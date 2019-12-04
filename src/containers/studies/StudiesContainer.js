@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+import { List } from 'immutable';
+import { connect } from 'react-redux';
+
 import styled from 'styled-components';
 import {
   Button,
@@ -8,6 +11,8 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
+import { GET_STUDIES } from './StudiesActions';
+import { PROPERTY_TYPES } from '../../utils/constants/DataModelConstants';
 
 const { NEUTRALS } = Colors;
 
@@ -36,26 +41,43 @@ const StudyName = styled.h2`
   padding: 0;
 `
 
-const studies = [
-  {uuid: 1, name: 'Chrome ', version: '1.0', description: 'lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds, lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds'},
-  {uuid: 2, name: 'Notebook', version: '1.0', description: 'lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds'},
-  {uuid: 3, name: 'Password', version: '1.0', description: 'lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds'},
-  {uuid: 4, name: 'Daingng ', version: '1.0', description: 'lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds'},
-  {uuid: 5, name: 'Friday Study', version: '1.0', description: 'lajdfkldsjf;dsf dsfldskf ldsfkl jdsfkljdslk jlkdsjfkl ds'}
-]
-
 const StudyDescription = styled.p`
   font-size: 14px;
   color: ${NEUTRALS[1]};
+  font-weight: normal;
+  margin: 0;
+  overflow:hidden;
+  overflow-wrap: break-word;
+  padding: 0;
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 `
 class StudiesContainer extends Component {
   openCreateStudyModal = () => {
     console.log("button clicked")
   }
 
+  formatStudy = (study: Map) => ({
+    id: study.getIn([PROPERTY_TYPES.STUDY_ID, 0]),
+    name: study.getIn([PROPERTY_TYPES.STUDY_NAME, 0]),
+    description: study.getIn([PROPERTY_TYPES.STUDY_DESCRIPTION, 0]),
+    group: study.getIn([PROPERTY_TYPES.STUDY_GROUP, 0]),
+    version: study.getIn([PROPERTY_TYPES.STUDY_VERSION, 0]),
+    email: study.getIn([PROPERTY_TYPES.STUDY_EMAIL, 0])
+  });
+
+  // formatStudy = (item) => {
+  //   console.log(item.getIn([PROPERTY_TYPES.STUDY_ID, 0]));
+  // }
+  //
+
   renderStudyItem = (item) => {
+    // console.log(item)
     return (
-      <Card key={item.uuid}>
+      <Card key={item.id}>
         <CardHeader>
           <StudyName>
             {item.name}
@@ -71,6 +93,10 @@ class StudiesContainer extends Component {
     )
   }
   render() {
+    const { studies } = this.props;
+    const formatedStudies = studies.map(study => this.formatStudy(study));
+    formatedStudies.map(item => console.log(item));
+
     return (
       <>
         <ContainerHeader>
@@ -78,10 +104,18 @@ class StudiesContainer extends Component {
           <Button mode="primary" onClick = {this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
         <CardGrid>
-          {studies.map((item) => this.renderStudyItem(item))}
+          {formatedStudies.map((item) => this.renderStudyItem(item))}
         </CardGrid>
       </>
     )
   }
 }
-export default StudiesContainer;
+const mapStateToProps = state => ({
+  getStudiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
+  studies: state.getIn(['studies', 'studies'], List())
+})
+
+const mapDispatchToProps = dispatch => ({
+  getStudies: () => dispatch(getStudies()),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(StudiesContainer);
