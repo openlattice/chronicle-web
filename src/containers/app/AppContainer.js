@@ -76,7 +76,7 @@ class AppContainer extends Component<Props> {
     if (requestStates[INITIALIZE_APPLICATION] === RequestStates.SUCCESS) {
       return (
         <Switch>
-          <Route path={Routes.STUDIES} component = {StudiesContainer} />
+          <Route path={Routes.STUDIES} component={StudiesContainer} />
           <Redirect to={Routes.STUDIES} />
         </Switch>
       );
@@ -117,7 +117,7 @@ class AppContainer extends Component<Props> {
             <NavLink to={Routes.STUDIES} />
           </AppNavigationWrapper>
         </AppHeaderWrapper>
-        <AppContentWrapper contentWidth = {APP_CONTENT_WIDTH}>
+        <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
           { this.renderAppContent() }
         </AppContentWrapper>
       </AppContainerWrapper>

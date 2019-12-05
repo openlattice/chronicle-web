@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
 import {
   Card,
   CardHeader,
@@ -16,28 +18,29 @@ const StudyName = styled.h2`
   font-weight: normal;
   margin: 0;
   padding: 0;
-`
-
+`;
+/* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const StudyDescription = styled.p`
   font-size: 14px;
   color: ${NEUTRALS[1]};
   font-weight: normal;
   margin: 0;
-  overflow:hidden;
+  overflow: hidden;
   overflow-wrap: break-word;
   padding: 0;
   text-overflow: ellipsis;
-
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 `;
+/* stylelint-enable */
 
 const StudySummary = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+
   ${StudyName} {
     overflow: hidden;
     white-space: nowrap;
@@ -52,28 +55,34 @@ const StudyParticipants = styled.div`
   align-items: center;
   color: ${NEUTRALS[0]};
   font-size: 15px;
+`;
 
-`
 const ParticipantsIcon = styled(FontAwesomeIcon).attrs({
   icon: faUsers
 })`
   margin-right: 10px;
   color: ${NEUTRALS[1]};
-`
-//TODO : get the number of participants for a study;
-class StudyCard extends Component {
+`;
+
+type Props = {
+  study: PropTypes.object;
+  handleCardClick : PropTypes.func;
+}
+
+//  TODO : get the number of participants for a study;
+class StudyCard extends Component<Props> {
   render() {
     const { study, handleCardClick } = this.props;
-    const numParticipants = 3; //// TODO: change this to the actual number of participants
+    const numParticipants = 3; // TODO: change this to the actual number of participants
     return (
-      <Card onClick = {(event) => handleCardClick(event)} data-study-id = {study.id} >
+      <Card onClick={(event) => handleCardClick(event)} data-study-id={study.id}>
         <CardHeader>
           <StudySummary>
             <StudyName>
               {study.name}
             </StudyName>
             <StudyParticipants>
-              <ParticipantsIcon/>
+              <ParticipantsIcon />
               {numParticipants}
             </StudyParticipants>
           </StudySummary>
@@ -85,7 +94,7 @@ class StudyCard extends Component {
           </StudyDescription>
         </CardSegment>
       </Card>
-    )
+    );
   }
 }
 

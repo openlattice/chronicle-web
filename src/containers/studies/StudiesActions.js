@@ -13,4 +13,4 @@ export {
   GET_STUDIES_PERMISSIONS,
   getStudiesPermissions,
   getStudies
-}
+};

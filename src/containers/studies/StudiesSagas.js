@@ -10,7 +10,6 @@ import {
 } from 'lattice-sagas';
 import {
   EntitySetsApi,
-  DataApi,
   AuthorizationApi
 } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
@@ -25,20 +24,23 @@ import { ENTITY_SETS, PROPERTY_TYPES } from '../../utils/constants/DataModelCons
 const { searchEntitySetData } = SearchApiActions;
 const { searchEntitySetDataWorker } = SearchApiSagas;
 
-function* getStudyEntitySetId(studyId): Generator<*, *, *> {
+function* getStudyEntitySetId(studyId) {
   try {
     const entitySetName = `${ENTITY_SETS.PARTICIPANTS_PREFIX}${studyId}`;
     return yield call(EntitySetsApi.getEntitySetId, entitySetName);
-  } catch(error) {
+  }
+  catch (error) {
+
     return null;
   }
+
 }
-function* getStudiesPermissionsWorker(action: SequenceAction) : Generator<*, *, *> {
+function* getStudiesPermissionsWorker(action: SequenceAction) {
   const response = {};
   try {
     yield put(getStudiesPermissions.request(action.id));
     const studyIds = action.value;
-    const entitySetIds = yield all(studyIds.map(studyId => call(getStudyEntitySetId, studyId)));
+    const entitySetIds = yield all(studyIds.map((studyId) => call(getStudyEntitySetId, studyId)));
     const studyIdsByEntitySetIds = {};
     entitySetIds.forEach((id, index) => {
       if (id) {
@@ -46,35 +48,33 @@ function* getStudiesPermissionsWorker(action: SequenceAction) : Generator<*, *, 
       }
     });
 
-    const accessChecks = Object.keys(studyIdsByEntitySetIds).map(entitySetId => ({
+    const accessChecks = Object.keys(studyIdsByEntitySetIds).map((entitySetId) => ({
       aclKey: [entitySetId],
       permissions: ['WRITE']
     }));
 
     const permissions = yield call(AuthorizationApi.checkAuthorizations, accessChecks);
-    const writableStudyIds = permissions.filter(item => item.permissions.WRITE)
-      .map(item => studyIdsByEntitySetIds[item.aclKey[0]]);
+    const writableStudyIds = permissions.filter((item) => item.permissions.WRITE)
+      .map((item) => studyIdsByEntitySetIds[item.aclKey[0]]);
     response.data = writableStudyIds;
-    yield put (getStudiesPermissions.success(action.id));
-  } catch(error) {
+    yield put(getStudiesPermissions.success(action.id));
+  }
+  catch (error) {
     response.error = error;
     yield put(getStudiesPermissions.failure(action.id, error));
-  } finally {
+  }
+  finally {
     yield put(getStudiesPermissions.finally(action.id));
   }
 
   return response;
 }
 
-function* getStudiesPermissionsWatcher(action: SequenceAction) : Generator<*, *, *> {
+function* getStudiesPermissionsWatcher() {
   yield takeEvery(GET_STUDIES_PERMISSIONS, getStudiesPermissionsWorker);
 }
 
-function* getStudiesWatcher(action) : Generator<*, *, *> {
-  yield takeEvery(GET_STUDIES, getStudiesWorker);
-}
-
-function* getStudiesWorker(action :SequenceAction) : Generator<*, *, *> {
+function* getStudiesWorker(action :SequenceAction) {
   try {
     yield put(getStudies.request(action.id));
     const entitySetId = yield call(EntitySetsApi.getEntitySetId, ENTITY_SETS.CHRONICLE_STUDIES);
@@ -95,8 +95,8 @@ function* getStudiesWorker(action :SequenceAction) : Generator<*, *, *> {
     }
 
     const results = response.data.hits;
-    const studyIds = results.map(study => study[PROPERTY_TYPES.STUDY_ID][0]);
-    response = yield call (getStudiesPermissionsWorker, getStudiesPermissions(studyIds));
+    const studyIds = results.map((study) => study[PROPERTY_TYPES.STUDY_ID][0]);
+    response = yield call(getStudiesPermissionsWorker, getStudiesPermissions(studyIds));
 
     if (response.error) {
       throw response.error;
@@ -104,18 +104,24 @@ function* getStudiesWorker(action :SequenceAction) : Generator<*, *, *> {
 
     const writableStudyIds = response.data;
     const writableStudies = results.filter(
-      study => writableStudyIds.includes(study[PROPERTY_TYPES.STUDY_ID][0])
+      (study) => writableStudyIds.includes(study[PROPERTY_TYPES.STUDY_ID][0])
     );
     yield put(getStudies.success(action.id, writableStudies));
-  } catch (error) {
+  }
+  catch (error) {
     yield put(getStudies.failure(action.id, error));
-  } finally {
+  }
+  finally {
     yield put(getStudies.finally(action.id));
   }
+}
+
+function* getStudiesWatcher() {
+  yield takeEvery(GET_STUDIES, getStudiesWorker);
 }
 
 export {
   getStudiesWorker,
   getStudiesPermissionsWatcher,
   getStudiesWatcher
-}
+};

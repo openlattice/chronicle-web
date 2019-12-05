@@ -1,13 +1,13 @@
 import { List, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 
-import  {
+import {
   GET_STUDIES,
   getStudies
 } from './StudiesActions';
 
 const INITIAL_STATE = fromJS({
-  [GET_STUDIES] : { requestState: RequestStates.STANDBY },
+  [GET_STUDIES]: { requestState: RequestStates.STANDBY },
   studies: List(),
 });
 
@@ -26,7 +26,7 @@ export default function studiesReducer(state = INITIAL_STATE, action) {
       });
     }
 
-    //other action types here
+    // other action types here
     default:
       return state;
   }
