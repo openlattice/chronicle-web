@@ -30,7 +30,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(RoutingSagas.goToRouteWatcher),
 
     //studies sagas
-    //fork(StudiesSagas.getStudiesWatcher),
+    fork(StudiesSagas.getStudiesWatcher),
     //fork(StudiesSagas.getStudiesPermissionsWatcher),
   ]);
 }

@@ -39,6 +39,10 @@ const CardGrid = styled.div`
   ${Card} {
     min-width: 0;
   }
+`;
+
+const  CenterText = styled.div`
+  text-align: center;
 `
 
 const ErrorMessage = () => (
@@ -47,6 +51,10 @@ const ErrorMessage = () => (
 
 
 class StudiesContainer extends Component {
+  componentDidMount() {
+    const { actions } = this.props;
+    actions.getStudies();
+  }
   openCreateStudyModal = () => {
     //TODO: open modal to create study
   }

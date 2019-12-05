@@ -34,7 +34,7 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     yield put(initializeApplication.request(action.id));
     const responses :Object[] = yield all([
       call(getEntityDataModelTypesWorker, getEntityDataModelTypes()),
-      call(getStudiesWorker, getStudies()),
+      //call(getStudiesWorker, getStudies()),
       // ...any other required requests
     ]);
     if (responses[0].error) throw responses[0].error;
