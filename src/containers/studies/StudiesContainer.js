@@ -2,19 +2,22 @@ import React, { Component } from 'react';
 
 import { List } from 'immutable';
 import { connect } from 'react-redux';
-
+import { bindActionCreators } from 'redux';
+import { RequestStates } from 'redux-reqseq';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUsers } from '@fortawesome/pro-solid-svg-icons';
 import {
   Button,
-  Card,
-  CardHeader,
-  CardSegment,
-  Colors
+  Banner,
+  Spinner,
+  Card
 } from 'lattice-ui-kit';
-import { GET_STUDIES } from './StudiesActions';
+import * as Routes from '../../core/router/Routes';
+import * as RoutingActions from '../../core/router/RoutingActions';
+import { GET_STUDIES, getStudies } from './StudiesActions';
 import { PROPERTY_TYPES } from '../../utils/constants/DataModelConstants';
-
-const { NEUTRALS } = Colors;
+import StudyCard from '../../components/StudyCard';
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -32,32 +35,20 @@ const CardGrid = styled.div`
   display: grid;
   grid-gap: 30px;
   grid-template-columns: 1fr 1fr;
+
+  ${Card} {
+    min-width: 0;
+  }
 `
 
-const StudyName = styled.h2`
-  font-size: 18px;
-  font-weight: normal;
-  margin: 0;
-  padding: 0;
-`
+const ErrorMessage = () => (
+  <Banner isOpen mode="danger"> Sorry, something went wrong. Please try refreshing the page, or contact support. </Banner>
+)
 
-const StudyDescription = styled.p`
-  font-size: 14px;
-  color: ${NEUTRALS[1]};
-  font-weight: normal;
-  margin: 0;
-  overflow:hidden;
-  overflow-wrap: break-word;
-  padding: 0;
-  text-overflow: ellipsis;
 
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-`
 class StudiesContainer extends Component {
   openCreateStudyModal = () => {
-    console.log("button clicked")
+    //TODO: open modal to create study
   }
 
   formatStudy = (study: Map) => ({
@@ -69,33 +60,27 @@ class StudiesContainer extends Component {
     email: study.getIn([PROPERTY_TYPES.STUDY_EMAIL, 0])
   });
 
-  // formatStudy = (item) => {
-  //   console.log(item.getIn([PROPERTY_TYPES.STUDY_ID, 0]));
-  // }
-  //
-
-  renderStudyItem = (item) => {
-    // console.log(item)
-    return (
-      <Card key={item.id}>
-        <CardHeader>
-          <StudyName>
-            {item.name}
-          </StudyName>
-        </CardHeader>
-
-        <CardSegment>
-          <StudyDescription>
-            {item.description}
-          </StudyDescription>
-        </CardSegment>
-      </Card>
-    )
+  handleCardClick = (event) => {
+    const { currentTarget } = event;
+    const { dataset } = currentTarget;
+    alert("study details page not yet implemented");
   }
+
   render() {
-    const { studies } = this.props;
+    const { studies, studiesReqState } = this.props;
     const formatedStudies = studies.map(study => this.formatStudy(study));
-    formatedStudies.map(item => console.log(item));
+
+    if (studiesReqState == RequestStates.PENDING) {
+      return (
+        <Spinner size="2x"/>
+      );
+    }
+
+    if (studiesReqState == RequestStates.FAILURE) {
+      return (
+        <Banner isOpen> Sorry, something went wrong. Please try refreshing the page, or contact support. </Banner>
+      );
+    }
 
     return (
       <>
@@ -103,19 +88,30 @@ class StudiesContainer extends Component {
           <h1> Studies </h1>
           <Button mode="primary" onClick = {this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
-        <CardGrid>
-          {formatedStudies.map((item) => this.renderStudyItem(item))}
-        </CardGrid>
+        {
+          formatedStudies.isEmpty() ?
+           <CenterText>
+              Sorry, no studies were found. Please try refreshing the page, or contact support.
+           </CenterText> :
+          <CardGrid>
+            {formatedStudies.map((study) => (
+              <StudyCard key={study.id} study = {study} handleCardClick={this.handleCardClick}/>
+            ))}
+          </CardGrid>
+        }
       </>
     )
   }
 }
 const mapStateToProps = state => ({
-  getStudiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
+  studiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
   studies: state.getIn(['studies', 'studies'], List())
 })
 
 const mapDispatchToProps = dispatch => ({
-  getStudies: () => dispatch(getStudies()),
+  actions: bindActionCreators({
+    goToRoute: RoutingActions.goToRoute,
+    getStudies: getStudies,
+  }, dispatch)
 });
 export default connect(mapStateToProps, mapDispatchToProps)(StudiesContainer);

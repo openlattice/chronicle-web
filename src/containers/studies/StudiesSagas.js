@@ -9,7 +9,6 @@ import {
   SearchApiSagas
 } from 'lattice-sagas';
 import {
-  EntityDataModelApi,
   EntitySetsApi,
   DataApi,
   AuthorizationApi
@@ -78,9 +77,7 @@ function* getStudiesWatcher(action) : Generator<*, *, *> {
 function* getStudiesWorker(action :SequenceAction) : Generator<*, *, *> {
   try {
     yield put(getStudies.request(action.id));
-    // console.log(EntitySetsApi);
     const entitySetId = yield call(EntitySetsApi.getEntitySetId, ENTITY_SETS.CHRONICLE_STUDIES);
-    // console.log(sagas);
     let response = yield call(
       searchEntitySetDataWorker,
       searchEntitySetData({
