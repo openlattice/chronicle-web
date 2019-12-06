@@ -90,8 +90,6 @@ function* getAllEntitySetIdsWorker(action :SequenceAction) :Generator<*, *, *> {
     else {
       yield put(getAllEntitySetIds.failure(action.id));
     }
-    console.log(response);
-    yield put(getAllEntitySetIds.success(action.id));
   }
   catch (error) {
     yield put(getAllEntitySetIds.failure(action.id, error));
