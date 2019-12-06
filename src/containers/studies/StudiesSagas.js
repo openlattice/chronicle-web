@@ -1,7 +1,6 @@
 /*
  * @flow
  */
-
 import {
   call,
   put,
@@ -16,11 +15,13 @@ import {
   getStudies,
 } from './StudiesActions';
 
+import Logger from '../../utils/Logger';
 import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
+const LOG = new Logger('StudiesSagas');
 
 function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
@@ -33,9 +34,21 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) {
       throw response.error;
     }
+    // console.log(response.data);
+    // const studies :List<Map<*, *>> = response.data.map((study) => {
+    //   const map :Map = Map().withMutations((item) => {
+    //     Object.keys(study).map((key) => item.set(key, study[key][0]));
+    //   })
+    //   // Object.keys(studies).map((key) => map.set(key, study[key][0]));
+    //   return map;
+    // });
+    // const studies = response.data.map((item) => Object.keys(item).map())
+
+    console.log(response.data);
     yield put(getStudies.success(action.id, response.data));
   }
   catch (error) {
+    LOG.error(action.type, error);
     yield put(getStudies.failure(action.id, error));
   }
   finally {

@@ -81,6 +81,8 @@ function* getEntityDataModelTypesWatcher() :Generator<*, *, *> {
 }
 
 function* getAllEntitySetIdsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse :Object = {};
+
   try {
     yield put(getAllEntitySetIds.request(action.id));
     const response = yield call(
@@ -94,12 +96,15 @@ function* getAllEntitySetIdsWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(getAllEntitySetIds.success(action.id, response.data));
   }
   catch (error) {
+    LOG.error(action.type, error);
+    workerResponse.error = error;
     yield put(getAllEntitySetIds.failure(action.id, error));
   }
   finally {
     yield put(getAllEntitySetIds.finally(action.id));
   }
 
+  return workerResponse;
 }
 
 function* getAllEntitySetIdsWatcher() :Generator<*, *, *> {

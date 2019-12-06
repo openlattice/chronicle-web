@@ -14,7 +14,9 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
+import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
 
+const { STUDY_DESCRIPTION, STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 
 const StudyName = styled.h2`
@@ -38,7 +40,7 @@ const StudyDescription = styled.p`
   padding: 0;
   text-overflow: ellipsis;
 `;
-/* stylelint-disable */
+/* stylelint-enable */
 
 const StudySummary = styled.div`
   align-items: center;
@@ -86,7 +88,7 @@ class StudyCard extends Component<Props> {
         <CardHeader>
           <StudySummary>
             <StudyName>
-              {study.name}
+              {study.getIn([STUDY_NAME, 0])}
             </StudyName>
             <StudyParticipants>
               <ParticipantsIcon />
@@ -97,7 +99,7 @@ class StudyCard extends Component<Props> {
         </CardHeader>
         <CardSegment>
           <StudyDescription>
-            {study.description}
+            {study.getIn([STUDY_DESCRIPTION, 0])}
           </StudyDescription>
         </CardSegment>
       </Card>

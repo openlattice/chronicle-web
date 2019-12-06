@@ -21,7 +21,8 @@ import { GET_STUDIES, getStudies } from './StudiesActions';
 
 import StudyCard from '../../components/StudyCard';
 import * as RoutingActions from '../../core/router/RoutingActions';
-import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
+
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -67,18 +68,8 @@ class StudiesContainer extends Component<Props> {
     // TODO: open modal to create study
   }
 
-  formatStudy = (study :Map) => ({
-    id: study.getIn([PROPERTY_TYPE_FQNS.STUDY_ID, 0]),
-    name: study.getIn([PROPERTY_TYPE_FQNS.STUDY_NAME, 0]),
-    description: study.getIn([PROPERTY_TYPE_FQNS.STUDY_DESCRIPTION, 0]),
-    group: study.getIn([PROPERTY_TYPE_FQNS.STUDY_GROUP, 0]),
-    version: study.getIn([PROPERTY_TYPE_FQNS.STUDY_VERSION, 0]),
-    email: study.getIn([PROPERTY_TYPE_FQNS.STUDY_EMAIL, 0])
-  });
-
   render() {
     const { studies, studiesReqState } = this.props;
-    const formatedStudies = studies.map((study) => this.formatStudy(study));
 
     if (studiesReqState === RequestStates.PENDING) {
       return (
@@ -99,7 +90,7 @@ class StudiesContainer extends Component<Props> {
           <Button mode="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
         {
-          formatedStudies.isEmpty()
+          studies.isEmpty()
             ? (
               <CenterText>
               Sorry, no studies were found. Please try refreshing the page, or contact support.
@@ -108,8 +99,8 @@ class StudiesContainer extends Component<Props> {
             : (
               <CardGrid>
                 {
-                  formatedStudies.map((study) => (
-                    <StudyCard key={study.id} study={study} />
+                  studies.map((study) => (
+                    <StudyCard key={study.getIn([])} study={study} />
                   ))
                 }
               </CardGrid>
