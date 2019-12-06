@@ -1,21 +1,27 @@
+/*
+ * @flow
+ */
+
 import React, { Component } from 'react';
 
-import PropTypes from 'prop-types';
-import { List } from 'immutable';
+import styled from 'styled-components';
+import { List, Map } from 'immutable';
+import {
+  Banner,
+  Button,
+  Card,
+  Spinner
+} from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { RequestStates, RequestSequence } from 'redux-reqseq';
-import styled from 'styled-components';
-import {
-  Button,
-  Banner,
-  Spinner,
-  Card
-} from 'lattice-ui-kit';
-import * as RoutingActions from '../../core/router/RoutingActions';
+import { RequestStates } from 'redux-reqseq';
+import type { RequestSequence, RequestState } from 'redux-reqseq';
+
 import { GET_STUDIES, getStudies } from './StudiesActions';
-import { PROPERTY_TYPES } from '../../utils/constants/DataModelConstants';
+
 import StudyCard from '../../components/StudyCard';
+import * as RoutingActions from '../../core/router/RoutingActions';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -45,10 +51,13 @@ const CenterText = styled.div`
 `;
 
 type Props = {
-  actions: PropTypes.object;
-  studiesReqState: RequestSequence;
-  studies: List<*>;
-}
+  actions :{
+    getStudies :RequestSequence;
+  };
+  studiesReqState :RequestState;
+  studies :List;
+};
+
 class StudiesContainer extends Component<Props> {
   componentDidMount() {
     const { actions } = this.props;
@@ -58,20 +67,20 @@ class StudiesContainer extends Component<Props> {
     // TODO: open modal to create study
   }
 
-  formatStudy = (study: Map) => ({
-    id: study.getIn([PROPERTY_TYPES.STUDY_ID, 0]),
-    name: study.getIn([PROPERTY_TYPES.STUDY_NAME, 0]),
-    description: study.getIn([PROPERTY_TYPES.STUDY_DESCRIPTION, 0]),
-    group: study.getIn([PROPERTY_TYPES.STUDY_GROUP, 0]),
-    version: study.getIn([PROPERTY_TYPES.STUDY_VERSION, 0]),
-    email: study.getIn([PROPERTY_TYPES.STUDY_EMAIL, 0])
+  formatStudy = (study :Map) => ({
+    id: study.getIn([PROPERTY_TYPE_FQNS.STUDY_ID, 0]),
+    name: study.getIn([PROPERTY_TYPE_FQNS.STUDY_NAME, 0]),
+    description: study.getIn([PROPERTY_TYPE_FQNS.STUDY_DESCRIPTION, 0]),
+    group: study.getIn([PROPERTY_TYPE_FQNS.STUDY_GROUP, 0]),
+    version: study.getIn([PROPERTY_TYPE_FQNS.STUDY_VERSION, 0]),
+    email: study.getIn([PROPERTY_TYPE_FQNS.STUDY_EMAIL, 0])
   });
 
   handleCardClick = (event) => {
-    const { currentTarget } = event;
-    const { dataset } = currentTarget;
-    console.log(dataset.studyId);
-    alert('study details page not yet implemented');
+    // const { currentTarget } = event;
+    // const { dataset } = currentTarget;
+    // console.log(dataset.studyId);
+    // alert('study details page not yet implemented');
   }
 
   render() {
@@ -116,15 +125,17 @@ class StudiesContainer extends Component<Props> {
     );
   }
 }
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state :Map) => ({
   studiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
   studies: state.getIn(['studies', 'studies'], List())
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     goToRoute: RoutingActions.goToRoute,
     getStudies,
   }, dispatch)
 });
+
+// $FlowFixMe
 export default connect(mapStateToProps, mapDispatchToProps)(StudiesContainer);

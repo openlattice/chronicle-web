@@ -13,9 +13,11 @@ import type { SequenceAction } from 'redux-reqseq';
 import Logger from '../../utils/Logger';
 import { INITIALIZE_APPLICATION, initializeApplication } from './AppActions';
 import {
+  getAllEntitySetIds,
   getEntityDataModelTypes,
 } from '../../core/edm/EDMActions';
 import {
+  getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
 } from '../../core/edm/EDMSagas';
 
@@ -33,6 +35,7 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     yield put(initializeApplication.request(action.id));
     const responses :Object[] = yield all([
       call(getEntityDataModelTypesWorker, getEntityDataModelTypes()),
+      call(getAllEntitySetIdsWorker, getAllEntitySetIds()),
       // ...any other required requests
     ]);
     if (responses[0].error) throw responses[0].error;

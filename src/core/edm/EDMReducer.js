@@ -28,6 +28,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_EDM_TYPES]: {
     requestState: RequestStates.STANDBY,
   },
+  entitySetIds: Map(),
   entityTypes: List(),
   entityTypesIndexMap: Map(),
   propertyTypes: List(),
@@ -121,6 +122,13 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
           .deleteIn([GET_EDM_TYPES, seqAction.id]),
       });
     }
+
+    // case getEntitySets: {
+    //   const entitySetIds = {
+    //     [entitySet.name]: [entitySet.id]
+    //   }
+    //   return state.set('entitySetIds', fromJS(entitySetIds));
+    // }
 
     default:
       return state;
