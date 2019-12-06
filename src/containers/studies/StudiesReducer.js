@@ -1,4 +1,8 @@
-import { List, fromJS } from 'immutable';
+/*
+ * @flow
+ */
+
+import { List, Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 
 import {
@@ -6,12 +10,12 @@ import {
   getStudies
 } from './StudiesActions';
 
-const INITIAL_STATE = fromJS({
+const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
   studies: List(),
 });
 
-export default function studiesReducer(state = INITIAL_STATE, action) {
+export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
   switch (action.type) {
     case getStudies.case(action.type): {
       const seqAction = action;

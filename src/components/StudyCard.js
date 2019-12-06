@@ -24,6 +24,7 @@ const StudyName = styled.h2`
   padding: 0;
 `;
 
+/* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -37,6 +38,7 @@ const StudyDescription = styled.p`
   padding: 0;
   text-overflow: ellipsis;
 `;
+/* stylelint-disable */
 
 const StudySummary = styled.div`
   align-items: center;
@@ -45,19 +47,19 @@ const StudySummary = styled.div`
   width: 100%;
 
   ${StudyName} {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     flex: 0 0 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 `;
 
 const StudyParticipants = styled.div`
-  display: flex;
-  justify-content: flex-end;
   align-items: center;
   color: ${NEUTRALS[0]};
+  display: flex;
   font-size: 15px;
+  justify-content: flex-end;
 `;
 
 const ParticipantsIcon = styled(FontAwesomeIcon).attrs({
@@ -73,15 +75,14 @@ type Props = {
 
 //  TODO : get the number of participants for a study;
 class StudyCard extends Component<Props> {
-  handleCardClick = (event) => {
-
+  handleCardClick = () => {
+    // to implement this
   }
-
   render() {
     const { study } = this.props;
     const numParticipants = 3; // TODO: change this to the actual number of participants
     return (
-      <Card onClick={(event) => this.handleCardClick(event)} data-study-id={study.id}>
+      <Card onClick={this.handleCardClick} data-study-id={study.id}>
         <CardHeader>
           <StudySummary>
             <StudyName>

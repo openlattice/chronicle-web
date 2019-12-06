@@ -8,16 +8,15 @@ import {
   select,
   takeEvery
 } from '@redux-saga/core/effects';
+import { DataApiActions, DataApiSagas } from 'lattice-sagas';
+import type { SequenceAction } from 'redux-reqseq';
 
-
-import { DataApiSagas, DataApiActions } from 'lattice-sagas';
-import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
   GET_STUDIES,
   getStudies,
 } from './StudiesActions';
-import type { SequenceAction } from 'redux-reqseq';
 
+import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { getEntitySetDataWorker } = DataApiSagas;

@@ -11,13 +11,14 @@ import type {
 } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../utils/Logger';
 import {
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
   getAllEntitySetIds,
   getEntityDataModelTypes,
 } from './EDMActions';
+
+import Logger from '../../utils/Logger';
 
 const LOG :Logger = new Logger('EDMReducer');
 

@@ -25,8 +25,8 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 
 const ContainerHeader = styled.section`
   display: flex;
-  margin: 20px 0 50px 0;
   justify-content: space-between;
+  margin: 20px 0 50px 0;
 
   > h1 {
     font-size: 28px;
@@ -76,13 +76,6 @@ class StudiesContainer extends Component<Props> {
     email: study.getIn([PROPERTY_TYPE_FQNS.STUDY_EMAIL, 0])
   });
 
-  handleCardClick = (event) => {
-    // const { currentTarget } = event;
-    // const { dataset } = currentTarget;
-    // console.log(dataset.studyId);
-    // alert('study details page not yet implemented');
-  }
-
   render() {
     const { studies, studiesReqState } = this.props;
     const formatedStudies = studies.map((study) => this.formatStudy(study));
@@ -114,9 +107,11 @@ class StudiesContainer extends Component<Props> {
             )
             : (
               <CardGrid>
-                {formatedStudies.map((study) => (
-                  <StudyCard key={study.id} study={study} handleCardClick={this.handleCardClick} />
-                ))}
+                {
+                  formatedStudies.map((study) => (
+                    <StudyCard key={study.id} study={study} />
+                  ))
+                }
               </CardGrid>
             )
         }
