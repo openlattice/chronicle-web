@@ -8,49 +8,33 @@ import {
   select,
   takeEvery
 } from '@redux-saga/core/effects';
-import {
-  SearchApiActions,
-  SearchApiSagas
-} from 'lattice-sagas';
-import {
-  EntitySetsApi,
-} from 'lattice';
-import type { SequenceAction } from 'redux-reqseq';
+
+
+import { DataApiSagas, DataApiActions } from 'lattice-sagas';
+import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
   GET_STUDIES,
   getStudies,
 } from './StudiesActions';
-import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
+import type { SequenceAction } from 'redux-reqseq';
 
 
-const { searchEntitySetData } = SearchApiActions;
-const { searchEntitySetDataWorker } = SearchApiSagas;
-
+const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
+const { getEntitySetDataWorker } = DataApiSagas;
+const { getEntitySetData } = DataApiActions;
 
 function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(getStudies.request(action.id));
-
-    const entitySetId = yield call(EntitySetsApi.getEntitySetId, ENTITY_SET_NAMES.CHRONICLE_STUDIES);
-
-    // const entitySetId = select((state) => state.getIn('edm', 'entitySetIds', ENTITY_SETS.CHRONICLE_STUDIES));
-    // use DataApi.getEntitySetData to fetch instead of search yeah?
-    const response = yield call(
-      searchEntitySetDataWorker,
-      searchEntitySetData({
-        entitySetId,
-        searchOptions: {
-          maxHits: 1000,
-          searchTerm: '*',
-          start: 0,
-        },
-      })
+    const entitySetId = yield select(
+      (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
+    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
 
     if (response.error) {
       throw response.error;
     }
-    yield put(getStudies.success(action.id, response.data.hits));
+    yield put(getStudies.success(action.id, response.data));
   }
   catch (error) {
     yield put(getStudies.failure(action.id, error));
