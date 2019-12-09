@@ -6,6 +6,7 @@ import React, { Component } from 'react';
 
 import styled from 'styled-components';
 import { List, Map } from 'immutable';
+import { Constants } from 'lattice';
 import {
   Banner,
   Button,
@@ -21,6 +22,8 @@ import StudyCard from './components/StudyCard';
 import { GET_STUDIES, getStudies } from './StudiesActions';
 
 import * as RoutingActions from '../../core/router/RoutingActions';
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -100,7 +103,7 @@ class StudiesContainer extends Component<Props> {
               <CardGrid>
                 {
                   studies.map((study) => (
-                    <StudyCard key={study.getIn(['openlattice.@id', 0])} study={study} />
+                    <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
                   ))
                 }
               </CardGrid>
