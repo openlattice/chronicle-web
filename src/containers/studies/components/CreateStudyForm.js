@@ -52,17 +52,22 @@ const uiSchema = {
 };
 
 type Props = {
-
+  formData :Object;
+  handleOnChange :Function;
 }
 
 class CreateStudyForm extends Component<Props> {
   componentDidMount() {
 
   }
+
   render() {
+    const { formData, handleOnChange } = this.props;
     return (
       <Form
+          formData={formData}
           hideSubmit
+          onChange={handleOnChange}
           schema={dataSchema}
           uiSchema={uiSchema} />
     );
