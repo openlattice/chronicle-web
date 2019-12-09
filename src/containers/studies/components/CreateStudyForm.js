@@ -34,26 +34,30 @@ const dataSchema = {
 };
 
 const uiSchema = {
-  name: {
+  description: {
     classNames: 'column-span-12'
   },
-  description: {
+  email: {
     classNames: 'column-span-12'
   },
   group: {
     classNames: 'column-span-12'
   },
-  version: {
+  name: {
     classNames: 'column-span-12'
   },
-  email: {
+  version: {
     classNames: 'column-span-12'
   }
+
 };
 
 type Props = {
   formData :Object;
   handleOnChange :Function;
+  handleOnSubmit :Function;
+  isSubmitting :boolean;
+  resetData :Function;
 }
 
 class CreateStudyForm extends Component<Props> {
@@ -62,12 +66,21 @@ class CreateStudyForm extends Component<Props> {
   }
 
   render() {
-    const { formData, handleOnChange } = this.props;
+    const {
+      formData,
+      handleOnChange,
+      handleOnSubmit,
+      isSubmitting,
+      resetData,
+    } = this.props;
+
     return (
       <Form
           formData={formData}
-          hideSubmit
+          isSubmitting={isSubmitting}
           onChange={handleOnChange}
+          onDiscard={resetData}
+          onSubmit={handleOnSubmit}
           schema={dataSchema}
           uiSchema={uiSchema} />
     );
