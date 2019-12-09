@@ -20,6 +20,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 import { GET_STUDIES, getStudies } from './StudiesActions';
 
 import StudyCard from './components/StudyCard';
+import CreateStudyModal from './components/CreateStudyModal';
 import * as RoutingActions from '../../core/router/RoutingActions';
 
 const ContainerHeader = styled.section`
@@ -57,17 +58,36 @@ type Props = {
   studies :List;
 };
 
-class StudiesContainer extends Component<Props> {
+type State = {
+  isCreateStudyModalVisible :boolean;
+}
+
+class StudiesContainer extends Component<Props, State> {
+  constructor(props :Props) {
+    super(props);
+    this.state = {
+      isCreateStudyModalVisible: false
+    };
+  }
+
   componentDidMount() {
     const { actions } = this.props;
     actions.getStudies();
   }
   openCreateStudyModal = () => {
-    // TODO: open modal to create study
+    this.setState({
+      isCreateStudyModalVisible: true
+    });
+  }
+  handleOnCloseModal = () => {
+    this.setState({
+      isCreateStudyModalVisible: false
+    });
   }
 
   render() {
     const { studies, studiesReqState } = this.props;
+    const { isCreateStudyModalVisible } = this.state;
 
     if (studiesReqState === RequestStates.PENDING) {
       return (
@@ -104,7 +124,9 @@ class StudiesContainer extends Component<Props> {
               </CardGrid>
             )
         }
-        {this.openCreateStudyModal()}
+        <CreateStudyModal
+            isVisible={isCreateStudyModalVisible}
+            handleOnCloseModal={this.handleOnCloseModal} />
       </>
     );
   }
