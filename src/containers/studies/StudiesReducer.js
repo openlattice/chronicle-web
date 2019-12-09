@@ -8,11 +8,13 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   GET_STUDIES,
+  CREATE_STUDY,
   getStudies
 } from './StudiesActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
+  [CREATE_STUDY]: { requestState: RequestStates.STANDBY },
   studies: List(),
 });
 
