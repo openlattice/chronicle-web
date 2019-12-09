@@ -55,9 +55,7 @@ const uiSchema = {
 type Props = {
   formData :Object;
   handleOnChange :Function;
-  handleOnSubmit :Function;
   isSubmitting :boolean;
-  resetData :Function;
 }
 
 class CreateStudyForm extends Component<Props> {
@@ -69,18 +67,15 @@ class CreateStudyForm extends Component<Props> {
     const {
       formData,
       handleOnChange,
-      handleOnSubmit,
       isSubmitting,
-      resetData,
     } = this.props;
 
     return (
       <Form
           formData={formData}
+          hideSubmit
           isSubmitting={isSubmitting}
           onChange={handleOnChange}
-          onDiscard={resetData}
-          onSubmit={handleOnSubmit}
           schema={dataSchema}
           uiSchema={uiSchema} />
     );

@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
-  Modal
+  ActionModal
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -17,8 +17,8 @@ import CreateStudyForm from './CreateStudyForm';
 import { CREATE_STUDY } from '../StudiesActions';
 
 type Props = {
-  isVisible :boolean;
   handleOnCloseModal :Function;
+  isVisible :boolean;
   requestStates:{
     CREATE_STUDY :RequestState
   }
@@ -65,58 +65,38 @@ class CreateStudyModal extends Component<Props, State> {
     });
   }
 
-  resetFormData = () => {
-    this.setState({
-      data: { ...initialFormDataState }
-    });
-    // TODO : decide if to cancel if still submitting
-  }
-
-  handleOnSubmit = ({ formData } :Object) => {
-    // this is where we submit data;
-    // need to maintain state of the data what data to displ
-    // need to dispatch an action to submit the data
-    console.log(formData);
-    this.setState({
-      isSubmitting: true
-    });
-  }
-  getRequestStateComponents = () => {
-    const { requestStates } = this.props;
+  requestStateComponents = () => {
     const { data, isSubmitting } = this.state;
-    switch (requestStates[CREATE_STUDY]) {
-      case RequestStates.PENDING:
-      case RequestStates.STANDBY:
-        return (
-          <ModalBodyWrapper>
-            <CreateStudyForm
-                formData={data}
-                handleOnChange={this.handleOnChange}
-                handleOnSubmit={this.handleOnSubmit}
-                isSubmitting={isSubmitting}
-                resetData={this.resetFormData} />
-          </ModalBodyWrapper>
-        );
-      case RequestStates.FAILURE:
-        return (
-          <ModalBodyWrapper>
-            <span> Failed to create a new study. Please try again </span>
-          </ModalBodyWrapper>
-        );
-      default:
-        return null;
-    }
+
+    const components = {
+      [RequestStates.STANDBY]: (
+        <ModalBodyWrapper>
+          <CreateStudyForm
+              formData={data}
+              handleOnChange={this.handleOnChange}
+              isSubmitting={isSubmitting} />
+        </ModalBodyWrapper>
+      ),
+      [RequestStates.FAILURE]: (
+        <ModalBodyWrapper>
+          <span> Failed to create a new study. Please try again </span>
+        </ModalBodyWrapper>
+      )
+    };
+    return components;
   }
 
   render() {
-    const { isVisible, handleOnCloseModal } = this.props;
+    const { isVisible, handleOnCloseModal, requestStates } = this.props;
     return (
-      <Modal
+      <ActionModal
           isVisible={isVisible}
           onClose={handleOnCloseModal}
-          textTitle="Create Study">
-        {this.getRequestStateComponents()}
-      </Modal>
+          requestState={requestStates[CREATE_STUDY]}
+          requestStateComponents={this.requestStateComponents()}
+          textPrimary="Create"
+          textSecondary="Cancel"
+          textTitle="Create Study" />
     );
   }
 }
