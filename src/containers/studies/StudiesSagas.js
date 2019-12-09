@@ -34,17 +34,7 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) {
       throw response.error;
     }
-    // console.log(response.data);
-    // const studies :List<Map<*, *>> = response.data.map((study) => {
-    //   const map :Map = Map().withMutations((item) => {
-    //     Object.keys(study).map((key) => item.set(key, study[key][0]));
-    //   })
-    //   // Object.keys(studies).map((key) => map.set(key, study[key][0]));
-    //   return map;
-    // });
-    // const studies = response.data.map((item) => Object.keys(item).map())
 
-    console.log(response.data);
     yield put(getStudies.success(action.id, response.data));
   }
   catch (error) {

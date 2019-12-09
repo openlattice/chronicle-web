@@ -21,8 +21,6 @@ import { GET_STUDIES, getStudies } from './StudiesActions';
 
 import StudyCard from '../../components/StudyCard';
 import * as RoutingActions from '../../core/router/RoutingActions';
-import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
-
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -100,7 +98,7 @@ class StudiesContainer extends Component<Props> {
               <CardGrid>
                 {
                   studies.map((study) => (
-                    <StudyCard key={study.getIn([])} study={study} />
+                    <StudyCard key={study.getIn(['id', 0])} study={study} />
                   ))
                 }
               </CardGrid>
