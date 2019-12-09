@@ -11,11 +11,14 @@ import type {
 } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../utils/Logger';
 import {
+  GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
+  getAllEntitySetIds,
   getEntityDataModelTypes,
 } from './EDMActions';
+
+import Logger from '../../utils/Logger';
 
 const LOG :Logger = new Logger('EDMReducer');
 
@@ -28,6 +31,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_EDM_TYPES]: {
     requestState: RequestStates.STANDBY,
   },
+  entitySetIds: Map(),
   entityTypes: List(),
   entityTypesIndexMap: Map(),
   propertyTypes: List(),
@@ -122,6 +126,14 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
       });
     }
 
+    case getAllEntitySetIds.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getAllEntitySetIds.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.set('entitySetIds', fromJS(seqAction.value))
+      });
+    }
     default:
       return state;
   }

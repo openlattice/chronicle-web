@@ -4,6 +4,6 @@ coverage/
 npm-debug.log
 package-lock.json
 node_modules/
-
+generateEntitySets.js
 # macOS
 *.DS_Store

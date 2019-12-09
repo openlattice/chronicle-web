@@ -1,8 +1,14 @@
 /*
  * @flow
  */
+const ID_PARAM :':id' = ':id';
+const ROOT :string = '/';
+const STUDIES :string = '/studies';
+const STUDY :string = `${STUDIES}/${ID_PARAM}`;
 
-export const ROOT :string = '/';
-
-export const HOME :string = '/home';
-export const LOGIN :string = '/login';
+export {
+  ROOT,
+  STUDIES,
+  ID_PARAM,
+  STUDY
+};
