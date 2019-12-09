@@ -17,9 +17,9 @@ import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
+import StudyCard from './components/StudyCard';
 import { GET_STUDIES, getStudies } from './StudiesActions';
 
-import StudyCard from './components/StudyCard';
 import * as RoutingActions from '../../core/router/RoutingActions';
 
 const ContainerHeader = styled.section`
@@ -53,7 +53,9 @@ type Props = {
   actions :{
     getStudies :RequestSequence;
   };
-  studiesReqState :RequestState;
+  requestStates:{
+    GET_STUDIES :RequestState;
+  };
   studies :List;
 };
 
@@ -67,15 +69,15 @@ class StudiesContainer extends Component<Props> {
   }
 
   render() {
-    const { studies, studiesReqState } = this.props;
+    const { studies, requestStates } = this.props;
 
-    if (studiesReqState === RequestStates.PENDING) {
+    if (requestStates[GET_STUDIES] === RequestStates.PENDING) {
       return (
         <Spinner size="2x" />
       );
     }
 
-    if (studiesReqState === RequestStates.FAILURE) {
+    if (requestStates[GET_STUDIES] === RequestStates.FAILURE) {
       return (
         <Banner isOpen> Sorry, something went wrong. Please try refreshing the page, or contact support. </Banner>
       );
@@ -91,14 +93,14 @@ class StudiesContainer extends Component<Props> {
           studies.isEmpty()
             ? (
               <CenterText>
-              Sorry, no studies were found. Please try refreshing the page, or contact support.
+                Sorry, no studies were found. Please try refreshing the page, or contact support.
               </CenterText>
             )
             : (
               <CardGrid>
                 {
                   studies.map((study) => (
-                    <StudyCard key={study.getIn(['id', 0])} study={study} />
+                    <StudyCard key={study.getIn(['openlattice.@id', 0])} study={study} />
                   ))
                 }
               </CardGrid>
@@ -111,7 +113,9 @@ class StudiesContainer extends Component<Props> {
 }
 const mapStateToProps = (state :Map) => ({
   studies: state.getIn(['studies', 'studies'], List()),
-  studiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
+  requestStates: {
+    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState'])
+  }
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({
