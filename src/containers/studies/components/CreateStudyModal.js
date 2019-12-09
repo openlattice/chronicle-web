@@ -23,7 +23,7 @@ type Props = {
 };
 
 const ModalWrapper = styled.div`
-  min-width: 400px;
+  min-width: 440px;
 `;
 
 const requestStateComponents = {
