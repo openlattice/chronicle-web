@@ -130,8 +130,8 @@ class StudiesContainer extends Component<Props, State> {
             )
         }
         <CreateStudyModal
-            isVisible={isCreateStudyModalVisible}
-            handleOnCloseModal={this.handleOnCloseModal} />
+            handleOnCloseModal={this.handleOnCloseModal}
+            isVisible={isCreateStudyModalVisible} />
       </>
     );
   }
