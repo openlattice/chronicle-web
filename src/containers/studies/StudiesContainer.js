@@ -118,7 +118,7 @@ class StudiesContainer extends Component<Props, State> {
               <CardGrid>
                 {
                   studies.map((study) => (
-                    <StudyCard key={study.getIn(['id', 0])} study={study} />
+                    <StudyCard key={study.getIn(['openlattice.@id', 0])} study={study} />
                   ))
                 }
               </CardGrid>

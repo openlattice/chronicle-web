@@ -22,38 +22,71 @@ type Props = {
   }
 };
 
+type State = {
+  data :Object;
+}
+
 const ModalWrapper = styled.div`
   min-width: 440px;
 `;
 
-const requestStateComponents = {
-  [RequestStates.STANDBY]: (
-    <ModalWrapper>
-      <CreateStudyForm />
-    </ModalWrapper>
-  ),
-  [RequestStates.FAILURE]: (
-    <ModalWrapper>
-      <span> Failed to create a new study. Please try again </span>
-    </ModalWrapper>
-  )
-};
-
-class CreateStudyModal extends Component<Props> {
+class CreateStudyModal extends Component<Props, State> {
+  constructor(props :Props) {
+    super(props);
+    this.state = {
+      data: {
+        description: '',
+        email: '',
+        group: '',
+        name: '',
+        version: '',
+      }
+    };
+  }
   componentDidMount() {
 
   }
-  handleOnCreateStudy = () => {
 
+  handleOnChange = ({ formData } :Object) => {
+    this.setState({
+      data: {
+        description: formData.description || '',
+        email: formData.email || '',
+        group: formData.group || '',
+        name: formData.name || '',
+        version: formData.version || ''
+      }
+    });
+  }
+  getRequestStateComponents = () => {
+    const { data } = this.state;
+    const requestStateComponents = {
+      [RequestStates.STANDBY]: (
+        <ModalWrapper>
+          <CreateStudyForm formData={data} handleOnChange={this.handleOnChange} />
+        </ModalWrapper>
+      ),
+      [RequestStates.FAILURE]: (
+        <ModalWrapper>
+          <span> Failed to create a new study. Please try again </span>
+        </ModalWrapper>
+      )
+    };
+    return requestStateComponents;
+  }
+  handleOnCreateStudy = () => {
+    // this is where we submit data;
+    // need to maintain state of the data what data to displ
   }
   render() {
     const { isVisible, handleOnCloseModal, requestStates } = this.props;
+
     return (
       <ActionModal
           onClickPrimary={this.handleOnCreateStudy}
           onClose={handleOnCloseModal}
           requestState={requestStates[CREATE_STUDY]}
-          requestStateComponents={requestStateComponents}
+          requestStateComponents={this.getRequestStateComponents()}
           textPrimary="Create"
           textSecondary="Cancel"
           textTitle="New Study"
