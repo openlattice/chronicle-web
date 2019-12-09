@@ -19,7 +19,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import { GET_STUDIES, getStudies } from './StudiesActions';
 
-import StudyCard from '../../components/StudyCard';
+import StudyCard from './components/StudyCard';
 import * as RoutingActions from '../../core/router/RoutingActions';
 
 const ContainerHeader = styled.section`
