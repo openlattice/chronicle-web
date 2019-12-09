@@ -110,14 +110,14 @@ class StudiesContainer extends Component<Props> {
   }
 }
 const mapStateToProps = (state :Map) => ({
+  studies: state.getIn(['studies', 'studies'], List()),
   studiesReqState: state.getIn(['studies', GET_STUDIES, 'requestState']),
-  studies: state.getIn(['studies', 'studies'], List())
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
-    goToRoute: RoutingActions.goToRoute,
     getStudies,
+    goToRoute: RoutingActions.goToRoute,
   }, dispatch)
 });
 
