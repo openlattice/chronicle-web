@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 
 import { Form } from 'lattice-fabricate';
 
@@ -49,7 +49,6 @@ const uiSchema = {
   version: {
     classNames: 'column-span-12'
   }
-
 };
 
 type Props = {
@@ -58,27 +57,14 @@ type Props = {
   isSubmitting :boolean;
 }
 
-class CreateStudyForm extends Component<Props> {
-  componentDidMount() {
+const CreateStudyForm = ({ formData, handleOnChange, isSubmitting }:Props) => (
+  <Form
+      formData={formData}
+      hideSubmit
+      isSubmitting={isSubmitting}
+      onChange={handleOnChange}
+      schema={dataSchema}
+      uiSchema={uiSchema} />
+);
 
-  }
-
-  render() {
-    const {
-      formData,
-      handleOnChange,
-      isSubmitting,
-    } = this.props;
-
-    return (
-      <Form
-          formData={formData}
-          hideSubmit
-          isSubmitting={isSubmitting}
-          onChange={handleOnChange}
-          schema={dataSchema}
-          uiSchema={uiSchema} />
-    );
-  }
-}
 export default CreateStudyForm;
