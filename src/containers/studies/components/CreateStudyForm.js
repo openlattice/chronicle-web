@@ -57,7 +57,7 @@ type Props = {
   isSubmitting :boolean;
 }
 
-const CreateStudyForm = ({ formData, handleOnChange, isSubmitting }:Props) => (
+const CreateStudyForm = ({ formData, handleOnChange, isSubmitting } :Props) => (
   <Form
       formData={formData}
       hideSubmit
