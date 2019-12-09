@@ -14,7 +14,7 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
-import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { STUDY_DESCRIPTION, STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
