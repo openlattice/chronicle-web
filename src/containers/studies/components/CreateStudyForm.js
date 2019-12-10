@@ -8,18 +8,18 @@ import { Form } from 'lattice-fabricate';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
 
+
 type Props = {
   formData :Object;
-  handleOnChange :Function;
   isSubmitting :boolean;
 }
 
-const CreateStudyForm = ({ formData, handleOnChange, isSubmitting } :Props) => (
+const CreateStudyForm = ({ formData, isSubmitting } :Props) => (
   <Form
       formData={formData}
       hideSubmit
       isSubmitting={isSubmitting}
-      onChange={handleOnChange}
+      noPadding
       schema={dataSchema}
       uiSchema={uiSchema} />
 );

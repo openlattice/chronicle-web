@@ -79,7 +79,6 @@ class CreateStudyModal extends Component<Props, State> {
         <ModalBodyWrapper>
           <CreateStudyForm
               formData={data}
-              handleOnChange={this.handleOnChange}
               isSubmitting={isSubmitting} />
         </ModalBodyWrapper>
       ),
