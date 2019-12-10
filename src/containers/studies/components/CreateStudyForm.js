@@ -6,58 +6,7 @@ import React from 'react';
 
 import { Form } from 'lattice-fabricate';
 
-const dataSchema = {
-  properties: {
-    alfonce: {
-      properties: {
-        name: {
-          title: 'Study Name',
-          type: 'string'
-        },
-        description: {
-          title: 'Description',
-          type: 'string'
-        },
-        group: {
-          title: 'Study Group',
-          type: 'string'
-        },
-        version: {
-          title: 'Study Version',
-          type: 'string'
-        },
-        email: {
-          title: 'Contact Email',
-          type: 'string'
-        }
-      },
-      type: 'object',
-      title: ''
-    }
-  },
-  type: 'object',
-  title: ''
-};
-
-const uiSchema = {
-  alfonce: {
-    description: {
-      classNames: 'column-span-12'
-    },
-    email: {
-      classNames: 'column-span-12'
-    },
-    group: {
-      classNames: 'column-span-12'
-    },
-    name: {
-      classNames: 'column-span-12'
-    },
-    version: {
-      classNames: 'column-span-12'
-    }
-  }
-};
+import { dataSchema, uiSchema } from './CreateStudySchemas';
 
 type Props = {
   formData :Object;
