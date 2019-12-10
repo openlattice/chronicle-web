@@ -49,9 +49,6 @@ class CreateStudyModal extends Component<Props, State> {
       isSubmitting: false
     };
   }
-  componentDidMount() {
-
-  }
 
   handleOnChange = ({ formData } :Object) => {
     this.setState({
