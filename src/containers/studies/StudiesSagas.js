@@ -11,7 +11,9 @@ import { DataApiActions, DataApiSagas } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CREATE_STUDY,
   GET_STUDIES,
+  createStudy,
   getStudies,
 } from './StudiesActions';
 
@@ -50,7 +52,26 @@ function* getStudiesWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDIES, getStudiesWorker);
 }
 
+
+function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(createStudy.request(action.id));
+  }
+  catch (error) {
+    yield put(createStudy.failure(action.id, error));
+  }
+  finally {
+    yield put(createStudy.failure(action.id));
+  }
+}
+
+function* createStudyWatcher() :Generator<*, *, *> {
+  yield takeEvery(CREATE_STUDY, createStudyWorker);
+}
+
 export {
+  createStudyWatcher,
+  createStudyWorker,
   getStudiesWatcher,
   getStudiesWorker,
 };
