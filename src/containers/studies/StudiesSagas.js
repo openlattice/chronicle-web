@@ -31,11 +31,12 @@ const LOG = new Logger('StudiesSagas');
 function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(getStudies.request(action.id));
+
     const entitySetId = yield select(
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
-    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
 
+    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
     if (response.error) {
       throw response.error;
     }
@@ -59,7 +60,6 @@ function* getStudiesWatcher() :Generator<*, *, *> {
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   const { id, value } = action;
   let response = {};
-
   try {
     yield put(createStudy.request(id, value));
 
@@ -75,7 +75,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(createStudy.failure(action.id, error));
   }
   finally {
-    yield put(createStudy.failure(action.id));
+    yield put(createStudy.finally(action.id));
   }
 }
 

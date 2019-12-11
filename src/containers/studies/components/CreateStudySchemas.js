@@ -38,6 +38,10 @@ const dataSchema = {
           type: 'string'
         }
       },
+      required: [
+        getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME),
+        getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)
+      ],
       type: 'object',
       title: ''
     }
@@ -53,7 +57,8 @@ const uiSchema = {
       classNames: 'column-span-12'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION)]: {
-      classNames: 'column-span-12'
+      classNames: 'column-span-12',
+      'ui:widget': 'textarea'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP)]: {
       classNames: 'column-span-12'
