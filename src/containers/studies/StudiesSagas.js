@@ -54,8 +54,11 @@ function* getStudiesWatcher() :Generator<*, *, *> {
 
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
+  const { id, value } = action;
+  let response :Object = {};
+
   try {
-    yield put(createStudy.request(action.id));
+    yield put(createStudy.request(id, value));
   }
   catch (error) {
     yield put(createStudy.failure(action.id, error));

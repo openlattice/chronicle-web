@@ -1,7 +1,7 @@
 /*
  * @flow
  */
-import React, { Component } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -28,58 +28,25 @@ type Props = {
   }
 };
 
-type State = {
-  data :Object;
-  isSubmitting :boolean;
-}
-
 const ModalBodyWrapper = styled.div`
   min-width: 440px;
 `;
 
-const initialFormDataState :Object = {
-  description: '',
-  email: '',
-  group: '',
-  name: '',
-  version: '',
-};
-class CreateStudyModal extends Component<Props, State> {
-  constructor(props :Props) {
-    super(props);
-    this.state = {
-      data: { ...initialFormDataState },
-      isSubmitting: false
-    };
-  }
+const CreateStudyModal = (props :Props) => {
+  const formRef = useRef();
+  const { isVisible, handleOnCloseModal, requestStates } = props;
 
-  handleOnSubmit = () => {
-    const { data } = this.state;
-    const { actions } = this.props;
-    actions.createStudy(data);
-  }
+  const handleOnSubmit = useCallback(() => {
+    if (formRef.current) {
+      formRef.current.submit();
+    }
+  });
 
-  handleOnChange = ({ formData } :Object) => {
-    this.setState({
-      data: {
-        description: formData.description || '',
-        email: formData.email || '',
-        group: formData.group || '',
-        name: formData.name || '',
-        version: formData.version || ''
-      }
-    });
-  }
-
-  requestStateComponents = () => {
-    const { data, isSubmitting } = this.state;
-
+  const requestStateComponents = () => {
     const components = {
       [RequestStates.STANDBY]: (
         <ModalBodyWrapper>
-          <CreateStudyForm
-              formData={data}
-              isSubmitting={isSubmitting} />
+          <CreateStudyForm ref={formRef} />
         </ModalBodyWrapper>
       ),
       [RequestStates.FAILURE]: (
@@ -89,28 +56,26 @@ class CreateStudyModal extends Component<Props, State> {
       )
     };
     return components;
-  }
+  };
 
-  render() {
-    const { isVisible, handleOnCloseModal, requestStates } = this.props;
-    return (
-      <ActionModal
-          isVisible={isVisible}
-          onClose={handleOnCloseModal}
-          requestState={requestStates[CREATE_STUDY]}
-          requestStateComponents={this.requestStateComponents()}
-          onClickPrimary={this.handleOnSubmit}
-          textPrimary="Create"
-          textSecondary="Cancel"
-          textTitle="Create Study" />
-    );
-  }
-}
+
+  return (
+    <ActionModal
+        isVisible={isVisible}
+        onClose={handleOnCloseModal}
+        requestState={requestStates[CREATE_STUDY]}
+        requestStateComponents={requestStateComponents()}
+        onClickPrimary={handleOnSubmit}
+        textPrimary="Create"
+        textSecondary="Cancel"
+        textTitle="Create Study" />
+  );
+};
 
 const mapStateToProps = (state :Map) => ({
   requestStates: {
     [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState'])
-  }
+  },
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({

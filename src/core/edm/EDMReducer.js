@@ -21,6 +21,7 @@ import {
 import Logger from '../../utils/Logger';
 
 const LOG :Logger = new Logger('EDMReducer');
+const { FullyQualifiedName } = Models;
 
 const {
   EntityTypeBuilder,
@@ -82,6 +83,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
           const rawPropertyTypes :PropertyTypeObject[] = seqAction.value.propertyTypes;
           const propertyTypes :List = List().asMutable();
           const propertyTypesIndexMap :Map = Map().asMutable();
+          const propertyTypesFqnIdMap :Map = Map().asMutable();
 
           rawPropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
             try {
@@ -98,6 +100,9 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
                 .setTitle(pt.title)
                 .setType(pt.type)
                 .build();
+
+              const typeFqn :FullyQualifiedName = new FullyQualifiedName(propertyType.type);
+              propertyTypesFqnIdMap.set(typeFqn, propertyType.id);
               propertyTypes.push(propertyType.toImmutable());
               propertyTypesIndexMap.set(propertyType.id, index);
               propertyTypesIndexMap.set(propertyType.type, index);
@@ -112,6 +117,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
             .set('entityTypes', entityTypes.asImmutable())
             .set('entityTypesIndexMap', entityTypesIndexMap.asImmutable())
             .set('propertyTypes', propertyTypes.asImmutable())
+            .set('propertyTypesFqnIdMap', propertyTypesFqnIdMap.asImmutable())
             .set('propertyTypesIndexMap', propertyTypesIndexMap.asImmutable())
             .setIn([GET_EDM_TYPES, 'requestState'], RequestStates.SUCCESS);
         },
@@ -119,6 +125,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
           .set('entityTypes', List())
           .set('entityTypesIndexMap', Map())
           .set('propertyTypes', List())
+          .set('propertyTypesFqnIdMap', Map())
           .set('propertyTypesIndexMap', Map())
           .setIn([GET_EDM_TYPES, 'requestState'], RequestStates.FAILURE),
         FINALLY: () => state
