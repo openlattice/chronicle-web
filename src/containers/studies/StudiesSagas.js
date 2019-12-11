@@ -20,6 +20,8 @@ import {
 
 import Logger from '../../utils/Logger';
 import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
+import { submitDataGraph } from '../../core/sagas/data/DataActions';
+import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { getEntitySetDataWorker } = DataApiSagas;
@@ -56,12 +58,20 @@ function* getStudiesWatcher() :Generator<*, *, *> {
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   const { id, value } = action;
-  let response :Object = {};
+  let response = {};
 
   try {
     yield put(createStudy.request(id, value));
+
+    response = yield call(submitDataGraphWorker, submitDataGraph(value));
+    if (response.error) {
+      throw response.error;
+    }
+
+    yield put(createStudy.success(id));
   }
   catch (error) {
+    LOG.error('caught exception in createStudy()', error);
     yield put(createStudy.failure(action.id, error));
   }
   finally {
