@@ -7,9 +7,7 @@ import { Models } from 'lattice';
 const { FullyQualifiedName } = Models;
 
 const ASSOCIATION_ENTITY_TYPE_FQNS = {};
-const ENTITY_TYPE_FQNS = {
-  PEOPLE: new FullyQualifiedName('app.people')
-};
+const ENTITY_TYPE_FQNS = {};
 
 const PROPERTY_TYPE_FQNS = {
   // study

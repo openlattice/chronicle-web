@@ -11,7 +11,7 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
-import type { RequestState, RequestSequence } from 'redux-reqseq';
+import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
@@ -34,6 +34,7 @@ const ModalBodyWrapper = styled.div`
 
 const CreateStudyModal = (props :Props) => {
   const formRef = useRef();
+
   const { isVisible, handleOnCloseModal, requestStates } = props;
 
   const handleOnSubmit = useCallback(() => {
@@ -53,11 +54,15 @@ const CreateStudyModal = (props :Props) => {
         <ModalBodyWrapper>
           <span> Failed to create a new study. Please try again </span>
         </ModalBodyWrapper>
+      ),
+      [RequestStates.SUCCESS]: (
+        <ModalBodyWrapper>
+          <span> Successfully created a new study. </span>
+        </ModalBodyWrapper>
       )
     };
     return components;
   };
-
 
   return (
     <ActionModal
@@ -66,6 +71,8 @@ const CreateStudyModal = (props :Props) => {
         requestState={requestStates[CREATE_STUDY]}
         requestStateComponents={requestStateComponents()}
         onClickPrimary={handleOnSubmit}
+        shouldCloseOnEscape={false}
+        shouldCloseOnOutsideClick={false}
         textPrimary="Create"
         textSecondary="Cancel"
         textTitle="Create Study" />

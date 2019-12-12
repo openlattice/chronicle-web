@@ -72,10 +72,10 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   }
   catch (error) {
     LOG.error('caught exception in createStudy()', error);
-    yield put(createStudy.failure(action.id, error));
+    yield put(createStudy.failure(id, error));
   }
   finally {
-    yield put(createStudy.finally(action.id));
+    yield put(createStudy.finally(id));
   }
 }
 

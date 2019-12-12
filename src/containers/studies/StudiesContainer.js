@@ -20,9 +20,10 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyModal from './components/CreateStudyModal';
 import StudyCard from './components/StudyCard';
-import { GET_STUDIES, getStudies } from './StudiesActions';
+import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
 import * as RoutingActions from '../../core/router/RoutingActions';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -56,8 +57,10 @@ const CenterText = styled.div`
 type Props = {
   actions :{
     getStudies :RequestSequence;
+    resetRequestState :RequestSequence;
   };
   requestStates:{
+    CREATE_STUDY :RequestState;
     GET_STUDIES :RequestState;
   };
   studies :List;
@@ -85,6 +88,11 @@ class StudiesContainer extends Component<Props, State> {
     });
   }
   handleOnCloseModal = () => {
+    const { actions } = this.props;
+
+    // this ensures that the modal always renders CreateStudyForm when opened
+    actions.resetRequestState(CREATE_STUDY);
+
     this.setState({
       isCreateStudyModalVisible: false
     });
@@ -138,7 +146,9 @@ class StudiesContainer extends Component<Props, State> {
 }
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState'])
+    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState']),
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
+
   },
   studies: state.getIn(['studies', 'studies'], List())
 });
@@ -146,6 +156,7 @@ const mapStateToProps = (state :Map) => ({
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     getStudies,
+    resetRequestState,
     goToRoute: RoutingActions.goToRoute,
   }, dispatch)
 });
