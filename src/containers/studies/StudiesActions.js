@@ -12,8 +12,8 @@ const CREATE_STUDY :'CREATE_STUDY' = 'CREATE_STUDY';
 const createStudy :RequestSequence = newRequestSequence(CREATE_STUDY);
 
 export {
-  GET_STUDIES,
   CREATE_STUDY,
+  GET_STUDIES,
+  createStudy,
   getStudies,
-  createStudy
 };

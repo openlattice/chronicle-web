@@ -68,7 +68,7 @@ type Props = {
 
 type State = {
   isCreateStudyModalVisible :boolean;
-}
+};
 
 class StudiesContainer extends Component<Props, State> {
   constructor(props :Props) {

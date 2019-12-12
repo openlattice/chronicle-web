@@ -1,3 +1,7 @@
+/*
+ * @flow
+ */
+
 import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';

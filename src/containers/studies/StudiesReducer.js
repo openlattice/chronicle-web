@@ -14,8 +14,8 @@ import {
 } from './StudiesActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [GET_STUDIES]: { requestState: RequestStates.STANDBY },
   [CREATE_STUDY]: { requestState: RequestStates.STANDBY },
+  [GET_STUDIES]: { requestState: RequestStates.STANDBY },
   studies: List(),
 });
 

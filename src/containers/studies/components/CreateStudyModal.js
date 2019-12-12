@@ -18,14 +18,14 @@ import CreateStudyForm from './CreateStudyForm';
 import { CREATE_STUDY, createStudy } from '../StudiesActions';
 
 type Props = {
-  handleOnCloseModal :Function;
+  handleOnCloseModal :() => void;
   isVisible :boolean;
   actions:{
     createStudy :RequestSequence
   };
   requestStates:{
     CREATE_STUDY :RequestState
-  }
+  };
 };
 
 const ModalBodyWrapper = styled.div`
@@ -52,7 +52,7 @@ const CreateStudyModal = (props :Props) => {
       ),
       [RequestStates.FAILURE]: (
         <ModalBodyWrapper>
-          <span> Failed to create a new study. Please try again </span>
+          <span> Failed to create a new study. Please try again. </span>
         </ModalBodyWrapper>
       ),
       [RequestStates.SUCCESS]: (
