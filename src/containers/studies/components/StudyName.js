@@ -16,7 +16,7 @@ const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const Container = styled.div`
   display: flex;
   align-items: center;
-  margin: 20px 0 30px 0;
+  margin: 20px 0 0 0;
 
   > h1 {
     font-size: 28px;
@@ -26,14 +26,13 @@ const Container = styled.div`
   }
 `;
 
-const FormWrapper = styled.div`
-  width: 100%;
-  min-height: 100px;
-`;
-
 type Props = {
   studyName :string,
 };
+
+const FormWrapper = styled.div`
+  
+`;
 
 const StudyName = ({ studyName } :Props) => {
   const [editMode, toggleEdit] = useState(false);

@@ -6,6 +6,8 @@ import React, { Component } from 'react';
 
 import styled from 'styled-components';
 import { Colors } from 'lattice-ui-kit';
+// import { connect } from 'react-redux';
+// import { bindActionCreators } from 'redux';
 import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
@@ -60,10 +62,9 @@ class StudyDetailsContainer extends Component<Props> {
     // const { match } = this.props;
   }
 
-
   render() {
     const { match } = this.props;
-    const studyId = match.params.id;
+    const studyId = match.params.id || ''; // necessary to quiet linter
 
     return (
       <>
@@ -86,4 +87,11 @@ class StudyDetailsContainer extends Component<Props> {
   }
 
 }
+//
+// const mapDispatchToProps = (dispatch :() => void) => ({
+//   actions: bindActionCreators({
+//     getStudyDetails,
+//   }, dispatch)
+// });
+
 export default StudyDetailsContainer;

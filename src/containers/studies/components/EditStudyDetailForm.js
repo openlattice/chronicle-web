@@ -5,19 +5,20 @@ import React from 'react';
 import styled from 'styled-components';
 import { Models } from 'lattice';
 import { Form } from 'lattice-fabricate';
+import { Colors } from 'lattice-ui-kit';
 
 import getFormSchema from './EditStudyDetailSchema';
 
 const { FullyQualifiedName } = Models;
+const { NEUTRALS } = Colors;
 
 type Props = {
   handleCancelEdit :() => void,
   propertyFqn :FullyQualifiedName
 }
 const FormWrapper = styled(Form)`
-  flex: 1;
-  margin: -30px;
   background-color: white;
+  border: solid 1px ${NEUTRALS[4]};
 `;
 const EditStudyDetailForm = (props :Props) => {
 

@@ -16,11 +16,11 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 const entityTitleMap = {
-  [STUDY_DESCRIPTION.toString()]: 'Study Description',
-  [STUDY_NAME.toString()]: 'Study Name',
-  [STUDY_GROUP.toString()]: 'Study Group',
-  [STUDY_VERSION.toString()]: 'Version',
-  [STUDY_EMAIL.toString()]: 'Contact Email'
+  [STUDY_DESCRIPTION.toString()]: 'Edit Study Description',
+  [STUDY_NAME.toString()]: 'Edit Study Name',
+  [STUDY_GROUP.toString()]: 'Edit Study Group',
+  [STUDY_VERSION.toString()]: 'Edit Version',
+  [STUDY_EMAIL.toString()]: 'Edit Email'
 };
 
 
@@ -48,6 +48,7 @@ const getFormSchema = (propertyTypeFqn :FullyQualifiedName) => {
       classNames: 'column-span-12 grid-container',
       [getEntityAddressKey(0, CHRONICLE_STUDIES, propertyTypeFqn)]: {
         classNames: 'column-span-12',
+        'ui:widget': propertyTypeFqn === STUDY_DESCRIPTION ? 'textarea' : 'text'
       }
     }
   };
