@@ -1,30 +1,39 @@
 // @flow
 
 import React from 'react';
-import { Form } from 'lattice-fabricate';
+
+import styled from 'styled-components';
 import { Models } from 'lattice';
+import { Form } from 'lattice-fabricate';
+
 import getFormSchema from './EditStudyDetailSchema';
 
 const { FullyQualifiedName } = Models;
 
 type Props = {
+  handleCancelEdit :() => void,
   propertyFqn :FullyQualifiedName
 }
+const FormWrapper = styled(Form)`
+  flex: 1;
+  margin: -30px;
+`;
 const EditStudyDetailForm = (props :Props) => {
 
-  const { propertyFqn } = props;
+  const { propertyFqn, handleCancelEdit } = props;
   // $FlowFixMe
   const { uiSchema, dataSchema } = getFormSchema(propertyFqn);
-  const handleSubmit = () => {
+  const handleSubmit = () => {};
 
-  };
+
   return (
-    <Form
+    <FormWrapper
+        onDiscard={handleCancelEdit}
         onSubmit={handleSubmit}
-        noPadding
         schema={dataSchema}
         uiSchema={uiSchema} />
   );
+
 };
 
 export default EditStudyDetailForm;

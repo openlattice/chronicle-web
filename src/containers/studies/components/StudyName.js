@@ -28,6 +28,7 @@ const Container = styled.div`
 
 const FormWrapper = styled.div`
   width: 100%;
+  min-height: 100px;
 `;
 
 type Props = {
@@ -47,7 +48,7 @@ const StudyName = ({ studyName } :Props) => {
         editMode
           ? (
             <FormWrapper>
-              <EditStudyDetailForm propertyFqn={STUDY_NAME} />
+              <EditStudyDetailForm handleCancelEdit={() => toggleEdit(false)} propertyFqn={STUDY_NAME} />
             </FormWrapper>
           ) : (
 
@@ -56,7 +57,9 @@ const StudyName = ({ studyName } :Props) => {
             </h1>
           )
       }
-      <EditButton onClick={() => toggleEdit(!editMode)} />
+      {
+        !editMode && <EditButton onClick={() => toggleEdit(!editMode)} />
+      }
     </Container>
   );
 };
