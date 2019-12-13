@@ -17,6 +17,7 @@ type Props = {
 const FormWrapper = styled(Form)`
   flex: 1;
   margin: -30px;
+  background-color: white;
 `;
 const EditStudyDetailForm = (props :Props) => {
 
