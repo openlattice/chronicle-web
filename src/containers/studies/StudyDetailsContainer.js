@@ -6,21 +6,20 @@ import React, { Component } from 'react';
 
 import styled from 'styled-components';
 import { Colors } from 'lattice-ui-kit';
-// import { connect } from 'react-redux';
-// import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
 import type { Match } from 'react-router';
+import type { RequestSequence } from 'redux-reqseq';
 
 import StudyDetails from './StudyDetails';
 import StudyName from './components/StudyName';
 import StudyParticipants from './StudyParticipants';
+import { getStudyDetails } from './StudiesActions';
 
 import * as Routes from '../../core/router/Routes';
 
-type Props = {
-  match :Match;
-};
 const { NEUTRALS } = Colors;
 
 const Tabs = styled.div`
@@ -57,9 +56,19 @@ const TabLink = styled(NavLink)`
   }
 `;
 
+type Props = {
+  match :Match;
+  actions:{
+    getStudyDetails :RequestSequence;
+  };
+};
+
 class StudyDetailsContainer extends Component<Props> {
   componentDidMount() {
-    // const { match } = this.props;
+    const { match } = this.props;
+    const studyId = match.params.id;
+    const { actions } = this.props;
+    actions.getStudyDetails(studyId);
   }
 
   render() {
@@ -87,11 +96,12 @@ class StudyDetailsContainer extends Component<Props> {
   }
 
 }
-//
-// const mapDispatchToProps = (dispatch :() => void) => ({
-//   actions: bindActionCreators({
-//     getStudyDetails,
-//   }, dispatch)
-// });
 
-export default StudyDetailsContainer;
+const mapDispatchToProps = (dispatch :() => void) => ({
+  actions: bindActionCreators({
+    getStudyDetails,
+  }, dispatch)
+});
+
+// $FlowFixMe
+export default connect(null, mapDispatchToProps)(StudyDetailsContainer);
