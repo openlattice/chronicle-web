@@ -27,7 +27,6 @@ const EditStudyDetailForm = (props :Props) => {
   const { uiSchema, dataSchema } = getFormSchema(propertyFqn);
   const handleSubmit = () => {};
 
-
   return (
     <FormWrapper
         onDiscard={handleCancelEdit}

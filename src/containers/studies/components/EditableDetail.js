@@ -25,7 +25,7 @@ const EditableDetail = (props :Props) => {
   }
 
   return (
-    <p style={{ marginTop: '5px', 'word-break': 'break-all' }}>
+    <p style={{ margin: '5px 15px 0 0', wordBreak: 'break-all' }}>
       <EditButton style={{ float: 'right' }} onClick={() => toggleEditMode(!editMode)} />
       { value }
     </p>

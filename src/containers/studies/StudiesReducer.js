@@ -18,8 +18,9 @@ import {
 const INITIAL_STATE :Map<*, *> = fromJS({
   [CREATE_STUDY]: { requestState: RequestStates.STANDBY },
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
-  [GET_STUDY_DETAILS]: { RequestStates: RequestStates.STANDBY },
+  [GET_STUDY_DETAILS]: { requestState: RequestStates.STANDBY },
   studies: List(),
+  selectedStudy: Map()
 });
 
 export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -58,10 +59,10 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       return getStudyDetails.reducer(state, action, {
         REQUEST: () => state.setIn([GET_STUDY_DETAILS, 'requestState'], RequestStates.PENDING),
         SUCCESS: () => state
-          .setIn(['studies', 'selected'], fromJS(seqAction.value))
+          .setIn(['selectedStudy'], fromJS(seqAction.value))
           .setIn([GET_STUDY_DETAILS, 'requestState'], RequestStates.SUCCESS),
         FAILURE: () => state
-          .set('studies', 'selected', null)
+          .set('selectedStudy', Map())
           .setIn([GET_STUDY_DETAILS, 'requestState'], RequestStates.FAILURE)
       });
     }

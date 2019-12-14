@@ -5,6 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { Map } from 'immutable';
 import {
   Card,
   CardSegment,
@@ -18,7 +19,8 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 const {
   STUDY_DESCRIPTION,
   STUDY_EMAIL,
-  STUDY_GROUP
+  STUDY_GROUP,
+  STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
 const { NEUTRALS } = Colors;
@@ -32,6 +34,7 @@ const CardGrid = styled.div`
     display: flex;
     flex-direction: column;
     min-width: 0;
+    cursor: default;
   }
 `;
 
@@ -51,12 +54,13 @@ const DetailWrapper = styled.div`
   font-size: 15px;
   line-height: 1.7;
   >h4 {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 400;
     margin: 0;
     color: ${NEUTRALS[1]};
     margin-right: 10px;
     text-transform: uppercase;
+    letter-spacing: 1.8px;
   }
 
   >p {
@@ -65,11 +69,12 @@ const DetailWrapper = styled.div`
 `;
 
 
-const AboutCard = () => {
-  // const onEditDescription = () => {};
-  const description = 'i hate on the whole l;dfkg;kdfl;gk;dfkgl;dfgdf peolel.';
+type Props = {
+  studyDetails :Map
+}
 
-  return (
+const StudyDetails = ({ studyDetails } :Props) => {
+  const renderAboutCard = () => (
     <Card>
       <CardSegment vertical noBleed>
         <CardTitle>
@@ -83,17 +88,18 @@ const AboutCard = () => {
 
         <DetailWrapper>
           <h4> Description </h4>
-          <EditableDetail propertyFqn={STUDY_DESCRIPTION} value={description} />
+          <EditableDetail propertyFqn={STUDY_DESCRIPTION} value={studyDetails.getIn([STUDY_DESCRIPTION, 0])} />
+        </DetailWrapper>
+
+        <DetailWrapper>
+          <h4> Version </h4>
+          <EditableDetail propertyFqn={STUDY_VERSION} value={studyDetails.getIn([STUDY_VERSION, 0])} />
         </DetailWrapper>
       </CardSegment>
     </Card>
   );
-};
 
-const ContactCard = () => {
-  const email = 'alfonce.starfish@gmail.com';
-  const group = '333';
-  return (
+  const renderContactCard = () => (
     <Card>
       <CardSegment vertical noBleed>
         <CardTitle>
@@ -101,23 +107,20 @@ const ContactCard = () => {
         </CardTitle>
         <DetailWrapper>
           <h4> Email </h4>
-          <EditableDetail propertyFqn={STUDY_EMAIL} value={email} />
+          <EditableDetail propertyFqn={STUDY_EMAIL} value={studyDetails.getIn([STUDY_EMAIL, 0])} />
         </DetailWrapper>
-
         <DetailWrapper>
           <h4> Group </h4>
-          <EditableDetail propertyFqn={STUDY_GROUP} value={group} />
+          <EditableDetail propertyFqn={STUDY_GROUP} value={studyDetails.getIn([STUDY_GROUP, 0])} />
         </DetailWrapper>
       </CardSegment>
     </Card>
   );
-};
 
-const StudyDetails = () => {
   return (
     <CardGrid>
-      <AboutCard />
-      <ContactCard />
+      {renderAboutCard()}
+      {renderContactCard()}
     </CardGrid>
   );
 };
