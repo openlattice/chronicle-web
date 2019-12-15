@@ -20,10 +20,9 @@ import StudyDetails from './StudyDetails';
 // import StudyName from './components/StudyName';
 import StudyParticipants from './StudyParticipants';
 import {
-  GET_STUDIES,
   GET_STUDY_DETAILS,
   getStudyDetails
-} from './StudiesActions';
+} from './StudyActions';
 
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -132,7 +131,6 @@ class StudyDetailsContainer extends Component<Props> {
 const mapStateToProps = (state) => ({
   requestStates: {
     [GET_STUDY_DETAILS]: state.getIn(['studies', GET_STUDY_DETAILS, 'requestState']),
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES], 'requestState')
   },
   studyDetails: state.getIn(['studies', 'selectedStudy'])
 });
