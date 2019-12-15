@@ -120,7 +120,7 @@ class StudyDetailsContainer extends Component<Props> {
           </TabLink>
         </Tabs>
         <Switch>
-          <Route path={Routes.PARTICIPANTS} component={StudyParticipants} />
+          <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants studyId={studyId} />} />
           <Route path={Routes.STUDY} render={() => <StudyDetails studyDetails={studyDetails} />} />
         </Switch>
       </>

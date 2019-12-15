@@ -14,10 +14,15 @@ const createStudy :RequestSequence = newRequestSequence(CREATE_STUDY);
 const GET_STUDY_DETAILS :'GET_STUDY_DETAILS' = 'GET_STUDY_DETAILS';
 const getStudyDetails :RequestSequence = newRequestSequence(GET_STUDY_DETAILS);
 
+const CREATE_PARTICIPANT :'CREATE_PARTICIPANT' = 'CREATE_PARTICIPANT';
+const createParticipant :RequestSequence = newRequestSequence(CREATE_PARTICIPANT);
+
 export {
+  CREATE_PARTICIPANT,
   CREATE_STUDY,
   GET_STUDIES,
   GET_STUDY_DETAILS,
+  createParticipant,
   createStudy,
   getStudies,
   getStudyDetails
