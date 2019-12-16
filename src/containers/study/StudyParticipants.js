@@ -14,7 +14,6 @@ import {
 } from 'lattice-ui-kit';
 
 import AddParticipantModal from './components/AddParticipantModal';
-
 import ParticipantsTable from './components/ParticipantsTable';
 
 const Container = styled.div`

@@ -5,7 +5,7 @@
 import React, { Component } from 'react';
 
 import styled from 'styled-components';
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import { Colors, Spinner } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { Route, Switch } from 'react-router';
@@ -17,13 +17,11 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import EditableDetail from './components/EditableDetail';
 import StudyDetails from './StudyDetails';
-// import StudyName from './components/StudyName';
 import StudyParticipants from './StudyParticipants';
 import {
-  GET_STUDIES,
   GET_STUDY_DETAILS,
   getStudyDetails
-} from './StudiesActions';
+} from './StudyActions';
 
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -83,6 +81,7 @@ type Props = {
     GET_STUDY_DETAILS :RequestState;
   };
   studyDetails :Map<*, *>;
+  studies :List
 };
 
 class StudyDetailsContainer extends Component<Props> {
@@ -96,7 +95,11 @@ class StudyDetailsContainer extends Component<Props> {
 
   render() {
     const { match, requestStates, studyDetails } = this.props;
-    const studyId = match.params.id || ''; // necessary to quiet linter
+    const studyUUID = match.params.id;
+
+    if (!studyUUID) {
+      return null;
+    }
 
     if (requestStates[GET_STUDY_DETAILS] === RequestStates.PENDING && studyDetails !== null) {
       return (
@@ -104,37 +107,35 @@ class StudyDetailsContainer extends Component<Props> {
       );
     }
 
-    // require that all the following be met with immediate effect
     return (
       <>
         <StudyNameWrapper>
           <EditableDetail propertyFqn={STUDY_NAME} value={studyDetails.getIn([STUDY_NAME, 0])} />
         </StudyNameWrapper>
         <Tabs>
-          <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyId)}>
+          <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
             Study Details
           </TabLink>
 
-          <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyId)}>
+          <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
             Participants
           </TabLink>
         </Tabs>
         <Switch>
-          <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants studyId={studyId} />} />
+          <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants studyId={studyUUID} />} />
           <Route path={Routes.STUDY} render={() => <StudyDetails studyDetails={studyDetails} />} />
         </Switch>
       </>
     );
   }
-
 }
 
 const mapStateToProps = (state) => ({
   requestStates: {
-    [GET_STUDY_DETAILS]: state.getIn(['studies', GET_STUDY_DETAILS, 'requestState']),
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES], 'requestState')
+    [GET_STUDY_DETAILS]: state.getIn(['study', GET_STUDY_DETAILS, 'requestState']),
   },
-  studyDetails: state.getIn(['studies', 'selectedStudy'])
+  studyDetails: state.getIn(['study', 'selectedStudy']),
+  studies: state.getIn(['studies', 'studies'])
 });
 
 const mapDispatchToProps = (dispatch :() => void) => ({

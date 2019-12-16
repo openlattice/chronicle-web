@@ -13,7 +13,7 @@ import { dataSchema, uiSchema } from './CreateStudySchemas';
 
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { createStudy } from '../StudiesActions';
+import { createStudy } from '../../study/StudyActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
@@ -38,7 +38,8 @@ const CreateStudyForm = (props :Props, ref) => {
 
     dispatch(createStudy({
       entityData,
-      assocationEntityData
+      assocationEntityData,
+      newFormData
     }));
   });
 

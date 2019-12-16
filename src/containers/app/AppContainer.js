@@ -29,7 +29,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
-import StudyDetailsContainer from '../studies/StudyDetailsContainer';
+import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as AppActions from './AppActions';
 import * as Routes from '../../core/router/Routes';
 import { isNonEmptyString } from '../../utils/LangUtils';
