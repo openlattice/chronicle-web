@@ -85,11 +85,12 @@ class StudiesContainer extends Component<Props, State> {
 
   openCreateStudyModal = () => {
     const { actions } = this.props;
+    // necessary after a successful or failed CREATE_STUDY action
+    actions.resetRequestState(CREATE_STUDY);
+
     this.setState({
       isCreateStudyModalVisible: true
     });
-    // necessary after a successful or failed CREATE_STUDY action
-    actions.resetRequestState(CREATE_STUDY);
   }
 
   handleOnCloseModal = () => {
