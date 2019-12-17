@@ -11,7 +11,7 @@ import type { RequestState } from 'redux-reqseq';
 
 import AddParticipantForm from './AddParticipantForm';
 
-import { ADD_PARTICIPANT } from '../StudyActions';
+import { ADD_PARTICIPANT } from '../../studies/StudiesActions';
 
 type Props = {
   isVisible :boolean;
@@ -77,7 +77,7 @@ const AddParticipantModal = (props :Props) => {
 
 const mapStateToProps = (state) => ({
   requestStates: {
-    [ADD_PARTICIPANT]: state.getIn(['study', ADD_PARTICIPANT, 'requestState'])
+    [ADD_PARTICIPANT]: state.getIn(['studies', ADD_PARTICIPANT, 'requestState'])
   }
 });
 

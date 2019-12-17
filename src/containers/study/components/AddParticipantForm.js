@@ -6,7 +6,7 @@ import { Map, fromJS } from 'immutable';
 import { Constants } from 'lattice';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { useDispatch, useSelector } from 'react-redux';
-import { addStudyParticipant } from '../StudyActions';
+import { addStudyParticipant } from '../../studies/StudiesActions';
 import getFormSchema from './AddParticipantSchema';
 
 import {

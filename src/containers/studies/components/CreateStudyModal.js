@@ -13,7 +13,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { CREATE_STUDY, createStudy } from '../../study/StudyActions';
+import { CREATE_STUDY, createStudy } from '../StudiesActions';
 
 type Props = {
   handleOnCloseModal :() => void;
@@ -79,7 +79,7 @@ const CreateStudyModal = (props :Props) => {
 
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [CREATE_STUDY]: state.getIn(['study', CREATE_STUDY, 'requestState'])
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState'])
   },
 });
 
