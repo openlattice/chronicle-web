@@ -45,6 +45,11 @@ const AddParticipantModal = (props :Props) => {
       <ModalBodyWrapper>
         <span> Failed to add participant. Please try again. </span>
       </ModalBodyWrapper>
+    ),
+    [RequestStates.SUCCESS]: (
+      <ModalBodyWrapper>
+        <span> Successfully added participant.</span>
+      </ModalBodyWrapper>
     )
   };
 

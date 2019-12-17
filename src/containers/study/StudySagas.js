@@ -17,7 +17,9 @@ import { EntityDataModelApi } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  ADD_PARTICIPANT,
   CREATE_STUDY,
+  addStudyParticipant,
   createParticipantEntitySet,
   createStudy,
 } from './StudyActions';
@@ -72,7 +74,6 @@ function* createParticipantEntitySetWorker(action :SequenceAction) :Generator<*,
     }
     const entitySetIdMap = response.data;
     const entitySetId = entitySetIdMap[entitySet.name];
-    console.log(entitySetId);
     yield put(createParticipantEntitySet.success(action.id, { studyId, entitySetId }));
 
   }
@@ -81,6 +82,30 @@ function* createParticipantEntitySetWorker(action :SequenceAction) :Generator<*,
   }
   return workerResponse;
 }
+
+function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
+  const { value, id } = action;
+  try {
+    yield put(addStudyParticipant.request(id));
+
+    const response = yield call(submitDataGraphWorker, submitDataGraph(value));
+    if (response.error) throw response.error;
+
+    yield put(addStudyParticipant.success(id));
+  }
+  catch (error) {
+    LOG.error('caught exception in addStudyParticipant()', error);
+    yield put(addStudyParticipant.failure(id, error));
+  }
+  finally {
+    yield put(addStudyParticipant.finally(id));
+  }
+}
+
+function* addStudyParticipantWatcher() :Generator<*, *, *> {
+  yield takeEvery(ADD_PARTICIPANT, addStudyParticipantWorker);
+}
+
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   const { id, value } = action;
@@ -115,5 +140,6 @@ function* createStudyWatcher() :Generator<*, *, *> {
 
 
 export {
+  addStudyParticipantWatcher,
   createStudyWatcher,
 };

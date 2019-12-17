@@ -6,8 +6,6 @@ import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
-// given the study Id, spit out the entityId of the study of participants,
-// use that to get the participants for that study
 import {
   ADD_PARTICIPANT,
   CREATE_STUDY,
@@ -24,13 +22,15 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   selectedStudy: Map()
 });
 
-export default function studyReducer(state :Map = INITIAL_STATE, action:Object) {
+export default function studyReducer(state :Map = INITIAL_STATE, action :Object) {
   // const seqAction = action;
+  // todo: update participants for the related study
   switch (action.type) {
-    case ADD_PARTICIPANT:
+    case addStudyParticipant.case(action.type):
       return addStudyParticipant.reducer(state, action, {
         REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
       });
 
     case getStudyDetails.case(action.type): {
@@ -45,6 +45,7 @@ export default function studyReducer(state :Map = INITIAL_STATE, action:Object) 
           .setIn([GET_STUDY_DETAILS, 'requestState'], RequestStates.FAILURE)
       });
     }
+
     case createStudy.case(action.type): {
       return createStudy.reducer(state, action, {
         REQUEST: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING),
