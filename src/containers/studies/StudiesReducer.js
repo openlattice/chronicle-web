@@ -2,7 +2,7 @@
  * @flow
  */
 
-import { List, Map, fromJS } from 'immutable';
+import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
@@ -16,7 +16,7 @@ import {
 const INITIAL_STATE :Map<*, *> = fromJS({
   [CREATE_STUDY]: { requestState: RequestStates.STANDBY },
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
-  studies: List(),
+  studies: Map(),
 });
 
 export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -37,7 +37,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           .set('studies', fromJS(seqAction.value))
           .setIn([GET_STUDIES, 'requestState'], RequestStates.SUCCESS),
         FAILURE: () => state
-          .set('studies', List())
+          .set('studies', Map())
           .setIn([GET_STUDIES, 'requestState'], RequestStates.FAILURE),
       });
     }
@@ -45,8 +45,15 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case createStudy.case(action.type): {
       return createStudy.reducer(state, action, {
         REQUEST: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING),
-        SUCCESS: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS),
-        FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE)
+        FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { studyUUID } = action.value;
+          const study = state.getIn(['studies', studyUUID], Map());
+
+          return state
+            .setIn(['studies', studyUUID], study)
+            .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+        }
       });
     }
 
