@@ -1,7 +1,7 @@
 /*
  * @flow
  */
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -15,13 +15,15 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
+import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { CREATE_STUDY, createStudy } from '../StudiesActions';
 
 type Props = {
   handleOnCloseModal :() => void;
   isVisible :boolean;
   actions:{
-    createStudy :RequestSequence
+    createStudy :RequestSequence,
+    resetRequestState :RequestSequence
   };
   requestStates:{
     CREATE_STUDY :RequestState
@@ -35,13 +37,17 @@ const ModalBodyWrapper = styled.div`
 const CreateStudyModal = (props :Props) => {
   const formRef = useRef();
 
-  const { isVisible, handleOnCloseModal, requestStates } = props;
+  const {
+    isVisible,
+    handleOnCloseModal,
+    requestStates
+  } = props;
 
-  const handleOnSubmit = useCallback(() => {
+  const handleOnSubmit = () => {
     if (formRef.current) {
       formRef.current.submit();
     }
-  });
+  };
 
   const requestStateComponents = () => {
     const components = {
@@ -88,6 +94,7 @@ const mapStateToProps = (state :Map) => ({
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
     createStudy,
+    resetRequestState
   }, dispatch)
 });
 // $FlowFixMe

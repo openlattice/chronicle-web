@@ -82,17 +82,17 @@ class StudiesContainer extends Component<Props, State> {
     const { actions } = this.props;
     actions.getStudies();
   }
+
   openCreateStudyModal = () => {
+    const { actions } = this.props;
     this.setState({
       isCreateStudyModalVisible: true
     });
-  }
-  handleOnCloseModal = () => {
-    const { actions } = this.props;
-
-    // this ensures that the modal always renders CreateStudyForm when opened
+    // necessary after a successful or failed CREATE_STUDY action
     actions.resetRequestState(CREATE_STUDY);
+  }
 
+  handleOnCloseModal = () => {
     this.setState({
       isCreateStudyModalVisible: false
     });
