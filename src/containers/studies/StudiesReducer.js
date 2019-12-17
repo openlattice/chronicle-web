@@ -43,15 +43,16 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     }
 
     case createStudy.case(action.type): {
+      const seqAction = action;
       return createStudy.reducer(state, action, {
         REQUEST: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { studyUUID } = action.value;
-          const study = state.getIn(['studies', studyUUID], Map());
+          const { studyUUID, study } = seqAction.value;
+          const updatedStudies = state.get('studies').set(studyUUID, fromJS(study));
 
           return state
-            .setIn(['studies', studyUUID], study)
+            .set('studies', updatedStudies)
             .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
         }
       });

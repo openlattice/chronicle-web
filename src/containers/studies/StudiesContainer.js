@@ -149,16 +149,15 @@ const mapStateToProps = (state :Map) => ({
   requestStates: {
     [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState']),
     [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
-
   },
   studies: state.getIn(['studies', 'studies'], List())
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
+    goToRoute: RoutingActions.goToRoute,
     getStudies,
     resetRequestState,
-    goToRoute: RoutingActions.goToRoute,
   }, dispatch)
 });
 
