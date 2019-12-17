@@ -7,14 +7,22 @@ import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  ADD_PARTICIPANT,
+  CREATE_STUDY,
   GET_STUDIES,
+  addStudyParticipant,
+  createStudy,
   getStudies,
 } from './StudiesActions';
 
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
+  [ADD_PARTICIPANT]: { requestState: RequestStates.STANDBY },
+  [CREATE_STUDY]: { requestState: RequestStates.STANDBY },
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
+
+  participants: Map(),
   studies: Map(),
 });
 
@@ -38,6 +46,31 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         FAILURE: () => state
           .set('studies', List())
           .setIn([GET_STUDIES, 'requestState'], RequestStates.FAILURE),
+      });
+    }
+    case createStudy.case(action.type): {
+      return createStudy.reducer(state, action, {
+        REQUEST: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS),
+      });
+    }
+
+    case addStudyParticipant.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return addStudyParticipant.reducer(state, action, {
+        REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { participant } = seqAction.value;
+          const { studyId } = seqAction.value;
+          let participants = state.getIn(['participants', studyId], List());
+          participants = participants.push(participant);
+
+          return state
+            .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
+            .setIn(['participants', studyId], participants);
+        }
       });
     }
 

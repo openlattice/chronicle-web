@@ -9,7 +9,6 @@ import { combineReducers } from 'redux-immutable';
 import appReducer from '../../containers/app/AppReducer';
 import edmReducer from '../edm/EDMReducer';
 import studiesReducer from '../../containers/studies/StudiesReducer';
-import studyReducer from '../../containers/study/StudyReducer';
 
 export default function reduxReducer(routerHistory :any) {
 
@@ -19,6 +18,5 @@ export default function reduxReducer(routerHistory :any) {
     edm: edmReducer,
     router: connectRouter(routerHistory),
     studies: studiesReducer,
-    study: studyReducer
   });
 }

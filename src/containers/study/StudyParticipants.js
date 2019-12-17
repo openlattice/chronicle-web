@@ -41,7 +41,7 @@ const StudyParticipants = ({ study } :Props) => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const studyId = study.getIn([STUDY_ID, 0]);
-  const participants = useSelector((state) => state.getIn(['study', 'participants', studyId], List()));
+  const participants = useSelector((state) => state.getIn(['studies', 'participants', studyId], List()));
 
   return (
     <Container>
