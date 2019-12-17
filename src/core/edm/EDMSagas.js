@@ -126,17 +126,20 @@ function* getParticipantsEntitySetsIdsWorker(action :SequenceAction) :Generator<
   const workerResponse = {};
   try {
     yield put(getParticipantsEntitySetsIds.request(action.id));
-    const studies = yield select((state) => state.getIn(['studies', 'studies']));
+    const studies = yield select((state) => state.getIn(['studies', 'studies'], Map()));
     const studyIds = studies
       .valueSeq()
       .map((entry :Map) => entry.getIn([STUDY_ID, 0]))
       .map((studyId :string) => `${PARTICIPANTS_PREFIX}${studyId}`)
       .toJS();
 
-    const response = yield call(getEntitySetIdsWorker, getEntitySetIds(studyIds));
-    if (response.error) throw response.error;
-
-    yield put(getParticipantsEntitySetsIds.success(action.id, response.data));
+    let responseData = {};
+    if (studyIds.length === 0) {
+      const response = yield call(getEntitySetIdsWorker, getEntitySetIds(studyIds));
+      if (response.error) throw response.error;
+      responseData = response.data;
+    }
+    yield put(getParticipantsEntitySetsIds.success(action.id, responseData));
   }
   catch (error) {
     workerResponse.error = error;
