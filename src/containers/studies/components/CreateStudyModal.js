@@ -5,9 +5,7 @@ import React, { useRef } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import {
-  ActionModal
-} from 'lattice-ui-kit';
+import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
@@ -16,16 +14,15 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 import CreateStudyForm from './CreateStudyForm';
 
 import { resetRequestState } from '../../../core/redux/ReduxActions';
-import { CREATE_STUDY, createStudy } from '../StudiesActions';
+import { CREATE_STUDY } from '../StudiesActions';
 
 type Props = {
-  handleOnCloseModal :() => void;
-  isVisible :boolean;
-  actions:{
-    createStudy :RequestSequence,
+  actions :{
     resetRequestState :RequestSequence
   };
-  requestStates:{
+  handleOnCloseModal :() => void;
+  isVisible :boolean;
+  requestStates :{
     CREATE_STUDY :RequestState
   };
 };
@@ -49,25 +46,22 @@ const CreateStudyModal = (props :Props) => {
     }
   };
 
-  const requestStateComponents = () => {
-    const components = {
-      [RequestStates.STANDBY]: (
-        <ModalBodyWrapper>
-          <CreateStudyForm ref={formRef} />
-        </ModalBodyWrapper>
-      ),
-      [RequestStates.FAILURE]: (
-        <ModalBodyWrapper>
-          <span> Failed to create a new study. Please try again. </span>
-        </ModalBodyWrapper>
-      ),
-      [RequestStates.SUCCESS]: (
-        <ModalBodyWrapper>
-          <span> Successfully created a new study. </span>
-        </ModalBodyWrapper>
-      )
-    };
-    return components;
+  const requestStateComponents = {
+    [RequestStates.STANDBY]: (
+      <ModalBodyWrapper>
+        <CreateStudyForm ref={formRef} />
+      </ModalBodyWrapper>
+    ),
+    [RequestStates.FAILURE]: (
+      <ModalBodyWrapper>
+        <span> Failed to create a new study. Please try again. </span>
+      </ModalBodyWrapper>
+    ),
+    [RequestStates.SUCCESS]: (
+      <ModalBodyWrapper>
+        <span> Successfully created a new study. </span>
+      </ModalBodyWrapper>
+    )
   };
 
   return (
@@ -75,7 +69,7 @@ const CreateStudyModal = (props :Props) => {
         isVisible={isVisible}
         onClose={handleOnCloseModal}
         requestState={requestStates[CREATE_STUDY]}
-        requestStateComponents={requestStateComponents()}
+        requestStateComponents={requestStateComponents}
         onClickPrimary={handleOnSubmit}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
@@ -93,7 +87,6 @@ const mapStateToProps = (state :Map) => ({
 
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
-    createStudy,
     resetRequestState
   }, dispatch)
 });

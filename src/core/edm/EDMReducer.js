@@ -7,6 +7,7 @@ import { Models } from 'lattice';
 import { RequestStates } from 'redux-reqseq';
 import type {
   EntityTypeObject,
+  FQN,
   PropertyTypeObject,
 } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
@@ -37,6 +38,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   entityTypesIndexMap: Map(),
   propertyTypes: List(),
   propertyTypesIndexMap: Map(),
+  propertyTypesFqnIdMap: Map()
 });
 
 export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -101,7 +103,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
                 .setType(pt.type)
                 .build();
 
-              const typeFqn :FullyQualifiedName = new FullyQualifiedName(propertyType.type);
+              const typeFqn :FQN = new FullyQualifiedName(propertyType.type);
               propertyTypesFqnIdMap.set(typeFqn, propertyType.id);
               propertyTypes.push(propertyType.toImmutable());
               propertyTypesIndexMap.set(propertyType.id, index);

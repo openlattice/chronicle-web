@@ -59,11 +59,10 @@ function* getStudiesWatcher() :Generator<*, *, *> {
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   const { id, value } = action;
-  let response = {};
   try {
     yield put(createStudy.request(id, value));
 
-    response = yield call(submitDataGraphWorker, submitDataGraph(value));
+    const response = yield call(submitDataGraphWorker, submitDataGraph(value));
     if (response.error) {
       throw response.error;
     }
@@ -71,7 +70,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(createStudy.success(id));
   }
   catch (error) {
-    LOG.error('caught exception in createStudy()', error);
+    LOG.error(action.type, error);
     yield put(createStudy.failure(id, error));
   }
   finally {
