@@ -6,9 +6,11 @@ import {
   all,
   call,
   put,
+  select,
   takeEvery,
 } from '@redux-saga/core/effects';
 // import { EntitySetsApi } from 'lattice';
+import { Map } from 'immutable';
 import {
   EntityDataModelApiActions,
   EntityDataModelApiSagas,
@@ -16,17 +18,26 @@ import {
   EntitySetsApiSagas
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
-import Logger from '../../utils/Logger';
-import { isDefined } from '../../utils/LangUtils';
+
 import {
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
   getAllEntitySetIds,
   getEntityDataModelTypes,
+  getParticipantsEntitySetsIds
 } from './EDMActions';
+import {
+  ENTITY_SET_NAMES_LIST,
+  PARTICIPANTS_PREFIX
+} from './constants/EntitySetNames';
+import {
+  PROPERTY_TYPE_FQNS
+} from './constants/FullyQualifiedNames';
 
-import { ENTITY_SET_NAMES_LIST } from './constants/EntitySetNames';
+import Logger from '../../utils/Logger';
+import { isDefined } from '../../utils/LangUtils';
 
+const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const LOG = new Logger('EDMSagas');
 const { getEntitySetIds } = EntitySetsApiActions;
 const { getEntitySetIdsWorker } = EntitySetsApiSagas;
@@ -111,10 +122,36 @@ function* getAllEntitySetIdsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_ALL_ENTITY_SET_IDS, getAllEntitySetIdsWorker);
 }
 
+function* getParticipantsEntitySetsIdsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getParticipantsEntitySetsIds.request(action.id));
+    const studies = yield select((state) => state.getIn(['studies', 'studies']));
+    const studyIds = studies
+      .valueSeq()
+      .map((entry :Map) => entry.getIn([STUDY_ID, 0]))
+      .map((studyId :string) => `${PARTICIPANTS_PREFIX}${studyId}`)
+      .toJS();
+
+    const response = yield call(getEntitySetIdsWorker, getEntitySetIds(studyIds));
+    if (response.error) throw response.error;
+
+    yield put(getParticipantsEntitySetsIds.success(action.id, response.data));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.id, error);
+  }
+  finally {
+    yield put(getParticipantsEntitySetsIds.finally(action.id));
+  }
+  return workerResponse;
+}
 
 export {
   getEntityDataModelTypesWatcher,
   getEntityDataModelTypesWorker,
   getAllEntitySetIdsWorker,
-  getAllEntitySetIdsWatcher
+  getAllEntitySetIdsWatcher,
+  getParticipantsEntitySetsIdsWorker
 };

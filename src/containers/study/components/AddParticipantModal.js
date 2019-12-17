@@ -2,11 +2,12 @@
 
 import React, { useRef } from 'react';
 
+import styled from 'styled-components';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
-import type { RequestState } from 'redux-reqseq';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
+
 import AddParticipantForm from './AddParticipantForm';
 
 import { ADD_PARTICIPANT } from '../StudyActions';
@@ -17,7 +18,7 @@ type Props = {
   };
   isVisible :boolean;
   onCloseModal :() => void;
-  studyId :string; // needs to be UUID?
+  study :string; // needs to be UUID?
 };
 
 const ModalBodyWrapper = styled.div`
@@ -27,7 +28,7 @@ const ModalBodyWrapper = styled.div`
 const AddParticipantModal = (props :Props) => {
   const {
     isVisible,
-    studyId,
+    study,
     onCloseModal,
     requestStates
   } = props;
@@ -37,7 +38,7 @@ const AddParticipantModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <AddParticipantForm ref={formRef} studyId={studyId} />
+        <AddParticipantForm ref={formRef} study={study} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (

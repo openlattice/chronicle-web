@@ -14,8 +14,10 @@ import type { SequenceAction } from 'redux-reqseq';
 import {
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
+  GET_PARTICIPANTS_ENTITY_SET_IDS,
   getAllEntitySetIds,
   getEntityDataModelTypes,
+  getParticipantsEntitySetsIds
 } from './EDMActions';
 
 import Logger from '../../utils/Logger';
@@ -31,6 +33,9 @@ const {
 const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_EDM_TYPES]: {
     requestState: RequestStates.STANDBY,
+  },
+  [GET_PARTICIPANTS_ENTITY_SET_IDS]: {
+    requestState: RequestStates.STANDBY
   },
   entitySetIds: Map(),
   entityTypes: List(),
@@ -138,9 +143,23 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
       return getAllEntitySetIds.reducer(state, action, {
         REQUEST: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.set('entitySetIds', fromJS(seqAction.value))
+        SUCCESS: () => state
+          .set('entitySetIds', fromJS(seqAction.value))
+          .setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.SUCCESS)
       });
     }
+
+    case getParticipantsEntitySetsIds.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getParticipantsEntitySetsIds.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.SUCCESS)
+          .set('participantEntitySetIds', fromJS(seqAction.value))
+      });
+    }
+
     default:
       return state;
   }

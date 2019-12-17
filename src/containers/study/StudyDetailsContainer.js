@@ -2,29 +2,23 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 
 import styled from 'styled-components';
-import { Map, List } from 'immutable';
-import { Colors, Spinner } from 'lattice-ui-kit';
-import { connect } from 'react-redux';
+import { Map } from 'immutable';
+import { Colors } from 'lattice-ui-kit';
+import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import { RequestStates } from 'redux-reqseq';
 import type { Match } from 'react-router';
-import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import EditableDetail from './components/EditableDetail';
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
-import {
-  GET_STUDY_DETAILS,
-  getStudyDetails
-} from './StudyActions';
 
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { goToRoot } from '../../core/router/RoutingActions';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
@@ -74,75 +68,44 @@ const StudyNameWrapper = styled.div`
 
 type Props = {
   match :Match;
-  actions:{
-    getStudyDetails :RequestSequence;
-  };
-  requestStates:{
-    GET_STUDY_DETAILS :RequestState;
-  };
-  studyDetails :Map<*, *>;
-  studies :List
 };
 
-class StudyDetailsContainer extends Component<Props> {
-  componentDidMount() {
-    const { match } = this.props;
-    const studyId = match.params.id;
-    const { actions } = this.props;
-    // only make this call only if there is no pending request
-    actions.getStudyDetails(studyId);
+const StudyDetailsContainer = (props :Props) => {
+  const {
+    match,
+  } = props;
+
+  const dispatch = useDispatch();
+  const studies = useSelector((state :Map) => state.getIn(['studies', 'studies']));
+  const studyUUID = match.params.id;
+
+  const study = studies.get(studyUUID);
+  if (!study) {
+    dispatch(goToRoot());
   }
 
-  render() {
-    const { match, requestStates, studyDetails } = this.props;
-    const studyUUID = match.params.id;
+  return (
+    <>
+      <StudyNameWrapper>
+        <EditableDetail propertyFqn={STUDY_NAME} value={study.getIn([STUDY_NAME, 0])} />
+      </StudyNameWrapper>
+      <Tabs>
+        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
+          Study Details
+        </TabLink>
 
-    if (!studyUUID) {
-      return null;
-    }
+        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
+          Participants
+        </TabLink>
+      </Tabs>
+      <Switch>
+        <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants study={study} />} />
+        <Route path={Routes.STUDY} render={() => <StudyDetails study={study} />} />
+      </Switch>
+    </>
+  );
 
-    if (requestStates[GET_STUDY_DETAILS] === RequestStates.PENDING && studyDetails !== null) {
-      return (
-        <Spinner size="2x" />
-      );
-    }
-
-    return (
-      <>
-        <StudyNameWrapper>
-          <EditableDetail propertyFqn={STUDY_NAME} value={studyDetails.getIn([STUDY_NAME, 0])} />
-        </StudyNameWrapper>
-        <Tabs>
-          <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
-            Study Details
-          </TabLink>
-
-          <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
-            Participants
-          </TabLink>
-        </Tabs>
-        <Switch>
-          <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants studyId={studyUUID} />} />
-          <Route path={Routes.STUDY} render={() => <StudyDetails studyDetails={studyDetails} />} />
-        </Switch>
-      </>
-    );
-  }
-}
-
-const mapStateToProps = (state) => ({
-  requestStates: {
-    [GET_STUDY_DETAILS]: state.getIn(['study', GET_STUDY_DETAILS, 'requestState']),
-  },
-  studyDetails: state.getIn(['study', 'selectedStudy']),
-  studies: state.getIn(['studies', 'studies'])
-});
-
-const mapDispatchToProps = (dispatch :() => void) => ({
-  actions: bindActionCreators({
-    getStudyDetails,
-  }, dispatch)
-});
+};
 
 // $FlowFixMe
-export default connect(mapStateToProps, mapDispatchToProps)(StudyDetailsContainer);
+export default StudyDetailsContainer;

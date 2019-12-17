@@ -5,7 +5,7 @@
 import React, { Component } from 'react';
 
 import styled from 'styled-components';
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
   Banner,
@@ -64,7 +64,7 @@ type Props = {
     CREATE_STUDY :RequestState;
     GET_STUDIES :RequestState;
   };
-  studies :List;
+  studies :Map;
 };
 
 type State = {
@@ -131,7 +131,7 @@ class StudiesContainer extends Component<Props, State> {
             : (
               <CardGrid>
                 {
-                  studies.map((study) => (
+                  studies.valueSeq().map((study) => (
                     <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
                   ))
                 }
@@ -151,7 +151,7 @@ const mapStateToProps = (state :Map) => ({
     [CREATE_STUDY]: state.getIn(['study', CREATE_STUDY, 'requestState']),
 
   },
-  studies: state.getIn(['studies', 'studies'], List())
+  studies: state.getIn(['studies', 'studies'])
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({

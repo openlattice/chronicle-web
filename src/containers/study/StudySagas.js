@@ -5,14 +5,11 @@
 import {
   call,
   put,
-  select,
   takeEvery
 } from '@redux-saga/core/effects';
 import { getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
-  DataApiActions,
-  DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas
 } from 'lattice-sagas';
@@ -21,10 +18,8 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   CREATE_STUDY,
-  GET_STUDY_DETAILS,
   createParticipantEntitySet,
   createStudy,
-  getStudyDetails
 } from './StudyActions';
 
 import Logger from '../../utils/Logger';
@@ -43,8 +38,6 @@ const { STUDY_ID, STUDY_NAME, STUDY_EMAIL } = PROPERTY_TYPE_FQNS;
 const { PERSON } = ENTITY_TYPE_FQNS;
 
 const { getEntityTypeId } = EntityDataModelApi;
-const { getEntityData } = DataApiActions;
-const { getEntityDataWorker } = DataApiSagas;
 const { createEntitySets } = EntitySetsApiActions;
 const { createEntitySetsWorker } = EntitySetsApiSagas;
 
@@ -79,6 +72,7 @@ function* createParticipantEntitySetWorker(action :SequenceAction) :Generator<*,
     }
     const entitySetIdMap = response.data;
     const entitySetId = entitySetIdMap[entitySet.name];
+    console.log(entitySetId);
     yield put(createParticipantEntitySet.success(action.id, { studyId, entitySetId }));
 
   }
@@ -88,29 +82,6 @@ function* createParticipantEntitySetWorker(action :SequenceAction) :Generator<*,
   return workerResponse;
 }
 
-
-function* getStudyDetailsWorker(action :SequenceAction) :Generator<*, *, *> {
-  try {
-    yield put(getStudyDetails.request(action.id));
-
-    const entitySetId = yield select(
-      (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
-    );
-    const entityKeyId = action.value;
-
-    const response = yield call(getEntityDataWorker, getEntityData({ entitySetId, entityKeyId }));
-    if (response.error) throw response.error;
-
-    yield put(getStudyDetails.success(action.id, response.data));
-  }
-  catch (error) {
-    LOG.error(action.type, error);
-    yield put(getStudyDetails.failure(action.id, error));
-  }
-  finally {
-    yield put(getStudyDetails.finally(action.id));
-  }
-}
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   const { id, value } = action;
   const { newFormData } = value;
@@ -142,12 +113,7 @@ function* createStudyWatcher() :Generator<*, *, *> {
   yield takeEvery(CREATE_STUDY, createStudyWorker);
 }
 
-function* getStudyDetailsWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_STUDY_DETAILS, getStudyDetailsWorker);
-}
 
 export {
   createStudyWatcher,
-  getStudyDetailsWatcher,
-  getStudyDetailsWorker,
 };

@@ -70,10 +70,10 @@ const DetailWrapper = styled.div`
 
 
 type Props = {
-  studyDetails :Map
+  study :Map
 }
 
-const StudyDetails = ({ studyDetails } :Props) => {
+const StudyDetails = ({ study } :Props) => {
   const renderAboutCard = () => (
     <Card>
       <CardSegment vertical noBleed>
@@ -88,12 +88,12 @@ const StudyDetails = ({ studyDetails } :Props) => {
 
         <DetailWrapper>
           <h4> Description </h4>
-          <EditableDetail propertyFqn={STUDY_DESCRIPTION} value={studyDetails.getIn([STUDY_DESCRIPTION, 0])} />
+          <EditableDetail propertyFqn={STUDY_DESCRIPTION} value={study.getIn([STUDY_DESCRIPTION, 0])} />
         </DetailWrapper>
 
         <DetailWrapper>
           <h4> Version </h4>
-          <EditableDetail propertyFqn={STUDY_VERSION} value={studyDetails.getIn([STUDY_VERSION, 0])} />
+          <EditableDetail propertyFqn={STUDY_VERSION} value={study.getIn([STUDY_VERSION, 0])} />
         </DetailWrapper>
       </CardSegment>
     </Card>
@@ -107,11 +107,11 @@ const StudyDetails = ({ studyDetails } :Props) => {
         </CardTitle>
         <DetailWrapper>
           <h4> Email </h4>
-          <EditableDetail propertyFqn={STUDY_EMAIL} value={studyDetails.getIn([STUDY_EMAIL, 0])} />
+          <EditableDetail propertyFqn={STUDY_EMAIL} value={study.getIn([STUDY_EMAIL, 0])} />
         </DetailWrapper>
         <DetailWrapper>
           <h4> Group </h4>
-          <EditableDetail propertyFqn={STUDY_GROUP} value={studyDetails.getIn([STUDY_GROUP, 0])} />
+          <EditableDetail propertyFqn={STUDY_GROUP} value={study.getIn([STUDY_GROUP, 0])} />
         </DetailWrapper>
       </CardSegment>
     </Card>

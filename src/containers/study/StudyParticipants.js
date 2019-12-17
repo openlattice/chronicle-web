@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import {
   Banner,
   Button,
@@ -26,15 +26,14 @@ const AddParticipantsButton = styled(Button)`
   align-self: flex-end;
 `;
 type Props = {
-  studyId :string,
-  // participants :List;
+  study :Map,
 };
 
 const MissingParticipants = () => (
   <Banner isOpen> No participants found! </Banner>
 );
 
-const StudyParticipants = ({ studyId } :Props) => {
+const StudyParticipants = ({ study } :Props) => {
   const [isModalOpen, setModalOpen] = useState(false);
   useEffect(() => {
     // here we dispatch an action to fetch the study Participants
@@ -59,7 +58,7 @@ const StudyParticipants = ({ studyId } :Props) => {
         <AddParticipantModal
             isVisible={isModalOpen}
             onCloseModal={() => setModalOpen(false)}
-            studyId={studyId} />
+            study={study} />
       </Card>
     </Container>
   );

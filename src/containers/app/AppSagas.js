@@ -10,16 +10,25 @@ import {
 } from '@redux-saga/core/effects';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../utils/Logger';
 import { INITIALIZE_APPLICATION, initializeApplication } from './AppActions';
+
+import Logger from '../../utils/Logger';
 import {
   getAllEntitySetIds,
   getEntityDataModelTypes,
+  getParticipantsEntitySetsIds,
 } from '../../core/edm/EDMActions';
 import {
   getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
+  getParticipantsEntitySetsIdsWorker
 } from '../../core/edm/EDMSagas';
+import {
+  getStudies,
+} from '../studies/StudiesActions';
+import {
+  getStudiesWorker,
+} from '../studies/StudiesSagas';
 
 const LOG = new Logger('AppSagas');
 
@@ -38,7 +47,16 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
       call(getAllEntitySetIdsWorker, getAllEntitySetIds()),
       // ...any other required requests
     ]);
-    if (responses[0].error) throw responses[0].error;
+    responses.forEach((res) => {
+      if (res.error) throw res.error;
+    });
+    // get all studies only after getting entitySetIds
+    let response = yield call(getStudiesWorker, getStudies());
+    if (response.error) throw response.error;
+
+    response = yield call(getParticipantsEntitySetsIdsWorker, getParticipantsEntitySetsIds());
+    if (response.error) throw response.error;
+
     yield put(initializeApplication.success(action.id));
   }
   catch (error) {
