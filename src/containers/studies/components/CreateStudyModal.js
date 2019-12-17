@@ -7,13 +7,11 @@ import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { CREATE_STUDY } from '../StudiesActions';
 
 type Props = {
@@ -85,10 +83,5 @@ const mapStateToProps = (state :Map) => ({
   },
 });
 
-const mapDispatchToProps = (dispatch :Function) => ({
-  actions: bindActionCreators({
-    resetRequestState
-  }, dispatch)
-});
 // $FlowFixMe
-export default connect(mapStateToProps, mapDispatchToProps)(CreateStudyModal);
+export default connect(mapStateToProps)(CreateStudyModal);
