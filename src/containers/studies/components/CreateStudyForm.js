@@ -17,7 +17,11 @@ import { createStudy } from '../../study/StudyActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
-const { processEntityData, getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
+const {
+  processEntityData,
+  getEntityAddressKey,
+  getPageSectionKey
+} = DataProcessingUtils;
 
 type Props = {
 };
@@ -45,9 +49,9 @@ const CreateStudyForm = (props :Props, ref) => {
 
   return (
     <Form
+        hideSubmit
         noPadding
         onSubmit={handleSubmit}
-        hideSubmit
         ref={ref}
         schema={dataSchema}
         uiSchema={uiSchema} />

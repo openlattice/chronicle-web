@@ -5,9 +5,7 @@ import React, { useCallback, useRef } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import {
-  ActionModal
-} from 'lattice-ui-kit';
+import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';

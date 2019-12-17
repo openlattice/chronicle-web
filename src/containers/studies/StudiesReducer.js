@@ -15,7 +15,7 @@ import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDIES]: { requestState: RequestStates.STANDBY },
-  studies: List(),
+  studies: Map(),
 });
 
 export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {

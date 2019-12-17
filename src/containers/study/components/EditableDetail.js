@@ -1,34 +1,42 @@
 // @flow
 import React, { useState } from 'react';
-
-import { Models } from 'lattice';
+import styled from 'styled-components';
+import type { FQN } from 'lattice';
 import { EditButton } from 'lattice-ui-kit';
 
 import EditStudyDetailForm from './EditStudyDetailForm';
 
-const { FullyQualifiedName } = Models;
-
-
 type Props = {
-  propertyFqn :FullyQualifiedName;
+  propertyFqn :FQN;
   value :string;
 };
 
+const Container = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
+const EditButtonWrapper = styled(EditButton)`
+  margin-left: 10px;
+`;
+
 const EditableDetail = (props :Props) => {
+  const { propertyFqn, value } = props;
   const [editMode, toggleEditMode] = useState(false);
-  const { value, propertyFqn } = props;
 
   if (editMode) {
     return (
-      <EditStudyDetailForm handleCancelEdit={() => toggleEditMode(false)} propertyFqn={propertyFqn} />
+      <EditStudyDetailForm
+          handleCancelEdit={() => toggleEditMode(false)}
+          propertyFqn={propertyFqn} />
     );
   }
 
   return (
-    <p style={{ margin: '5px 15px 0 0', wordBreak: 'break-all' }}>
-      <EditButton style={{ float: 'right' }} onClick={() => toggleEditMode(!editMode)} />
+    <Container>
       { value }
-    </p>
+      <EditButtonWrapper onClick={() => toggleEditMode(!editMode)} />
+    </Container>
   );
 };
 

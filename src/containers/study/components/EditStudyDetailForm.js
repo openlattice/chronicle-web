@@ -3,28 +3,29 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Models } from 'lattice';
 import { Form } from 'lattice-fabricate';
 import { Colors } from 'lattice-ui-kit';
+import type { FQN } from 'lattice';
 
 import getFormSchema from './EditStudyDetailSchema';
 
-const { FullyQualifiedName } = Models;
 const { NEUTRALS } = Colors;
 
 type Props = {
   handleCancelEdit :() => void,
-  propertyFqn :FullyQualifiedName
+  propertyFqn :FQN
 }
+
 const FormWrapper = styled(Form)`
   background-color: white;
   border: solid 1px ${NEUTRALS[4]};
 `;
+
 const EditStudyDetailForm = (props :Props) => {
 
-  const { propertyFqn, handleCancelEdit } = props;
+  const { handleCancelEdit, propertyFqn } = props;
   // $FlowFixMe
-  const { uiSchema, dataSchema } = getFormSchema(propertyFqn);
+  const { dataSchema, uiSchema } = getFormSchema(propertyFqn);
   const handleSubmit = () => {};
 
   return (

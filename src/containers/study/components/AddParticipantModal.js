@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 
 import styled from 'styled-components';
+import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -13,12 +14,12 @@ import AddParticipantForm from './AddParticipantForm';
 import { ADD_PARTICIPANT } from '../StudyActions';
 
 type Props = {
+  isVisible :boolean;
+  onCloseModal :() => void;
   requestStates:{
     ADD_PARTICIPANT :RequestState;
   };
-  isVisible :boolean;
-  onCloseModal :() => void;
-  study :string; // needs to be UUID?
+  study :Map;
 };
 
 const ModalBodyWrapper = styled.div`
@@ -44,6 +45,11 @@ const AddParticipantModal = (props :Props) => {
     [RequestStates.FAILURE]: (
       <ModalBodyWrapper>
         <span> Failed to add participant. Please try again. </span>
+      </ModalBodyWrapper>
+    ),
+    [RequestStates.SUCCESS]: (
+      <ModalBodyWrapper>
+        <span> Successfully added participant.</span>
       </ModalBodyWrapper>
     )
   };

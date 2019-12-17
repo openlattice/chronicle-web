@@ -19,48 +19,50 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 const {
   STUDY_DESCRIPTION,
   STUDY_EMAIL,
+  STUDY_ID,
   STUDY_GROUP,
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
 const { NEUTRALS } = Colors;
 const CardGrid = styled.div`
-  margin-top: 50px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   grid-gap: 30px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 50px;
 
   ${Card}{
+    cursor: default;
     display: flex;
     flex-direction: column;
     min-width: 0;
-    cursor: default;
   }
 `;
 
 const CardTitle = styled.h4`
   color: ${NEUTRALS[0]};
   font-size: 18px;
-  margin: 0;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  margin: 0;
   text-transform: uppercase;
 `;
 
 const DetailWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
   font-size: 15px;
   line-height: 1.7;
+  margin-bottom: 10px;
+  margin-top: 10px;
   >h4 {
+    color: ${NEUTRALS[1]};
     font-size: 14px;
     font-weight: 400;
-    margin: 0;
-    color: ${NEUTRALS[1]};
-    margin-right: 10px;
-    text-transform: uppercase;
     letter-spacing: 1.8px;
+    margin-right: 10px;
+    margin: 0;
+    text-transform: uppercase;
   }
 
   >p {
@@ -83,7 +85,11 @@ const StudyDetails = ({ study } :Props) => {
 
         <DetailWrapper>
           <h4> UUID </h4>
-          <p> 4b8fe7f9-c43d-44fe-80ba-51926ebc6531 </p>
+          <p>
+            {
+              study.getIn([STUDY_ID, 0])
+            }
+          </p>
         </DetailWrapper>
 
         <DetailWrapper>

@@ -1,12 +1,12 @@
 // @flow
+
 import { DataProcessingUtils } from 'lattice-fabricate';
-import { Models } from 'lattice';
+import type { FQN } from 'lattice';
+
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
-// const { STUDY_DESCRIPTION } = PROPERTY_TYPE_FQNS;
-const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
-const { FullyQualifiedName } = Models;
+const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const {
   STUDY_DESCRIPTION,
@@ -15,16 +15,16 @@ const {
   STUDY_NAME,
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
+
 const entityTitleMap = {
   [STUDY_DESCRIPTION.toString()]: 'Edit Study Description',
-  [STUDY_NAME.toString()]: 'Edit Study Name',
+  [STUDY_EMAIL.toString()]: 'Edit Email',
   [STUDY_GROUP.toString()]: 'Edit Study Group',
+  [STUDY_NAME.toString()]: 'Edit Study Name',
   [STUDY_VERSION.toString()]: 'Edit Version',
-  [STUDY_EMAIL.toString()]: 'Edit Email'
 };
 
-
-const getFormSchema = (propertyTypeFqn :FullyQualifiedName) => {
+const getFormSchema = (propertyTypeFqn :FQN) => {
 
   const dataSchema = {
     properties: {
@@ -52,6 +52,7 @@ const getFormSchema = (propertyTypeFqn :FullyQualifiedName) => {
       }
     }
   };
+
   return { dataSchema, uiSchema };
 };
 

@@ -58,12 +58,12 @@ const TabLink = styled(NavLink)`
 `;
 
 const StudyNameWrapper = styled.div`
+  align-items: flex-start;
+  display: flex;
   font-size: 28px;
   font-weight: normal;
   margin: 0 10px 0 0;
   padding: 0;
-  display: flex;
-  align-items: flex-start;
 `;
 
 type Props = {

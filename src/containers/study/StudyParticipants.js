@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { List, Map } from 'immutable';
@@ -12,9 +12,12 @@ import {
   Card,
   CardSegment
 } from 'lattice-ui-kit';
-
+import { useSelector } from 'react-redux';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './components/ParticipantsTable';
+
+const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const Container = styled.div`
   margin-top: 50px;
@@ -25,6 +28,7 @@ const Container = styled.div`
 const AddParticipantsButton = styled(Button)`
   align-self: flex-end;
 `;
+
 type Props = {
   study :Map,
 };
@@ -35,12 +39,9 @@ const MissingParticipants = () => (
 
 const StudyParticipants = ({ study } :Props) => {
   const [isModalOpen, setModalOpen] = useState(false);
-  useEffect(() => {
-    // here we dispatch an action to fetch the study Participants
-  });
 
-  const participants = List(['sample id', 'king lafonce']);
-  participants.set('here is a sample id');
+  const studyId = study.getIn([STUDY_ID, 0]);
+  const participants = useSelector((state) => state.getIn(['study', 'participants', studyId], List()));
 
   return (
     <Container>
