@@ -14,10 +14,15 @@ const getAllEntitySetIds :RequestSequence = newRequestSequence(GET_ALL_ENTITY_SE
 const GET_PARTICIPANTS_ENTITY_SET_IDS :'GET_PARTICIPANTS_ENTITY_SET_IDS' = 'GET_PARTICIPANTS_ENTITY_SET_IDS';
 const getParticipantsEntitySetsIds :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENTITY_SET_IDS);
 
+const CREATE_PARTICIPANTS_ENTITY_SET :'CREATE_PARTICIPANTS_ENTITY_SET' = 'CREATE_PARTICIPANTS_ENTITY_SET';
+const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_PARTICIPANTS_ENTITY_SET);
+
 export {
-  GET_PARTICIPANTS_ENTITY_SET_IDS,
+  CREATE_PARTICIPANTS_ENTITY_SET,
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
+  GET_PARTICIPANTS_ENTITY_SET_IDS,
+  createParticipantsEntitySet,
   getAllEntitySetIds,
   getEntityDataModelTypes,
   getParticipantsEntitySetsIds

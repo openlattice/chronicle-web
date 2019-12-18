@@ -33,17 +33,17 @@ const CreateStudyForm = (props :Props, ref) => {
   const dispatch = useDispatch();
 
   const handleSubmit = useCallback((payload :any) => {
-    let { formData: newFormData } = payload;
-    newFormData = setIn(newFormData,
+    let { formData: newStudyData } = payload;
+    newStudyData = setIn(newStudyData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], uuid());
 
-    const entityData = processEntityData(newFormData, allEntitySetIds, propertyTypeIds);
+    const entityData = processEntityData(newStudyData, allEntitySetIds, propertyTypeIds);
     const assocationEntityData = {};
 
     dispatch(createStudy({
       entityData,
       assocationEntityData,
-      newFormData
+      newStudyData
     }));
   });
 

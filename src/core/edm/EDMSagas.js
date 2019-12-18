@@ -9,8 +9,9 @@ import {
   select,
   takeEvery,
 } from '@redux-saga/core/effects';
-// import { EntitySetsApi } from 'lattice';
-import { Map } from 'immutable';
+import { Map, getIn } from 'immutable';
+import { EntityDataModelApi } from 'lattice';
+import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   EntityDataModelApiActions,
   EntityDataModelApiSagas,
@@ -20,30 +21,31 @@ import {
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CREATE_PARTICIPANTS_ENTITY_SET,
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
+  createParticipantsEntitySet,
   getAllEntitySetIds,
   getEntityDataModelTypes,
   getParticipantsEntitySetsIds
 } from './EDMActions';
-import {
-  ENTITY_SET_NAMES_LIST,
-  PARTICIPANTS_PREFIX
-} from './constants/EntitySetNames';
-import {
-  PROPERTY_TYPE_FQNS
-} from './constants/FullyQualifiedNames';
+import { ENTITY_SET_NAMES, ENTITY_SET_NAMES_LIST, PARTICIPANTS_PREFIX } from './constants/EntitySetNames';
+import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from './constants/FullyQualifiedNames';
 
 import Logger from '../../utils/Logger';
 import { isDefined } from '../../utils/LangUtils';
 
-const { STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
+const { STUDY_ID, STUDY_NAME, STUDY_EMAIL } = PROPERTY_TYPE_FQNS;
+const { PERSON } = ENTITY_TYPE_FQNS;
+
 const LOG = new Logger('EDMSagas');
-const { getEntitySetIds } = EntitySetsApiActions;
-const { getEntitySetIdsWorker } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetIds } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdsWorker } = EntitySetsApiSagas;
 const { getAllEntityTypes, getAllPropertyTypes } = EntityDataModelApiActions;
 const { getAllEntityTypesWorker, getAllPropertyTypesWorker } = EntityDataModelApiSagas;
-
+const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
+const { getEntityTypeId } = EntityDataModelApi;
 /*
  *
  * EDMActions.getEntityDataModelTypes()
@@ -130,20 +132,22 @@ function* getParticipantsEntitySetsIdsWorker(action :SequenceAction) :Generator<
     const studyIds = studies
       .valueSeq()
       .map((entry :Map) => entry.getIn([STUDY_ID, 0]))
-      .map((studyId :string) => `${PARTICIPANTS_PREFIX}${studyId}`)
-      .toJS();
+      .map((studyId :string) => `${PARTICIPANTS_PREFIX}${studyId}`);
 
     let responseData = {};
-    if (studyIds.length === 0) {
-      const response = yield call(getEntitySetIdsWorker, getEntitySetIds(studyIds));
+
+    if (!studyIds.isEmpty()) {
+      const response = yield call(getEntitySetIdsWorker, getEntitySetIds(studyIds.toJS()));
       if (response.error) throw response.error;
       responseData = response.data;
     }
+
     yield put(getParticipantsEntitySetsIds.success(action.id, responseData));
   }
   catch (error) {
     workerResponse.error = error;
-    LOG.error(action.id, error);
+    LOG.error(action.type, error);
+    getParticipantsEntitySetsIds.failure(action.id, error);
   }
   finally {
     yield put(getParticipantsEntitySetsIds.finally(action.id));
@@ -151,10 +155,59 @@ function* getParticipantsEntitySetsIdsWorker(action :SequenceAction) :Generator<
   return workerResponse;
 }
 
+function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(createParticipantsEntitySet.request(action.id));
+    const newStudyData = action.value;
+    const studyName = getIn(newStudyData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]);
+    const studyId = getIn(newStudyData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)]);
+    const email = getIn(newStudyData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]);
+
+    const entityTypeId = yield call(getEntityTypeId, PERSON);
+    const entitySet = {
+      entityTypeId,
+      name: `${PARTICIPANTS_PREFIX}${studyId}`,
+      title: `${studyName} Participants`,
+      description: `Participants of study with name ${studyName} and id ${studyId}`,
+      external: false,
+      contacts: [email]
+    };
+
+    const response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
+    if (response.error) throw response.error;
+
+    const responseObj = {
+      entitySetName: entitySet.name,
+      entitySetId: response.data[entitySet.name]
+    };
+    yield put(createParticipantsEntitySet.success(action.id, responseObj));
+
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(error.type, error);
+    yield put(createParticipantsEntitySet.failure(action.id, error));
+  }
+  finally {
+    yield put(createParticipantsEntitySet.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* createParticipantsEntitySetWatcher() :Generator<*, *, *> {
+  yield takeEvery(CREATE_PARTICIPANTS_ENTITY_SET, createParticipantsEntitySetWorker);
+}
+
 export {
+  createParticipantsEntitySetWatcher,
+  createParticipantsEntitySetWorker,
+  getAllEntitySetIdsWatcher,
+  getAllEntitySetIdsWorker,
   getEntityDataModelTypesWatcher,
   getEntityDataModelTypesWorker,
-  getAllEntitySetIdsWorker,
-  getAllEntitySetIdsWatcher,
   getParticipantsEntitySetsIdsWorker
 };

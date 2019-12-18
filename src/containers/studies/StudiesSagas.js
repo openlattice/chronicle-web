@@ -8,15 +8,8 @@ import {
   select,
   takeEvery
 } from '@redux-saga/core/effects';
-import { getIn } from 'immutable';
-import { Constants, EntityDataModelApi } from 'lattice';
-import { DataProcessingUtils } from 'lattice-fabricate';
-import {
-  DataApiActions,
-  DataApiSagas,
-  EntitySetsApiActions,
-  EntitySetsApiSagas
-} from 'lattice-sagas';
+import { Constants } from 'lattice';
+import { DataApiActions, DataApiSagas } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -29,28 +22,24 @@ import {
 } from './StudiesActions';
 
 import Logger from '../../utils/Logger';
-import { ENTITY_SET_NAMES, PARTICIPANTS_PREFIX } from '../../core/edm/constants/EntitySetNames';
-import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { createParticipantsEntitySet } from '../../core/edm/EDMActions';
+import { createParticipantsEntitySetWorker } from '../../core/edm/EDMSagas';
+import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
-const { getEntityTypeId } = EntityDataModelApi;
-const { createEntitySets } = EntitySetsApiActions;
-const { createEntitySetsWorker } = EntitySetsApiSagas;
-const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
 const { getEntityDataWorker, getEntitySetDataWorker } = DataApiSagas;
 const { getEntityData, getEntitySetData } = DataApiActions;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
-const { STUDY_ID, STUDY_NAME, STUDY_EMAIL } = PROPERTY_TYPE_FQNS;
-const { PERSON } = ENTITY_TYPE_FQNS;
 
 const LOG = new Logger('StudiesSagas');
 
 function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
-  const { value, id } = action;
   try {
+    const { value, id } = action;
+
     yield put(addStudyParticipant.request(id));
 
     const response = yield call(submitDataGraphWorker, submitDataGraph(value));
@@ -60,10 +49,10 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(addStudyParticipant.failure(id, error));
+    yield put(addStudyParticipant.failure(action.id, error));
   }
   finally {
-    yield put(addStudyParticipant.finally(id));
+    yield put(addStudyParticipant.finally(action.id));
   }
 }
 
@@ -102,44 +91,18 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   return workerResponse;
 }
 
-function* createParticipantEntitySet(formData) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    const studyName = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]);
-    const studyId = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)]);
-    const email = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]);
-
-    const entityTypeId = yield call(getEntityTypeId, PERSON);
-    const entitySet = {
-      entityTypeId,
-      name: `${PARTICIPANTS_PREFIX}${studyId}`,
-      title: `${studyName} Participants`,
-      description: `Participants of study with name ${studyName} and id ${studyId}`,
-      external: false,
-      contacts: [email]
-    };
-
-    // the only property type is PERSON_ID
-    const response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
-    if (response.error) {
-      workerResponse.error = response.error;
-    }
-  }
-  catch (error) {
-    workerResponse.error = error;
-  }
-  return workerResponse;
-}
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
-  const { id, value } = action;
-  const { newFormData } = value;
-  let response = {};
 
-  response = yield call(createParticipantEntitySet, newFormData);
-  // do not create a new study if createParticipantEntitySet fails
-  if (response.error) throw response.error;
+  // do not create a new study if createParticipantsEntitySet fails
   try {
+    const { id, value } = action;
+    const { newStudyData } = value;
+    let response = {};
+
+    response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(newStudyData));
+    if (response.error) throw response.error;
+
     yield put(createStudy.request(id, value));
 
     response = yield call(submitDataGraphWorker, submitDataGraph(value));
@@ -164,10 +127,10 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(createStudy.failure(id, error));
+    yield put(createStudy.failure(action.id, error));
   }
   finally {
-    yield put(createStudy.finally(id));
+    yield put(createStudy.finally(action.id));
   }
 }
 
