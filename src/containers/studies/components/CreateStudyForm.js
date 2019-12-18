@@ -10,6 +10,7 @@ import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
+
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { createStudy } from '../StudiesActions';
@@ -17,9 +18,9 @@ import { createStudy } from '../StudiesActions';
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const {
-  processEntityData,
   getEntityAddressKey,
-  getPageSectionKey
+  getPageSectionKey,
+  processEntityData,
 } = DataProcessingUtils;
 
 const CreateStudyForm = (props, ref) => {
@@ -39,9 +40,9 @@ const CreateStudyForm = (props, ref) => {
     const associationEntityData = {};
 
     dispatch(createStudy({
-      newStudyData,
+      associationEntityData,
       entityData,
-      associationEntityData
+      newStudyData,
     }));
   };
 

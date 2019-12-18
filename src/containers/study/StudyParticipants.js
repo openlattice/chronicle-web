@@ -13,16 +13,18 @@ import {
   CardSegment
 } from 'lattice-ui-kit';
 import { useSelector } from 'react-redux';
-import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './components/ParticipantsTable';
+
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const Container = styled.div`
-  margin-top: 50px;
   display: flex;
   flex-direction: column;
+  margin-top: 50px;
 `;
 
 const AddParticipantsButton = styled(Button)`
