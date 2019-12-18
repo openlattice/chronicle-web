@@ -48,10 +48,10 @@ const AddParticipantForm = (props :Props, ref) => {
     ];
 
     const entityData = processEntityData(newFormData, entitySetIds, propertyTypeIds);
-    const assocationEntityData = processAssociationEntityData(fromJS(associations), entitySetIds, propertyTypeIds);
+    const associationEntityData = processAssociationEntityData(fromJS(associations), entitySetIds, propertyTypeIds);
 
     dispatch(
-      addStudyParticipant({ entityData, assocationEntityData })
+      addStudyParticipant({ entityData, associationEntityData })
     );
   };
 
