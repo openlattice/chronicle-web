@@ -1,27 +1,26 @@
 /*
  * @flow
  */
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { CREATE_STUDY, createStudy } from '../StudiesActions';
+import { CREATE_STUDY } from '../StudiesActions';
 
 type Props = {
+  actions :{
+    resetRequestState :RequestSequence
+  };
   handleOnCloseModal :() => void;
   isVisible :boolean;
-  actions:{
-    createStudy :RequestSequence
-  };
-  requestStates:{
+  requestStates :{
     CREATE_STUDY :RequestState
   };
 };
@@ -33,33 +32,34 @@ const ModalBodyWrapper = styled.div`
 const CreateStudyModal = (props :Props) => {
   const formRef = useRef();
 
-  const { isVisible, handleOnCloseModal, requestStates } = props;
+  const {
+    isVisible,
+    handleOnCloseModal,
+    requestStates
+  } = props;
 
-  const handleOnSubmit = useCallback(() => {
+  const handleOnSubmit = () => {
     if (formRef.current) {
       formRef.current.submit();
     }
-  });
+  };
 
-  const requestStateComponents = () => {
-    const components = {
-      [RequestStates.STANDBY]: (
-        <ModalBodyWrapper>
-          <CreateStudyForm ref={formRef} />
-        </ModalBodyWrapper>
-      ),
-      [RequestStates.FAILURE]: (
-        <ModalBodyWrapper>
-          <span> Failed to create a new study. Please try again. </span>
-        </ModalBodyWrapper>
-      ),
-      [RequestStates.SUCCESS]: (
-        <ModalBodyWrapper>
-          <span> Successfully created a new study. </span>
-        </ModalBodyWrapper>
-      )
-    };
-    return components;
+  const requestStateComponents = {
+    [RequestStates.STANDBY]: (
+      <ModalBodyWrapper>
+        <CreateStudyForm ref={formRef} />
+      </ModalBodyWrapper>
+    ),
+    [RequestStates.FAILURE]: (
+      <ModalBodyWrapper>
+        <span> Failed to create a new study. Please try again. </span>
+      </ModalBodyWrapper>
+    ),
+    [RequestStates.SUCCESS]: (
+      <ModalBodyWrapper>
+        <span> Successfully created a new study. </span>
+      </ModalBodyWrapper>
+    )
   };
 
   return (
@@ -67,7 +67,7 @@ const CreateStudyModal = (props :Props) => {
         isVisible={isVisible}
         onClose={handleOnCloseModal}
         requestState={requestStates[CREATE_STUDY]}
-        requestStateComponents={requestStateComponents()}
+        requestStateComponents={requestStateComponents}
         onClickPrimary={handleOnSubmit}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
@@ -83,10 +83,5 @@ const mapStateToProps = (state :Map) => ({
   },
 });
 
-const mapDispatchToProps = (dispatch :Function) => ({
-  actions: bindActionCreators({
-    createStudy,
-  }, dispatch)
-});
 // $FlowFixMe
-export default connect(mapStateToProps, mapDispatchToProps)(CreateStudyModal);
+export default connect(mapStateToProps)(CreateStudyModal);

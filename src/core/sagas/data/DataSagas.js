@@ -40,7 +40,7 @@ function* submitDataGraphWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(submitDataGraph.request(id, value));
 
     const dataGraph = (new DataGraphBuilder())
-      .setAssociations(value.assocationEntityData)
+      .setAssociations(value.associationEntityData)
       .setEntities(value.entityData)
       .build();
 

@@ -82,17 +82,18 @@ class StudiesContainer extends Component<Props, State> {
     const { actions } = this.props;
     actions.getStudies();
   }
+
   openCreateStudyModal = () => {
+    const { actions } = this.props;
+    // necessary after a successful or failed CREATE_STUDY action
+    actions.resetRequestState(CREATE_STUDY);
+
     this.setState({
       isCreateStudyModalVisible: true
     });
   }
+
   handleOnCloseModal = () => {
-    const { actions } = this.props;
-
-    // this ensures that the modal always renders CreateStudyForm when opened
-    actions.resetRequestState(CREATE_STUDY);
-
     this.setState({
       isCreateStudyModalVisible: false
     });
@@ -148,16 +149,15 @@ const mapStateToProps = (state :Map) => ({
   requestStates: {
     [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState']),
     [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
-
   },
   studies: state.getIn(['studies', 'studies'])
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
+    goToRoute: RoutingActions.goToRoute,
     getStudies,
     resetRequestState,
-    goToRoute: RoutingActions.goToRoute,
   }, dispatch)
 });
 

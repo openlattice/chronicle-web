@@ -2,7 +2,7 @@
  * @flow
  */
 
-import { List, Map, fromJS } from 'immutable';
+import { Map, fromJS, List } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -44,7 +44,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           .set('studies', fromJS(seqAction.value))
           .setIn([GET_STUDIES, 'requestState'], RequestStates.SUCCESS),
         FAILURE: () => state
-          .set('studies', List())
+          .set('studies', Map())
           .setIn([GET_STUDIES, 'requestState'], RequestStates.FAILURE),
       });
     }

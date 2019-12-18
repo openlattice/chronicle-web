@@ -120,8 +120,8 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) throw response.error;
 
     const responseObj = {
+      study: response.data,
       studyUUID: entityKeyId,
-      study: response.data
     };
     yield put(createStudy.success(id, responseObj));
   }

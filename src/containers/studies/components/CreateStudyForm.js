@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import uuid from 'uuid/v4';
 import { Map, setIn } from 'immutable';
@@ -10,7 +10,6 @@ import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
-
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { createStudy } from '../StudiesActions';
@@ -23,29 +22,28 @@ const {
   getPageSectionKey
 } = DataProcessingUtils;
 
-type Props = {
-};
-
-const CreateStudyForm = (props :Props, ref) => {
+const CreateStudyForm = (props, ref) => {
 
   const allEntitySetIds :Map = useSelector((store :Map) => store.getIn(['edm', 'entitySetIds']));
   const propertyTypeIds :Map = useSelector((store :Map) => store.getIn(['edm', 'propertyTypesFqnIdMap']));
   const dispatch = useDispatch();
 
-  const handleSubmit = useCallback((payload :any) => {
+  const handleSubmit = (payload :any) => {
     let { formData: newStudyData } = payload;
-    newStudyData = setIn(newStudyData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], uuid());
+    newStudyData = setIn(
+      newStudyData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], uuid()
+    );
 
     const entityData = processEntityData(newStudyData, allEntitySetIds, propertyTypeIds);
-    const assocationEntityData = {};
+    const associationEntityData = {};
 
     dispatch(createStudy({
+      newStudyData,
       entityData,
-      assocationEntityData,
-      newStudyData
+      associationEntityData
     }));
-  });
+  };
 
   return (
     <Form
@@ -58,6 +56,5 @@ const CreateStudyForm = (props :Props, ref) => {
   );
 };
 
-export default React.memo<Props, typeof Form>(
-  React.forwardRef(CreateStudyForm)
-);
+// $FlowFixMe
+export default React.forwardRef(CreateStudyForm);
