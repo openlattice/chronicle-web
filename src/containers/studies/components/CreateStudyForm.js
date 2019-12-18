@@ -18,10 +18,7 @@ const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { processEntityData, getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
 
-type Props = {
-};
-
-const CreateStudyForm = (props :Props, ref) => {
+const CreateStudyForm = (props, ref) => {
 
   const allEntitySetIds :Map = useSelector((store :Map) => store.getIn(['edm', 'entitySetIds']));
   const propertyTypeIds :Map = useSelector((store :Map) => store.getIn(['edm', 'propertyTypesFqnIdMap']));
@@ -29,15 +26,17 @@ const CreateStudyForm = (props :Props, ref) => {
 
   const handleSubmit = (payload :any) => {
     let { formData: newFormData } = payload;
-    newFormData = setIn(newFormData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], uuid());
+    newFormData = setIn(
+      newFormData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], uuid()
+    );
 
     const entityData = processEntityData(newFormData, allEntitySetIds, propertyTypeIds);
-    const assocationEntityData = {};
+    const associationEntityData = {};
 
     dispatch(createStudy({
       entityData,
-      assocationEntityData
+      associationEntityData
     }));
   };
 
@@ -52,6 +51,5 @@ const CreateStudyForm = (props :Props, ref) => {
   );
 };
 
-export default React.memo<Props, typeof Form>(
-  React.forwardRef(CreateStudyForm)
-);
+// $FlowFixMe
+export default React.forwardRef(CreateStudyForm);
