@@ -65,6 +65,5 @@ const AddParticipantForm = (props :Props, ref) => {
   );
 };
 
-export default React.memo<Props, typeof Form>(
-  React.forwardRef(AddParticipantForm)
-);
+// $FlowFixMe
+export default React.forwardRef(AddParticipantForm)
