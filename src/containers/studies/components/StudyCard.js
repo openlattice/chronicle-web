@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { faUsers } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
-import { Constants } from 'lattice';
 import {
   Card,
   CardHeader,
@@ -23,13 +22,8 @@ import * as Routes from '../../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { goToRoute } from '../../../core/router/RoutingActions';
 
-// import Logger from '../../../utils/Logger';
-// import { isValidUUID } from '../../../utils/ValidationUtils';
-
-const { OPENLATTICE_ID_FQN } = Constants;
-const { STUDY_DESCRIPTION, STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { STUDY_DESCRIPTION, STUDY_ID, STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
-// const LOG = new Logger('StudyLogger');
 
 const StudyName = styled.h2`
   font-size: 18px;
@@ -105,7 +99,7 @@ class StudyCard extends Component<Props> {
     const { study } = this.props;
     const numParticipants = 3; // TODO: change this to the actual number of participants
     return (
-      <Card onClick={this.handleCardClick} data-study-id={study.getIn([OPENLATTICE_ID_FQN, 0])}>
+      <Card onClick={this.handleCardClick} data-study-id={study.getIn([STUDY_ID, 0])}>
         <CardHeader>
           <StudySummary>
             <StudyName>

@@ -2,8 +2,20 @@
  * @flow
  */
 
+
 import type { Match } from 'react-router';
 
-const getIdFromMatch = (match :Match) => match.params.id;
+const getIdFromMatch = (match :Match) :?string => {
 
-export default getIdFromMatch;
+  const {
+    params: {
+      id = null,
+    } = {},
+  } = match;
+
+  return id;
+};
+
+export {
+  getIdFromMatch,
+};

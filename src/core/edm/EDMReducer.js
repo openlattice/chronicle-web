@@ -13,14 +13,10 @@ import type {
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
-  CREATE_PARTICIPANTS_ENTITY_SET,
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
-  GET_PARTICIPANTS_ENTITY_SET_IDS,
-  createParticipantsEntitySet,
   getAllEntitySetIds,
   getEntityDataModelTypes,
-  getParticipantsEntitySetsIds
 } from './EDMActions';
 
 import Logger from '../../utils/Logger';
@@ -34,16 +30,9 @@ const {
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [CREATE_PARTICIPANTS_ENTITY_SET]: {
-    requestState: RequestStates.STANDBY
-  },
   [GET_EDM_TYPES]: {
     requestState: RequestStates.STANDBY,
   },
-  [GET_PARTICIPANTS_ENTITY_SET_IDS]: {
-    requestState: RequestStates.STANDBY
-  },
-
   entitySetIds: Map(),
   entityTypes: List(),
   entityTypesIndexMap: Map(),
@@ -154,33 +143,6 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
         SUCCESS: () => state
           .set('entitySetIds', fromJS(seqAction.value))
           .setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.SUCCESS)
-      });
-    }
-
-    case getParticipantsEntitySetsIds.case(action.type): {
-      const seqAction :SequenceAction = action;
-      // console.log(seqAction.value);
-      return getParticipantsEntitySetsIds.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state
-          .setIn([GET_PARTICIPANTS_ENTITY_SET_IDS, 'requestState'], RequestStates.SUCCESS)
-          .set('participantEntitySetIds', fromJS(seqAction.value))
-      });
-    }
-
-    case createParticipantsEntitySet.case(action.type): {
-      const seqAction :SequenceAction = action;
-      return createParticipantsEntitySet.reducer(state, action, {
-        REQUEST: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => {
-          const { entitySetName, entitySetId } = seqAction.value;
-          const updatedMap = state.get('participantEntitySetIds').set(entitySetName, entitySetId);
-          return state
-            .setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.SUCCESS)
-            .set('participantEntitySetIds', updatedMap);
-        }
       });
     }
 

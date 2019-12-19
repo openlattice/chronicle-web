@@ -16,19 +16,13 @@ import Logger from '../../utils/Logger';
 import {
   getAllEntitySetIds,
   getEntityDataModelTypes,
-  getParticipantsEntitySetsIds,
 } from '../../core/edm/EDMActions';
 import {
   getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
-  getParticipantsEntitySetsIdsWorker
 } from '../../core/edm/EDMSagas';
-import {
-  getStudies,
-} from '../studies/StudiesActions';
-import {
-  getStudiesWorker,
-} from '../studies/StudiesSagas';
+import { getStudies } from '../studies/StudiesActions';
+import { getStudiesWorker } from '../studies/StudiesSagas';
 
 const LOG = new Logger('AppSagas');
 
@@ -51,10 +45,7 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
       if (res.error) throw res.error;
     });
     // get all studies only after getting entitySetIds
-    let response = yield call(getStudiesWorker, getStudies());
-    if (response.error) throw response.error;
-
-    response = yield call(getParticipantsEntitySetsIdsWorker, getParticipantsEntitySetsIds());
+    const response = yield call(getStudiesWorker, getStudies());
     if (response.error) throw response.error;
 
     yield put(initializeApplication.success(action.id));

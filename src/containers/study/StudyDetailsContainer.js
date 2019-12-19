@@ -18,6 +18,7 @@ import StudyParticipants from './StudyParticipants';
 
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
@@ -75,11 +76,10 @@ const StudyDetailsContainer = (props :Props) => {
     match,
   } = props;
 
+  const studyUUID = getIdFromMatch(match);
   const dispatch = useDispatch();
-  const studies = useSelector((state :Map) => state.getIn(['studies', 'studies']));
-  const studyUUID = match.params.id;
+  const study = useSelector((state :Map) => state.getIn(['studies', 'studies', studyUUID]));
 
-  const study = studies.get(studyUUID);
   if (!study) {
     dispatch(goToRoot());
   }

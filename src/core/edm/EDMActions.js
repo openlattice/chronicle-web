@@ -11,19 +11,9 @@ const getEntityDataModelTypes :RequestSequence = newRequestSequence(GET_EDM_TYPE
 const GET_ALL_ENTITY_SET_IDS :'GET_ALL_ENTITY_SET_IDS' = 'GET_ALL_ENTITY_SET_IDS';
 const getAllEntitySetIds :RequestSequence = newRequestSequence(GET_ALL_ENTITY_SET_IDS);
 
-const GET_PARTICIPANTS_ENTITY_SET_IDS :'GET_PARTICIPANTS_ENTITY_SET_IDS' = 'GET_PARTICIPANTS_ENTITY_SET_IDS';
-const getParticipantsEntitySetsIds :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENTITY_SET_IDS);
-
-const CREATE_PARTICIPANTS_ENTITY_SET :'CREATE_PARTICIPANTS_ENTITY_SET' = 'CREATE_PARTICIPANTS_ENTITY_SET';
-const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_PARTICIPANTS_ENTITY_SET);
-
 export {
-  CREATE_PARTICIPANTS_ENTITY_SET,
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
-  GET_PARTICIPANTS_ENTITY_SET_IDS,
-  createParticipantsEntitySet,
   getAllEntitySetIds,
   getEntityDataModelTypes,
-  getParticipantsEntitySetsIds
 };

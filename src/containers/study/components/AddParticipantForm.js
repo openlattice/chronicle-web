@@ -33,7 +33,9 @@ const AddParticipantForm = (props :Props, ref) => {
   const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
   let entitySetIds :Map = useSelector((store :Map) => store.getIn(['edm', 'entitySetIds']));
-  const participantsEntitySetIds :Map = useSelector((store :Map) => store.getIn(['edm', 'participantEntitySetIds']));
+  const participantsEntitySetIds :Map = useSelector(
+    (store :Map) => store.getIn(['studies', 'participantEntitySetIds'])
+  );
   entitySetIds = entitySetIds.merge(participantsEntitySetIds);
   const propertyTypeIds :Map = useSelector((store :Map) => store.getIn(['edm', 'propertyTypesFqnIdMap']));
 
@@ -66,4 +68,4 @@ const AddParticipantForm = (props :Props, ref) => {
 };
 
 // $FlowFixMe
-export default React.forwardRef(AddParticipantForm)
+export default React.forwardRef(AddParticipantForm);
