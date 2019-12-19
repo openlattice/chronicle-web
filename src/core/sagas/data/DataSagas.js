@@ -10,17 +10,12 @@ import type { SequenceAction } from 'redux-reqseq';
 import { SUBMIT_DATA_GRAPH, submitDataGraph } from './DataActions';
 
 import Logger from '../../../utils/Logger';
-import { ERR_ACTION_VALUE_NOT_DEFINED, ERR_WORKER_SAGA } from '../../../utils/Errors';
 
 const LOG = new Logger('DataSagas');
-const { DataGraphBuilder } = Models;
-const {
-  createEntityAndAssociationDataWorker
-} = DataApiSagas;
-const {
-  createEntityAndAssociationData
-} = DataApiActions;
 
+const { DataGraphBuilder } = Models;
+const { createEntityAndAssociationData } = DataApiActions;
+const { createEntityAndAssociationDataWorker } = DataApiSagas;
 
 /*
  *
@@ -29,15 +24,12 @@ const {
  */
 
 function* submitDataGraphWorker(action :SequenceAction) :Generator<*, *, *> {
+
   const workerResponse :Object = {};
-  const { id, value } = action;
-  if (value === null || value === undefined) {
-    workerResponse.error = ERR_ACTION_VALUE_NOT_DEFINED;
-    yield put(submitDataGraph.failure(id, workerResponse.error));
-    return workerResponse;
-  }
+  const { value } = action;
+
   try {
-    yield put(submitDataGraph.request(id, value));
+    yield put(submitDataGraph.request(action.id, value));
 
     const dataGraph = (new DataGraphBuilder())
       .setAssociations(value.associationEntityData)
@@ -46,26 +38,28 @@ function* submitDataGraphWorker(action :SequenceAction) :Generator<*, *, *> {
 
     const response = yield call(createEntityAndAssociationDataWorker, createEntityAndAssociationData(dataGraph));
     if (response.error) throw response.error;
-
     workerResponse.data = response.data;
-    yield put(submitDataGraph.success(id, response.data));
 
+    yield put(submitDataGraph.success(action.id, response.data));
   }
   catch (error) {
     workerResponse.error = error;
-    LOG.error(ERR_WORKER_SAGA, error);
-    yield put(submitDataGraph.failure(id, error));
+    LOG.error(action.type, error);
+    yield put(submitDataGraph.failure(action.id, error));
   }
   finally {
-    yield put(submitDataGraph.finally(id));
+    yield put(submitDataGraph.finally(action.id));
   }
+
   return workerResponse;
 }
+
 function* submitDataGraphWatcher() :Generator<*, *, *> {
+
   yield takeEvery(SUBMIT_DATA_GRAPH, submitDataGraphWorker);
 }
 
 export {
   submitDataGraphWatcher,
-  submitDataGraphWorker
+  submitDataGraphWorker,
 };
