@@ -8,8 +8,13 @@ import {
   select,
   takeEvery
 } from '@redux-saga/core/effects';
-import { Map, fromJS, getIn } from 'immutable';
-import { Models } from 'lattice';
+import {
+  fromJS,
+  getIn,
+  setIn,
+  Map
+} from 'immutable';
+import { Constants, Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   DataApiActions,
@@ -37,12 +42,14 @@ import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
-const { getEntityDataWorker, getEntitySetDataWorker } = DataApiSagas;
-const { getEntityData, getEntitySetData } = DataApiActions;
+const { getEntitySetDataWorker } = DataApiSagas;
+const { getEntitySetData } = DataApiActions;
 const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
 const { createEntitySetsWorker } = EntitySetsApiSagas;
 const { createEntitySets } = EntitySetsApiActions;
 const { EntitySetBuilder } = Models;
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { STUDY_ID, STUDY_NAME, STUDY_EMAIL } = PROPERTY_TYPE_FQNS;
@@ -158,7 +165,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   // do not create a new study if createParticipantsEntitySet fails
   try {
     const { id, value } = action;
-    const { newStudyData } = value;
+    let { newStudyData } = value;
     let response = {};
 
     response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(newStudyData));
@@ -177,10 +184,12 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
     const entityKeyId = entityKeyIds[entitySetId][0];
-    response = yield call(getEntityDataWorker, getEntityData({ entityKeyId, entitySetId }));
-    if (response.error) throw response.error;
+    newStudyData = setIn(
+      newStudyData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)], entityKeyId
+    );
 
-    yield put(createStudy.success(id, { study: fromJS(response.data) }));
+    yield put(createStudy.success(id, newStudyData));
   }
   catch (error) {
     LOG.error(action.type, error);

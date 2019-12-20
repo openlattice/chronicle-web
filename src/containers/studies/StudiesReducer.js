@@ -2,10 +2,16 @@
  * @flow
  */
 
-import { List, Map, fromJS } from 'immutable';
+import {
+  List,
+  Map,
+  fromJS,
+  get
+} from 'immutable';
+import { DataProcessingUtils } from 'lattice-fabricate';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
-
+import { Constants } from 'lattice';
 import {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
@@ -17,11 +23,23 @@ import {
   getStudies,
 } from './StudiesActions';
 
+import { ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-const { STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
 
+const { OPENLATTICE_ID_FQN } = Constants;
+
+const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
+const {
+  STUDY_ID,
+  STUDY_NAME,
+  STUDY_DESCRIPTION,
+  STUDY_VERSION,
+  STUDY_GROUP,
+  STUDY_EMAIL
+} = PROPERTY_TYPE_FQNS;
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
     requestState: RequestStates.STANDBY
@@ -69,9 +87,25 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { study } = seqAction.value;
-          const studyId = study.getIn([STUDY_ID, 0]);
-          const updatedStudies = state.get('studies').set(studyId, fromJS(study));
+          const newStudyData = seqAction.value;
+          const pageSection = get(newStudyData, getPageSectionKey(1, 1));
+          const study = {
+            [STUDY_ID.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID))],
+            [STUDY_NAME.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME))],
+            [STUDY_DESCRIPTION.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION))],
+            [STUDY_VERSION.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION))],
+            [STUDY_GROUP.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP))],
+            [STUDY_EMAIL.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL))],
+            [OPENLATTICE_ID_FQN.toString()]:
+              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN))],
+          };
+          const updatedStudies = state.get('studies').set(study[STUDY_ID.toString()], fromJS(study));
 
           return state
             .set('studies', updatedStudies)
