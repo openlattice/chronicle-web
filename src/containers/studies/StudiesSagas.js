@@ -108,13 +108,22 @@ function* createParticipantsEntitySetWatcher() :Generator<*, *, *> {
 function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     const { value, id } = action;
+    const { entitySetId, entitySetName, studyId } = value;
+    let { newFormData } = value;
 
     yield put(addStudyParticipant.request(id));
 
     const response = yield call(submitDataGraphWorker, submitDataGraph(value));
     if (response.error) throw response.error;
 
-    yield put(addStudyParticipant.success(id, response.data));
+    const { entityKeyIds } = response.data;
+    const entityKeyId = entityKeyIds[entitySetId][0];
+    newFormData = setIn(
+      newFormData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], entityKeyId
+    );
+
+    yield put(addStudyParticipant.success(id, { newFormData, studyId, entitySetName }));
   }
   catch (error) {
     LOG.error(action.type, error);

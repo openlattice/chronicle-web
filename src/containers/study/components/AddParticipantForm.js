@@ -44,16 +44,26 @@ const AddParticipantForm = (props :Props, ref) => {
   const handleSubmit = (payload :any) => {
 
     const { formData: newFormData } = payload;
+
+    const entitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
     // associations: participant => study
     const associations = [
-      [PARTICIPATED_IN, 0, `${PARTICIPANTS_PREFIX}${studyId}`, studyEntityKeyId, CHRONICLE_STUDIES, {}]
+      [PARTICIPATED_IN, 0, entitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {}]
     ];
+    const entitySetId = participantsEntitySetIds.get(entitySetName);
 
     const entityData = processEntityData(newFormData, entitySetIds, propertyTypeIds);
     const associationEntityData = processAssociationEntityData(fromJS(associations), entitySetIds, propertyTypeIds);
 
     dispatch(
-      addStudyParticipant({ entityData, associationEntityData })
+      addStudyParticipant({
+        associationEntityData,
+        entityData,
+        entitySetId,
+        entitySetName,
+        newFormData,
+        studyId,
+      })
     );
   };
 

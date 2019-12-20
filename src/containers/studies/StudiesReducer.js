@@ -33,12 +33,13 @@ const { OPENLATTICE_ID_FQN } = Constants;
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const {
+  PERSON_ID,
+  STUDY_DESCRIPTION,
+  STUDY_EMAIL,
+  STUDY_GROUP,
   STUDY_ID,
   STUDY_NAME,
-  STUDY_DESCRIPTION,
   STUDY_VERSION,
-  STUDY_GROUP,
-  STUDY_EMAIL
 } = PROPERTY_TYPE_FQNS;
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
@@ -120,8 +121,16 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { participant } = seqAction.value;
-          const { studyId } = seqAction.value;
+          const { newFormData, entitySetName, studyId } = seqAction.value;
+          const pageSection = get(newFormData, getPageSectionKey(1, 1));
+
+          const participant = {
+            [PERSON_ID.toString()]:
+              [get(pageSection, getEntityAddressKey(0, entitySetName, PERSON_ID))],
+            [OPENLATTICE_ID_FQN.toString()]:
+              [get(pageSection, getEntityAddressKey(0, entitySetName, PERSON_ID))]
+          };
+
           let participants = state.getIn(['participants', studyId], List());
           participants = participants.push(participant);
 
