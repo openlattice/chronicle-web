@@ -62,6 +62,7 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
   const workerResponse = {};
   try {
     yield put(createParticipantsEntitySet.request(action.id));
+
     const newStudyData = action.value;
     const studyName = getIn(newStudyData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]);
@@ -107,11 +108,11 @@ function* createParticipantsEntitySetWatcher() :Generator<*, *, *> {
 
 function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
-    const { value, id } = action;
+    yield put(addStudyParticipant.request(action.id));
+
+    const { value } = action;
     const { entitySetId, entitySetName, studyId } = value;
     let { newFormData } = value;
-
-    yield put(addStudyParticipant.request(id));
 
     const response = yield call(submitDataGraphWorker, submitDataGraph(value));
     if (response.error) throw response.error;
@@ -123,7 +124,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
       [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], entityKeyId
     );
 
-    yield put(addStudyParticipant.success(id, { newFormData, studyId, entitySetName }));
+    yield put(addStudyParticipant.success(action.id, { newFormData, studyId, entitySetName }));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -171,16 +172,16 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
-  // do not create a new study if createParticipantsEntitySet fails
   try {
-    const { id, value } = action;
+    yield put(createStudy.request(action.id));
+
+    const { value } = action;
     let { newStudyData } = value;
     let response = {};
 
+    // do not create a new study if createParticipantsEntitySet fails
     response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(newStudyData));
     if (response.error) throw response.error;
-
-    yield put(createStudy.request(id, value));
 
     response = yield call(submitDataGraphWorker, submitDataGraph(value));
     if (response.error) {
@@ -198,7 +199,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)], entityKeyId
     );
 
-    yield put(createStudy.success(id, newStudyData));
+    yield put(createStudy.success(action.id, newStudyData));
   }
   catch (error) {
     LOG.error(action.type, error);
