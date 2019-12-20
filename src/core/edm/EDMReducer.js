@@ -22,7 +22,6 @@ import {
 import Logger from '../../utils/Logger';
 
 const LOG :Logger = new Logger('EDMReducer');
-const { FullyQualifiedName } = Models;
 
 const {
   EntityTypeBuilder,
@@ -103,7 +102,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
                 .setType(pt.type)
                 .build();
 
-              const typeFqn :FQN = new FullyQualifiedName(propertyType.type);
+              const typeFqn :FQN = propertyType.type;
               propertyTypesFqnIdMap.set(typeFqn, propertyType.id);
               propertyTypes.push(propertyType.toImmutable());
               propertyTypesIndexMap.set(propertyType.id, index);

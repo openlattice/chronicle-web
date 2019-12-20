@@ -9,7 +9,7 @@ import {
   takeEvery
 } from '@redux-saga/core/effects';
 import { Map, fromJS, getIn } from 'immutable';
-import { EntityDataModelApi, Models } from 'lattice';
+import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   DataApiActions,
@@ -33,6 +33,7 @@ import {
 import Logger from '../../utils/Logger';
 import { ENTITY_SET_NAMES, PARTICIPANTS_PREFIX } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
@@ -41,7 +42,6 @@ const { getEntityData, getEntitySetData } = DataApiActions;
 const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
 const { createEntitySetsWorker } = EntitySetsApiSagas;
 const { createEntitySets } = EntitySetsApiActions;
-const { getEntityTypeId } = EntityDataModelApi;
 const { EntitySetBuilder } = Models;
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
@@ -63,7 +63,7 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
     const email = getIn(newStudyData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]);
 
-    const entityTypeId = yield call(getEntityTypeId, PERSON);
+    const entityTypeId :UUID = yield select(selectEntityTypeId(PERSON));
 
     const entitySet = new EntitySetBuilder()
       .setContacts([email])

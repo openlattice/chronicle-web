@@ -36,6 +36,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
 
+  participantEntitySetIds: Map(),
   participants: Map(),
   studies: Map(),
 });
