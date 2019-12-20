@@ -6,7 +6,8 @@ import {
   List,
   Map,
   fromJS,
-  get
+  get,
+  getIn
 } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { RequestStates } from 'redux-reqseq';
@@ -89,27 +90,27 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
           const newStudyData = seqAction.value;
-          const pageSection = get(newStudyData, getPageSectionKey(1, 1));
-          const study = {
-            [STUDY_ID.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID))],
-            [STUDY_NAME.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME))],
-            [STUDY_DESCRIPTION.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION))],
-            [STUDY_VERSION.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION))],
-            [STUDY_GROUP.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP))],
-            [STUDY_EMAIL.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL))],
-            [OPENLATTICE_ID_FQN.toString()]:
-              [get(pageSection, getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN))],
-          };
-          const updatedStudies = state.get('studies').set(study[STUDY_ID.toString()], fromJS(study));
+
+          const psk = getPageSectionKey(1, 1);
+          const idEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN);
+          const studyDescriptionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION);
+          const studyEmailEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL);
+          const studyGroupEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP);
+          const studyIdEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID);
+          const studyNameEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME);
+          const studyVersionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION);
+
+          const study = Map()
+            .set(OPENLATTICE_ID_FQN, [getIn(newStudyData, [psk, idEAK])])
+            .set(STUDY_DESCRIPTION, [getIn(newStudyData, [psk, studyDescriptionEAK])])
+            .set(STUDY_EMAIL, [getIn(newStudyData, [psk, studyEmailEAK])])
+            .set(STUDY_GROUP, [getIn(newStudyData, [psk, studyGroupEAK])])
+            .set(STUDY_ID, [getIn(newStudyData, [psk, studyIdEAK])])
+            .set(STUDY_NAME, [getIn(newStudyData, [psk, studyNameEAK])])
+            .set(STUDY_VERSION, [getIn(newStudyData, [psk, studyVersionEAK])]);
 
           return state
-            .set('studies', updatedStudies)
+            .setIn(['studies', study.getIn([STUDY_ID, 0])], study)
             .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
         }
       });
