@@ -31,7 +31,7 @@ const CardGrid = styled.div`
   grid-template-columns: 1fr 1fr;
   margin-top: 50px;
 
-  ${Card}{
+  ${Card} {
     cursor: default;
     display: flex;
     flex-direction: column;
@@ -44,7 +44,6 @@ const CardTitle = styled.h4`
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 30px;
-  margin: 0;
   text-transform: uppercase;
 `;
 
@@ -55,17 +54,17 @@ const DetailWrapper = styled.div`
   line-height: 1.7;
   margin-bottom: 10px;
   margin-top: 10px;
-  >h4 {
+
+  > h4 {
     color: ${NEUTRALS[1]};
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 1.8px;
     margin-right: 10px;
-    margin: 0;
     text-transform: uppercase;
   }
 
-  >p {
+  > p {
     margin: 5px 0 0 0;
   }
 `;
