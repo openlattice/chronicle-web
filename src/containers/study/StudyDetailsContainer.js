@@ -76,7 +76,7 @@ const StudyDetailsContainer = (props :Props) => {
     match,
   } = props;
 
-  const studyUUID = getIdFromMatch(match);
+  const studyUUID :UUID = getIdFromMatch(match) || '';
   const dispatch = useDispatch();
   const study = useSelector((state :Map) => state.getIn(['studies', 'studies', studyUUID]));
 
