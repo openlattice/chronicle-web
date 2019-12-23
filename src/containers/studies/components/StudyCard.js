@@ -14,9 +14,15 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
-import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import type { RequestSequence } from 'redux-reqseq';
 
-const { STUDY_DESCRIPTION, STUDY_NAME } = PROPERTY_TYPE_FQNS;
+import * as Routes from '../../../core/router/Routes';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { goToRoute } from '../../../core/router/RoutingActions';
+
+const { STUDY_DESCRIPTION, STUDY_ID, STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 
 const StudyName = styled.h2`
@@ -73,18 +79,27 @@ const ParticipantsIcon = styled(FontAwesomeIcon).attrs({
 
 type Props = {
   study :Map<*, *>;
+  actions:{
+    goToRoute :RequestSequence
+  };
 }
 
-//  TODO : get the number of participants for a study;
 class StudyCard extends Component<Props> {
-  handleCardClick = () => {
-    // to implement this
+  handleCardClick = (event :SyntheticEvent<HTMLElement>) => {
+    // since the entityKeyIds are a bunch of zeros we may want to use the STUDY_ID
+    // value for the URL
+    const { actions } = this.props;
+    const { currentTarget } = event;
+    const { dataset } = currentTarget;
+    const { studyId } = dataset;
+    actions.goToRoute(Routes.STUDY.replace(Routes.ID_PARAM, studyId));
   }
+
   render() {
     const { study } = this.props;
     const numParticipants = 3; // TODO: change this to the actual number of participants
     return (
-      <Card onClick={this.handleCardClick} data-study-id={study.id}>
+      <Card onClick={this.handleCardClick} data-study-id={study.getIn([STUDY_ID, 0])}>
         <CardHeader>
           <StudySummary>
             <StudyName>
@@ -107,4 +122,11 @@ class StudyCard extends Component<Props> {
   }
 }
 
-export default StudyCard;
+const mapDispatchToProps = (dispatch :() => void) => ({
+  actions: bindActionCreators({
+    goToRoute
+  }, dispatch)
+});
+
+// $FlowFixMe
+export default connect(null, mapDispatchToProps)(StudyCard);

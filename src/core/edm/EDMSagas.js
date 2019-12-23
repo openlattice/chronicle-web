@@ -8,7 +8,6 @@ import {
   put,
   takeEvery,
 } from '@redux-saga/core/effects';
-// import { EntitySetsApi } from 'lattice';
 import {
   EntityDataModelApiActions,
   EntityDataModelApiSagas,
@@ -16,16 +15,17 @@ import {
   EntitySetsApiSagas
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
-import Logger from '../../utils/Logger';
-import { isDefined } from '../../utils/LangUtils';
+
 import {
   GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
   getAllEntitySetIds,
   getEntityDataModelTypes,
 } from './EDMActions';
-
 import { ENTITY_SET_NAMES_LIST } from './constants/EntitySetNames';
+
+import Logger from '../../utils/Logger';
+import { isDefined } from '../../utils/LangUtils';
 
 const LOG = new Logger('EDMSagas');
 const { getEntitySetIds } = EntitySetsApiActions;
@@ -111,10 +111,9 @@ function* getAllEntitySetIdsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_ALL_ENTITY_SET_IDS, getAllEntitySetIdsWorker);
 }
 
-
 export {
+  getAllEntitySetIdsWatcher,
+  getAllEntitySetIdsWorker,
   getEntityDataModelTypesWatcher,
   getEntityDataModelTypesWorker,
-  getAllEntitySetIdsWorker,
-  getAllEntitySetIdsWatcher
 };

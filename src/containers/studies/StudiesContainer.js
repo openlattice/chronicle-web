@@ -5,7 +5,7 @@
 import React, { Component } from 'react';
 
 import styled from 'styled-components';
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
   Banner,
@@ -18,10 +18,12 @@ import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
+import CreateStudyModal from './components/CreateStudyModal';
 import StudyCard from './components/StudyCard';
-import { GET_STUDIES, getStudies } from './StudiesActions';
+import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
 import * as RoutingActions from '../../core/router/RoutingActions';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -55,24 +57,51 @@ const CenterText = styled.div`
 type Props = {
   actions :{
     getStudies :RequestSequence;
+    resetRequestState :RequestSequence;
   };
   requestStates:{
+    CREATE_STUDY :RequestState;
     GET_STUDIES :RequestState;
   };
-  studies :List;
+  studies :Map;
 };
 
-class StudiesContainer extends Component<Props> {
+type State = {
+  isCreateStudyModalVisible :boolean;
+};
+
+class StudiesContainer extends Component<Props, State> {
+  constructor(props :Props) {
+    super(props);
+    this.state = {
+      isCreateStudyModalVisible: false
+    };
+  }
+
   componentDidMount() {
     const { actions } = this.props;
     actions.getStudies();
   }
+
   openCreateStudyModal = () => {
-    // TODO: open modal to create study
+    const { actions } = this.props;
+    // necessary after a successful or failed CREATE_STUDY action
+    actions.resetRequestState(CREATE_STUDY);
+
+    this.setState({
+      isCreateStudyModalVisible: true
+    });
+  }
+
+  handleOnCloseModal = () => {
+    this.setState({
+      isCreateStudyModalVisible: false
+    });
   }
 
   render() {
     const { studies, requestStates } = this.props;
+    const { isCreateStudyModalVisible } = this.state;
 
     if (requestStates[GET_STUDIES] === RequestStates.PENDING) {
       return (
@@ -102,29 +131,33 @@ class StudiesContainer extends Component<Props> {
             : (
               <CardGrid>
                 {
-                  studies.map((study) => (
+                  studies.valueSeq().map((study) => (
                     <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
                   ))
                 }
               </CardGrid>
             )
         }
-        {this.openCreateStudyModal()}
+        <CreateStudyModal
+            handleOnCloseModal={this.handleOnCloseModal}
+            isVisible={isCreateStudyModalVisible} />
       </>
     );
   }
 }
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState'])
+    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState']),
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
   },
-  studies: state.getIn(['studies', 'studies'], List())
+  studies: state.getIn(['studies', 'studies'])
 });
 
 const mapDispatchToProps = (dispatch :Function) => ({
   actions: bindActionCreators({
-    getStudies,
     goToRoute: RoutingActions.goToRoute,
+    getStudies,
+    resetRequestState,
   }, dispatch)
 });
 

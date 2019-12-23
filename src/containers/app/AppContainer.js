@@ -29,6 +29,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
+import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as AppActions from './AppActions';
 import * as Routes from '../../core/router/Routes';
 import { isNonEmptyString } from '../../utils/LangUtils';
@@ -76,6 +77,7 @@ class AppContainer extends Component<Props> {
     if (requestStates[INITIALIZE_APPLICATION] === RequestStates.SUCCESS) {
       return (
         <Switch>
+          <Route path={Routes.STUDY} component={StudyDetailsContainer} />
           <Route path={Routes.STUDIES} component={StudiesContainer} />
           <Redirect to={Routes.STUDIES} />
         </Switch>
