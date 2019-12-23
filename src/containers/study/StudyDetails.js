@@ -7,12 +7,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
-  Card,
-  CardSegment,
+  Button,
   Colors,
 } from 'lattice-ui-kit';
-
-import EditableDetail from './components/EditableDetail';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
@@ -25,27 +22,6 @@ const {
 } = PROPERTY_TYPE_FQNS;
 
 const { NEUTRALS } = Colors;
-const CardGrid = styled.div`
-  display: grid;
-  grid-gap: 30px;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 50px;
-
-  ${Card} {
-    cursor: default;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-`;
-
-const CardTitle = styled.h4`
-  color: ${NEUTRALS[0]};
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-`;
 
 const DetailWrapper = styled.div`
   display: flex;
@@ -76,57 +52,79 @@ type Props = {
 
 const StudyDetails = ({ study } :Props) => {
   const renderAboutCard = () => (
-    <Card>
-      <CardSegment vertical noBleed>
-        <CardTitle>
-          About
-        </CardTitle>
+    <About>
+      <DetailWrapper>
+        <h4> Description </h4>
+        <p>
+          { study.getIn([STUDY_DESCRIPTION, 0]) }
+        </p>
+      </DetailWrapper>
 
-        <DetailWrapper>
-          <h4> UUID </h4>
-          <p>
-            {
-              study.getIn([STUDY_ID, 0])
-            }
-          </p>
-        </DetailWrapper>
+      <DetailWrapper>
+        <h4> UUID </h4>
+        <p>
+          { study.getIn([STUDY_ID, 0]) }
+        </p>
+      </DetailWrapper>
 
-        <DetailWrapper>
-          <h4> Description </h4>
-          <EditableDetail propertyFqn={STUDY_DESCRIPTION} value={study.getIn([STUDY_DESCRIPTION, 0])} />
-        </DetailWrapper>
-
-        <DetailWrapper>
-          <h4> Version </h4>
-          <EditableDetail propertyFqn={STUDY_VERSION} value={study.getIn([STUDY_VERSION, 0])} />
-        </DetailWrapper>
-      </CardSegment>
-    </Card>
+      <DetailWrapper>
+        <h4> Version </h4>
+        <p>
+          { study.getIn([STUDY_VERSION, 0]) }
+        </p>
+      </DetailWrapper>
+    </About>
   );
 
+  const DetailsContainer = styled.div`
+    display: flex;
+    margin-top: 10px;
+  `;
+
+  const About = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 80%;
+  `;
+
+  const Contact = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 20%;
+  `;
+
+  const EditButton = styled(Button)`
+    align-self: flex-start;
+    margin-top: 20px;
+  `;
+
   const renderContactCard = () => (
-    <Card>
-      <CardSegment vertical noBleed>
-        <CardTitle>
-          Contact info
-        </CardTitle>
-        <DetailWrapper>
-          <h4> Email </h4>
-          <EditableDetail propertyFqn={STUDY_EMAIL} value={study.getIn([STUDY_EMAIL, 0])} />
-        </DetailWrapper>
-        <DetailWrapper>
-          <h4> Group </h4>
-          <EditableDetail propertyFqn={STUDY_GROUP} value={study.getIn([STUDY_GROUP, 0])} />
-        </DetailWrapper>
-      </CardSegment>
-    </Card>
+    <Contact>
+      <DetailWrapper>
+        <h4> Email </h4>
+        <p>
+          { study.getIn([STUDY_EMAIL, 0]) }
+        </p>
+      </DetailWrapper>
+      <DetailWrapper>
+        <h4> Group </h4>
+        <p>
+          { study.getIn([STUDY_GROUP, 0]) }
+        </p>
+      </DetailWrapper>
+    </Contact>
   );
 
   return (
-    <CardGrid>
-      {renderAboutCard()}
-      {renderContactCard()}
-    </CardGrid>
+    <>
+      <EditButton mode="primary">
+        Edit Details
+      </EditButton>
+      <DetailsContainer>
+        {renderAboutCard()}
+        {renderContactCard()}
+      </DetailsContainer>
+    </>
   );
 };
 export default StudyDetails;
