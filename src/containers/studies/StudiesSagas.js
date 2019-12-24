@@ -2,6 +2,7 @@
  * @flow
  */
 
+import uuid from 'uuid/v4';
 import {
   call,
   put,
@@ -9,10 +10,10 @@ import {
   takeEvery
 } from '@redux-saga/core/effects';
 import {
+  Map,
   fromJS,
   getIn,
   setIn,
-  Map
 } from 'immutable';
 import { Constants, Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
@@ -20,7 +21,7 @@ import {
   DataApiActions,
   DataApiSagas,
   EntitySetsApiActions,
-  EntitySetsApiSagas
+  EntitySetsApiSagas,
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -36,15 +37,15 @@ import {
 } from './StudiesActions';
 
 import Logger from '../../utils/Logger';
+import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ENTITY_SET_NAMES, PARTICIPANTS_PREFIX } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
-const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
+const { getPageSectionKey, getEntityAddressKey, processEntityData } = DataProcessingUtils;
 const { createEntitySetsWorker } = EntitySetsApiSagas;
 const { createEntitySets } = EntitySetsApiActions;
 const { EntitySetBuilder } = Models;
@@ -57,9 +58,16 @@ const { PERSON } = ENTITY_TYPE_FQNS;
 
 const LOG = new Logger('StudiesSagas');
 
+/*
+ *
+ * StudiesActions.createParticipantsEntitySet()
+ *
+ */
 
 function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*, *, *> {
+
   const workerResponse = {};
+
   try {
     yield put(createParticipantsEntitySet.request(action.id));
 
@@ -99,12 +107,19 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
   finally {
     yield put(createParticipantsEntitySet.finally(action.id));
   }
+
   return workerResponse;
 }
 
 function* createParticipantsEntitySetWatcher() :Generator<*, *, *> {
   yield takeEvery(CREATE_PARTICIPANTS_ENTITY_SET, createParticipantsEntitySetWorker);
 }
+
+/*
+ *
+ * StudiesActions.addStudyParticipant()
+ *
+ */
 
 function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
@@ -139,6 +154,12 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
   yield takeEvery(ADD_PARTICIPANT, addStudyParticipantWorker);
 }
 
+/*
+ *
+ * StudiesActions.getStudies()
+ *
+ */
+
 function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -169,37 +190,56 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   return workerResponse;
 }
 
+function* getStudiesWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_STUDIES, getStudiesWorker);
+}
+
+/*
+ *
+ * StudiesActions.createStudy()
+ *
+ */
 
 function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
   try {
     yield put(createStudy.request(action.id));
 
-    const { value } = action;
-    let { newStudyData } = value;
-    let response = {};
+    let { value: formData } = action;
 
-    // do not create a new study if createParticipantsEntitySet fails
-    response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(newStudyData));
+    // create a new participant entity set for the new study
+    let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
     if (response.error) throw response.error;
 
-    response = yield call(submitDataGraphWorker, submitDataGraph(value));
-    if (response.error) {
-      throw response.error;
-    }
+    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
+      entitySetIds: state.getIn(['edm', 'entitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
 
-    // get the created entity
-    const { entityKeyIds } = response.data;
-    const entitySetId = yield select(
-      (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
-    );
-    const entityKeyId = entityKeyIds[entitySetId][0];
-    newStudyData = setIn(
-      newStudyData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)], entityKeyId
+    // generate a random study id
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
+      uuid(),
     );
 
-    yield put(createStudy.success(action.id, newStudyData));
+    let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
+    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData: {}, entityData }));
+    if (response.error) throw response.error;
+
+    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    const entityKeyId :UUID = getIn(response.data, ['entityKeyIds', entitySetId, 0]);
+
+    // update the study entity with its entity key id
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)],
+      entityKeyId,
+    );
+    entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
+
+    const studyEntityData = getIn(entityData, [entitySetId, 0]);
+    yield put(createStudy.success(action.id, studyEntityData));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -213,13 +253,12 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 function* createStudyWatcher() :Generator<*, *, *> {
   yield takeEvery(CREATE_STUDY, createStudyWorker);
 }
-function* getStudiesWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_STUDIES, getStudiesWorker);
-}
 
 export {
   addStudyParticipantWatcher,
+  addStudyParticipantWorker,
   createParticipantsEntitySetWatcher,
+  createParticipantsEntitySetWorker,
   createStudyWatcher,
   getStudiesWatcher,
   getStudiesWorker,

@@ -37,7 +37,7 @@ const AddParticipantForm = (props :Props, ref) => {
     (store :Map) => store.getIn(['studies', 'participantEntitySetIds'])
   );
   entitySetIds = entitySetIds.merge(participantsEntitySetIds);
-  const propertyTypeIds :Map = useSelector((store :Map) => store.getIn(['edm', 'propertyTypesFqnIdMap']));
+  const propertyTypeIds :Map = useSelector((store :Map) => store.getIn(['edm', 'propertyTypeIds']));
 
   const { dataSchema, uiSchema } = getFormSchema(studyId);
 
