@@ -11,6 +11,7 @@ import {
   Banner,
   Button,
   Card,
+  CardSegment,
   Spinner
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
@@ -30,9 +31,10 @@ const { OPENLATTICE_ID_FQN } = Constants;
 const ContainerHeader = styled.section`
   display: flex;
   justify-content: space-between;
-  margin: 20px 0 50px 0;
+  margin: 20px 0;
 
   > h1 {
+    cursor: default;
     font-size: 28px;
     font-weight: normal;
     margin: 0;
@@ -121,23 +123,27 @@ class StudiesContainer extends Component<Props, State> {
           <h1> Studies </h1>
           <Button mode="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
-        {
-          studies.isEmpty()
-            ? (
-              <CenterText>
-                Sorry, no studies were found. Please try refreshing the page, or contact support.
-              </CenterText>
-            )
-            : (
-              <CardGrid>
-                {
-                  studies.valueSeq().map((study) => (
-                    <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
-                  ))
-                }
-              </CardGrid>
-            )
-        }
+        <Card>
+          <CardSegment>
+            {
+              studies.isEmpty()
+                ? (
+                  <CenterText>
+                    Sorry, no studies were found. Please try refreshing the page, or contact support.
+                  </CenterText>
+                )
+                : (
+                  <CardGrid>
+                    {
+                      studies.valueSeq().map((study) => (
+                        <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
+                      ))
+                    }
+                  </CardGrid>
+                )
+            }
+          </CardSegment>
+        </Card>
         <CreateStudyModal
             handleOnCloseModal={this.handleOnCloseModal}
             isVisible={isCreateStudyModalVisible} />
