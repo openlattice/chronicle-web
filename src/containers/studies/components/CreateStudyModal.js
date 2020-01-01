@@ -12,7 +12,7 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { CREATE_STUDY, EDIT_STUDY } from '../StudiesActions';
+import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 
 type Props = {
   actions :{
@@ -23,7 +23,7 @@ type Props = {
   isVisible :boolean;
   requestStates :{
     CREATE_STUDY :RequestState,
-    EDIT_STUDY :RequestState
+    UPDATE_STUDY :RequestState
   };
   study :Map;
 };
@@ -68,7 +68,7 @@ const CreateStudyModal = (props :Props) => {
   };
 
   const textTitle = editMode ? 'Edit Study ' : 'Create Study';
-  const requestState = editMode ? requestStates[EDIT_STUDY] : requestStates[CREATE_STUDY];
+  const requestState = editMode ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
 
   return (
     <ActionModal
@@ -88,7 +88,7 @@ const CreateStudyModal = (props :Props) => {
 const mapStateToProps = (state :Map) => ({
   requestStates: {
     [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
-    [EDIT_STUDY]: state.getIn(['studies', EDIT_STUDY, 'requestState'])
+    [UPDATE_STUDY]: state.getIn(['studies', UPDATE_STUDY, 'requestState'])
   },
 });
 

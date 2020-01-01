@@ -17,8 +17,8 @@ import {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
-  EDIT_STUDY,
   GET_STUDIES,
+  UPDATE_STUDY,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
@@ -46,10 +46,10 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [CREATE_PARTICIPANTS_ENTITY_SET]: {
     requestState: RequestStates.STANDBY
   },
-  [EDIT_STUDY]: {
+  [GET_STUDIES]: {
     requestState: RequestStates.STANDBY
   },
-  [GET_STUDIES]: {
+  [UPDATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
   participantEntitySetIds: Map(),
