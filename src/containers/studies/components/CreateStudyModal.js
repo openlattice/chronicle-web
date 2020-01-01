@@ -12,16 +12,18 @@ import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { CREATE_STUDY } from '../StudiesActions';
+import { CREATE_STUDY, EDIT_STUDY } from '../StudiesActions';
 
 type Props = {
   actions :{
     resetRequestState :RequestSequence
   };
+  editMode :boolean;
   handleOnCloseModal :() => void;
   isVisible :boolean;
   requestStates :{
-    CREATE_STUDY :RequestState
+    CREATE_STUDY :RequestState,
+    EDIT_STUDY :RequestState
   };
 };
 
@@ -33,6 +35,7 @@ const CreateStudyModal = (props :Props) => {
   const formRef = useRef();
 
   const {
+    editMode,
     isVisible,
     handleOnCloseModal,
     requestStates
@@ -62,24 +65,28 @@ const CreateStudyModal = (props :Props) => {
     )
   };
 
+  const textTitle = editMode ? 'Edit Study ' : 'Create Study';
+  const requestState = editMode ? requestStates[EDIT_STUDY] : requestStates[CREATE_STUDY];
+
   return (
     <ActionModal
         isVisible={isVisible}
         onClose={handleOnCloseModal}
-        requestState={requestStates[CREATE_STUDY]}
+        requestState={requestState}
         requestStateComponents={requestStateComponents}
         onClickPrimary={handleOnSubmit}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary="Create"
+        textPrimary="Submit"
         textSecondary="Cancel"
-        textTitle="Create Study" />
+        textTitle={textTitle} />
   );
 };
 
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState'])
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
+    [EDIT_STUDY]: state.getIn(['studies', EDIT_STUDY, 'requestState'])
   },
 });
 

@@ -24,7 +24,7 @@ const { NEUTRALS } = Colors;
 
 const StudyName = styled.h2`
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 400;
   margin: 0 0 20px 0;
   overflow: hidden;
   padding: 0;
@@ -36,7 +36,7 @@ const StudyName = styled.h2`
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRALS[1]};
   display: -webkit-box;
   font-size: 1rem;
   font-weight: 400;

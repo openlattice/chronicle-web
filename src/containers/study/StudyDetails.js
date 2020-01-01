@@ -2,16 +2,18 @@
  * @flow
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
-  Button,
   Colors,
+  EditButton
 } from 'lattice-ui-kit';
 
+import CreateStudyModal from '../studies/components/CreateStudyModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { isEmptyString } from '../../utils/LangUtils';
 
 const {
   STUDY_DESCRIPTION,
@@ -28,102 +30,148 @@ const DetailWrapper = styled.div`
   flex-direction: column;
   font-size: 15px;
   line-height: 1.7;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  margin-bottom: 15px;
+  margin-right: 15px;
 
   > h4 {
-    color: ${NEUTRALS[1]};
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 1.8px;
-    margin-right: 10px;
+    color: ${NEUTRALS[0]};
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    margin-bottom: 3px;
+    margin-top: 0;
+    padding: 0;
     text-transform: uppercase;
   }
 
   > p {
-    margin: 5px 0 0 0;
+    color: ${(props) => (props.isEmptyString ? NEUTRALS[1] : NEUTRALS[0])};
+    font-size: 15px;
+    font-style: ${(props) => (props.isEmptyString ? 'italic' : 'normal')};
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
   }
 `;
 
+const DetailsContainer = styled.div`
+  border-top: 1px solid ${NEUTRALS[3]};
+  display: flex;
+  margin-top: 10px;
+  padding-top: 10px;
+`;
+
+const About = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 80%;
+`;
+
+const Contact = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 20%;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  > h3 {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+  }
+`;
 
 type Props = {
   study :Map
 }
 
 const StudyDetails = ({ study } :Props) => {
-  const renderAboutCard = () => (
+
+  const description = study.getIn([STUDY_DESCRIPTION, 0]);
+  const uuid = study.getIn([STUDY_ID, 0]);
+  const version = study.getIn([STUDY_VERSION, 0]);
+  const email = study.getIn([STUDY_EMAIL, 0]);
+  const group = study.getIn([STUDY_GROUP, 0]);
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+
+  const renderAbout = () => (
     <About>
-      <DetailWrapper>
+      <DetailWrapper isEmptyString={!description || isEmptyString(description)}>
         <h4> Description </h4>
         <p>
-          { study.getIn([STUDY_DESCRIPTION, 0]) }
+          {
+            !description || isEmptyString(description) ? 'No description' : description
+          }
         </p>
       </DetailWrapper>
 
       <DetailWrapper>
         <h4> UUID </h4>
         <p>
-          { study.getIn([STUDY_ID, 0]) }
+          { uuid }
         </p>
       </DetailWrapper>
 
-      <DetailWrapper>
+      <DetailWrapper isEmptyString={!version || isEmptyString(version)}>
         <h4> Version </h4>
         <p>
-          { study.getIn([STUDY_VERSION, 0]) }
+          {
+            !version || isEmptyString(version) ? 'No version' : version
+          }
         </p>
       </DetailWrapper>
     </About>
   );
 
-  const DetailsContainer = styled.div`
-    display: flex;
-    margin-top: 10px;
-  `;
-
-  const About = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 80%;
-  `;
-
-  const Contact = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 20%;
-  `;
-
-  const EditButton = styled(Button)`
-    align-self: flex-start;
-    margin-top: 20px;
-  `;
-
-  const renderContactCard = () => (
+  const renderContactInfo = () => (
     <Contact>
       <DetailWrapper>
         <h4> Email </h4>
         <p>
-          { study.getIn([STUDY_EMAIL, 0]) }
+          { email }
         </p>
       </DetailWrapper>
-      <DetailWrapper>
+      <DetailWrapper isEmptyString={!group || isEmptyString(group)}>
         <h4> Group </h4>
         <p>
-          { study.getIn([STUDY_GROUP, 0]) }
+          {
+            !group || isEmptyString(group) ? 'No group' : group
+          }
         </p>
       </DetailWrapper>
     </Contact>
   );
 
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+  };
+
+  const openEditModal = () => {
+    setEditModalVisible(true);
+  };
+
   return (
     <>
-      <EditButton mode="primary">
-        Edit Details
-      </EditButton>
+      <SectionHeader>
+        <h3> Study Details </h3>
+        <EditButton mode="secondary" onClick={openEditModal}>
+          Edit Details
+        </EditButton>
+      </SectionHeader>
       <DetailsContainer>
-        {renderAboutCard()}
-        {renderContactCard()}
+        {renderAbout()}
+        {renderContactInfo()}
       </DetailsContainer>
+      <CreateStudyModal
+          editMode
+          handleOnCloseModal={closeEditModal}
+          isVisible={editModalVisible} />
     </>
   );
 };

@@ -207,6 +207,13 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     let { value: formData } = action;
 
+    // generate a random study id
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
+      uuid(),
+    );
+
     // create a new participant entity set for the new study
     let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
     if (response.error) throw response.error;
@@ -215,13 +222,6 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       entitySetIds: state.getIn(['edm', 'entitySetIds']),
       propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
     }));
-
-    // generate a random study id
-    formData = setIn(
-      formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
-      uuid(),
-    );
 
     let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
     response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData: {}, entityData }));
