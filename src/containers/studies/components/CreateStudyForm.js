@@ -13,7 +13,7 @@ import { dataSchema, uiSchema } from './CreateStudySchemas';
 
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { createStudy } from '../StudiesActions';
+import { createStudy, editStudy } from '../StudiesActions';
 
 const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
 
@@ -73,7 +73,12 @@ const CreateStudyForm = (props:Props, ref) => {
   }, [editMode, getInitialFormData, study]);
 
   const handleSubmit = ({ formData } :Object) => {
-    dispatch(createStudy(formData));
+    if (editMode) {
+      dispatch(editStudy(formData));
+    }
+    else {
+      dispatch(createStudy(formData));
+    }
   };
 
   return (

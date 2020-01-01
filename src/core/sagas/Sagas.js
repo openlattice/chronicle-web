@@ -39,6 +39,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(StudiesSagas.createParticipantsEntitySetWatcher),
 
     // DataSagas
-    fork(DataSagas.submitDataGraphWatcher)
+    fork(DataSagas.submitDataGraphWatcher),
+    fork(DataSagas.submitPartialReplaceWatcher)
   ]);
 }
