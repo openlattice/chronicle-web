@@ -171,7 +171,8 @@ const StudyDetails = ({ study } :Props) => {
       <CreateStudyModal
           editMode
           handleOnCloseModal={closeEditModal}
-          isVisible={editModalVisible} />
+          isVisible={editModalVisible}
+          study={study} />
     </>
   );
 };

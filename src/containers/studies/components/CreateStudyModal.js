@@ -25,6 +25,7 @@ type Props = {
     CREATE_STUDY :RequestState,
     EDIT_STUDY :RequestState
   };
+  study :Map;
 };
 
 const ModalBodyWrapper = styled.div`
@@ -38,7 +39,8 @@ const CreateStudyModal = (props :Props) => {
     editMode,
     isVisible,
     handleOnCloseModal,
-    requestStates
+    requestStates,
+    study
   } = props;
 
   const handleOnSubmit = () => {
@@ -50,7 +52,7 @@ const CreateStudyModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <CreateStudyForm ref={formRef} />
+        <CreateStudyForm editMode={editMode} ref={formRef} study={study} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (
