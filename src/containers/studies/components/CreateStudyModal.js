@@ -57,17 +57,26 @@ const CreateStudyModal = (props :Props) => {
     ),
     [RequestStates.FAILURE]: (
       <ModalBodyWrapper>
-        <span> Failed to create a new study. Please try again. </span>
+        {
+          editMode
+            ? <span> Failed to updated study. Please try again. </span>
+            : <span> Failed to create a new study. Please try again. </span>
+        }
       </ModalBodyWrapper>
     ),
     [RequestStates.SUCCESS]: (
       <ModalBodyWrapper>
-        <span> Successfully created a new study. </span>
+        {
+          editMode
+            ? <span> Successfully updated study. </span>
+            : <span> Successfully created a new study. </span>
+        }
       </ModalBodyWrapper>
     )
   };
 
   const textTitle = editMode ? 'Edit Study ' : 'Create Study';
+  const textPrimary = editMode ? 'Save Changes' : 'Submit';
   const requestState = editMode ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
 
   return (
@@ -79,7 +88,7 @@ const CreateStudyModal = (props :Props) => {
         onClickPrimary={handleOnSubmit}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary="Submit"
+        textPrimary={textPrimary}
         textSecondary="Cancel"
         textTitle={textTitle} />
   );
