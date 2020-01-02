@@ -8,16 +8,13 @@ import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
-import type { RequestSequence, RequestState } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
 import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 
 type Props = {
-  actions :{
-    resetRequestState :RequestSequence
-  };
   editMode :boolean;
   handleOnCloseModal :() => void;
   isVisible :boolean;
