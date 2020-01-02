@@ -23,7 +23,7 @@ const { STUDY_DESCRIPTION, STUDY_NAME, STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 
 const StudyName = styled.h2`
-  font-size: 1.25rem;
+  font-size: 20px;
   font-weight: 400;
   margin: 0 0 20px 0;
   overflow: hidden;
@@ -36,10 +36,10 @@ const StudyName = styled.h2`
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
-  color: ${NEUTRALS[1]};
+  color: ${NEUTRALS[0]};
   display: -webkit-box;
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 300;
   line-height: 1.5;
   margin: 0;
   overflow-wrap: break-word;

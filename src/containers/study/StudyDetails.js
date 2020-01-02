@@ -21,73 +21,103 @@ import { UPDATE_STUDY } from '../studies/StudiesActions';
 const {
   STUDY_DESCRIPTION,
   STUDY_EMAIL,
-  STUDY_ID,
   STUDY_GROUP,
+  STUDY_ID,
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
 const { NEUTRALS } = Colors;
 
-const DetailWrapper = styled.div`
+const DetailContainer = styled.div`
+  align-items: ${(props) => (props.flexDirection === 'row' ? 'center' : 'flex-start')};
   display: flex;
-  flex-direction: column;
+  flex-direction: ${(props) => props.flexDirection};
   font-size: 15px;
-  line-height: 1.7;
-  margin-bottom: 15px;
-  margin-right: 15px;
+  margin: ${(props) => (props.flexDirection === 'row' ? 0 : '0 15px 15px 0')};
+
+  :last-child {
+    margin-bottom: 0;
+  }
 
   > h4 {
     color: ${NEUTRALS[0]};
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    margin-bottom: 3px;
-    margin-top: 0;
+    font-size: 16px;
+    font-weight: 400;
+    margin: ${(props) => (props.flexDirection === 'row' ? '0 5px 0 0' : '0 0 3px 0')};
     padding: 0;
-    text-transform: uppercase;
   }
 
   > p {
-    color: ${(props) => (props.isEmptyString ? NEUTRALS[1] : NEUTRALS[0])};
+    color: ${(props) => (props.missingValue ? NEUTRALS[1] : NEUTRALS[0])};
     font-size: 15px;
-    font-style: ${(props) => (props.isEmptyString ? 'italic' : 'normal')};
-    font-weight: 400;
+    font-style: ${(props) => (props.missingValue ? 'italic' : 'normal')};
+    font-weight: 300;
     margin: 0;
     padding: 0;
+    word-break: break-word;
   }
 `;
 
-const DetailsContainer = styled.div`
-  border-top: 1px solid ${NEUTRALS[3]};
+const MainInfoContainer = styled.div`
   display: flex;
-  margin-top: 10px;
-  padding-top: 10px;
+  padding: 15px 0;
 `;
 
-const About = styled.div`
+const AboutWrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 0 0 80%;
 `;
 
-const Contact = styled.div`
+const ContactWrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 0 0 20%;
 `;
 
-const SectionHeader = styled.div`
+const EditButtonWrapper = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  > h3 {
-    font-size: 22px;
-    font-weight: 500;
-    margin: 0;
-    padding: 0;
-  }
+  justify-content: flex-start;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed ${NEUTRALS[3]};
 `;
+
+const VersionWrapper = styled.div`
+  padding-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-top: 1px dashed ${NEUTRALS[3]};
+`;
+
+type DetailProps = {
+  missingValue?:boolean;
+  label :string;
+  value :string;
+  placeholder?:string
+}
+const DetailWrapper = ({
+  missingValue,
+  label,
+  value,
+  placeholder
+}:DetailProps) => {
+  const detailValue = missingValue ? placeholder : value;
+  return (
+    <DetailContainer missingValue={missingValue} flexDirection="column">
+      <h4>
+        { label }
+      </h4>
+      <p>
+        { detailValue }
+      </p>
+    </DetailContainer>
+  );
+};
+DetailWrapper.defaultProps = {
+  placeholder: undefined,
+  missingValue: false
+};
 
 type Props = {
   study :Map
@@ -95,62 +125,14 @@ type Props = {
 
 const StudyDetails = ({ study } :Props) => {
 
-  const description = study.getIn([STUDY_DESCRIPTION, 0]);
-  const uuid = study.getIn([STUDY_ID, 0]);
-  const version = study.getIn([STUDY_VERSION, 0]);
-  const email = study.getIn([STUDY_EMAIL, 0]);
-  const group = study.getIn([STUDY_GROUP, 0]);
+  const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
+  const studyUUID = study.getIn([STUDY_ID, 0]);
+  const studyVersion = study.getIn([STUDY_VERSION, 0]);
+  const studyEmail = study.getIn([STUDY_EMAIL, 0]);
+  const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
-
-  const renderAbout = () => (
-    <About>
-      <DetailWrapper isEmptyString={!description || isEmptyString(description)}>
-        <h4> Description </h4>
-        <p>
-          {
-            !description || isEmptyString(description) ? 'No description' : description
-          }
-        </p>
-      </DetailWrapper>
-
-      <DetailWrapper>
-        <h4> UUID </h4>
-        <p>
-          { uuid }
-        </p>
-      </DetailWrapper>
-
-      <DetailWrapper isEmptyString={!version || isEmptyString(version)}>
-        <h4> Version </h4>
-        <p>
-          {
-            !version || isEmptyString(version) ? 'No version' : version
-          }
-        </p>
-      </DetailWrapper>
-    </About>
-  );
-
-  const renderContactInfo = () => (
-    <Contact>
-      <DetailWrapper>
-        <h4> Email </h4>
-        <p>
-          { email }
-        </p>
-      </DetailWrapper>
-      <DetailWrapper isEmptyString={!group || isEmptyString(group)}>
-        <h4> Group </h4>
-        <p>
-          {
-            !group || isEmptyString(group) ? 'No group' : group
-          }
-        </p>
-      </DetailWrapper>
-    </Contact>
-  );
 
   const closeEditModal = () => {
     setEditModalVisible(false);
@@ -162,23 +144,66 @@ const StudyDetails = ({ study } :Props) => {
     dispatch(resetRequestState(UPDATE_STUDY));
   };
 
+  const renderAbout = () => (
+    <AboutWrapper>
+      <DetailWrapper
+          label="Description"
+          missingValue={!studyDescription || isEmptyString(studyDescription)}
+          placeholder="No description"
+          value={studyDescription} />
+      <DetailWrapper
+          label="UUID"
+          value={studyUUID} />
+    </AboutWrapper>
+  );
+
+  const renderContactInfo = () => (
+    <ContactWrapper>
+      <DetailWrapper
+          label="Email"
+          value={studyEmail} />
+      <DetailWrapper
+          label="Group"
+          missingValue={!studyGroup || isEmptyString(studyGroup)}
+          placeholder="No group"
+          value={studyGroup} />
+    </ContactWrapper>
+  );
+
+  const renderEditButton = () => (
+    <EditButtonWrapper>
+      <EditButton mode="secondary" onClick={openEditModal}>
+        Edit Details
+      </EditButton>
+    </EditButtonWrapper>
+  );
+
+  const renderVersion = () => (
+    <VersionWrapper>
+      <DetailContainer flexDirection="row" missingValue={!studyVersion || isEmptyString(studyVersion)}>
+        <h4> Version </h4>
+        <p>
+          {
+            !studyVersion || isEmptyString(studyVersion) ? 'No version' : studyVersion
+          }
+        </p>
+      </DetailContainer>
+    </VersionWrapper>
+  );
+
   return (
     <>
-      <SectionHeader>
-        <h3> Study Details </h3>
-        <EditButton mode="secondary" onClick={openEditModal}>
-          Edit Details
-        </EditButton>
-      </SectionHeader>
-      <DetailsContainer>
+      {renderEditButton()}
+      <MainInfoContainer>
         {renderAbout()}
         {renderContactInfo()}
-      </DetailsContainer>
+      </MainInfoContainer>
       <CreateStudyModal
           editMode
           handleOnCloseModal={closeEditModal}
           isVisible={editModalVisible}
           study={study} />
+      {renderVersion()}
     </>
   );
 };

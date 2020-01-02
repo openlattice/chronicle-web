@@ -5,8 +5,6 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { faInfo, faUsers } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import { Card, CardSegment, Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,7 +26,7 @@ const { PURPLES } = Colors;
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
   display: flex;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: normal;
   margin-bottom: 10px;
   padding: 0;
@@ -42,6 +40,7 @@ const Tabs = styled.div`
   border-bottom: 2px solid #eee;
   display: flex;
   height: 40px;
+  margin-bottom: 20px;
 `;
 
 const TabItem = styled.div`
@@ -53,7 +52,7 @@ const TabItem = styled.div`
 
 const TabLink = styled(NavLink)`
   border: 2px solid transparent;
-  color: rgba(66,66,66,.7);
+  color: rgba(66, 66, 66, 0.7);
   font-size: 16px;
   height: 100%;
   outline: none;
@@ -95,14 +94,12 @@ const StudyDetailsContainer = (props :Props) => {
           <Tabs>
             <TabItem>
               <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
-                <FontAwesomeIcon icon={faInfo} />
-                <span style={{ marginLeft: '10px' }}> Study Details </span>
+                Study Details
               </TabLink>
             </TabItem>
             <TabItem>
               <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
-                <FontAwesomeIcon icon={faUsers} />
-                <span style={{ marginLeft: '10px' }}> Participants </span>
+                Participants
               </TabLink>
             </TabItem>
           </Tabs>

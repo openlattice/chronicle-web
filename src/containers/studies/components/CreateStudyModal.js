@@ -34,8 +34,8 @@ const CreateStudyModal = (props :Props) => {
 
   const {
     editMode,
-    isVisible,
     handleOnCloseModal,
+    isVisible,
     requestStates,
     study
   } = props;
