@@ -10,10 +10,13 @@ import {
   Colors,
   EditButton
 } from 'lattice-ui-kit';
+import { useDispatch } from 'react-redux';
 
 import CreateStudyModal from '../studies/components/CreateStudyModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 import { isEmptyString } from '../../utils/LangUtils';
+import { UPDATE_STUDY } from '../studies/StudiesActions';
 
 const {
   STUDY_DESCRIPTION,
@@ -98,6 +101,7 @@ const StudyDetails = ({ study } :Props) => {
   const email = study.getIn([STUDY_EMAIL, 0]);
   const group = study.getIn([STUDY_GROUP, 0]);
 
+  const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
 
   const renderAbout = () => (
@@ -154,6 +158,8 @@ const StudyDetails = ({ study } :Props) => {
 
   const openEditModal = () => {
     setEditModalVisible(true);
+
+    dispatch(resetRequestState(UPDATE_STUDY));
   };
 
   return (
