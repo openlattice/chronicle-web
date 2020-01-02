@@ -23,6 +23,7 @@ import {
   createParticipantsEntitySet,
   createStudy,
   getStudies,
+  updateStudy
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -100,6 +101,21 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         },
         FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
         FINALLY: () => state.deleteIn([CREATE_STUDY, seqAction.id]),
+      });
+    }
+
+    case updateStudy.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return updateStudy.reducer(state, action, {
+        REQUEST: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.PENDING),
+        SUCCESS: () => {
+          const study :Map = fromJS(seqAction.value);
+          const studyId :UUID = study.getIn([STUDY_ID, 0]);
+          return state
+            .setIn(['studies', studyId], study)
+            .setIn([UPDATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+        },
+        FAILURE: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.FAILURE)
       });
     }
 

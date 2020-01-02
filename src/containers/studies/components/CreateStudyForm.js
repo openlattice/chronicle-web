@@ -36,7 +36,6 @@ type Props = {
 }
 const CreateStudyForm = (props:Props, ref) => {
   const { editMode, study } = props;
-
   const dispatch = useDispatch();
 
   const getInitialFormData = useCallback(() => {
@@ -74,7 +73,7 @@ const CreateStudyForm = (props:Props, ref) => {
 
   const handleSubmit = ({ formData } :Object) => {
     if (editMode) {
-      dispatch(updateStudy(formData));
+      dispatch(updateStudy({ formData, initialFormData, study }));
     }
     else {
       dispatch(createStudy(formData));
