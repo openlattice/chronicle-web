@@ -91,20 +91,22 @@ const VersionWrapper = styled.div`
 `;
 
 type DetailProps = {
-  missingValue?:boolean;
   label :string;
+  missingValue?:boolean;
+  placeholder?:string;
   value :string;
-  placeholder?:string
 }
+
 const DetailWrapper = ({
-  missingValue,
   label,
+  missingValue,
+  placeholder,
   value,
-  placeholder
 }:DetailProps) => {
   const detailValue = missingValue ? placeholder : value;
+
   return (
-    <DetailContainer missingValue={missingValue} flexDirection="column">
+    <DetailContainer flexDirection="column" missingValue={missingValue}>
       <h4>
         { label }
       </h4>
@@ -114,6 +116,7 @@ const DetailWrapper = ({
     </DetailContainer>
   );
 };
+
 DetailWrapper.defaultProps = {
   placeholder: undefined,
   missingValue: false
