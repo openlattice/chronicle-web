@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 
 import AddParticipantModal from './components/AddParticipantModal';
-import ParticipantsTable from './components/ParticipantsTable';
+import ParticipantsTable from './ParticipantsTable';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
