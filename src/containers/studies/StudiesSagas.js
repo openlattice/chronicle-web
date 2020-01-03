@@ -38,14 +38,20 @@ import {
 
 import Logger from '../../utils/Logger';
 import { selectEntityTypeId } from '../../core/edm/EDMUtils';
-import { ENTITY_SET_NAMES, PARTICIPANTS_PREFIX } from '../../core/edm/constants/EntitySetNames';
+import { PARTICIPANTS_PREFIX, ENROLLMENT_STATUS } from '../../core/edm/constants/DataModelConstants';
+import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
-const { getPageSectionKey, getEntityAddressKey, processEntityData } = DataProcessingUtils;
+const {
+  getPageSectionKey,
+  getEntityAddressKey,
+  processAssociationEntityData,
+  processEntityData
+} = DataProcessingUtils;
 const { createEntitySetsWorker } = EntitySetsApiSagas;
 const { createEntitySets } = EntitySetsApiActions;
 const { EntitySetBuilder } = Models;
@@ -53,8 +59,15 @@ const { EntitySetBuilder } = Models;
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
-const { STUDY_ID, STUDY_NAME, STUDY_EMAIL } = PROPERTY_TYPE_FQNS;
+const { PARTICIPATED_IN } = ASSOCIATION_ENTITY_SET_NAMES;
+const {
+  STATUS,
+  STUDY_ID,
+  STUDY_NAME,
+  STUDY_EMAIL
+} = PROPERTY_TYPE_FQNS;
 const { PERSON } = ENTITY_TYPE_FQNS;
+const { ENROLLED } = ENROLLMENT_STATUS;
 
 const LOG = new Logger('StudiesSagas');
 
@@ -126,20 +139,40 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     yield put(addStudyParticipant.request(action.id));
 
     const { value } = action;
-    const { entitySetId, entitySetName, studyId } = value;
-    let { newFormData } = value;
+    const { studyId, studyEntityKeyId } = value;
+    let { formData } = value;
 
-    const response = yield call(submitDataGraphWorker, submitDataGraph(value));
+    let entitySetIds = yield select((state) => state.getIn(['edm', 'entitySetIds']));
+    const { participantEntitySetIds, propertyTypeIds } = yield select((state) => ({
+      participantEntitySetIds: state.getIn(['studies', 'participantEntitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
+    entitySetIds = entitySetIds.merge(participantEntitySetIds);
+
+    const entitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
+    const entitySetId = participantEntitySetIds.get(entitySetName);
+
+    const associations = [
+      [PARTICIPATED_IN, 0, entitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
+        [STATUS.toString()]: [ENROLLED]
+      }]
+    ];
+    let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
+    const associationEntityData = processAssociationEntityData(fromJS(associations), entitySetIds, propertyTypeIds);
+
+    const response = yield call(submitDataGraphWorker, submitDataGraph({ entityData, associationEntityData }));
     if (response.error) throw response.error;
 
-    const { entityKeyIds } = response.data;
-    const entityKeyId = entityKeyIds[entitySetId][0];
-    newFormData = setIn(
-      newFormData,
+    // reconstructed created entity
+    const entityKeyId = getIn(response.data, ['entityKeyIds', entitySetId, 0]);
+    formData = setIn(
+      formData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], entityKeyId
     );
+    entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    yield put(addStudyParticipant.success(action.id, { newFormData, studyId, entitySetName }));
+    const participantEntityData = getIn(entityData, [entitySetId, 0]);
+    yield put(addStudyParticipant.success(action.id, { participantEntityData, studyId }));
   }
   catch (error) {
     LOG.error(action.type, error);

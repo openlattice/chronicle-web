@@ -2,7 +2,7 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PARTICIPANTS_PREFIX } from '../../../core/edm/constants/EntitySetNames';
+import { PARTICIPANTS_PREFIX } from '../../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { PERSON_ID } = PROPERTY_TYPE_FQNS;

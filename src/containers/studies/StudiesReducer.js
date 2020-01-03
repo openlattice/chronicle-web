@@ -105,22 +105,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { newFormData, entitySetName, studyId } = seqAction.value;
-          const pageSection = get(newFormData, getPageSectionKey(1, 1));
-
-          const participant = {
-            [PERSON_ID.toString()]:
-              [get(pageSection, getEntityAddressKey(0, entitySetName, PERSON_ID))],
-            [OPENLATTICE_ID_FQN.toString()]:
-              [get(pageSection, getEntityAddressKey(0, entitySetName, PERSON_ID))]
-          };
-
-          let participants = state.getIn(['participants', studyId], List());
-          participants = participants.push(participant);
+          const { participantEntityData, studyId } = seqAction.value;
 
           return state
             .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
-            .setIn(['participants', studyId], participants);
+            .mergeIn(['participants', studyId], participantEntityData);
         }
       });
     }
