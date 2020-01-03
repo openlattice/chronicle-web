@@ -175,7 +175,7 @@ const StudyDetails = ({ study } :Props) => {
 
   const renderEditButton = () => (
     <EditButtonWrapper>
-      <EditButton mode="secondary" onClick={openEditModal}>
+      <EditButton mode="positive" onClick={openEditModal}>
         Edit Details
       </EditButton>
     </EditButtonWrapper>
