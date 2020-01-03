@@ -142,9 +142,10 @@ const StudyDetails = ({ study } :Props) => {
   };
 
   const openEditModal = () => {
-    setEditModalVisible(true);
-
+    // clear any previous state
     dispatch(resetRequestState(UPDATE_STUDY));
+
+    setEditModalVisible(true);
   };
 
   const renderAbout = () => (
