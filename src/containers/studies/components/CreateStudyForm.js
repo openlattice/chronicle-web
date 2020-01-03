@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
@@ -29,6 +29,29 @@ const {
 } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 
+const getInitialFormData = (study) => {
+  const psk = getPageSectionKey(1, 1);
+  const studyDescriptionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION);
+  const studyEmailEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL);
+  const studyEntityKeyIdEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN);
+  const studyGroupEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP);
+  const studyIdEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID);
+  const studyNameEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME);
+  const studyVersionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION);
+
+  const formData = {
+    [psk]: {
+      [studyDescriptionEAK]: study.getIn([STUDY_DESCRIPTION, 0]),
+      [studyEmailEAK]: study.getIn([STUDY_EMAIL, 0]),
+      [studyEntityKeyIdEAK]: study.getIn([OPENLATTICE_ID_FQN, 0]),
+      [studyGroupEAK]: study.getIn([STUDY_GROUP, 0]),
+      [studyIdEAK]: study.getIn([STUDY_ID, 0]),
+      [studyNameEAK]: study.getIn([STUDY_NAME, 0]),
+      [studyVersionEAK]: study.getIn([STUDY_VERSION, 0]),
+    }
+  };
+  return formData;
+};
 
 type Props = {
   editMode :boolean;
@@ -36,40 +59,16 @@ type Props = {
 }
 const CreateStudyForm = (props:Props, ref) => {
   const { editMode, study } = props;
+
   const dispatch = useDispatch();
-
-  const getInitialFormData = useCallback(() => {
-    const psk = getPageSectionKey(1, 1);
-    const studyDescriptionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION);
-    const studyEmailEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL);
-    const studyEntityKeyIdEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN);
-    const studyGroupEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP);
-    const studyIdEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID);
-    const studyNameEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME);
-    const studyVersionEAK = getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION);
-
-    const formData = {
-      [psk]: {
-        [studyDescriptionEAK]: study.getIn([STUDY_DESCRIPTION, 0]),
-        [studyEmailEAK]: study.getIn([STUDY_EMAIL, 0]),
-        [studyEntityKeyIdEAK]: study.getIn([OPENLATTICE_ID_FQN, 0]),
-        [studyGroupEAK]: study.getIn([STUDY_GROUP, 0]),
-        [studyIdEAK]: study.getIn([STUDY_ID, 0]),
-        [studyNameEAK]: study.getIn([STUDY_NAME, 0]),
-        [studyVersionEAK]: study.getIn([STUDY_VERSION, 0]),
-      }
-    };
-    return formData;
-  }, [study]);
-
   const [initialFormData, setInitialFormData] = useState({});
 
   useEffect(() => {
     if (editMode) {
-      const formData :Object = getInitialFormData();
+      const formData :Object = getInitialFormData(study);
       setInitialFormData(formData);
     }
-  }, [editMode, getInitialFormData, study]);
+  }, [editMode, study]);
 
   const handleSubmit = ({ formData } :Object) => {
     if (editMode) {
