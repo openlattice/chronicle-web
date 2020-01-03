@@ -19,9 +19,9 @@ import ParticipantRow from './components/ParticipantRow';
 
 import { PARTICIPANT_ACTIONS } from '../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { DELETE_STUDY_PARTICIPANT, deleteStudyParticipant } from '../studies/StudiesActions';
+import { DELETE_STUDY_PARTICIPANT, changeEnrollmentStatus, deleteStudyParticipant } from '../studies/StudiesActions';
 
-const { PERSON_ID } = PROPERTY_TYPE_FQNS;
+const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { OPENLATTICE_ID_FQN } = Constants;
 const {
@@ -58,16 +58,19 @@ const TableWrapper = styled.div`
 
 type Props = {
   participants :Map<UUID, Map>;
-  studyId :string;
+  study :Map;
 };
 
 const ParticipantsTable = (props :Props) => {
-  const { participants, studyId } = props;
+  const { participants, study } = props;
 
   const dispatch = useDispatch();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
+
+  const studyId = study.getIn([STUDY_ID, 0]);
+
   const requestStates = {
     [DELETE_STUDY_PARTICIPANT]:
       useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, 'requestState']))
@@ -136,6 +139,14 @@ const ParticipantsTable = (props :Props) => {
     // actions
     if (actionId === LINK) setInfoModalOpen(true);
     if (actionId === DELETE) setDeleteModalOpen(true);
+    if (actionId === TOGGLE_ENROLLMENT) {
+      dispatch(changeEnrollmentStatus({
+        enrollmentStatus: participants.getIn([keyId, STATUS, 0]),
+        studyEntityKeyId: study.getIn([OPENLATTICE_ID_FQN, 0]),
+        studyId,
+        participantEntityKeyId: keyId,
+      }));
+    }
 
   };
 

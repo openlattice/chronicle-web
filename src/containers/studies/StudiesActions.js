@@ -8,6 +8,9 @@ import type { RequestSequence } from 'redux-reqseq';
 const ADD_PARTICIPANT :'ADD_PARTICIPANT' = 'ADD_PARTICIPANT';
 const addStudyParticipant :RequestSequence = newRequestSequence(ADD_PARTICIPANT);
 
+const CHANGE_ENROLLMENT_STATUS :'CHANGE_ENROLLMENT_STATUS' = 'CHANGE_ENROLLMENT_STATUS';
+const changeEnrollmentStatus :RequestSequence = newRequestSequence(CHANGE_ENROLLMENT_STATUS);
+
 const CREATE_PARTICIPANTS_ENTITY_SET :'CREATE_PARTICIPANTS_ENTITY_SET' = 'CREATE_PARTICIPANTS_ENTITY_SET';
 const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_PARTICIPANTS_ENTITY_SET);
 
@@ -28,6 +31,7 @@ const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTI
 
 export {
   ADD_PARTICIPANT,
+  CHANGE_ENROLLMENT_STATUS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
@@ -35,6 +39,7 @@ export {
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
+  changeEnrollmentStatus,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,

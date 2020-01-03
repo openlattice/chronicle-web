@@ -75,7 +75,7 @@ const StudyParticipants = ({ study } :Props) => {
           {
             participants.isEmpty()
               ? <MissingParticipants />
-              : <ParticipantsTable participants={participants} studyId={studyId} />
+              : <ParticipantsTable participants={participants} study={study} />
           }
         </CardSegment>
         <AddParticipantModal

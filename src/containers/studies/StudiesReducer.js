@@ -2,21 +2,25 @@
  * @flow
  */
 
-import { List, Map, fromJS } from 'immutable';
+import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
   ADD_PARTICIPANT,
+  CHANGE_ENROLLMENT_STATUS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
+  GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
+  changeEnrollmentStatus,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
+  getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
 } from './StudiesActions';
@@ -24,7 +28,7 @@ import {
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-const { STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
@@ -45,6 +49,10 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
+  GET_PARTICIPANTS_ENROLLMENT: {
+    requestState: RequestStates.STANDBY
+  },
+  associationKeyIds: Map(),
   participantEntitySetIds: Map(),
   participants: Map(),
   studies: Map(),
@@ -157,6 +165,34 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .deleteIn(['participants', studyId, participantEntityKeyId])
             .setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case getParticipantsEnrollmentStatus.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getParticipantsEnrollmentStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { associationKeyIds, participantsEntitySetId } = seqAction.value;
+          return state
+            .setIn(['associationKeyIds', participantsEntitySetId], associationKeyIds)
+            .setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case changeEnrollmentStatus.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return changeEnrollmentStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { newEnrollmentStatus, participantEntityKeyId, studyId } = seqAction.value;
+          return state
+            .setIn(['participants', studyId, participantEntityKeyId, STATUS], [newEnrollmentStatus])
+            .setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }

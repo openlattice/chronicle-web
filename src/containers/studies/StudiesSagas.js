@@ -30,6 +30,7 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   ADD_PARTICIPANT,
+  CHANGE_ENROLLMENT_STATUS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
@@ -37,6 +38,7 @@ import {
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
+  changeEnrollmentStatus,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
@@ -53,15 +55,15 @@ import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/F
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
-const { deleteEntityDataWorker, getEntitySetDataWorker } = DataApiSagas;
-const { deleteEntityData, getEntitySetData } = DataApiActions;
+const { deleteEntityDataWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
+const { deleteEntityData, getEntitySetData, updateEntityData } = DataApiActions;
 const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
 const { EntitySetBuilder } = Models;
-const { DeleteTypes } = Types;
+const { DeleteTypes, UpdateTypes } = Types;
 
 
 const {
@@ -82,9 +84,68 @@ const {
   STUDY_NAME,
 } = PROPERTY_TYPE_FQNS;
 const { PERSON } = ENTITY_TYPE_FQNS;
-const { ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED, NOT_ENROLLED } = ENROLLMENT_STATUS;
 
 const LOG = new Logger('StudiesSagas');
+
+/*
+ *
+ * StudiesActions.changeEnrollmentStatus()
+ *
+ */
+
+function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(changeEnrollmentStatus.request(action.id));
+
+    const { value } = action;
+    const {
+      enrollmentStatus,
+      participantEntityKeyId,
+      studyId,
+    } = value;
+
+    const participantsEntityName = `${PARTICIPANTS_PREFIX}${studyId}`;
+    const participantsEntitySetId = yield select(
+      (state) => state.getIn(['studies', 'participantEntitySetIds', participantsEntityName])
+    );
+    const associationEntityKeyId = yield select(
+      (state) => state.getIn(['studies', 'associationKeyIds', participantsEntitySetId, participantEntityKeyId])
+    );
+    const statusPropertyTypeId = yield select((state) => state.getIn(['edm', 'propertyTypeIds', STATUS]));
+    const participatedInEntitySetId = yield select((state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN]));
+    const newEnrollmentStatus = enrollmentStatus === ENROLLED ? NOT_ENROLLED : ENROLLED;
+
+    const response = yield call(updateEntityDataWorker, updateEntityData({
+      entitySetId: participatedInEntitySetId,
+      updateType: UpdateTypes.PartialReplace,
+      entities: {
+        [associationEntityKeyId]: {
+          [statusPropertyTypeId]: [newEnrollmentStatus]
+        }
+      }
+    }));
+
+    if (response.error) throw response.error;
+
+    yield put(changeEnrollmentStatus.success(action.id, {
+      newEnrollmentStatus,
+      participantEntityKeyId,
+      studyId,
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(changeEnrollmentStatus.failure(action.id));
+  }
+  finally {
+    yield put(changeEnrollmentStatus.finally(action.id));
+  }
+}
+
+function* changeEnrollmentWatcher() :Generator<*, *, *> {
+  yield takeEvery(CHANGE_ENROLLMENT_STATUS, changeEnrollmentWorker);
+}
 
 /*
  *
@@ -174,6 +235,12 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
       const enrollmentStatus :Map = fromJS(response.data)
         .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0]));
       workerResponse.data = enrollmentStatus;
+
+      // mapping from participantEntityKeyId -> association EKID
+      const associationKeyIds :Map = fromJS(response.data)
+        .map((associations :List) => associations.first().getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
+
+      yield put(getParticipantsEnrollmentStatus.success(action.id, { associationKeyIds, participantsEntitySetId }));
     }
   }
   catch (error) {
@@ -479,6 +546,7 @@ function* createStudyWatcher() :Generator<*, *, *> {
 export {
   addStudyParticipantWatcher,
   addStudyParticipantWorker,
+  changeEnrollmentWatcher,
   createParticipantsEntitySetWatcher,
   createParticipantsEntitySetWorker,
   createStudyWatcher,
