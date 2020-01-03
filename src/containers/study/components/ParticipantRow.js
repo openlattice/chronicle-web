@@ -8,7 +8,7 @@ import {
   faLink,
   faToggleOff,
   faToggleOn,
-  faTrash
+  faTrashAlt
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
@@ -18,7 +18,7 @@ import { ENROLLMENT_STATUS, PARTICIPANT_ACTIONS } from '../../../core/edm/consta
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS, PURPLES, REDS } = Colors;
+const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = ENROLLMENT_STATUS;
 const {
   DELETE,
@@ -27,91 +27,95 @@ const {
   TOGGLE_ENROLLMENT
 } = PARTICIPANT_ACTIONS;
 
-const { getHoverStyles } = StyleUtils;
 const StyledCell = styled.td`
-  padding: 10px 10px;
+  padding: 5px 5px;
   word-wrap: break-word;
 `;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[4]};
-  ${getHoverStyles};
+
+  :focus {
+    outline: none;
+  }
+  
 `;
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   display: -webkit-box;
   overflow: hidden;
 `;
 /* stylelint-enable */
 
-const FontAwesomeIconWrapper = styled(FontAwesomeIcon)`
-  color: ${(props) => (props.color)};
-  cursor: pointer;
-  margin: 0 10px;
+const IconOuteWrapper = styled.span`
+  align-items: center;
+  background-color: transparent;
+  border-radius: 50%;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  margin: 0;
+  transition: all 500ms ease;
+  width: 40px;
+
+  :hover {
+    background-color: ${NEUTRALS[5]};
+    cursor: pointer;
+  }
 `;
 
 type IconProps = {
+  action :string;
   icon :any;
-  onClickIcon :() => void;
-  id :UUID;
+  onClickIcon :(SyntheticEvent<HTMLElement>) => void;
+  participantEKId :UUID;
 };
 
-const ActionIcon = ({ icon, id, onClickIcon } :IconProps) => {
-  let iconColor;
-  let action;
+const ActionIcon = (props :IconProps) => {
+  const {
+    action,
+    icon,
+    onClickIcon,
+    participantEKId,
+  } = props;
 
-  switch (icon) {
-    case faTrash:
-      [, , , iconColor] = REDS;
-      action = DELETE;
-      break;
-    case faCloudDownload:
-      action = DOWNLOAD;
-      [, iconColor] = NEUTRALS;
-      break;
-    case faToggleOn:
-      action = TOGGLE_ENROLLMENT;
-      [, , iconColor] = PURPLES;
-      break;
-    case faToggleOff:
-      action = TOGGLE_ENROLLMENT;
-      [, iconColor] = NEUTRALS;
-      break;
-    default:
-      [, iconColor] = NEUTRALS;
-      action = LINK;
+  let iconColor = NEUTRALS[0];
+  if (icon === faToggleOn) {
+    [, , iconColor] = PURPLES;
   }
+
   return (
-    <FontAwesomeIconWrapper
-        data-key-id={id}
+    <IconOuteWrapper
         data-action-id={action}
-        onClick={onClickIcon}
-        icon={icon}
-        color={iconColor} />
+        data-key-id={participantEKId}
+        onClick={onClickIcon}>
+      <FontAwesomeIcon
+          color={iconColor}
+          icon={icon} />
+    </IconOuteWrapper>
   );
 };
 
 type Props = {
   data :Object;
-  onClickIcon :() => void;
+  onClickIcon :(SyntheticEvent<HTMLElement>) => void;
 };
 
 const ParticipantRow = (props :Props) => {
   const { data, onClickIcon } = props;
 
-  const id = getIn(data, ['id', 0]);
+  const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollment = getIn(data, [STATUS, 0]);
 
   const toggleIcon = enrollment === ENROLLED ? faToggleOn : faToggleOff;
 
-  const icons = [
-    { name: faLink, key: 'Info' },
-    { name: faCloudDownload, key: 'Download' },
-    { name: toggleIcon, key: 'Enrollment' },
-    { name: faTrash, key: 'Delete' }
+  const actionsData = [
+    { action: LINK, icon: faLink },
+    { action: DOWNLOAD, icon: faCloudDownload },
+    { action: DELETE, icon: faTrashAlt },
+    { action: TOGGLE_ENROLLMENT, icon: toggleIcon },
   ];
 
   return (
@@ -126,12 +130,13 @@ const ParticipantRow = (props :Props) => {
         <StyledCell>
           <CellContent>
             {
-              icons.map((icon) => (
+              actionsData.map((actionItem) => (
                 <ActionIcon
-                    id={id}
-                    key={icon.key}
-                    icon={icon.name}
-                    onClickIcon={onClickIcon} />
+                    action={actionItem.action}
+                    icon={actionItem.icon}
+                    key={actionItem.action}
+                    onClickIcon={onClickIcon}
+                    participantEKId={participantEKId} />
               ))
             }
           </CellContent>

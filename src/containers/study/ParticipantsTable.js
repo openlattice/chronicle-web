@@ -18,9 +18,8 @@ import ParticipantInfo from './components/ParticipantInfo';
 import ParticipantRow from './components/ParticipantRow';
 
 import { PARTICIPANT_ACTIONS } from '../../core/edm/constants/DataModelConstants';
-import { DELETE_STUDY_PARTICIPANT, deleteStudyParticipant } from '../studies/StudiesActions';
-
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { DELETE_STUDY_PARTICIPANT, deleteStudyParticipant } from '../studies/StudiesActions';
 
 const { PERSON_ID } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
@@ -39,8 +38,8 @@ const tableHeader = [
   },
   {
     cellStyle: {
+      textAlign: 'center',
       width: '175px',
-      textAlign: 'center'
     },
     key: 'actions',
     label: 'Actions',
@@ -87,7 +86,7 @@ const ParticipantsTable = (props :Props) => {
         isVisible={infoModalOpen}
         onClose={() => setInfoModalOpen(false)}
         textSecondary="Close"
-        textTitle="PARTICIPANT INFO">
+        textTitle="Participant Info">
       <ParticipantInfo participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])} studyId={studyId} />
     </Modal>
   );
@@ -100,8 +99,7 @@ const ParticipantsTable = (props :Props) => {
           { participants.getIn([participantEntityKeyId, PERSON_ID, 0]) }
           &apos;
         </span>
-        <span> ? </span>
-        <p>This action cannot be undone. </p>
+        <span>?</span>
       </ModalWrapper>
     ),
     [RequestStates.FAILURE]: (

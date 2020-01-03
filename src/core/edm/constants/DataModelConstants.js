@@ -16,8 +16,11 @@ const PARTICIPANT_ACTIONS = {
 
 const PARTICIPANTS_PREFIX = 'chronicle_participants_';
 
+const STUDY_LOGIN_ROOT = 'https://openlattice.com/chronicle/login?studyId=';
+
 export {
   ENROLLMENT_STATUS,
+  PARTICIPANTS_PREFIX,
   PARTICIPANT_ACTIONS,
-  PARTICIPANTS_PREFIX
+  STUDY_LOGIN_ROOT
 };
