@@ -33,10 +33,12 @@ export default function* sagas() :Generator<*, *, *> {
     fork(RoutingSagas.goToRouteWatcher),
 
     // studies sagas
-    fork(StudiesSagas.getStudiesWatcher),
     fork(StudiesSagas.addStudyParticipantWatcher),
-    fork(StudiesSagas.createStudyWatcher),
     fork(StudiesSagas.createParticipantsEntitySetWatcher),
+    fork(StudiesSagas.createStudyWatcher),
+    fork(StudiesSagas.getParticipantsEnrollmentStatusWatcher),
+    fork(StudiesSagas.getStudiesWatcher),
+    fork(StudiesSagas.getStudyParticipantsWatcher),
 
     // DataSagas
     fork(DataSagas.submitDataGraphWatcher)

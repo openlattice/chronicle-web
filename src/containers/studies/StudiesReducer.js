@@ -2,14 +2,7 @@
  * @flow
  */
 
-import {
-  List,
-  Map,
-  fromJS,
-  get,
-} from 'immutable';
-import { Constants } from 'lattice';
-import { DataProcessingUtils } from 'lattice-fabricate';
+import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -18,6 +11,8 @@ import {
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   GET_STUDIES,
+  GET_STUDY_PARTICIPANTS,
+  getStudyParticipants,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
@@ -27,13 +22,7 @@ import {
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-const { OPENLATTICE_ID_FQN } = Constants;
-const { getPageSectionKey, getEntityAddressKey } = DataProcessingUtils;
-
-const {
-  PERSON_ID,
-  STUDY_ID,
-} = PROPERTY_TYPE_FQNS;
+const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
@@ -46,6 +35,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
   [GET_STUDIES]: {
+    requestState: RequestStates.STANDBY
+  },
+  [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
   participantEntitySetIds: Map(),
@@ -125,6 +117,27 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.SUCCESS)
             .set('participantEntitySetIds', updatedMap);
+        }
+      });
+    }
+
+    case getStudyParticipants.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getStudyParticipants.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const {
+            participants,
+            participantsEntitySetId,
+            participantsEntitySetName,
+            studyId,
+          } = seqAction.value;
+
+          return state
+            .setIn(['participants', studyId], participants)
+            .setIn(['participantEntitySetIds', participantsEntitySetName], participantsEntitySetId)
+            .setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }

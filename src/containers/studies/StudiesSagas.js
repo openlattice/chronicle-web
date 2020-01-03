@@ -10,6 +10,7 @@ import {
   takeEvery
 } from '@redux-saga/core/effects';
 import {
+  List,
   Map,
   fromJS,
   getIn,
@@ -22,6 +23,8 @@ import {
   DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
+  SearchApiActions,
+  SearchApiSagas
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -29,16 +32,20 @@ import {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
+  GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
+  getParticipantsEnrollmentStatus,
   getStudies,
+  getStudyParticipants,
 } from './StudiesActions';
 
 import Logger from '../../utils/Logger';
 import { selectEntityTypeId } from '../../core/edm/EDMUtils';
-import { PARTICIPANTS_PREFIX, ENROLLMENT_STATUS } from '../../core/edm/constants/DataModelConstants';
+import { ENROLLMENT_STATUS, PARTICIPANTS_PREFIX } from '../../core/edm/constants/DataModelConstants';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
@@ -46,15 +53,18 @@ import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
+const { searchEntityNeighborsWithFilter } = SearchApiActions;
+const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
+const { EntitySetBuilder } = Models;
+
 const {
-  getPageSectionKey,
   getEntityAddressKey,
+  getPageSectionKey,
   processAssociationEntityData,
   processEntityData
 } = DataProcessingUtils;
-const { createEntitySetsWorker } = EntitySetsApiSagas;
-const { createEntitySets } = EntitySetsApiActions;
-const { EntitySetBuilder } = Models;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -62,14 +72,139 @@ const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 const { PARTICIPATED_IN } = ASSOCIATION_ENTITY_SET_NAMES;
 const {
   STATUS,
+  STUDY_EMAIL,
   STUDY_ID,
   STUDY_NAME,
-  STUDY_EMAIL
 } = PROPERTY_TYPE_FQNS;
 const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED } = ENROLLMENT_STATUS;
 
 const LOG = new Logger('StudiesSagas');
+
+/*
+ *
+ * StudiesActions.getParticipantsEnrollmentStatus()
+ *
+ */
+
+function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getParticipantsEnrollmentStatus.request(action.id));
+
+    const { value } = action;
+    const { participants, participantsEntitySetId } = value;
+
+    if (!participants.isEmpty()) {
+      const participatedInEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN])
+      );
+      const studiesEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
+      );
+      const participantsEntityKeyIds = participants.keySeq().toJS();
+
+      const searchFilter = {
+        destinationEntitySetIds: [studiesEntitySetId],
+        edgeEntitySetIds: [participatedInEntitySetId],
+        entityKeyIds: participantsEntityKeyIds,
+        sourceEntitySetIds: [participantsEntitySetId]
+      };
+
+      const response = yield call(
+        searchEntityNeighborsWithFilterWorker,
+        searchEntityNeighborsWithFilter({
+          entitySetId: participantsEntitySetId,
+          filter: searchFilter,
+        })
+      );
+      if (response.error) throw response.error;
+
+      // mapping from participantEntityKeyId -> enrollment status
+      const enrollmentStatus :Map = fromJS(response.data)
+        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0]));
+      workerResponse.data = enrollmentStatus;
+    }
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    workerResponse.error = error;
+    yield put(getParticipantsEnrollmentStatus.failure(action.id));
+  }
+  finally {
+    yield put(getParticipantsEnrollmentStatus.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_PARTICIPANTS_ENROLLMENT, getParticipantsEnrollmentStatusWorker);
+}
+
+/*
+ *
+ * StudiesActions.getStudyParticipants()
+ *
+ */
+
+function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(getStudyParticipants.request(action.id));
+
+    const studyId = action.value;
+
+    // only fetch if data is not found in redux store.
+    let participants = yield select((state) => state.getIn(['studies', 'participants', studyId]));
+    if (participants) {
+      yield put(getStudyParticipants.success(action.id));
+    }
+    else {
+      const participantsEntitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
+      let response = {};
+
+      response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
+      if (response.error) throw response.error;
+      const participantsEntitySetId = response.data;
+
+      response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId: participantsEntitySetId }));
+      if (response.error) throw response.error;
+
+      participants = fromJS(response.data)
+        .toMap()
+        .mapKeys((index, participant) => participant.getIn([OPENLATTICE_ID_FQN, 0]));
+
+      // get participant ->
+      response = yield call(
+        getParticipantsEnrollmentStatusWorker,
+        getParticipantsEnrollmentStatus({ participants, participantsEntitySetId })
+      );
+      if (response.error) throw response.error;
+
+      // update participant with enrollment status
+      const enrollmentStatus = response.data;
+      participants = participants.map((participant, id) => participant
+        .set(STATUS, [enrollmentStatus.get(id)])
+        .set('id', [id])); // required by LUK table
+      yield put(getStudyParticipants.success(action.id, {
+        participants,
+        participantsEntitySetId,
+        participantsEntitySetName,
+        studyId,
+      }));
+    }
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getStudyParticipants.failure(action.id));
+  }
+  finally {
+    yield put(getStudyParticipants.finally(action.id));
+  }
+}
+
+function* getStudyParticipantsWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
+}
 
 /*
  *
@@ -293,6 +428,9 @@ export {
   createParticipantsEntitySetWatcher,
   createParticipantsEntitySetWorker,
   createStudyWatcher,
+  getParticipantsEnrollmentStatusWatcher,
+  getParticipantsEnrollmentStatusWorker,
   getStudiesWatcher,
   getStudiesWorker,
+  getStudyParticipantsWatcher,
 };
