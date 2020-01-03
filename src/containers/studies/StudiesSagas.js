@@ -16,7 +16,7 @@ import {
   getIn,
   setIn,
 } from 'immutable';
-import { Constants, Models } from 'lattice';
+import { Constants, Models, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   DataApiActions,
@@ -32,12 +32,14 @@ import {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
+  deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
@@ -51,13 +53,16 @@ import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/F
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
-const { getEntitySetDataWorker } = DataApiSagas;
-const { getEntitySetData } = DataApiActions;
+const { deleteEntityDataWorker, getEntitySetDataWorker } = DataApiSagas;
+const { deleteEntityData, getEntitySetData } = DataApiActions;
 const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
+
 const { EntitySetBuilder } = Models;
+const { DeleteTypes } = Types;
+
 
 const {
   getEntityAddressKey,
@@ -80,6 +85,51 @@ const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED } = ENROLLMENT_STATUS;
 
 const LOG = new Logger('StudiesSagas');
+
+/*
+ *
+ * StudiesActions.deleteStudyParticipant()
+ *
+ */
+
+function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(deleteStudyParticipant.request(action.id));
+
+    const { studyId, participantEntityKeyId } = action.value;
+
+    const participantsEntityName = `${PARTICIPANTS_PREFIX}${studyId}`;
+    const participantsEntitySetId = yield select(
+      (state) => state.getIn(['studies', 'participantEntitySetIds', participantsEntityName])
+    );
+
+    const response = yield call(
+      deleteEntityDataWorker,
+      deleteEntityData({
+        entitySetId: participantsEntitySetId,
+        entityKeyIds: [participantEntityKeyId],
+        deleteType: DeleteTypes.HARD
+      })
+    );
+    if (response.error) throw response.error;
+
+    yield put(deleteStudyParticipant.success(action.id, {
+      participantEntityKeyId,
+      studyId
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteStudyParticipant.failure(action.id));
+  }
+  finally {
+    yield put(deleteStudyParticipant.finally(action.id));
+  }
+}
+
+function* deleteStudyParticipantWatcher() :Generator<*, *, *> {
+  yield takeEvery(DELETE_STUDY_PARTICIPANT, deleteStudyParticipantWorker);
+}
 
 /*
  *
@@ -173,15 +223,15 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
         .toMap()
         .mapKeys((index, participant) => participant.getIn([OPENLATTICE_ID_FQN, 0]));
 
-      // get participant ->
+      // get enrollment status
       response = yield call(
         getParticipantsEnrollmentStatusWorker,
         getParticipantsEnrollmentStatus({ participants, participantsEntitySetId })
       );
       if (response.error) throw response.error;
+      const enrollmentStatus :Map = response.data;
 
       // update participant with enrollment status
-      const enrollmentStatus = response.data;
       participants = participants.map((participant, id) => participant
         .set(STATUS, [enrollmentStatus.get(id)])
         .set('id', [id])); // required by LUK table
@@ -428,6 +478,7 @@ export {
   createParticipantsEntitySetWatcher,
   createParticipantsEntitySetWorker,
   createStudyWatcher,
+  deleteStudyParticipantWatcher,
   getParticipantsEnrollmentStatusWatcher,
   getParticipantsEnrollmentStatusWorker,
   getStudiesWatcher,

@@ -14,6 +14,9 @@ const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_P
 const CREATE_STUDY :'CREATE_STUDY' = 'CREATE_STUDY';
 const createStudy :RequestSequence = newRequestSequence(CREATE_STUDY);
 
+const DELETE_STUDY_PARTICIPANT :'DELETE_STUDY_PARTICIPANT' = 'DELETE_STUDY_PARTICIPANT';
+const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_PARTICIPANT);
+
 const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
 const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
 
@@ -27,12 +30,14 @@ export {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
+  deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,

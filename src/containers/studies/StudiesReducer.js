@@ -10,12 +10,14 @@ import {
   ADD_PARTICIPANT,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   getStudyParticipants,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
+  deleteStudyParticipant,
   getStudies,
 } from './StudiesActions';
 
@@ -32,6 +34,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
   [CREATE_PARTICIPANTS_ENTITY_SET]: {
+    requestState: RequestStates.STANDBY
+  },
+  [DELETE_STUDY_PARTICIPANT]: {
     requestState: RequestStates.STANDBY
   },
   [GET_STUDIES]: {
@@ -138,6 +143,20 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             .setIn(['participants', studyId], participants)
             .setIn(['participantEntitySetIds', participantsEntitySetName], participantsEntitySetId)
             .setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case deleteStudyParticipant.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return deleteStudyParticipant.reducer(state, action, {
+        REQUEST: () => state.setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { participantEntityKeyId, studyId } = seqAction.value;
+          return state
+            .deleteIn(['participants', studyId, participantEntityKeyId])
+            .setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }
