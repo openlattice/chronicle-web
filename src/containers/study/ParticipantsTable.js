@@ -50,6 +50,7 @@ const tableHeader = [
 
 const ModalWrapper = styled.div`
   width: 500px;
+  font-weight: 300;
 `;
 
 const TableWrapper = styled.div`
@@ -69,7 +70,8 @@ const ParticipantsTable = (props :Props) => {
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
   const requestStates = {
-    [DELETE_STUDY_PARTICIPANT]: useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT]))
+    [DELETE_STUDY_PARTICIPANT]:
+      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, 'requestState']))
   };
 
   const handleDeleteParticipant = () => {
@@ -98,7 +100,8 @@ const ParticipantsTable = (props :Props) => {
           { participants.getIn([participantEntityKeyId, PERSON_ID, 0]) }
           &apos;
         </span>
-        <span>? This action cannot be undone. </span>
+        <span> ? </span>
+        <p>This action cannot be undone. </p>
       </ModalWrapper>
     ),
     [RequestStates.FAILURE]: (
@@ -106,11 +109,7 @@ const ParticipantsTable = (props :Props) => {
     ),
     [RequestStates.SUCCESS]: (
       <ModalWrapper>
-        <span> Successfully deleted participant &apos </span>
-        <span style={{ color: NEUTRALS[0], fontWeight: 500 }}>
-          { participants.getIn([participantEntityKeyId, PERSON_ID, 0]) }
-          &apos;
-        </span>
+        <span> Successfully deleted participant. </span>
       </ModalWrapper>
     )
   };
@@ -126,7 +125,7 @@ const ParticipantsTable = (props :Props) => {
         shouldCloseOnOutsideClick={false}
         textPrimary="Yes, Delete"
         textSecondary="No, Cancel"
-        textTitle="DELETE PARTICIPANT" />
+        textTitle="Delete Participant" />
   );
 
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
