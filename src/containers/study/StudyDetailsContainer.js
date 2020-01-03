@@ -21,7 +21,7 @@ import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
-const { PURPLES } = Colors;
+const { NEUTRALS, PURPLES } = Colors;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -37,7 +37,7 @@ type Props = {
 };
 
 const Tabs = styled.div`
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid ${NEUTRALS[5]};
   display: flex;
   height: 40px;
   margin-bottom: 20px;
@@ -52,7 +52,7 @@ const TabItem = styled.div`
 
 const TabLink = styled(NavLink)`
   border: 2px solid transparent;
-  color: rgba(66, 66, 66, 0.7);
+  color: ${NEUTRALS[1]};
   font-size: 16px;
   height: 100%;
   outline: none;
@@ -63,6 +63,10 @@ const TabLink = styled(NavLink)`
     border-bottom: 2px solid ${PURPLES[2]};
     color: ${PURPLES[2]};
     text-decoration: none;
+  }
+
+  :hover {
+    color: ${NEUTRALS[0]};
   }
 
   &.active {
