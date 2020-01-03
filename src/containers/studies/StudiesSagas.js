@@ -356,8 +356,12 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    const participantEntityData = getIn(entityData, [entitySetId, 0]);
-    yield put(addStudyParticipant.success(action.id, { participantEntityData, studyId }));
+    let participantEntityData = fromJS(getIn(entityData, [entitySetId, 0]));
+    participantEntityData = participantEntityData
+      .set(STATUS, [ENROLLED])
+      .set('id', [entityKeyId]); // required by LUK table
+
+    yield put(addStudyParticipant.success(action.id, { entityKeyId, participantEntityData, studyId }));
   }
   catch (error) {
     LOG.error(action.type, error);

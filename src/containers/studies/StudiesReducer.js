@@ -2,7 +2,7 @@
  * @flow
  */
 
-import { Map, fromJS } from 'immutable';
+import { List, Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -13,12 +13,12 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
-  getStudyParticipants,
   addStudyParticipant,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getStudies,
+  getStudyParticipants,
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -102,11 +102,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { participantEntityData, studyId } = seqAction.value;
+          const { entityKeyId, participantEntityData, studyId } = seqAction.value;
 
           return state
             .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
-            .mergeIn(['participants', studyId], participantEntityData);
+            .setIn(['participants', studyId, entityKeyId], participantEntityData);
         }
       });
     }
