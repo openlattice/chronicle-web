@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import CreateStudyModal from '../studies/components/CreateStudyModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { isEmptyString } from '../../utils/LangUtils';
+import { isNonEmptyString } from '../../utils/LangUtils';
 import { UPDATE_STUDY } from '../studies/StudiesActions';
 
 const {
@@ -29,11 +29,11 @@ const {
 const { NEUTRALS } = Colors;
 
 const DetailsWrapper = styled.div`
-  align-items: ${(props) => (props.flexDirection === 'row' ? 'center' : 'flex-start')};
+  align-items: flex-start;
   display: flex;
-  flex-direction: ${(props) => props.flexDirection};
+  flex-direction: column;
   font-size: 15px;
-  margin: ${(props) => (props.flexDirection === 'row' ? 0 : '0 15px 15px 0')};
+  margin: 0 15px 15px 0;
 
   :last-child {
     margin-bottom: 0;
@@ -43,7 +43,7 @@ const DetailsWrapper = styled.div`
     color: ${NEUTRALS[0]};
     font-size: 16px;
     font-weight: 400;
-    margin: ${(props) => (props.flexDirection === 'row' ? '0 5px 0 0' : '0 0 3px 0')};
+    margin: 0 0 3px 0;
     padding: 0;
   }
 
@@ -82,14 +82,6 @@ const EditButtonWrapper = styled.div`
   border-bottom: 1px dashed ${NEUTRALS[3]};
 `;
 
-const VersionWrapper = styled.div`
-  padding-top: 15px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  border-top: 1px dashed ${NEUTRALS[3]};
-`;
-
 type DetailProps = {
   label :string;
   missingValue?:boolean;
@@ -106,7 +98,7 @@ const DetailWrapper = ({
   const detailValue = missingValue ? placeholder : value;
 
   return (
-    <DetailsWrapper flexDirection="column" missingValue={missingValue}>
+    <DetailsWrapper missingValue={missingValue}>
       <h4>
         { label }
       </h4>
@@ -152,12 +144,17 @@ const StudyDetails = ({ study } :Props) => {
     <AboutWrapper>
       <DetailWrapper
           label="Description"
-          missingValue={!studyDescription || isEmptyString(studyDescription)}
+          missingValue={!isNonEmptyString(studyDescription)}
           placeholder="No description"
           value={studyDescription} />
       <DetailWrapper
           label="UUID"
           value={studyUUID} />
+      <DetailWrapper
+          label="Version"
+          missingValue={!isNonEmptyString(studyVersion)}
+          placeholder="No version"
+          value={studyVersion} />
     </AboutWrapper>
   );
 
@@ -168,7 +165,7 @@ const StudyDetails = ({ study } :Props) => {
           value={studyEmail} />
       <DetailWrapper
           label="Group"
-          missingValue={!studyGroup || isEmptyString(studyGroup)}
+          missingValue={!isNonEmptyString(studyGroup)}
           placeholder="No group"
           value={studyGroup} />
     </ContactWrapper>
@@ -180,19 +177,6 @@ const StudyDetails = ({ study } :Props) => {
         Edit Details
       </EditButton>
     </EditButtonWrapper>
-  );
-
-  const renderVersion = () => (
-    <VersionWrapper>
-      <DetailsWrapper flexDirection="row" missingValue={!studyVersion || isEmptyString(studyVersion)}>
-        <h4> Version </h4>
-        <p>
-          {
-            !studyVersion || isEmptyString(studyVersion) ? 'No version' : studyVersion
-          }
-        </p>
-      </DetailsWrapper>
-    </VersionWrapper>
   );
 
   return (
@@ -207,7 +191,6 @@ const StudyDetails = ({ study } :Props) => {
           handleOnCloseModal={closeEditModal}
           isVisible={editModalVisible}
           study={study} />
-      {renderVersion()}
     </>
   );
 };
