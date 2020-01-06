@@ -35,7 +35,7 @@ const StudyName = styled.h2`
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   color: ${NEUTRALS[0]};
   display: -webkit-box;
   font-size: 16px;

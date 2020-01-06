@@ -11,7 +11,6 @@ import {
   Banner,
   Button,
   Card,
-  CardSegment,
   Spinner
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
@@ -123,27 +122,23 @@ class StudiesContainer extends Component<Props, State> {
           <h1> Studies </h1>
           <Button mode="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
-        <Card>
-          <CardSegment>
-            {
-              studies.isEmpty()
-                ? (
-                  <CenterText>
-                    Sorry, no studies were found. Please try refreshing the page, or contact support.
-                  </CenterText>
-                )
-                : (
-                  <CardGrid>
-                    {
-                      studies.valueSeq().map((study) => (
-                        <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
-                      ))
-                    }
-                  </CardGrid>
-                )
-            }
-          </CardSegment>
-        </Card>
+        {
+          studies.isEmpty()
+            ? (
+              <CenterText>
+                Sorry, no studies were found. Please try refreshing the page, or contact support.
+              </CenterText>
+            )
+            : (
+              <CardGrid>
+                {
+                  studies.valueSeq().map((study) => (
+                    <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
+                  ))
+                }
+              </CardGrid>
+            )
+        }
         <StudyDetailsModal
             handleOnCloseModal={this.handleOnCloseModal}
             isVisible={isCreateStudyModalVisible} />
