@@ -29,7 +29,7 @@ const ModalBodyWrapper = styled.div`
   min-width: 440px;
 `;
 
-const CreateStudyModal = (props :Props) => {
+const StudyDetailsModal = (props :Props) => {
   const formRef = useRef();
 
   const {
@@ -56,7 +56,7 @@ const CreateStudyModal = (props :Props) => {
       <ModalBodyWrapper>
         {
           editMode
-            ? <span> Failed to updated study. Please try again. </span>
+            ? <span> Failed to update study. Please try again. </span>
             : <span> Failed to create a new study. Please try again. </span>
         }
       </ModalBodyWrapper>
@@ -99,4 +99,4 @@ const mapStateToProps = (state :Map) => ({
 });
 
 // $FlowFixMe
-export default connect(mapStateToProps)(CreateStudyModal);
+export default connect(mapStateToProps)(StudyDetailsModal);

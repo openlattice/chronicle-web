@@ -12,7 +12,7 @@ import {
 } from 'lattice-ui-kit';
 import { useDispatch } from 'react-redux';
 
-import CreateStudyModal from '../studies/components/CreateStudyModal';
+import StudyDetailsModal from '../studies/components/StudyDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 import { isNonEmptyString } from '../../utils/LangUtils';
@@ -186,7 +186,7 @@ const StudyDetails = ({ study } :Props) => {
         {renderAbout()}
         {renderContactInfo()}
       </MainInfoContainer>
-      <CreateStudyModal
+      <StudyDetailsModal
           editMode
           handleOnCloseModal={closeEditModal}
           isVisible={editModalVisible}

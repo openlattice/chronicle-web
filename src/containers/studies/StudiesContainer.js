@@ -19,7 +19,7 @@ import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
-import CreateStudyModal from './components/CreateStudyModal';
+import StudyDetailsModal from './components/StudyDetailsModal';
 import StudyCard from './components/StudyCard';
 import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
@@ -144,7 +144,7 @@ class StudiesContainer extends Component<Props, State> {
             }
           </CardSegment>
         </Card>
-        <CreateStudyModal
+        <StudyDetailsModal
             handleOnCloseModal={this.handleOnCloseModal}
             isVisible={isCreateStudyModalVisible} />
       </>
