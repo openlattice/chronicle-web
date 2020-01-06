@@ -28,7 +28,7 @@ const {
 
 const { NEUTRALS } = Colors;
 
-const DetailContainer = styled.div`
+const DetailsWrapper = styled.div`
   align-items: ${(props) => (props.flexDirection === 'row' ? 'center' : 'flex-start')};
   display: flex;
   flex-direction: ${(props) => props.flexDirection};
@@ -106,14 +106,14 @@ const DetailWrapper = ({
   const detailValue = missingValue ? placeholder : value;
 
   return (
-    <DetailContainer flexDirection="column" missingValue={missingValue}>
+    <DetailsWrapper flexDirection="column" missingValue={missingValue}>
       <h4>
         { label }
       </h4>
       <p>
         { detailValue }
       </p>
-    </DetailContainer>
+    </DetailsWrapper>
   );
 };
 
@@ -184,14 +184,14 @@ const StudyDetails = ({ study } :Props) => {
 
   const renderVersion = () => (
     <VersionWrapper>
-      <DetailContainer flexDirection="row" missingValue={!studyVersion || isEmptyString(studyVersion)}>
+      <DetailsWrapper flexDirection="row" missingValue={!studyVersion || isEmptyString(studyVersion)}>
         <h4> Version </h4>
         <p>
           {
             !studyVersion || isEmptyString(studyVersion) ? 'No version' : studyVersion
           }
         </p>
-      </DetailContainer>
+      </DetailsWrapper>
     </VersionWrapper>
   );
 
