@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
-import { Colors, StyleUtils } from 'lattice-ui-kit';
+import { Colors } from 'lattice-ui-kit';
 
 import { ENROLLMENT_STATUS, PARTICIPANT_ACTIONS } from '../../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
@@ -38,7 +38,7 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   :focus {
     outline: none;
   }
-  
+
 `;
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
