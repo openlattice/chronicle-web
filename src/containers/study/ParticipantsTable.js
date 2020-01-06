@@ -5,24 +5,24 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
-import {
-  ActionModal,
-  Colors,
-  Modal,
-  Table
-} from 'lattice-ui-kit';
+import { Table } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
-import { RequestStates } from 'redux-reqseq';
 
-import ParticipantInfo from './components/ParticipantInfo';
+import ChangeEnrollment from './components/ChangeEnrollment';
+import DeleteParticipantModal from './components/DeleteParticipantModal';
+import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
-
+import { resetRequestState } from '../../core/redux/ReduxActions';
 import { PARTICIPANT_ACTIONS } from '../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { DELETE_STUDY_PARTICIPANT, changeEnrollmentStatus, deleteStudyParticipant } from '../studies/StudiesActions';
+import {
+  CHANGE_ENROLLMENT_STATUS,
+  DELETE_STUDY_PARTICIPANT,
+  changeEnrollmentStatus,
+  deleteStudyParticipant
+} from '../studies/StudiesActions';
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS } = Colors;
 const { OPENLATTICE_ID_FQN } = Constants;
 const {
   DELETE,
@@ -47,11 +47,6 @@ const tableHeader = [
   },
 ];
 
-const ModalWrapper = styled.div`
-  width: 500px;
-  font-weight: 300;
-`;
-
 const TableWrapper = styled.div`
   margin-top: 20px;
 `;
@@ -67,67 +62,42 @@ const ParticipantsTable = (props :Props) => {
   const dispatch = useDispatch();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
 
   const studyId = study.getIn([STUDY_ID, 0]);
 
   const requestStates = {
     [DELETE_STUDY_PARTICIPANT]:
-      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, 'requestState']))
+      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, 'requestState'])),
+    [CHANGE_ENROLLMENT_STATUS]:
+      useSelector((state) => state.getIn(['studies', CHANGE_ENROLLMENT_STATUS, 'requestState']))
   };
 
-  const handleDeleteParticipant = () => {
+  const handleOnDeleteParticipant = () => {
     dispatch(deleteStudyParticipant({
       participantEntityKeyId,
       studyId
     }));
-    // entity key Id
   };
 
-  const renderInfoModal = () => (
-    <Modal
-        isVisible={infoModalOpen}
-        onClose={() => setInfoModalOpen(false)}
-        textSecondary="Close"
-        textTitle="Participant Info">
-      <ParticipantInfo participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])} studyId={studyId} />
-    </Modal>
-  );
-
-  const requestStateComponents = {
-    [RequestStates.STANDBY]: (
-      <ModalWrapper>
-        <span> Are you sure you want to delete participant &apos;</span>
-        <span style={{ color: NEUTRALS[0], fontWeight: 500 }}>
-          { participants.getIn([participantEntityKeyId, PERSON_ID, 0]) }
-          &apos;
-        </span>
-        <span>?</span>
-      </ModalWrapper>
-    ),
-    [RequestStates.FAILURE]: (
-      <span> Failed to delete participant. Please try again. </span>
-    ),
-    [RequestStates.SUCCESS]: (
-      <ModalWrapper>
-        <span> Successfully deleted participant. </span>
-      </ModalWrapper>
-    )
+  const openDeleteModal = () => {
+    dispatch(resetRequestState(DELETE_STUDY_PARTICIPANT));
+    setDeleteModalOpen(true);
   };
 
-  const renderDeleteModal = () => (
-    <ActionModal
-        isVisible={deleteModalOpen}
-        onClickPrimary={handleDeleteParticipant}
-        onClose={() => setDeleteModalOpen(false)}
-        requestState={requestStates[DELETE_STUDY_PARTICIPANT]}
-        requestStateComponents={requestStateComponents}
-        shouldCloseOnEscape={false}
-        shouldCloseOnOutsideClick={false}
-        textPrimary="Yes, Delete"
-        textSecondary="No, Cancel"
-        textTitle="Delete Participant" />
-  );
+  const openEnrollmentModel = () => {
+    dispatch(resetRequestState(CHANGE_ENROLLMENT_STATUS));
+    setEnrollmentModalOpen(true);
+  };
+
+  const handleOnChangeEnrollment = () => {
+    dispatch(changeEnrollmentStatus({
+      enrollmentStatus: participants.getIn([participantEntityKeyId, STATUS, 0]),
+      participantEntityKeyId,
+      studyId,
+    }));
+  };
 
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
     const { currentTarget } = event;
@@ -136,17 +106,11 @@ const ParticipantsTable = (props :Props) => {
     const { keyId } = dataset;
 
     setParticipantEntityKeyId(keyId);
+
     // actions
     if (actionId === LINK) setInfoModalOpen(true);
-    if (actionId === DELETE) setDeleteModalOpen(true);
-    if (actionId === TOGGLE_ENROLLMENT) {
-      dispatch(changeEnrollmentStatus({
-        enrollmentStatus: participants.getIn([keyId, STATUS, 0]),
-        studyEntityKeyId: study.getIn([OPENLATTICE_ID_FQN, 0]),
-        studyId,
-        participantEntityKeyId: keyId,
-      }));
-    }
+    if (actionId === DELETE) openDeleteModal();
+    if (actionId === TOGGLE_ENROLLMENT) openEnrollmentModel();
 
   };
 
@@ -166,8 +130,25 @@ const ParticipantsTable = (props :Props) => {
             paginated
             rowsPerPageOptions={[5, 20, 50]} />
       </TableWrapper>
-      {renderInfoModal()}
-      {renderDeleteModal()}
+      <ParticipantInfoModal
+          handleOnClose={() => setInfoModalOpen(false)}
+          isVisible={infoModalOpen}
+          participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
+          studyId={studyId} />
+      <DeleteParticipantModal
+          handleOnClose={() => setDeleteModalOpen(false)}
+          handleOnDeleteParticipant={() => handleOnDeleteParticipant()}
+          isVisible={deleteModalOpen}
+          participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
+          requestState={requestStates[DELETE_STUDY_PARTICIPANT]} />
+
+      <ChangeEnrollment
+          enrollmentStatus={participants.getIn([participantEntityKeyId, STATUS, 0])}
+          handleOnChangeEnrollment={() => handleOnChangeEnrollment()}
+          handleOnClose={() => setEnrollmentModalOpen(false)}
+          isVisible={enrollmentModalOpen}
+          participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
+          requestState={requestStates[CHANGE_ENROLLMENT_STATUS]} />
     </>
   );
 };
