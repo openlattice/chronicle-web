@@ -15,7 +15,6 @@ import CreateStudyForm from './CreateStudyForm';
 import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 
 type Props = {
-  editMode :boolean;
   handleOnCloseModal :() => void;
   isVisible :boolean;
   requestStates :{
@@ -33,7 +32,6 @@ const StudyDetailsModal = (props :Props) => {
   const formRef = useRef();
 
   const {
-    editMode,
     handleOnCloseModal,
     isVisible,
     requestStates,
@@ -49,13 +47,13 @@ const StudyDetailsModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <CreateStudyForm editMode={editMode} ref={formRef} study={study} />
+        <CreateStudyForm ref={formRef} study={study} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (
       <ModalBodyWrapper>
         {
-          editMode
+          study
             ? <span> Failed to update study. Please try again. </span>
             : <span> Failed to create a new study. Please try again. </span>
         }
@@ -64,7 +62,7 @@ const StudyDetailsModal = (props :Props) => {
     [RequestStates.SUCCESS]: (
       <ModalBodyWrapper>
         {
-          editMode
+          study
             ? <span> Successfully updated study. </span>
             : <span> Successfully created a new study. </span>
         }
@@ -72,9 +70,9 @@ const StudyDetailsModal = (props :Props) => {
     )
   };
 
-  const textTitle = editMode ? 'Edit Study ' : 'Create Study';
-  const textPrimary = editMode ? 'Save Changes' : 'Submit';
-  const requestState = editMode ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
+  const textTitle = study ? 'Edit Study ' : 'Create Study';
+  const textPrimary = study ? 'Save Changes' : 'Submit';
+  const requestState = study ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
 
   return (
     <ActionModal

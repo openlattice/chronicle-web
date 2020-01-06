@@ -54,24 +54,23 @@ const getInitialFormData = (study) => {
 };
 
 type Props = {
-  editMode :boolean;
   study :Map;
 }
 const CreateStudyForm = (props:Props, ref) => {
-  const { editMode, study } = props;
+  const { study } = props;
 
   const dispatch = useDispatch();
   const [initialFormData, setInitialFormData] = useState({});
 
   useEffect(() => {
-    if (editMode) {
+    if (study) {
       const formData :Object = getInitialFormData(study);
       setInitialFormData(formData);
     }
-  }, [editMode, study]);
+  }, [study]);
 
   const handleSubmit = ({ formData } :Object) => {
-    if (editMode) {
+    if (study) {
       dispatch(updateStudy({ formData, initialFormData, study }));
     }
     else {

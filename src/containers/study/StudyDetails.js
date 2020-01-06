@@ -187,7 +187,6 @@ const StudyDetails = ({ study } :Props) => {
         {renderContactInfo()}
       </MainInfoContainer>
       <StudyDetailsModal
-          editMode
           handleOnCloseModal={closeEditModal}
           isVisible={editModalVisible}
           study={study} />
