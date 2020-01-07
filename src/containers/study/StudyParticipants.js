@@ -24,12 +24,6 @@ import { GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/Studies
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 50px;
-`;
-
 const AddParticipantsButton = styled(Button)`
   align-self: flex-end;
 `;
@@ -64,26 +58,24 @@ const StudyParticipants = ({ study } :Props) => {
   }
 
   return (
-    <Container>
-      <Card>
-        <CardSegment vertical>
-          <AddParticipantsButton
-              onClick={() => setModalOpen(true)}
-              mode="primary">
-            Add Participant
-          </AddParticipantsButton>
-          {
-            participants.isEmpty()
-              ? <MissingParticipants />
-              : <ParticipantsTable participants={participants} study={study} />
-          }
-        </CardSegment>
-        <AddParticipantModal
-            isVisible={isModalOpen}
-            onCloseModal={() => setModalOpen(false)}
-            study={study} />
-      </Card>
-    </Container>
+    <Card>
+      <CardSegment vertical>
+        <AddParticipantsButton
+            onClick={() => setModalOpen(true)}
+            mode="primary">
+          Add Participant
+        </AddParticipantsButton>
+        {
+          participants.isEmpty()
+            ? <MissingParticipants />
+            : <ParticipantsTable participants={participants} study={study} />
+        }
+      </CardSegment>
+      <AddParticipantModal
+          isVisible={isModalOpen}
+          onCloseModal={() => setModalOpen(false)}
+          study={study} />
+    </Card>
   );
 };
 
