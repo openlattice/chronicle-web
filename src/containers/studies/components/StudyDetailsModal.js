@@ -8,34 +8,34 @@ import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
-import type { RequestSequence, RequestState } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import CreateStudyForm from './CreateStudyForm';
 
-import { CREATE_STUDY } from '../StudiesActions';
+import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 
 type Props = {
-  actions :{
-    resetRequestState :RequestSequence
-  };
   handleOnCloseModal :() => void;
   isVisible :boolean;
   requestStates :{
-    CREATE_STUDY :RequestState
+    CREATE_STUDY :RequestState,
+    UPDATE_STUDY :RequestState
   };
+  study :Map;
 };
 
 const ModalBodyWrapper = styled.div`
   min-width: 440px;
 `;
 
-const CreateStudyModal = (props :Props) => {
+const StudyDetailsModal = (props :Props) => {
   const formRef = useRef();
 
   const {
-    isVisible,
     handleOnCloseModal,
-    requestStates
+    isVisible,
+    requestStates,
+    study
   } = props;
 
   const handleOnSubmit = () => {
@@ -47,41 +47,54 @@ const CreateStudyModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <CreateStudyForm ref={formRef} />
+        <CreateStudyForm ref={formRef} study={study} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (
       <ModalBodyWrapper>
-        <span> Failed to create a new study. Please try again. </span>
+        {
+          study
+            ? <span> Failed to update study. Please try again. </span>
+            : <span> Failed to create a new study. Please try again. </span>
+        }
       </ModalBodyWrapper>
     ),
     [RequestStates.SUCCESS]: (
       <ModalBodyWrapper>
-        <span> Successfully created a new study. </span>
+        {
+          study
+            ? <span> Successfully updated study. </span>
+            : <span> Successfully created a new study. </span>
+        }
       </ModalBodyWrapper>
     )
   };
+
+  const textTitle = study ? 'Edit Study ' : 'Create Study';
+  const textPrimary = study ? 'Save Changes' : 'Submit';
+  const requestState = study ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
 
   return (
     <ActionModal
         isVisible={isVisible}
         onClose={handleOnCloseModal}
-        requestState={requestStates[CREATE_STUDY]}
+        requestState={requestState}
         requestStateComponents={requestStateComponents}
         onClickPrimary={handleOnSubmit}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary="Create"
+        textPrimary={textPrimary}
         textSecondary="Cancel"
-        textTitle="Create Study" />
+        textTitle={textTitle} />
   );
 };
 
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState'])
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
+    [UPDATE_STUDY]: state.getIn(['studies', UPDATE_STUDY, 'requestState'])
   },
 });
 
 // $FlowFixMe
-export default connect(mapStateToProps)(CreateStudyModal);
+export default connect(mapStateToProps)(StudyDetailsModal);

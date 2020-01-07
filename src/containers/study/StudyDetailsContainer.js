@@ -12,7 +12,6 @@ import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
 
-import EditableDetail from './components/EditableDetail';
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
@@ -22,16 +21,27 @@ import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS } = Colors;
+const { NEUTRALS, PURPLES } = Colors;
+
+const StudyNameWrapper = styled.h2`
+  align-items: flex-start;
+  display: flex;
+  font-size: 22px;
+  font-weight: normal;
+  margin-bottom: 0;
+  padding: 0;
+`;
+
+type Props = {
+  match :Match;
+};
 
 const Tabs = styled.div`
   display: flex;
-  justify-content: flex-start;
-  margin: 0;
+  margin: 30px 0 50px 0;
 `;
 
 const TabLink = styled(NavLink)`
-  align-items: center;
   border-bottom: 2px solid transparent;
   color: ${NEUTRALS[1]};
   font-size: 18px;
@@ -41,35 +51,20 @@ const TabLink = styled(NavLink)`
   outline: none;
   text-decoration: none;
 
-  &:focus {
+  :focus {
     text-decoration: none;
   }
 
-  &:hover {
+  :hover {
     color: ${NEUTRALS[0]};
-    cursor: pointer;
-    outline: none;
-    text-decoration: none;
+    cursor: ponter;
   }
 
   &.active {
-    border-bottom: 2px solid #674fef;
-    color: #674fef;
+    border-bottom: 2px solid ${PURPLES[1]};
+    color: ${PURPLES[1]};
   }
 `;
-
-const StudyNameWrapper = styled.div`
-  align-items: flex-start;
-  display: flex;
-  font-size: 28px;
-  font-weight: normal;
-  margin: 0 10px 0 0;
-  padding: 0;
-`;
-
-type Props = {
-  match :Match;
-};
 
 const StudyDetailsContainer = (props :Props) => {
   const {
@@ -87,13 +82,12 @@ const StudyDetailsContainer = (props :Props) => {
   return (
     <>
       <StudyNameWrapper>
-        <EditableDetail propertyFqn={STUDY_NAME} value={study.getIn([STUDY_NAME, 0])} />
+        { study.getIn([STUDY_NAME, 0]) }
       </StudyNameWrapper>
       <Tabs>
         <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
           Study Details
         </TabLink>
-
         <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
           Participants
         </TabLink>
@@ -104,7 +98,6 @@ const StudyDetailsContainer = (props :Props) => {
       </Switch>
     </>
   );
-
 };
 
 // $FlowFixMe
