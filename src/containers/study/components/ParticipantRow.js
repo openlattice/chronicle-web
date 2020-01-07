@@ -3,22 +3,25 @@
 import React from 'react';
 
 import styled from 'styled-components';
+// import { faToggleOff, faToggleOn } from '@fortawesome/pro-duotone-svg-icons';
 import {
   faCloudDownload,
   faLink,
+  faToggleOff,
   faToggleOn,
   faTrashAlt
-} from '@fortawesome/pro-regular-svg-icons';
+} from '@fortawesome/pro-duotone-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 
 import { ENROLLMENT_STATUS, PARTICIPANT_ACTIONS } from '../../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { getParticipantsDataUrl } from '../../../utils/api/AppApi';
 
 const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
-const { ENROLLED, NOT_ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED } = ENROLLMENT_STATUS;
 const {
   DELETE,
   DOWNLOAD,
@@ -75,6 +78,7 @@ type IconProps = {
   icon :any;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
   participantEKId :UUID;
+  studyId :UUID;
 };
 
 const ActionIcon = (props :IconProps) => {
@@ -84,25 +88,29 @@ const ActionIcon = (props :IconProps) => {
     icon,
     onClickIcon,
     participantEKId,
+    studyId
   } = props;
 
   let iconColor = NEUTRALS[0];
   if (icon === faToggleOn && enrollmentStatus === ENROLLED) {
     [, , iconColor] = PURPLES;
   }
+  const participantDataUrl = getParticipantsDataUrl(participantEKId, studyId);
 
   return (
     <IconCircleWrapper
         data-action-id={action}
         data-key-id={participantEKId}
         onClick={onClickIcon}>
+
       {
-        enrollmentStatus === NOT_ENROLLED && action === TOGGLE_ENROLLMENT
+        action === DOWNLOAD
           ? (
-            <FontAwesomeIcon
-                color={iconColor}
-                flip="horizontal"
-                icon={icon} />
+            <a href={participantDataUrl} download target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon
+                  color={iconColor}
+                  icon={icon} />
+            </a>
           )
           : (
             <FontAwesomeIcon
@@ -117,20 +125,22 @@ const ActionIcon = (props :IconProps) => {
 type Props = {
   data :Object;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
+  studyId :UUID;
 };
 
 const ParticipantRow = (props :Props) => {
-  const { data, onClickIcon } = props;
+  const { data, onClickIcon, studyId } = props;
 
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
 
+  const enrollmentIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
     { action: LINK, icon: faLink },
     { action: DOWNLOAD, icon: faCloudDownload },
     { action: DELETE, icon: faTrashAlt },
-    { action: TOGGLE_ENROLLMENT, icon: faToggleOn },
+    { action: TOGGLE_ENROLLMENT, icon: enrollmentIcon },
   ];
 
   return (
@@ -152,7 +162,8 @@ const ParticipantRow = (props :Props) => {
                     icon={actionItem.icon}
                     key={actionItem.action}
                     onClickIcon={onClickIcon}
-                    participantEKId={participantEKId} />
+                    participantEKId={participantEKId}
+                    studyId={studyId} />
               ))
             }
           </CellContent>
