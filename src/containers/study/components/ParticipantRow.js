@@ -38,8 +38,8 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   :focus {
     outline: none;
   }
-
 `;
+
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
   -webkit-line-clamp: 2;
@@ -56,7 +56,7 @@ const IconOuteWrapper = styled.span`
   height: 40px;
   justify-content: center;
   margin: 0;
-  transition: all 500ms ease;
+  transition: all 300ms ease;
   width: 40px;
 
   :hover {
