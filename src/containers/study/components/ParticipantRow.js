@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import {
   faCloudDownload,
   faLink,
-  faToggleOff,
   faToggleOn,
   faTrashAlt
 } from '@fortawesome/pro-regular-svg-icons';
@@ -19,7 +18,7 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 
 const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
-const { ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED, NOT_ENROLLED } = ENROLLMENT_STATUS;
 const {
   DELETE,
   DOWNLOAD,
@@ -52,7 +51,7 @@ const CellContent = styled.div`
 `;
 /* stylelint-enable */
 
-const IconOuteWrapper = styled.span`
+const IconCircleWrapper = styled.span`
   align-items: center;
   background-color: transparent;
   border-radius: 50%;
@@ -69,8 +68,10 @@ const IconOuteWrapper = styled.span`
   }
 `;
 
+
 type IconProps = {
   action :string;
+  enrollmentStatus :string;
   icon :any;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
   participantEKId :UUID;
@@ -79,25 +80,37 @@ type IconProps = {
 const ActionIcon = (props :IconProps) => {
   const {
     action,
+    enrollmentStatus,
     icon,
     onClickIcon,
     participantEKId,
   } = props;
 
   let iconColor = NEUTRALS[0];
-  if (icon === faToggleOn) {
+  if (icon === faToggleOn && enrollmentStatus === ENROLLED) {
     [, , iconColor] = PURPLES;
   }
 
   return (
-    <IconOuteWrapper
+    <IconCircleWrapper
         data-action-id={action}
         data-key-id={participantEKId}
         onClick={onClickIcon}>
-      <FontAwesomeIcon
-          color={iconColor}
-          icon={icon} />
-    </IconOuteWrapper>
+      {
+        enrollmentStatus === NOT_ENROLLED && action === TOGGLE_ENROLLMENT
+          ? (
+            <FontAwesomeIcon
+                color={iconColor}
+                flip="horizontal"
+                icon={icon} />
+          )
+          : (
+            <FontAwesomeIcon
+                color={iconColor}
+                icon={icon} />
+          )
+      }
+    </IconCircleWrapper>
   );
 };
 
@@ -111,15 +124,13 @@ const ParticipantRow = (props :Props) => {
 
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
-  const enrollment = getIn(data, [STATUS, 0]);
-
-  const toggleIcon = enrollment === ENROLLED ? faToggleOn : faToggleOff;
+  const enrollmentStatus = getIn(data, [STATUS, 0]);
 
   const actionsData = [
     { action: LINK, icon: faLink },
     { action: DOWNLOAD, icon: faCloudDownload },
     { action: DELETE, icon: faTrashAlt },
-    { action: TOGGLE_ENROLLMENT, icon: toggleIcon },
+    { action: TOGGLE_ENROLLMENT, icon: faToggleOn },
   ];
 
   return (
@@ -137,6 +148,7 @@ const ParticipantRow = (props :Props) => {
               actionsData.map((actionItem) => (
                 <ActionIcon
                     action={actionItem.action}
+                    enrollmentStatus={enrollmentStatus}
                     icon={actionItem.icon}
                     key={actionItem.action}
                     onClickIcon={onClickIcon}
