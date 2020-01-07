@@ -129,12 +129,12 @@ function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
     const newEnrollmentStatus = enrollmentStatus === ENROLLED ? NOT_ENROLLED : ENROLLED;
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
-      entitySetId: participatedInEntitySetId,
       entities: {
         [associationEntityKeyId]: {
           [statusPropertyTypeId]: [newEnrollmentStatus]
         }
       },
+      entitySetId: participatedInEntitySetId,
       updateType: UpdateTypes.PartialReplace
     }));
 

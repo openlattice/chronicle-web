@@ -47,6 +47,7 @@ const ParticipantInfoModal = ({
 
     const participantDetails = [
       { name: 'Participant ID', value: participantId },
+      { name: 'Study ID', value: studyId },
       { name: 'Enrollment Link', value: enrollmentLink }
     ];
     return (

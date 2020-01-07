@@ -3,14 +3,13 @@
 import React from 'react';
 
 import styled from 'styled-components';
-// import { faToggleOff, faToggleOn } from '@fortawesome/pro-duotone-svg-icons';
 import {
   faCloudDownload,
   faLink,
   faToggleOff,
   faToggleOn,
   faTrashAlt
-} from '@fortawesome/pro-duotone-svg-icons';
+} from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
@@ -98,27 +97,35 @@ const ActionIcon = (props :IconProps) => {
   const participantDataUrl = getParticipantsDataUrl(participantEKId, studyId);
 
   return (
-    <IconCircleWrapper
-        data-action-id={action}
-        data-key-id={participantEKId}
-        onClick={onClickIcon}>
-
+    <>
       {
         action === DOWNLOAD
           ? (
             <a href={participantDataUrl} download target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon
-                  color={iconColor}
-                  icon={icon} />
+              <IconCircleWrapper
+                  data-action-id={action}
+                  data-key-id={participantEKId}
+                  onClick={onClickIcon}>
+
+                <FontAwesomeIcon
+                    color={iconColor}
+                    icon={icon} />
+              </IconCircleWrapper>
+
             </a>
           )
           : (
-            <FontAwesomeIcon
-                color={iconColor}
-                icon={icon} />
+            <IconCircleWrapper
+                data-action-id={action}
+                data-key-id={participantEKId}
+                onClick={onClickIcon}>
+              <FontAwesomeIcon
+                  color={iconColor}
+                  icon={icon} />
+            </IconCircleWrapper>
           )
       }
-    </IconCircleWrapper>
+    </>
   );
 };
 
@@ -135,12 +142,12 @@ const ParticipantRow = (props :Props) => {
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
 
-  const enrollmentIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
+  const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
     { action: LINK, icon: faLink },
     { action: DOWNLOAD, icon: faCloudDownload },
     { action: DELETE, icon: faTrashAlt },
-    { action: TOGGLE_ENROLLMENT, icon: enrollmentIcon },
+    { action: TOGGLE_ENROLLMENT, icon: toggleIcon },
   ];
 
   return (

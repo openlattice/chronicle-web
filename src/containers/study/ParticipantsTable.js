@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import { Constants } from 'lattice';
 import { Table } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -12,24 +11,19 @@ import ChangeEnrollment from './components/ChangeEnrollment';
 import DeleteParticipantModal from './components/DeleteParticipantModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
-import { resetRequestState } from '../../core/redux/ReduxActions';
+
 import { PARTICIPANT_ACTIONS } from '../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 import {
   CHANGE_ENROLLMENT_STATUS,
   DELETE_STUDY_PARTICIPANT,
   changeEnrollmentStatus,
-  deleteStudyParticipant
+  deleteStudyParticipant,
 } from '../studies/StudiesActions';
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { OPENLATTICE_ID_FQN } = Constants;
-const {
-  DELETE,
-  DOWNLOAD,
-  LINK,
-  TOGGLE_ENROLLMENT
-} = PARTICIPANT_ACTIONS;
+const { DELETE, LINK, TOGGLE_ENROLLMENT } = PARTICIPANT_ACTIONS;
 
 const tableHeader = [
   {
@@ -116,7 +110,7 @@ const ParticipantsTable = (props :Props) => {
 
   const components = {
     Row: ({ data: rowData } :any) => (
-      <ParticipantRow data={rowData} onClickIcon={onClickIcon} />
+      <ParticipantRow data={rowData} onClickIcon={onClickIcon} studyId={studyId} />
     )
   };
 
