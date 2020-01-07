@@ -38,6 +38,10 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   :focus {
     outline: none;
   }
+
+  :hover {
+    background-color: ${NEUTRALS[8]};
+  }
 `;
 
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
@@ -60,7 +64,7 @@ const IconOuteWrapper = styled.span`
   width: 40px;
 
   :hover {
-    background-color: ${NEUTRALS[5]};
+    background-color: ${NEUTRALS[4]};
     cursor: pointer;
   }
 `;
