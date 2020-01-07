@@ -110,11 +110,18 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { entityKeyId, participantEntityData, studyId } = seqAction.value;
+          const {
+            participantEntityData,
+            participantEntityKeyId,
+            participantsEntitySetId,
+            participatedInEntityKeyId,
+            studyId
+          } = seqAction.value;
 
           return state
             .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
-            .setIn(['participants', studyId, entityKeyId], participantEntityData);
+            .setIn(['participants', studyId, participantEntityKeyId], participantEntityData)
+            .setIn(['associationKeyIds', participantsEntitySetId, participantEntityKeyId], participatedInEntityKeyId);
         }
       });
     }

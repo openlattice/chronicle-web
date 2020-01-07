@@ -118,12 +118,12 @@ function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
       entitySetId: participatedInEntitySetId,
-      updateType: UpdateTypes.PartialReplace,
       entities: {
         [associationEntityKeyId]: {
           [statusPropertyTypeId]: [newEnrollmentStatus]
         }
-      }
+      },
+      updateType: UpdateTypes.PartialReplace
     }));
 
     if (response.error) throw response.error;
@@ -402,7 +402,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     entitySetIds = entitySetIds.merge(participantEntitySetIds);
 
     const entitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
-    const entitySetId = participantEntitySetIds.get(entitySetName);
+    const participantsEntitySetId = participantEntitySetIds.get(entitySetName);
 
     const associations = [
       [PARTICIPATED_IN, 0, entitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
@@ -415,20 +415,30 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const response = yield call(submitDataGraphWorker, submitDataGraph({ entityData, associationEntityData }));
     if (response.error) throw response.error;
 
-    // reconstructed created entity
-    const entityKeyId = getIn(response.data, ['entityKeyIds', entitySetId, 0]);
+    // get association entityKeyId
+    const participatedInEntitySetId = entitySetIds.get(PARTICIPATED_IN);
+    const participatedInEntityKeyId = getIn(response.data, ['entitySetIds', participatedInEntitySetId, 0]);
+
+    // reconstruct created entity
+    const participantEntityKeyId = getIn(response.data, ['entityKeyIds', participantsEntitySetId, 0]);
     formData = setIn(
       formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], entityKeyId
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], participantEntityKeyId
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    let participantEntityData = fromJS(getIn(entityData, [entitySetId, 0]));
+    let participantEntityData = fromJS(getIn(entityData, [participantsEntitySetId, 0]));
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
-      .set('id', [entityKeyId]); // required by LUK table
+      .set('id', [participantEntityKeyId]); // required by LUK table
 
-    yield put(addStudyParticipant.success(action.id, { entityKeyId, participantEntityData, studyId }));
+    yield put(addStudyParticipant.success(action.id, {
+      participantEntityData,
+      participantEntityKeyId,
+      participantsEntitySetId,
+      participatedInEntityKeyId,
+      studyId
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
