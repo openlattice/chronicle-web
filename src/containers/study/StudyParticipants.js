@@ -8,9 +8,9 @@ import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
   Banner,
-  Button,
   Card,
   CardSegment,
+  PlusButton,
   Spinner
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,12 +20,14 @@ import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './ParticipantsTable';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
+import { resetRequestState } from '../../core/redux/ReduxActions';
+import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
-const AddParticipantsButton = styled(Button)`
-  align-self: flex-end;
+const AddParticipantsButton = styled(PlusButton)`
+  align-self: flex-start;
+  margin-bottom: 5px;
 `;
 
 type Props = {
@@ -48,7 +50,12 @@ const StudyParticipants = ({ study } :Props) => {
   }, [dispatch, studyId]);
 
   const requestStates = {
-    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['sudies', GET_STUDY_PARTICIPANTS, 'requestState']))
+    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['sudies', GET_STUDY_PARTICIPANTS, 'requestState'])),
+  };
+
+  const openAddParticipantModal = () => {
+    dispatch(resetRequestState(ADD_PARTICIPANT));
+    setModalOpen(true);
   };
 
   if (requestStates[GET_STUDY_PARTICIPANTS] === RequestStates.PENDING) {
@@ -61,7 +68,7 @@ const StudyParticipants = ({ study } :Props) => {
     <Card>
       <CardSegment vertical>
         <AddParticipantsButton
-            onClick={() => setModalOpen(true)}
+            onClick={() => openAddParticipantModal()}
             mode="primary">
           Add Participant
         </AddParticipantsButton>
