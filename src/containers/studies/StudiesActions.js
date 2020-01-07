@@ -23,6 +23,9 @@ const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_
 const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
 const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
 
+const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
+const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
+
 const GET_STUDIES :'GET_STUDIES' = 'GET_STUDIES';
 const getStudies :RequestSequence = newRequestSequence(GET_STUDIES);
 
@@ -38,6 +41,7 @@ export {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
   createParticipantsEntitySet,
@@ -46,4 +50,5 @@ export {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  updateStudy
 };

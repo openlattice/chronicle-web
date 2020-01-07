@@ -18,7 +18,7 @@ import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
-import CreateStudyModal from './components/CreateStudyModal';
+import StudyDetailsModal from './components/StudyDetailsModal';
 import StudyCard from './components/StudyCard';
 import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
@@ -30,9 +30,10 @@ const { OPENLATTICE_ID_FQN } = Constants;
 const ContainerHeader = styled.section`
   display: flex;
   justify-content: space-between;
-  margin: 20px 0 50px 0;
+  margin: 20px 0;
 
   > h1 {
+    cursor: default;
     font-size: 28px;
     font-weight: normal;
     margin: 0;
@@ -138,7 +139,7 @@ class StudiesContainer extends Component<Props, State> {
               </CardGrid>
             )
         }
-        <CreateStudyModal
+        <StudyDetailsModal
             handleOnCloseModal={this.handleOnCloseModal}
             isVisible={isCreateStudyModalVisible} />
       </>

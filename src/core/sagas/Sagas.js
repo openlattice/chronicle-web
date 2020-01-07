@@ -5,11 +5,11 @@
 import { all, fork } from '@redux-saga/core/effects';
 import { AuthSagas } from 'lattice-auth';
 
+import * as DataSagas from './data/DataSagas';
 import * as AppSagas from '../../containers/app/AppSagas';
 import * as EDMSagas from '../edm/EDMSagas';
 import * as RoutingSagas from '../router/RoutingSagas';
 import * as StudiesSagas from '../../containers/studies/StudiesSagas';
-import * as DataSagas from './data/DataSagas';
 
 export default function* sagas() :Generator<*, *, *> {
 
@@ -41,8 +41,10 @@ export default function* sagas() :Generator<*, *, *> {
     fork(StudiesSagas.getParticipantsEnrollmentStatusWatcher),
     fork(StudiesSagas.getStudiesWatcher),
     fork(StudiesSagas.getStudyParticipantsWatcher),
+    fork(StudiesSagas.updateStudyWatcher),
 
     // DataSagas
-    fork(DataSagas.submitDataGraphWatcher)
+    fork(DataSagas.submitDataGraphWatcher),
+    fork(DataSagas.submitPartialReplaceWatcher)
   ]);
 }

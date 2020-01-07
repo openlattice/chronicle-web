@@ -15,6 +15,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
   createParticipantsEntitySet,
@@ -23,6 +24,7 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  updateStudy
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -43,13 +45,16 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [DELETE_STUDY_PARTICIPANT]: {
     requestState: RequestStates.STANDBY
   },
+  [GET_PARTICIPANTS_ENROLLMENT]: {
+    requestState: RequestStates.STANDBY
+  },
   [GET_STUDIES]: {
     requestState: RequestStates.STANDBY
   },
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  GET_PARTICIPANTS_ENROLLMENT: {
+  [UPDATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
   associationKeyIds: Map(),
@@ -101,6 +106,21 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         },
         FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
         FINALLY: () => state.deleteIn([CREATE_STUDY, seqAction.id]),
+      });
+    }
+
+    case updateStudy.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return updateStudy.reducer(state, action, {
+        REQUEST: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.PENDING),
+        SUCCESS: () => {
+          const study :Map = fromJS(seqAction.value);
+          const studyId :UUID = study.getIn([STUDY_ID, 0]);
+          return state
+            .setIn(['studies', studyId], study)
+            .setIn([UPDATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+        },
+        FAILURE: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.FAILURE)
       });
     }
 

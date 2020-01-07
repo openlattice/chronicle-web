@@ -37,6 +37,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
   createParticipantsEntitySet,
@@ -45,6 +46,7 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  updateStudy
 } from './StudiesActions';
 
 import Logger from '../../utils/Logger';
@@ -52,26 +54,36 @@ import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ENROLLMENT_STATUS, PARTICIPANTS_PREFIX } from '../../core/edm/constants/DataModelConstants';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { submitDataGraph } from '../../core/sagas/data/DataActions';
-import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
+import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
+import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
 
-const { deleteEntityDataWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
-const { deleteEntityData, getEntitySetData, updateEntityData } = DataApiActions;
+const {
+  deleteEntityDataWorker,
+  getEntitySetDataWorker,
+  updateEntityDataWorker
+} = DataApiSagas;
+const {
+  deleteEntityData,
+  getEntitySetData,
+  updateEntityData
+} = DataApiActions;
 const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
-const { EntitySetBuilder } = Models;
-const { DeleteTypes, UpdateTypes } = Types;
-
-
 const {
+  findEntityAddressKeyFromMap,
   getEntityAddressKey,
   getPageSectionKey,
+  processEntityData,
+  processEntityDataForPartialReplace,
   processAssociationEntityData,
-  processEntityData
+  replaceEntityAddressKeys,
 } = DataProcessingUtils;
+
+const { EntitySetBuilder } = Models;
+const { DeleteTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -325,6 +337,70 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.updateStudy()
+ *
+ */
+
+function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(updateStudy.request(action.id));
+
+    const { value } = action;
+    const { formData, initialFormData, study } = value;
+
+    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
+      entitySetIds: state.getIn(['edm', 'entitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
+
+    const studyEKID :UUID = study.getIn([OPENLATTICE_ID_FQN, 0]);
+    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+
+    const entityIndexToIdMap :Map = Map()
+      .setIn([CHRONICLE_STUDIES, 0], studyEKID);
+
+    const draftWithKeys = replaceEntityAddressKeys(
+      formData,
+      findEntityAddressKeyFromMap(entityIndexToIdMap)
+    );
+
+    const originalWithKeys = replaceEntityAddressKeys(
+      initialFormData,
+      findEntityAddressKeyFromMap(entityIndexToIdMap)
+    );
+
+    let entityData = processEntityDataForPartialReplace(
+      draftWithKeys,
+      originalWithKeys,
+      entitySetIds,
+      propertyTypeIds,
+      {}
+    );
+
+    const response = yield call(submitPartialReplaceWorker, submitPartialReplace({ entityData }));
+    if (response.error) throw response.error;
+
+    // construct updated study
+    entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
+    const studyEntityData = getIn(entityData, [entitySetId, 0]);
+
+    yield put(updateStudy.success(action.id, studyEntityData));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(updateStudy.failure(action.id));
+  }
+  finally {
+    yield put(updateStudy.finally(action.id));
+  }
+}
+
+function* updateStudyWatcher() :Generator<*, *, *> {
+  yield takeEvery(UPDATE_STUDY, updateStudyWorker);
+}
+
+/*
+ *
  * StudiesActions.createParticipantsEntitySet()
  *
  */
@@ -506,6 +582,13 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     let { value: formData } = action;
 
+    // generate a random study id
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
+      uuid(),
+    );
+
     // create a new participant entity set for the new study
     let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
     if (response.error) throw response.error;
@@ -514,13 +597,6 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       entitySetIds: state.getIn(['edm', 'entitySetIds']),
       propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
     }));
-
-    // generate a random study id
-    formData = setIn(
-      formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
-      uuid(),
-    );
 
     let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
     response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData: {}, entityData }));
@@ -566,4 +642,6 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
+  updateStudyWatcher,
+  updateStudyWorker
 };
