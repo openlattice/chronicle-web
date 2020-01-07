@@ -6,7 +6,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import { Card, CardSegment, Colors } from 'lattice-ui-kit';
+import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
@@ -28,7 +28,7 @@ const StudyNameWrapper = styled.h2`
   display: flex;
   font-size: 22px;
   font-weight: normal;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   padding: 0;
 `;
 
@@ -37,41 +37,32 @@ type Props = {
 };
 
 const Tabs = styled.div`
-  border-bottom: 2px solid ${NEUTRALS[5]};
   display: flex;
-  height: 40px;
-  margin-bottom: 20px;
-`;
-
-const TabItem = styled.div`
-  align-items: center;
-  display: flex;
-  margin-bottom: -1px;
-  margin-right: 20px;
+  margin: 30px 0 50px 0;
 `;
 
 const TabLink = styled(NavLink)`
-  border: 2px solid transparent;
+  border-bottom: 2px solid transparent;
   color: ${NEUTRALS[1]};
-  font-size: 16px;
-  height: 100%;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 70px;
+  margin-right: 40px;
   outline: none;
-  padding: 0 20px;
   text-decoration: none;
 
   :focus {
-    border-bottom: 2px solid ${PURPLES[2]};
-    color: ${PURPLES[2]};
     text-decoration: none;
   }
 
   :hover {
     color: ${NEUTRALS[0]};
+    cursor: ponter;
   }
 
   &.active {
-    border-bottom: 2px solid ${PURPLES[2]};
-    color: ${PURPLES[2]};
+    border-bottom: 2px solid ${PURPLES[1]};
+    color: ${PURPLES[1]};
   }
 `;
 
@@ -93,26 +84,18 @@ const StudyDetailsContainer = (props :Props) => {
       <StudyNameWrapper>
         { study.getIn([STUDY_NAME, 0]) }
       </StudyNameWrapper>
-      <Card>
-        <CardSegment vertical>
-          <Tabs>
-            <TabItem>
-              <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
-                Study Details
-              </TabLink>
-            </TabItem>
-            <TabItem>
-              <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
-                Participants
-              </TabLink>
-            </TabItem>
-          </Tabs>
-          <Switch>
-            <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants study={study} />} />
-            <Route path={Routes.STUDY} render={() => <StudyDetails study={study} />} />
-          </Switch>
-        </CardSegment>
-      </Card>
+      <Tabs>
+        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
+          Study Details
+        </TabLink>
+        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
+          Participants
+        </TabLink>
+      </Tabs>
+      <Switch>
+        <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants study={study} />} />
+        <Route path={Routes.STUDY} render={() => <StudyDetails study={study} />} />
+      </Switch>
     </>
   );
 };

@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
+  Card,
+  CardSegment,
   Colors,
   EditButton
 } from 'lattice-ui-kit';
@@ -66,20 +68,19 @@ const MainInfoContainer = styled.div`
 const AboutWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 0 0 80%;
+  flex: 0 0 66.6%;
 `;
 
 const ContactWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 0 0 20%;
+  flex: 0 0 33.3%;
 `;
 
 const EditButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
-  padding-bottom: 5px;
-  border-bottom: 1px dashed ${NEUTRALS[3]};
+  margin-bottom: 5px;
 `;
 
 type DetailProps = {
@@ -173,24 +174,26 @@ const StudyDetails = ({ study } :Props) => {
 
   const renderEditButton = () => (
     <EditButtonWrapper>
-      <EditButton mode="positive" onClick={openEditModal}>
+      <EditButton mode="primary" onClick={openEditModal}>
         Edit Details
       </EditButton>
     </EditButtonWrapper>
   );
 
   return (
-    <>
-      {renderEditButton()}
-      <MainInfoContainer>
-        {renderAbout()}
-        {renderContactInfo()}
-      </MainInfoContainer>
-      <StudyDetailsModal
-          handleOnCloseModal={closeEditModal}
-          isVisible={editModalVisible}
-          study={study} />
-    </>
+    <Card>
+      <CardSegment vertical>
+        {renderEditButton()}
+        <MainInfoContainer>
+          {renderAbout()}
+          {renderContactInfo()}
+        </MainInfoContainer>
+        <StudyDetailsModal
+            handleOnCloseModal={closeEditModal}
+            isVisible={editModalVisible}
+            study={study} />
+      </CardSegment>
+    </Card>
   );
 };
 export default StudyDetails;
