@@ -52,7 +52,7 @@ const CellContent = styled.div`
   font-size: 15px;
   font-weight: 300;
   overflow: hidden;
-  padding: 0px 10px;
+  padding: 0px 5px;
 `;
 /* stylelint-enable */
 
