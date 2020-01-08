@@ -42,15 +42,15 @@ const StudyParticipants = ({ study } :Props) => {
   const dispatch = useDispatch();
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const studyId = study.getIn([STUDY_ID, 0]);
-  const participants = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
+  const studyId :UUID = study.getIn([STUDY_ID, 0]);
+  const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
 
   useEffect(() => {
     dispatch(getStudyParticipants(studyId));
   }, [dispatch, studyId]);
 
   const requestStates = {
-    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['sudies', GET_STUDY_PARTICIPANTS, 'requestState'])),
+    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
   };
 
   const openAddParticipantModal = () => {
