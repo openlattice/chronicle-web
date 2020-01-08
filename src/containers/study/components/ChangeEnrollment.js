@@ -35,7 +35,7 @@ const ChangeEnrollment = ({
   requestState
 } :Props) => {
 
-  const action = enrollmentStatus === ENROLLED ? 'pause' : 'resume';
+  let action = enrollmentStatus === ENROLLED ? 'pause' : 'resume';
   const completedAction = enrollmentStatus === ENROLLED ? 'resumed' : 'paused';
 
   const requestStateComponents = {
@@ -66,7 +66,7 @@ const ChangeEnrollment = ({
     )
   };
 
-  const primaryButtonAction = action.charAt(0).toUpperCase() + action.substr(1);
+  action = action.charAt(0).toUpperCase() + action.substr(1);
   return (
     <ActionModal
         isVisible={isVisible}
@@ -76,9 +76,9 @@ const ChangeEnrollment = ({
         requestStateComponents={requestStateComponents}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary={`Yes, ${primaryButtonAction}`}
+        textPrimary={`Yes, ${action}`}
         textSecondary="No, Cancel"
-        textTitle="Change Enrollment" />
+        textTitle={`${action} Enrollment`} />
   );
 };
 
