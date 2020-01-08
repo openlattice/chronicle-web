@@ -33,7 +33,7 @@ const tableHeader = [
   {
     cellStyle: {
       textAlign: 'center',
-      width: '175px',
+      width: '180px',
     },
     key: 'actions',
     label: 'Actions',
