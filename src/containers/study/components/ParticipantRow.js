@@ -49,7 +49,10 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
 const CellContent = styled.div`
   -webkit-line-clamp: 2;
   display: -webkit-box;
+  font-size: 15px;
+  font-weight: 300;
   overflow: hidden;
+  padding: 0px 10px;
 `;
 /* stylelint-enable */
 
