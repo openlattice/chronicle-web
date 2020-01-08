@@ -44,7 +44,7 @@ const DetailsWrapper = styled.div`
   > h4 {
     color: ${NEUTRALS[0]};
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 500;
     margin: 0 0 3px 0;
     padding: 0;
   }
