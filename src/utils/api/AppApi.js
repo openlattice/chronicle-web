@@ -41,7 +41,14 @@ const getParticipantsDataUrl = (participantEntityKeyId :UUID, studyId :UUID) => 
   }
 
   const baseUrl = getBaseUrl();
-  return `${baseUrl}/${CHRONICLE}/${STUDY}${PARTICIPANT}/${DATA}/${studyId}/${participantEntityKeyId}?${FILE_TYPE}=csv`;
+  return `${baseUrl}
+      /${CHRONICLE}
+      /${STUDY}
+      /${PARTICIPANT}
+      /${DATA}
+      /${studyId}
+      /${participantEntityKeyId}
+      ?${FILE_TYPE}=csv`;
 };
 
 export { getBaseUrl, getParticipantsDataUrl };
