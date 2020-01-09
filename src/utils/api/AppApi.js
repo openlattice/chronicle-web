@@ -12,16 +12,15 @@ import {
 } from '../constants/UrlConstants';
 import EnvTypes from '../constants/EnvTypes';
 
-declare var __ENV_DEV__ :boolean; // injected by Webpack.DefinePlugin
-
 const LOG = new Logger('AppApi');
 const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
 
 const getBaseUrl = () => {
-  if (__ENV_DEV__) {
+  const { hostname } = window.location;
+  if (hostname === 'localhost') {
     return ENV_URLS.get(LOCAL);
   }
-  if (window.location.host.startsWith(STAGING)) {
+  if (window.location.hostname.startsWith(STAGING)) {
     return ENV_URLS.get(STAGING);
   }
   return ENV_URLS.get(PRODUCTION);
