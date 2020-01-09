@@ -5,7 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Modal } from 'lattice-ui-kit';
 
-import { STUDY_LOGIN_ROOT } from '../../../core/edm/constants/DataModelConstants';
+import { STUDY_LOGIN_ROOT } from '../../../utils/constants/GlobalConstants';
 
 const ModalWrapper = styled.div`
   width: 500px;

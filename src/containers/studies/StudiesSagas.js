@@ -52,11 +52,11 @@ import {
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
 import { selectEntityTypeId } from '../../core/edm/EDMUtils';
-import { PARTICIPANTS_PREFIX } from '../../core/edm/constants/DataModelConstants';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
+import { PARTICIPANTS_PREFIX } from '../../utils/constants/GlobalConstants';
 
 const {
   deleteEntityDataWorker,
