@@ -122,7 +122,7 @@ const ParticipantsTable = (props :Props) => {
             data={participants.valueSeq().toJS()}
             headers={tableHeader}
             paginated
-            rowsPerPageOptions={[20, 50]} />
+            rowsPerPageOptions={[5, 20, 50]} />
       </TableWrapper>
       <ParticipantInfoModal
           handleOnClose={() => setInfoModalOpen(false)}
