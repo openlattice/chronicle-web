@@ -12,7 +12,7 @@ import DeleteParticipantModal from './components/DeleteParticipantModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
 
-import { PARTICIPANT_ACTIONS } from '../../core/edm/constants/DataModelConstants';
+import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 import {
@@ -23,7 +23,7 @@ import {
 } from '../studies/StudiesActions';
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { DELETE, LINK, TOGGLE_ENROLLMENT } = PARTICIPANT_ACTIONS;
+const { DELETE, LINK, TOGGLE_ENROLLMENT } = ParticipantActionTypes;
 
 const tableHeader = [
   {

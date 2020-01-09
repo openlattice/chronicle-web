@@ -15,7 +15,7 @@ import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
-import { PARTICIPANT_ACTIONS } from '../../../core/edm/constants/DataModelConstants';
+import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { getParticipantsDataUrl } from '../../../utils/api/AppApi';
 
@@ -27,7 +27,7 @@ const {
   DOWNLOAD,
   LINK,
   TOGGLE_ENROLLMENT
-} = PARTICIPANT_ACTIONS;
+} = ParticipantActionTypes;
 
 const StyledCell = styled.td`
   padding: 5px 5px;
