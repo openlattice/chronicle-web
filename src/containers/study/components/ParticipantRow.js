@@ -104,7 +104,7 @@ const ActionIcon = (props :IconProps) => {
       {
         action === DOWNLOAD
           ? (
-            <a href={participantDataUrl} download target="_blank" rel="noopener noreferrer">
+            <a href={participantDataUrl} download target={participantEKId} rel="noopener noreferrer">
               <IconCircleWrapper
                   data-action-id={action}
                   data-key-id={participantEKId}
