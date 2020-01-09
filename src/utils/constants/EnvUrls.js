@@ -2,7 +2,9 @@
 
 import { Map, fromJS } from 'immutable';
 
-import { LOCAL, PRODUCTION, STAGING } from './UrlConstants';
+import EnvTypes from './EnvTypes';
+
+const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
 
 const ENV_URLS :Map<string, string> = fromJS({
   [LOCAL]: 'http://localhost:8081',

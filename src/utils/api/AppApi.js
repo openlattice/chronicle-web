@@ -7,16 +7,15 @@ import {
   CHRONICLE,
   DATA,
   FILE_TYPE,
-  LOCAL,
   PARTICIPANT,
-  PRODUCTION,
-  STAGING,
   STUDY,
 } from '../constants/UrlConstants';
+import EnvTypes from '../constants/EnvTypes';
 
 declare var __ENV_DEV__ :boolean; // injected by Webpack.DefinePlugin
 
 const LOG = new Logger('AppApi');
+const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
 
 const getBaseUrl = () => {
   if (__ENV_DEV__) {
