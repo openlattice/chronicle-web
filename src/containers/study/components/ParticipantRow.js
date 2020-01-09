@@ -14,13 +14,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 
-import { ENROLLMENT_STATUS, PARTICIPANT_ACTIONS } from '../../../core/edm/constants/DataModelConstants';
+import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
+import { PARTICIPANT_ACTIONS } from '../../../core/edm/constants/DataModelConstants';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { getParticipantsDataUrl } from '../../../utils/api/AppApi';
 
 const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
-const { ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED } = EnrollmentStatuses;
 const {
   DELETE,
   DOWNLOAD,

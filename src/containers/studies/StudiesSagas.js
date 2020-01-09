@@ -49,9 +49,10 @@ import {
   updateStudy
 } from './StudiesActions';
 
+import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
 import { selectEntityTypeId } from '../../core/edm/EDMUtils';
-import { ENROLLMENT_STATUS, PARTICIPANTS_PREFIX } from '../../core/edm/constants/DataModelConstants';
+import { PARTICIPANTS_PREFIX } from '../../core/edm/constants/DataModelConstants';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
@@ -96,7 +97,7 @@ const {
   STUDY_NAME,
 } = PROPERTY_TYPE_FQNS;
 const { PERSON } = ENTITY_TYPE_FQNS;
-const { ENROLLED, NOT_ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 

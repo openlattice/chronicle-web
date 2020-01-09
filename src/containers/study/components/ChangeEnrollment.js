@@ -7,9 +7,9 @@ import { ActionModal, Colors } from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-import { ENROLLMENT_STATUS } from '../../../core/edm/constants/DataModelConstants';
+import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 
-const { ENROLLED } = ENROLLMENT_STATUS;
+const { ENROLLED } = EnrollmentStatuses;
 const { NEUTRALS } = Colors;
 
 const ModalWrapper = styled.div`
