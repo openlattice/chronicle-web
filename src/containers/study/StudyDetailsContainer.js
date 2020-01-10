@@ -26,7 +26,7 @@ const { NEUTRALS, PURPLES } = Colors;
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
   display: flex;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: normal;
   margin-bottom: 0;
   padding: 0;
