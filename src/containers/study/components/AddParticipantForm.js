@@ -36,6 +36,7 @@ const AddParticipantForm = (props :Props, ref) => {
         hideSubmit
         onSubmit={handleSubmit}
         ref={ref}
+        noPadding
         schema={dataSchema}
         uiSchema={uiSchema} />
   );
