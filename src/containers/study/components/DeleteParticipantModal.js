@@ -57,8 +57,8 @@ const DeleteParticipantModal = ({
         requestStateComponents={requestStateComponents}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary="Yes, Delete"
-        textSecondary="No, Cancel"
+        textPrimary="Yes"
+        textSecondary="No"
         textTitle="Delete Participant" />
   );
 };

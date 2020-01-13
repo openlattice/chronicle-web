@@ -133,7 +133,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           const {
             participantEntityData,
             participantEntityKeyId,
-            participantsEntitySetId,
+            participantsEntitySetName,
             participatedInEntityKeyId,
             studyId
           } = seqAction.value;
@@ -141,7 +141,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
             .setIn(['participants', studyId, participantEntityKeyId], participantEntityData)
-            .setIn(['associationKeyIds', participantsEntitySetId, participantEntityKeyId], participatedInEntityKeyId);
+            .setIn(['associationKeyIds', participantsEntitySetName, participantEntityKeyId], participatedInEntityKeyId);
         }
       });
     }
@@ -202,9 +202,9 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { associationKeyIds, participantsEntitySetId } = seqAction.value;
+          const { associationKeyIds, participantsEntitySetName } = seqAction.value;
           return state
-            .setIn(['associationKeyIds', participantsEntitySetId], associationKeyIds)
+            .setIn(['associationKeyIds', participantsEntitySetName], associationKeyIds)
             .setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.SUCCESS);
         }
       });

@@ -56,18 +56,20 @@ import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/c
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
-import { PARTICIPANTS_PREFIX } from '../../utils/constants/GlobalConstants';
+import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 
 const {
-  deleteEntityDataWorker,
+  deleteEntitiesAndNeighborsWorker,
   getEntitySetDataWorker,
   updateEntityDataWorker
 } = DataApiSagas;
+
 const {
-  deleteEntityData,
+  deleteEntitiesAndNeighbors,
   getEntitySetData,
   updateEntityData
 } = DataApiActions;
+
 const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
@@ -88,14 +90,21 @@ const { DeleteTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
-const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
-const { PARTICIPATED_IN } = ASSOCIATION_ENTITY_SET_NAMES;
+const {
+  CHRONICLE_STUDIES,
+  APPLICATION_DATA,
+  CHRONICLE_DEVICES,
+  PREPROCESSED_DATA
+} = ENTITY_SET_NAMES;
+
 const {
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
   STUDY_NAME,
 } = PROPERTY_TYPE_FQNS;
+
+const { PARTICIPATED_IN } = ASSOCIATION_ENTITY_SET_NAMES;
 const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
@@ -107,7 +116,7 @@ const LOG = new Logger('StudiesSagas');
  *
  */
 
-function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
+function* changeEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(changeEnrollmentStatus.request(action.id));
 
@@ -118,16 +127,19 @@ function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
       studyId,
     } = value;
 
-    const participantsEntityName = `${PARTICIPANTS_PREFIX}${studyId}`;
-    const participantsEntitySetId = yield select(
-      (state) => state.getIn(['studies', 'participantEntitySetIds', participantsEntityName])
-    );
-    const associationEntityKeyId = yield select(
-      (state) => state.getIn(['studies', 'associationKeyIds', participantsEntitySetId, participantEntityKeyId])
-    );
-    const statusPropertyTypeId = yield select((state) => state.getIn(['edm', 'propertyTypeIds', STATUS]));
-    const participatedInEntitySetId = yield select((state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN]));
+    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
     const newEnrollmentStatus = enrollmentStatus === ENROLLED ? NOT_ENROLLED : ENROLLED;
+
+    const {
+      associationEntityKeyId,
+      participatedInEntitySetId,
+      statusPropertyTypeId,
+    } = yield select((state) => ({
+      associationEntityKeyId:
+        state.getIn(['studies', 'associationKeyIds', participantsEntitySetName, participantEntityKeyId]),
+      participatedInEntitySetId: state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN]),
+      statusPropertyTypeId: state.getIn(['edm', 'propertyTypeIds', STATUS]),
+    }));
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
       entities: {
@@ -156,8 +168,8 @@ function* changeEnrollmentWorker(action :SequenceAction) :Generator<*, *, *> {
   }
 }
 
-function* changeEnrollmentWatcher() :Generator<*, *, *> {
-  yield takeEvery(CHANGE_ENROLLMENT_STATUS, changeEnrollmentWorker);
+function* changeEnrollmentStatusWatcher() :Generator<*, *, *> {
+  yield takeEvery(CHANGE_ENROLLMENT_STATUS, changeEnrollmentStatusWorker);
 }
 
 /*
@@ -172,15 +184,28 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
 
     const { studyId, participantEntityKeyId } = action.value;
 
-    const participantsEntityName = `${PARTICIPANTS_PREFIX}${studyId}`;
-    const participantsEntitySetId = yield select(
-      (state) => state.getIn(['studies', 'participantEntitySetIds', participantsEntityName])
-    );
+    const participantsEntityName = getParticipantsEntitySetName(studyId);
+
+    const {
+      applicationDataEntitySetId,
+      devicesEntitySetId,
+      participantsEntitySetId,
+      preprocessedDataEntitySetId,
+    } = yield select((state) => ({
+      applicationDataEntitySetId: state.getIn(['edm', 'entitySetIds', APPLICATION_DATA]),
+      devicesEntitySetId: state.getIn(['edm', 'entitySetIds', CHRONICLE_DEVICES]),
+      participantsEntitySetId: state.getIn(['studies', 'participantEntitySetIds', participantsEntityName]),
+      preprocessedDataEntitySetId: state.getIn(['edm', 'entitySetIds', PREPROCESSED_DATA]),
+    }));
 
     const response = yield call(
-      deleteEntityDataWorker,
-      deleteEntityData({
+      deleteEntitiesAndNeighborsWorker,
+      deleteEntitiesAndNeighbors({
         entitySetId: participantsEntitySetId,
+        filter: {
+          entityKeyIds: [participantEntityKeyId],
+          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId, preprocessedDataEntitySetId]
+        },
         entityKeyIds: [participantEntityKeyId],
         deleteType: DeleteTypes.HARD
       })
@@ -217,7 +242,7 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
     yield put(getParticipantsEnrollmentStatus.request(action.id));
 
     const { value } = action;
-    const { participants, participantsEntitySetId } = value;
+    const { participants, participantsEntitySetId, participantsEntitySetName } = value;
 
     if (!participants.isEmpty()) {
       const participatedInEntitySetId = yield select(
@@ -253,7 +278,10 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
       const associationKeyIds :Map = fromJS(response.data)
         .map((associations :List) => associations.first().getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
 
-      yield put(getParticipantsEnrollmentStatus.success(action.id, { associationKeyIds, participantsEntitySetId }));
+      yield put(getParticipantsEnrollmentStatus.success(action.id, { associationKeyIds, participantsEntitySetName }));
+    }
+    else {
+      yield put(getParticipantsEnrollmentStatus.success(action.id));
     }
   }
   catch (error) {
@@ -283,13 +311,14 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
     const studyId = action.value;
 
-    // only fetch if data is not found in redux store.
+    // for each study, participants data is fetched once and stored in redux
+    // subsequent requests should therefore not result in a new fetch
     let participants = yield select((state) => state.getIn(['studies', 'participants', studyId]));
     if (participants) {
       yield put(getStudyParticipants.success(action.id));
     }
     else {
-      const participantsEntitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
+      const participantsEntitySetName = getParticipantsEntitySetName(studyId);
       let response = {};
 
       response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
@@ -306,7 +335,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       // get enrollment status
       response = yield call(
         getParticipantsEnrollmentStatusWorker,
-        getParticipantsEnrollmentStatus({ participants, participantsEntitySetId })
+        getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName })
       );
       if (response.error) throw response.error;
       const enrollmentStatus :Map = response.data;
@@ -427,7 +456,7 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
       .setContacts([email])
       .setDescription(`Participants of study with name ${studyName} and id ${studyId}`)
       .setEntityTypeId(entityTypeId)
-      .setName(`${PARTICIPANTS_PREFIX}${studyId}`)
+      .setName(getParticipantsEntitySetName(studyId))
       .setTitle(`${studyName} Participants`)
       .build();
 
@@ -478,11 +507,11 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     }));
     entitySetIds = entitySetIds.merge(participantEntitySetIds);
 
-    const entitySetName = `${PARTICIPANTS_PREFIX}${studyId}`;
-    const participantsEntitySetId = participantEntitySetIds.get(entitySetName);
+    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
+    const participantsEntitySetId = participantEntitySetIds.get(participantsEntitySetName);
 
     const associations = [
-      [PARTICIPATED_IN, 0, entitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
+      [PARTICIPATED_IN, 0, participantsEntitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
         [STATUS.toString()]: [ENROLLED]
       }]
     ];
@@ -500,7 +529,8 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const participantEntityKeyId = getIn(response.data, ['entityKeyIds', participantsEntitySetId, 0]);
     formData = setIn(
       formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, entitySetName, OPENLATTICE_ID_FQN)], participantEntityKeyId
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, participantsEntitySetName, OPENLATTICE_ID_FQN)],
+      participantEntityKeyId
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
@@ -512,7 +542,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     yield put(addStudyParticipant.success(action.id, {
       participantEntityData,
       participantEntityKeyId,
-      participantsEntitySetId,
+      participantsEntitySetName,
       participatedInEntityKeyId,
       studyId
     }));
@@ -633,7 +663,7 @@ function* createStudyWatcher() :Generator<*, *, *> {
 export {
   addStudyParticipantWatcher,
   addStudyParticipantWorker,
-  changeEnrollmentWatcher,
+  changeEnrollmentStatusWatcher,
   createParticipantsEntitySetWatcher,
   createParticipantsEntitySetWorker,
   createStudyWatcher,

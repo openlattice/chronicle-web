@@ -76,8 +76,8 @@ const ChangeEnrollment = ({
         requestStateComponents={requestStateComponents}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary={`Yes, ${action}`}
-        textSecondary="No, Cancel"
+        textPrimary="Yes"
+        textSecondary="No"
         textTitle={`${action} Enrollment`} />
   );
 };

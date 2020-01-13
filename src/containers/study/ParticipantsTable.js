@@ -102,10 +102,15 @@ const ParticipantsTable = (props :Props) => {
     setParticipantEntityKeyId(keyId);
 
     // actions
-    if (actionId === LINK) setInfoModalOpen(true);
-    if (actionId === DELETE) openDeleteModal();
-    if (actionId === TOGGLE_ENROLLMENT) openEnrollmentModel();
-
+    if (actionId === LINK) {
+      setInfoModalOpen(true);
+    }
+    else if (actionId === DELETE) {
+      openDeleteModal();
+    }
+    else if (actionId === TOGGLE_ENROLLMENT) {
+      openEnrollmentModel();
+    }
   };
 
   const components = {
@@ -131,14 +136,14 @@ const ParticipantsTable = (props :Props) => {
           studyId={studyId} />
       <DeleteParticipantModal
           handleOnClose={() => setDeleteModalOpen(false)}
-          handleOnDeleteParticipant={() => handleOnDeleteParticipant()}
+          handleOnDeleteParticipant={handleOnDeleteParticipant}
           isVisible={deleteModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           requestState={requestStates[DELETE_STUDY_PARTICIPANT]} />
 
       <ChangeEnrollment
           enrollmentStatus={participants.getIn([participantEntityKeyId, STATUS, 0])}
-          handleOnChangeEnrollment={() => handleOnChangeEnrollment()}
+          handleOnChangeEnrollment={handleOnChangeEnrollment}
           handleOnClose={() => setEnrollmentModalOpen(false)}
           isVisible={enrollmentModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}

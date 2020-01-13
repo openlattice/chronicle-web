@@ -5,7 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Modal } from 'lattice-ui-kit';
 
-import { STUDY_LOGIN_ROOT } from '../../../utils/constants/GlobalConstants';
+import { getParticipantLoginLink } from '../../../utils/ParticipantUtils';
 
 const ModalWrapper = styled.div`
   width: 500px;
@@ -43,12 +43,12 @@ const ParticipantInfoModal = ({
 } :Props) => {
 
   const renderParticipantInfo = () => {
-    const enrollmentLink = `${STUDY_LOGIN_ROOT}${studyId}&participantId=${participantId}`;
+    const participantLoginLink = getParticipantLoginLink(studyId, participantId);
 
     const participantDetails = [
       { name: 'Participant ID', value: participantId },
       { name: 'Study ID', value: studyId },
-      { name: 'Enrollment Link', value: enrollmentLink }
+      { name: 'Enrollment Link', value: participantLoginLink }
     ];
     return (
       <ModalWrapper>

@@ -1,10 +1,10 @@
 // @flow
 
 type ParticipantActionTypesEnum = {|
-  DELETE:'delete';
-  DOWNLOAD:'download';
-  LINK:'link';
-  TOGGLE_ENROLLMENT:'toggle_enrollment';
+  DELETE :'delete';
+  DOWNLOAD :'download';
+  LINK :'link';
+  TOGGLE_ENROLLMENT :'toggle_enrollment';
 |};
 
 type ParticipantActionType = $Values<ParticipantActionTypesEnum>;

@@ -96,7 +96,9 @@ const ActionIcon = (props :IconProps) => {
 
   let iconColor = NEUTRALS[0];
   if (icon === faToggleOn && enrollmentStatus === ENROLLED) {
-    [, , iconColor] = PURPLES;
+    /* https://github.com/eslint/eslint/issues/10782#issuecomment-415561951 */
+    /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
+    iconColor = PURPLES[2];
   }
   const participantDataUrl = getParticipantsDataUrl(participantEKId, studyId);
 

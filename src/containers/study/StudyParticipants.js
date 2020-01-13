@@ -68,7 +68,7 @@ const StudyParticipants = ({ study } :Props) => {
     <Card>
       <CardSegment vertical>
         <AddParticipantsButton
-            onClick={() => openAddParticipantModal()}
+            onClick={openAddParticipantModal}
             mode="primary">
           Add Participant
         </AddParticipantsButton>

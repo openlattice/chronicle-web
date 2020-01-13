@@ -1,9 +1,9 @@
 // @flow
 
 type EnvTypeEnum = {|
-  PRODUCTION:'production';
-  STAGING:'staging';
-  LOCAL:'local';
+  PRODUCTION :'production';
+  STAGING :'staging';
+  LOCAL :'local';
 |};
 
 type EnvType = $Values<EnvTypeEnum>;
