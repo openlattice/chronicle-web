@@ -7,10 +7,11 @@ const ASSOCIATION_ENTITY_SET_NAMES = {
 };
 
 const ENTITY_SET_NAMES = {
+  APPLICATION_DATA: 'chronicle_app_data',
+  CHRONICLE_DEVICES: 'chronicle_device',
   CHRONICLE_STUDIES: 'chronicle_study',
+  PREPROCESSED_DATA: 'chronicle_preprocessed_app_data',
 };
-
-const PARTICIPANTS_PREFIX = 'chronicle_participants_';
 
 const ENTITY_SET_NAMES_LIST = [];
 Object.keys(ASSOCIATION_ENTITY_SET_NAMES).forEach((name :string) => {
@@ -25,5 +26,4 @@ export {
   ASSOCIATION_ENTITY_SET_NAMES,
   ENTITY_SET_NAMES,
   ENTITY_SET_NAMES_LIST,
-  PARTICIPANTS_PREFIX
 };

@@ -2,33 +2,32 @@
  * @flow
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 import {
   Banner,
-  Button,
   Card,
-  CardSegment
+  CardSegment,
+  PlusButton,
+  Spinner
 } from 'lattice-ui-kit';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
 
 import AddParticipantModal from './components/AddParticipantModal';
-import ParticipantsTable from './components/ParticipantsTable';
+import ParticipantsTable from './ParticipantsTable';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { resetRequestState } from '../../core/redux/ReduxActions';
+import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 50px;
-`;
-
-const AddParticipantsButton = styled(Button)`
-  align-self: flex-end;
+const AddParticipantsButton = styled(PlusButton)`
+  align-self: flex-start;
+  margin-bottom: 5px;
 `;
 
 type Props = {
@@ -40,30 +39,50 @@ const MissingParticipants = () => (
 );
 
 const StudyParticipants = ({ study } :Props) => {
+  const dispatch = useDispatch();
   const [isModalOpen, setModalOpen] = useState(false);
 
-  const studyId = study.getIn([STUDY_ID, 0]);
-  const participants = useSelector((state) => state.getIn(['studies', 'participants', studyId], List()));
+  const studyId :UUID = study.getIn([STUDY_ID, 0]);
+  const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
+
+  useEffect(() => {
+    dispatch(getStudyParticipants(studyId));
+  }, [dispatch, studyId]);
+
+  const requestStates = {
+    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
+  };
+
+  const openAddParticipantModal = () => {
+    dispatch(resetRequestState(ADD_PARTICIPANT));
+    setModalOpen(true);
+  };
+
+  if (requestStates[GET_STUDY_PARTICIPANTS] === RequestStates.PENDING) {
+    return (
+      <Spinner size="2x" />
+    );
+  }
 
   return (
-    <Container>
-      <Card>
-        <CardSegment vertical>
-          <AddParticipantsButton
-              onClick={() => setModalOpen(true)}
-              mode="primary">
-            Add Participant
-          </AddParticipantsButton>
-          {
-            participants.count() === 0 ? <MissingParticipants /> : <ParticipantsTable participants={participants} />
-          }
-        </CardSegment>
-        <AddParticipantModal
-            isVisible={isModalOpen}
-            onCloseModal={() => setModalOpen(false)}
-            study={study} />
-      </Card>
-    </Container>
+    <Card>
+      <CardSegment vertical>
+        <AddParticipantsButton
+            onClick={openAddParticipantModal}
+            mode="primary">
+          Add Participant
+        </AddParticipantsButton>
+        {
+          participants.isEmpty()
+            ? <MissingParticipants />
+            : <ParticipantsTable participants={participants} study={study} />
+        }
+      </CardSegment>
+      <AddParticipantModal
+          isVisible={isModalOpen}
+          onCloseModal={() => setModalOpen(false)}
+          study={study} />
+    </Card>
   );
 };
 
