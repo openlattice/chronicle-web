@@ -203,7 +203,7 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
         entitySetId: participantsEntitySetId,
         filter: {
           entityKeyIds: [participantEntityKeyId],
-          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId]
+          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId, preprocessedDataEntitySetId]
         },
         deleteType: DeleteTypes.HARD
       })
