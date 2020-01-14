@@ -190,7 +190,6 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
       applicationDataEntitySetId,
       devicesEntitySetId,
       participantsEntitySetId,
-      preprocessedDataEntitySetId,
     } = yield select((state) => ({
       applicationDataEntitySetId: state.getIn(['edm', 'entitySetIds', APPLICATION_DATA]),
       devicesEntitySetId: state.getIn(['edm', 'entitySetIds', CHRONICLE_DEVICES]),
@@ -204,9 +203,8 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
         entitySetId: participantsEntitySetId,
         filter: {
           entityKeyIds: [participantEntityKeyId],
-          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId, preprocessedDataEntitySetId]
+          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId]
         },
-        entityKeyIds: [participantEntityKeyId],
         deleteType: DeleteTypes.HARD
       })
     );
