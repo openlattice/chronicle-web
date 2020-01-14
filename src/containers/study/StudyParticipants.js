@@ -46,8 +46,12 @@ const StudyParticipants = ({ study } :Props) => {
   const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
 
   useEffect(() => {
-    dispatch(getStudyParticipants(studyId));
-  }, [dispatch, studyId]);
+    // This is useful for avoiding a network request if
+    // a cached value is already available.
+    if (participants.isEmpty()) {
+      dispatch(getStudyParticipants(studyId));
+    }
+  }, [dispatch, participants, studyId]);
 
   const requestStates = {
     [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
