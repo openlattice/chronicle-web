@@ -173,15 +173,10 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             participantsEntitySetName,
             studyId,
           } = seqAction.value;
-          // only update participants and participantEntitySetIds if valid values are passed to reducer.
-          // in this case it suffices to check if 'participants' is defined
-          if (participants) {
-            return state
-              .setIn(['participants', studyId], participants)
-              .setIn(['participantEntitySetIds', participantsEntitySetName], participantsEntitySetId)
-              .setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
-          }
-          return state.setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
+          return state
+            .setIn(['participants', studyId], participants)
+            .setIn(['participantEntitySetIds', participantsEntitySetName], participantsEntitySetId)
+            .setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }

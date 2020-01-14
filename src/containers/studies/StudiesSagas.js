@@ -310,46 +310,39 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
     const studyId = action.value;
 
-    // for each study, participants data is fetched once and stored in redux
-    // subsequent requests should therefore not result in a new fetch
-    let participants = yield select((state) => state.getIn(['studies', 'participants', studyId]));
-    if (participants) {
-      yield put(getStudyParticipants.success(action.id));
-    }
-    else {
-      const participantsEntitySetName = getParticipantsEntitySetName(studyId);
-      let response = {};
+    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
+    let response = {};
 
-      response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
-      if (response.error) throw response.error;
-      const participantsEntitySetId = response.data;
+    response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
+    if (response.error) throw response.error;
+    const participantsEntitySetId = response.data;
 
-      response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId: participantsEntitySetId }));
-      if (response.error) throw response.error;
+    response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId: participantsEntitySetId }));
+    if (response.error) throw response.error;
 
-      participants = fromJS(response.data)
-        .toMap()
-        .mapKeys((index, participant) => participant.getIn([OPENLATTICE_ID_FQN, 0]));
+    let participants = fromJS(response.data)
+      .toMap()
+      .mapKeys((index, participant) => participant.getIn([OPENLATTICE_ID_FQN, 0]));
 
-      // get enrollment status
-      response = yield call(
-        getParticipantsEnrollmentStatusWorker,
-        getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName })
-      );
-      if (response.error) throw response.error;
-      const enrollmentStatus :Map = response.data;
+    // get enrollment status
+    response = yield call(
+      getParticipantsEnrollmentStatusWorker,
+      getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName })
+    );
+    if (response.error) throw response.error;
+    const enrollmentStatus :Map = response.data;
 
-      // update participant with enrollment status
-      participants = participants.map((participant, id) => participant
-        .set(STATUS, [enrollmentStatus.get(id)])
-        .set('id', [id])); // required by LUK table
-      yield put(getStudyParticipants.success(action.id, {
-        participants,
-        participantsEntitySetId,
-        participantsEntitySetName,
-        studyId,
-      }));
-    }
+    // update participants with enrollment status
+    participants = participants.map((participant, id) => participant
+      .set(STATUS, [enrollmentStatus.get(id)])
+      .set('id', [id])); // required by LUK table
+
+    yield put(getStudyParticipants.success(action.id, {
+      participants,
+      participantsEntitySetId,
+      participantsEntitySetName,
+      studyId,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
