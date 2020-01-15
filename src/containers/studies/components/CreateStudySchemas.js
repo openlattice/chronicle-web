@@ -3,15 +3,17 @@
  */
 
 import { DataProcessingUtils } from 'lattice-fabricate';
-
+import { Constants } from 'lattice';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
+const { OPENLATTICE_ID_FQN } = Constants;
 const {
   STUDY_DESCRIPTION,
   STUDY_EMAIL,
   STUDY_GROUP,
+  STUDY_ID,
   STUDY_NAME,
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
@@ -40,7 +42,17 @@ const dataSchema = {
         [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]: {
           title: 'Contact Email',
           type: 'string'
+        },
+
+        [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)]: {
+          title: '',
+          type: 'string'
+        },
+        [getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)]: {
+          title: '',
+          type: 'string'
         }
+
       },
       required: [
         getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME),
@@ -48,7 +60,7 @@ const dataSchema = {
       ],
       type: 'object',
       title: ''
-    }
+    },
   },
   type: 'object',
   title: ''
@@ -73,7 +85,13 @@ const uiSchema = {
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]: {
       classNames: 'column-span-12'
     },
-  }
+    [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)]: {
+      classNames: 'hidden'
+    },
+    [getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)]: {
+      classNames: 'hidden'
+    }
+  },
 };
 
 export {
