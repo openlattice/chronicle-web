@@ -85,6 +85,7 @@ const StudyParticipants = ({ study } :Props) => {
       <AddParticipantModal
           isVisible={isModalOpen}
           onCloseModal={() => setModalOpen(false)}
+          participants={participants}
           study={study} />
     </Card>
   );
