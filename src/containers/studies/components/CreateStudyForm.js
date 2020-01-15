@@ -4,14 +4,22 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { Map } from 'immutable';
-import { Form } from 'lattice-fabricate';
+import { Map, setIn } from 'immutable';
+import { Constants } from 'lattice';
+import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { useDispatch } from 'react-redux';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
 
 import createFormDataFromStudyEntity from '../../../utils/FormUtils';
+import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { createStudy, updateStudy } from '../StudiesActions';
+
+const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
+const { OPENLATTICE_ID_FQN } = Constants;
+const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
+const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 type Props = {
   study :Map;
@@ -24,7 +32,16 @@ const CreateStudyForm = (props:Props, ref) => {
 
   useEffect(() => {
     if (study) {
-      const formData :Object = createFormDataFromStudyEntity(dataSchema, study);
+      let formData :Object = createFormDataFromStudyEntity(dataSchema, study);
+
+      const studyId :UUID = study.getIn([STUDY_ID, 0]);
+      const studyEKID :UUID = study.getIn([OPENLATTICE_ID_FQN, 0]);
+
+      formData = setIn(formData,
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)], studyId);
+      formData = setIn(formData,
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)], studyEKID);
+
       setInitialFormData(formData);
     }
   }, [study]);

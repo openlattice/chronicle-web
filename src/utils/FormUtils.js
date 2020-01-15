@@ -1,11 +1,12 @@
 // @flow
 
-import { Map, get } from 'immutable';
+import { Map, getIn, setIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-const { ATAT } = DataProcessingUtils;
+const { parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
+
 /*
  * returns a FormData object similar to this
  *  {
@@ -29,8 +30,9 @@ const PAGE_SECTION_PREFIX = 'page';
  * @param dataSchema: schema for Fabricate's Form component
  *
  */
+
 const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
-  const formData = {};
+  let formData = {};
 
   if (!dataSchema || !study) {
     return {};
@@ -40,18 +42,14 @@ const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
   const pageSectionKeys = Object.keys(properties).filter((key) => key.startsWith(PAGE_SECTION_PREFIX));
 
   pageSectionKeys.forEach((pageSectionKey) => {
-    formData[pageSectionKey] = {};
-
-    const pageSection = get(properties, pageSectionKey);
-    const addressKeys = get(pageSection, 'properties');
-
+    const addressKeys = getIn(properties, [pageSectionKey, 'properties'], {});
     Object.keys(addressKeys).forEach((addressKey) => {
-      const split :string[] = addressKey.split(ATAT);
-      const propertyTypeFQN :string = split[2];
+      const { propertyTypeFQN } = parseEntityAddressKey(addressKey);
       const propertyValue = study.getIn([propertyTypeFQN, 0]);
-      formData[pageSectionKey][addressKey] = propertyValue;
+      formData = setIn(formData, [pageSectionKey, addressKey], propertyValue);
     });
   });
+
   return formData;
 };
 
