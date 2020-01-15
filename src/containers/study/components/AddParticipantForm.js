@@ -33,6 +33,11 @@ const AddParticipantForm = (props :Props, ref) => {
     dispatch(addStudyParticipant({ formData, studyEntityKeyId, studyId }));
   };
 
+  const validate = (formData, errors) => {
+    const updatedErrors = validateAddParticipantForm(formData, errors, participants, studyId);
+    return updatedErrors;
+  };
+
   return (
     <Form
         hideSubmit
@@ -41,7 +46,7 @@ const AddParticipantForm = (props :Props, ref) => {
         noPadding
         schema={dataSchema}
         uiSchema={uiSchema}
-        validate={(formData, errors) => validateAddParticipantForm(formData, errors, participants, studyId)} />
+        validate={validate} />
   );
 };
 
