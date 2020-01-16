@@ -100,7 +100,7 @@ const StudyParticipants = ({ study } :Props) => {
     <Card>
       <CardSegment vertical>
         <CardHeader>
-          <SearchInputWrapper onChange={handleOnChange} defaultValue="Filter..." />
+          <SearchInputWrapper onChange={handleOnChange} placeholder="Filter..." />
           <AddParticipantsButton
               onClick={openAddParticipantModal}
               mode="primary">
