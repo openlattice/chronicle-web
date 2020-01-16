@@ -87,12 +87,12 @@ const containsParticipantId = (participantId :string, participants :Map) => {
 const validateAddParticipantForm = (formData :Object, errors :Object, participants :Map, studyId :UUID) => {
   const participantsEntitySetName = getParticipantsEntitySetName(studyId);
 
-  const psk = getPageSectionKey(1, 1);
-  const eak = getEntityAddressKey(0, participantsEntitySetName, PERSON_ID);
-  const participantId :string = getIn(formData, [psk, eak]);
+  const pageSectionKey = getPageSectionKey(1, 1);
+  const entityAddressKey = getEntityAddressKey(0, participantsEntitySetName, PERSON_ID);
+  const participantId :string = getIn(formData, [pageSectionKey, entityAddressKey]);
 
   if (containsParticipantId(participantId, participants)) {
-    errors[psk][eak].addError('Participant ID should be unique.');
+    errors[pageSectionKey][entityAddressKey].addError('Participant ID should be unique.');
   }
 
   return errors;

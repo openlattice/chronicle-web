@@ -33,10 +33,9 @@ const AddParticipantForm = (props :Props, ref) => {
     dispatch(addStudyParticipant({ formData, studyEntityKeyId, studyId }));
   };
 
-  const validate = (formData, errors) => {
-    const updatedErrors = validateAddParticipantForm(formData, errors, participants, studyId);
-    return updatedErrors;
-  };
+  const validate = (formData, errors) => (
+    validateAddParticipantForm(formData, errors, participants, studyId)
+  );
 
   return (
     <Form
