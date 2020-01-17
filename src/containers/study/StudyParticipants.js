@@ -36,10 +36,6 @@ const CardHeader = styled.div`
   justify-content: space-between;
 `;
 
-const SearchInputWrapper = styled(SearchInput)`
-  width: 250px;
-`;
-
 const NoParticipants = styled.div`
   margin-top: 20px;
   text-align: ${(props) => props.textAlign};
@@ -100,7 +96,7 @@ const StudyParticipants = ({ study } :Props) => {
     <Card>
       <CardSegment vertical>
         <CardHeader>
-          <SearchInputWrapper onChange={handleOnChange} placeholder="Filter..." />
+          <SearchInput placeholder="Filter..." onChange={handleOnChange} width="250px" />
           <AddParticipantsButton
               onClick={openAddParticipantModal}
               mode="primary">
