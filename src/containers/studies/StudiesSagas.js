@@ -23,8 +23,10 @@ import {
   DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
+  PermissionsApiActions,
+  PermissionsApiSagas,
   SearchApiActions,
-  SearchApiSagas
+  SearchApiSagas,
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -46,12 +48,13 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  updateParticipantsEntitySetPermissions,
   updateStudy
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
-import { selectEntityTypeId } from '../../core/edm/EDMUtils';
+import { selectEntityType, selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
@@ -74,6 +77,8 @@ const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
+const { updateAcls } = PermissionsApiActions;
+const { updateAclsWorker } = PermissionsApiSagas;
 
 const {
   findEntityAddressKeyFromMap,
@@ -85,10 +90,27 @@ const {
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 
-const { EntitySetBuilder } = Models;
-const { DeleteTypes, UpdateTypes } = Types;
+const {
+  Ace,
+  AceBuilder,
+  Acl,
+  AclBuilder,
+  AclData,
+  AclDataBuilder,
+  EntitySetBuilder,
+  Principal,
+  PrincipalBuilder,
+} = Models;
+const {
+  ActionTypes,
+  DeleteTypes,
+  PermissionTypes,
+  PrincipalTypes,
+  UpdateTypes
+} = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const DEFAULT_USER_PRINCIPAL_ID = 'auth0|5ae9026c04eb0b243f1d2bb6';
 
 const {
   CHRONICLE_STUDIES,
@@ -421,6 +443,60 @@ function* updateStudyWatcher() :Generator<*, *, *> {
   yield takeEvery(UPDATE_STUDY, updateStudyWorker);
 }
 
+function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(updateParticipantsEntitySetPermissions.request(action.id));
+
+    const participantsEntitySetId :UUID = action.value;
+
+    const entityType = yield select(selectEntityType(PERSON));
+    const updates :AclData[] = [];
+
+    entityType.toJS().properties.forEach((propertyTypeId :UUID) => {
+
+      const aclKey = [participantsEntitySetId, propertyTypeId];
+      const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
+
+      const principal :Principal = new PrincipalBuilder()
+        .setId(DEFAULT_USER_PRINCIPAL_ID)
+        .setType(PrincipalTypes.USER)
+        .build();
+
+      const ace :Ace = new AceBuilder()
+        .setPermissions(permissions)
+        .setPrincipal(principal)
+        .build();
+
+      const acl :Acl = new AclBuilder()
+        .setAces([ace])
+        .setAclKey(aclKey)
+        .build();
+
+      const aclData :AclData = new AclDataBuilder()
+        .setAcl(acl)
+        .setAction(ActionTypes.ADD)
+        .build();
+      updates.push(aclData);
+    });
+
+    const response = yield call(updateAclsWorker, updateAcls(updates));
+    if (response.error) throw response.error;
+
+    yield put(updateParticipantsEntitySetPermissions.success(action.id));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+  }
+  finally {
+    yield put(updateParticipantsEntitySetPermissions.finally(action.id));
+  }
+
+  return workerResponse;
+}
+
+
 /*
  *
  * StudiesActions.createParticipantsEntitySet()
@@ -452,12 +528,20 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
       .setTitle(`${studyName} Participants`)
       .build();
 
-    const response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
+    let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
+    if (response.error) throw response.error;
+
+    // update permissions
+    const entitySetId = response.data[entitySet.name];
+    response = yield call(
+      updateParticipantsEntitySetPermissionsWorker,
+      updateParticipantsEntitySetPermissions(entitySetId)
+    );
     if (response.error) throw response.error;
 
     const responseObj = {
       entitySetName: entitySet.name,
-      entitySetId: response.data[entitySet.name]
+      entitySetId
     };
     yield put(createParticipantsEntitySet.success(action.id, responseObj));
 
