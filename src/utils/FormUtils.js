@@ -1,12 +1,21 @@
 // @flow
 
-import { Map, getIn, setIn } from 'immutable';
+import {
+  List,
+  Map,
+  getIn,
+  setIn
+} from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-const { parseEntityAddressKey } = DataProcessingUtils;
+import { getParticipantsEntitySetName } from './ParticipantUtils';
+
+import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
+
+const { getEntityAddressKey, getPageSectionKey, parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
-
+const { PERSON_ID } = PROPERTY_TYPE_FQNS;
 /*
  * returns a FormData object similar to this
  *  {
@@ -53,4 +62,44 @@ const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
   return formData;
 };
 
-export default createFormDataFromStudyEntity;
+/* returns true if there is a participantId is found in the given participants
+ * @param participants: immutable Map object mapping participant entitykey ids to metadata, for example
+ * {
+      p1_entity_key: {
+        nc.SubjectIdentification: ['value1'],
+        openlattice.@id: ['value2'],
+        ol.status: ['value2']
+      },
+      p2_entity_key: {
+        nc.SubjectIdentification: ['value3'],
+        openlattice.@id: ['value4'],
+        ol.status: ['value5']
+      }
+ * }
+ */
+const containsParticipantId = (participantId :string, participants :Map) => {
+  const participantIds :List = participants.valueSeq().map(((participant :Map) => participant.getIn([PERSON_ID, 0])));
+  return participantIds.includes(participantId.trim());
+};
+
+// custom react-jsonschema-form validation
+// ref: https://react-jsonschema-form.readthedocs.io/en/latest/validation/#custom-error-messages
+const validateAddParticipantForm = (formData :Object, errors :Object, participants :Map, studyId :UUID) => {
+  const participantsEntitySetName = getParticipantsEntitySetName(studyId);
+
+  const pageSectionKey = getPageSectionKey(1, 1);
+  const entityAddressKey = getEntityAddressKey(0, participantsEntitySetName, PERSON_ID);
+  const participantId :string = getIn(formData, [pageSectionKey, entityAddressKey]);
+
+  if (containsParticipantId(participantId, participants)) {
+    errors[pageSectionKey][entityAddressKey].addError('Participant ID should be unique.');
+  }
+
+  return errors;
+};
+
+export {
+  containsParticipantId,
+  createFormDataFromStudyEntity,
+  validateAddParticipantForm
+};

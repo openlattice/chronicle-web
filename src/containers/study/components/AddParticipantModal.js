@@ -16,6 +16,7 @@ import { ADD_PARTICIPANT } from '../../studies/StudiesActions';
 type Props = {
   isVisible :boolean;
   onCloseModal :() => void;
+  participants :Map;
   requestStates:{
     ADD_PARTICIPANT :RequestState;
   };
@@ -31,6 +32,7 @@ const AddParticipantModal = (props :Props) => {
     isVisible,
     study,
     onCloseModal,
+    participants,
     requestStates
   } = props;
 
@@ -39,7 +41,7 @@ const AddParticipantModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <AddParticipantForm ref={formRef} study={study} />
+        <AddParticipantForm participants={participants} ref={formRef} study={study} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (

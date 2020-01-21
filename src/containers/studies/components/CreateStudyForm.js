@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
 
-import createFormDataFromStudyEntity from '../../../utils/FormUtils';
+import { createFormDataFromStudyEntity } from '../../../utils/FormUtils';
 import { createStudy, updateStudy } from '../StudiesActions';
 
 type Props = {

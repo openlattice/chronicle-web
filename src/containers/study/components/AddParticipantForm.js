@@ -3,23 +3,25 @@
 import React from 'react';
 
 import { Map } from 'immutable';
-import { Form } from 'lattice-fabricate';
 import { Constants } from 'lattice';
+import { Form } from 'lattice-fabricate';
 import { useDispatch } from 'react-redux';
 
 import getFormSchema from './AddParticipantSchema';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { validateAddParticipantForm } from '../../../utils/FormUtils';
 import { addStudyParticipant } from '../../studies/StudiesActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
 
 type Props = {
-  study :Map
+  participants :Map;
+  study :Map;
 }
 const AddParticipantForm = (props :Props, ref) => {
-  const { study } = props;
+  const { participants, study } = props;
   const dispatch = useDispatch();
 
   const studyId = study.getIn([STUDY_ID, 0]);
@@ -31,6 +33,10 @@ const AddParticipantForm = (props :Props, ref) => {
     dispatch(addStudyParticipant({ formData, studyEntityKeyId, studyId }));
   };
 
+  const validate = (formData, errors) => (
+    validateAddParticipantForm(formData, errors, participants, studyId)
+  );
+
   return (
     <Form
         hideSubmit
@@ -38,7 +44,8 @@ const AddParticipantForm = (props :Props, ref) => {
         ref={ref}
         noPadding
         schema={dataSchema}
-        uiSchema={uiSchema} />
+        uiSchema={uiSchema}
+        validate={validate} />
   );
 };
 
