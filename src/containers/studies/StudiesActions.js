@@ -23,19 +23,22 @@ const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_
 const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
 const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
 
-const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
-const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
-
 const GET_STUDIES :'GET_STUDIES' = 'GET_STUDIES';
 const getStudies :RequestSequence = newRequestSequence(GET_STUDIES);
 
 const GET_STUDY_PARTICIPANTS :'GET_STUDY_PARTICIPANTS' = 'GET_STUDY_PARTICIPANTS';
 const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTICIPANTS);
 
+const GET_STUDY_READ_PERMISSION :'GET_STUDY_READ_PERMISSION' = 'GET_STUDY_READ_PERMISSION';
+const getStudyReadPermission :RequestSequence = newRequestSequence(GET_STUDY_READ_PERMISSION);
+
 const UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS
   :'UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS' = 'UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS';
 const updateParticipantsEntitySetPermissions
   :RequestSequence = newRequestSequence(UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS);
+
+const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
+const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 
 export {
   ADD_PARTICIPANT,
@@ -46,6 +49,7 @@ export {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  GET_STUDY_READ_PERMISSION,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
   addStudyParticipant,
@@ -56,6 +60,7 @@ export {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  getStudyReadPermission,
   updateParticipantsEntitySetPermissions,
   updateStudy
 };

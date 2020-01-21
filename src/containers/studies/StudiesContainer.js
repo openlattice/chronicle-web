@@ -79,11 +79,6 @@ class StudiesContainer extends Component<Props, State> {
     };
   }
 
-  componentDidMount() {
-    const { actions } = this.props;
-    actions.getStudies();
-  }
-
   openCreateStudyModal = () => {
     const { actions } = this.props;
     // necessary after a successful or failed CREATE_STUDY action

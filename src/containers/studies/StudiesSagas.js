@@ -4,6 +4,7 @@
 
 import uuid from 'uuid/v4';
 import {
+  all,
   call,
   put,
   select,
@@ -19,6 +20,8 @@ import {
 import { Constants, Models, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
+  AuthorizationsApiActions,
+  AuthorizationsApiSagas,
   DataApiActions,
   DataApiSagas,
   EntitySetsApiActions,
@@ -39,6 +42,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  GET_STUDY_READ_PERMISSION,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -48,6 +52,7 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  getStudyReadPermission,
   updateParticipantsEntitySetPermissions,
   updateStudy
 } from './StudiesActions';
@@ -79,6 +84,8 @@ const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { updateAcls } = PermissionsApiActions;
 const { updateAclsWorker } = PermissionsApiSagas;
+const { getAuthorizationsWorker } = AuthorizationsApiSagas;
+const { getAuthorizations } = AuthorizationsApiActions;
 
 const {
   findEntityAddressKeyFromMap,
@@ -327,6 +334,7 @@ function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
  */
 
 function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
   try {
     yield put(getStudyParticipants.request(action.id));
 
@@ -368,11 +376,13 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
   }
   catch (error) {
     LOG.error(action.type, error);
+    workerResponse.error = error;
     yield put(getStudyParticipants.failure(action.id));
   }
   finally {
     yield put(getStudyParticipants.finally(action.id));
   }
+  return workerResponse;
 }
 
 function* getStudyParticipantsWatcher() :Generator<*, *, *> {
@@ -442,6 +452,12 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 function* updateStudyWatcher() :Generator<*, *, *> {
   yield takeEvery(UPDATE_STUDY, updateStudyWorker);
 }
+
+/*
+ *
+ * StudiesActions.updateParticipantsEntitySetPermissions()
+ *
+ */
 
 function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
@@ -638,6 +654,48 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.getStudyReadPermission()
+ *
+ */
+
+function* getStudyReadPermissionWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getStudyReadPermission.request(action.id));
+
+    const studyId = action.value;
+    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
+
+    let response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
+    if (response.error) throw response.error;
+    const participantsEntitySetId = response.data;
+
+    const accessCheck = {
+      aclKey: [participantsEntitySetId],
+      permissions: [PermissionTypes.READ]
+    };
+    response = yield call(getAuthorizationsWorker, getAuthorizations([accessCheck]));
+    if (response.error) throw response.error;
+    workerResponse.data = response.data;
+
+    yield put(getStudyReadPermission.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getStudyReadPermission.failure(action.id));
+  }
+  finally {
+    yield put(getStudyReadPermission.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* getStudyReadPermissionWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_STUDY_READ_PERMISSION, getStudyReadPermission);
+}
+
+/*
+ *
  * StudiesActions.getStudies()
  *
  */
@@ -656,8 +714,17 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       throw response.error;
     }
 
+    const studyIds = response.data.map((study) => getIn(study, [STUDY_ID, 0]));
+    const readPermissions = yield all(
+      studyIds.map((studyId) => call(getStudyReadPermissionWorker, getStudyReadPermission(studyId)))
+    );
+    const accessibleStudyIds = studyIds.filter(
+      (study, index) => getIn(readPermissions, [index, 'data', 0, 'permissions', PermissionTypes.READ])
+    );
+
     const studies :Map<UUID, Map> = fromJS(response.data)
       .toMap()
+      .filter((study) => accessibleStudyIds.includes(study.getIn([STUDY_ID, 0])))
       .mapKeys((index :number, study :Map) => study.getIn([STUDY_ID, 0]));
     yield put(getStudies.success(action.id, studies));
   }
@@ -749,6 +816,7 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
+  getStudyReadPermissionWatcher,
   updateStudyWatcher,
-  updateStudyWorker
+  updateStudyWorker,
 };
