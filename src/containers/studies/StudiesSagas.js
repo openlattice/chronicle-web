@@ -109,6 +109,7 @@ const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
+const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
 
 /*
  *
@@ -450,6 +451,7 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
       .setEntityTypeId(entityTypeId)
       .setName(getParticipantsEntitySetName(studyId))
       .setTitle(`${studyName} Participants`)
+      .setOrganizationId(CAFE_ORGANIZATION_ID)
       .build();
 
     const response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
