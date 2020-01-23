@@ -664,6 +664,8 @@ function* getStudyReadPermissionWorker(action :SequenceAction) :Generator<*, *, 
     yield put(getStudyReadPermission.request(action.id));
 
     const studyId = action.value;
+    if (!studyId) return workerResponse; // the study thus will not be shown
+
     const participantsEntitySetName = getParticipantsEntitySetName(studyId);
 
     let response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
