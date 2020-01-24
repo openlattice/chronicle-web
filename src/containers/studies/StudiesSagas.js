@@ -5,6 +5,7 @@
 import uuid from 'uuid/v4';
 import {
   call,
+  all,
   put,
   select,
   takeEvery
@@ -78,8 +79,8 @@ const {
   updateEntityData
 } = DataApiActions;
 
-const { createEntitySetsWorker, getEntitySetIdWorker, getEntitySetIdsWorker } = EntitySetsApiSagas;
-const { createEntitySets, getEntitySetId, getEntitySetIds } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { updateAcls } = PermissionsApiActions;
@@ -670,28 +671,21 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
     const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
     const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
 
-    // look up map : participant entity set names ->  study Ids
-    const entitySetNameStudyIdMap :Map<string, UUID> = Map().withMutations((map :Map) => {
-      studies.forEach((study) => {
-        const studyId = study.getIn([STUDY_ID, 0]);
-        map.set(getParticipantsEntitySetName(studyId), studyId);
-      });
-    });
-
-    let response = yield call(getEntitySetIdsWorker, getEntitySetIds(entitySetNames.toJS()));
-    if (response.error) throw response.error;
-    const participantEntitySets = response.data;
-
+    const responses :Object[] = yield all(
+      entitySetNames.toJS().map((entitySetName) => call(getEntitySetIdWorker, getEntitySetId(entitySetName)))
+    );
 
     // look up map: participant entity setIds -> study Ids
-    const entitySetIdStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
-      fromJS(participantEntitySets).forEach((entitySetId, entitySetName) => {
-        map.set(entitySetId, entitySetNameStudyIdMap.get(entitySetName));
+    const authroizedEntitySetIdStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
+      responses.forEach((response, index) => {
+        if (!response.error) {
+          map.set(response.data, studyIds.get(index));
+        }
       });
     });
 
-    const accessChecks :AccessCheck[] = fromJS(participantEntitySets)
-      .valueSeq()
+    const accessChecks :AccessCheck[] = fromJS(authroizedEntitySetIdStudyIdMap)
+      .keySeq()
       .map((entitySetId) => (
         new AccessCheckBuilder()
           .setAclKey([entitySetId])
@@ -700,7 +694,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
       ))
       .toJS();
 
-    response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
+    const response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
     if (response.error) throw response.error;
     const studyAuthorizations = response.data;
 
@@ -708,7 +702,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
       studyAuthorizations.forEach((authorization) => {
         if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
           const entitySetId = getIn(authorization, ['aclKey', 0]);
-          set.add(entitySetIdStudyIdMap.get(entitySetId));
+          set.add(authroizedEntitySetIdStudyIdMap.get(entitySetId));
         }
       });
     });
