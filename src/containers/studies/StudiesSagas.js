@@ -4,7 +4,6 @@
 
 import uuid from 'uuid/v4';
 import {
-  all,
   call,
   put,
   select,
@@ -13,6 +12,7 @@ import {
 import {
   List,
   Map,
+  Set,
   fromJS,
   getIn,
   setIn,
@@ -42,7 +42,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
-  GET_STUDY_READ_PERMISSION,
+  GET_STUDY_AUTHORIZATIONS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -52,7 +52,7 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
-  getStudyReadPermission,
+  getStudyAuthorizations,
   updateParticipantsEntitySetPermissions,
   updateStudy
 } from './StudiesActions';
@@ -78,8 +78,8 @@ const {
   updateEntityData
 } = DataApiActions;
 
-const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
-const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker, getEntitySetIdsWorker } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetId, getEntitySetIds } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { updateAcls } = PermissionsApiActions;
@@ -98,6 +98,8 @@ const {
 } = DataProcessingUtils;
 
 const {
+  AccessCheck,
+  AccessCheckBuilder,
   Ace,
   AceBuilder,
   Acl,
@@ -469,7 +471,7 @@ function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :
     const entityType = yield select(selectEntityType(PERSON));
     const updates :AclData[] = [];
 
-    entityType.toJS().properties.forEach((propertyTypeId :UUID) => {
+    entityType.get('properties').forEach((propertyTypeId :UUID) => {
 
       const aclKey = [participantsEntitySetId, propertyTypeId];
       const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
@@ -654,46 +656,80 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.getStudyReadPermission()
+ * StudiesActions.getStudyAuthorizations()
  *
  */
 
-function* getStudyReadPermissionWorker(action :SequenceAction) :Generator<*, *, *> {
+function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
-    yield put(getStudyReadPermission.request(action.id));
+    yield put(getStudyAuthorizations.request(action.id));
 
-    const studyId = action.value;
-    if (!studyId) return workerResponse; // the study thus will not be shown
+    const { studies, permissions } = action.value;
+    // if (!studyId) return workerResponse; // the study thus will not be shown
+    const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
+    const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
 
-    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
 
-    let response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
+    // look up map : entity set names ->  study Ids
+    const entitySetNameStudyIdMap :Map<string, UUID> = Map().withMutations((map :Map) => {
+      studies.forEach((study) => {
+        const studyId = study.getIn([STUDY_ID, 0]);
+        map.set(getParticipantsEntitySetName(studyId), studyId);
+      });
+    });
+
+    let response = yield call(getEntitySetIdsWorker, getEntitySetIds(entitySetNames.toJS()));
     if (response.error) throw response.error;
-    const participantsEntitySetId = response.data;
+    const participantEntitySets = response.data;
 
-    const accessCheck = {
-      aclKey: [participantsEntitySetId],
-      permissions: [PermissionTypes.READ]
-    };
-    response = yield call(getAuthorizationsWorker, getAuthorizations([accessCheck]));
+
+    // look up map: entity setIds -> study Ids
+    const entitySetIdStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
+      fromJS(participantEntitySets).forEach((entitySetId, entitySetName) => {
+        map.set(entitySetId, entitySetNameStudyIdMap.get(entitySetName));
+      });
+    });
+
+    const accessChecks :AccessCheck[] = fromJS(participantEntitySets)
+      .valueSeq()
+      .map((entitySetId) => (
+        new AccessCheckBuilder()
+          .setAclKey([entitySetId])
+          .setPermissions(permissions)
+          .build()
+      ))
+      .toJS();
+
+    response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
     if (response.error) throw response.error;
-    workerResponse.data = response.data;
+    const studyAuthorizations = response.data;
 
-    yield put(getStudyReadPermission.success(action.id));
+    const authorizedStudyIds :Set<UUID> = Set().withMutations((set :Set) => {
+      studyAuthorizations.forEach((authorization) => {
+        if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
+          const entitySetId = getIn(authorization, ['aclKey', 0]);
+          set.add(entitySetIdStudyIdMap.get(entitySetId));
+        }
+      });
+    });
+
+    workerResponse.data = authorizedStudyIds;
+
+    yield put(getStudyAuthorizations.success(action.id));
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(getStudyReadPermission.failure(action.id));
+    yield put(getStudyAuthorizations.failure(action.id));
   }
   finally {
-    yield put(getStudyReadPermission.finally(action.id));
+    yield put(getStudyAuthorizations.finally(action.id));
   }
   return workerResponse;
 }
 
-function* getStudyReadPermissionWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_STUDY_READ_PERMISSION, getStudyReadPermission);
+function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
 }
 
 /*
@@ -711,24 +747,24 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
 
-    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
+    let response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
     if (response.error) {
       throw response.error;
     }
+    const studies = fromJS(response.data);
 
-    const studyIds = response.data.map((study) => getIn(study, [STUDY_ID, 0]));
-    const readPermissions = yield all(
-      studyIds.map((studyId) => call(getStudyReadPermissionWorker, getStudyReadPermission(studyId)))
+    response = yield call(
+      getStudyAuthorizationsWorker,
+      getStudyAuthorizations({ studies, permissions: [PermissionTypes.READ] })
     );
-    const accessibleStudyIds = studyIds.filter(
-      (study, index) => getIn(readPermissions, [index, 'data', 0, 'permissions', PermissionTypes.READ])
-    );
+    if (response.error) throw response.error;
+    const authorizedStudyIds = response.data;
 
-    const studies :Map<UUID, Map> = fromJS(response.data)
+    const authorizedStudies :Map<UUID, Map> = studies
       .toMap()
-      .filter((study) => accessibleStudyIds.includes(study.getIn([STUDY_ID, 0])))
+      .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])))
       .mapKeys((index :number, study :Map) => study.getIn([STUDY_ID, 0]));
-    yield put(getStudies.success(action.id, studies));
+    yield put(getStudies.success(action.id, authorizedStudies));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -818,7 +854,7 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
-  getStudyReadPermissionWatcher,
+  getStudyAuthorizationsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
 };

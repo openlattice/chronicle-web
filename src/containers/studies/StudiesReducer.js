@@ -15,7 +15,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
-  GET_STUDY_READ_PERMISSION,
+  GET_STUDY_AUTHORIZATIONS,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
   addStudyParticipant,
@@ -26,7 +26,7 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
-  getStudyReadPermission,
+  getStudyAuthorizations,
   updateParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
@@ -58,7 +58,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  [GET_STUDY_READ_PERMISSION]: {
+  [GET_STUDY_AUTHORIZATIONS]: {
     requestState: RequestStates.STANDBY
   },
   [UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS]: {
@@ -241,11 +241,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       });
     }
 
-    case getStudyReadPermission.case(action.type): {
-      return getStudyReadPermission.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_READ_PERMISSION, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_READ_PERMISSION, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([GET_STUDY_READ_PERMISSION, 'requestState'], RequestStates.SUCCESS)
+    case getStudyAuthorizations.case(action.type): {
+      return getStudyAuthorizations.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
       });
     }
 
