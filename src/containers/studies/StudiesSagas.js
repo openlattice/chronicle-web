@@ -666,12 +666,11 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
     yield put(getStudyAuthorizations.request(action.id));
 
     const { studies, permissions } = action.value;
-    // if (!studyId) return workerResponse; // the study thus will not be shown
+
     const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
     const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
 
-
-    // look up map : entity set names ->  study Ids
+    // look up map : participant entity set names ->  study Ids
     const entitySetNameStudyIdMap :Map<string, UUID> = Map().withMutations((map :Map) => {
       studies.forEach((study) => {
         const studyId = study.getIn([STUDY_ID, 0]);
@@ -684,7 +683,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
     const participantEntitySets = response.data;
 
 
-    // look up map: entity setIds -> study Ids
+    // look up map: participant entity setIds -> study Ids
     const entitySetIdStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
       fromJS(participantEntitySets).forEach((entitySetId, entitySetName) => {
         map.set(entitySetId, entitySetNameStudyIdMap.get(entitySetName));
