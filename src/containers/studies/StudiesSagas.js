@@ -676,7 +676,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
     );
 
     // look up map: participant entity setIds -> study Ids
-    const authroizedEntitySetIdStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
+    const authorizedEntitySetIdsStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
       responses.forEach((response, index) => {
         if (!response.error) {
           map.set(response.data, studyIds.get(index));
@@ -684,7 +684,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
       });
     });
 
-    const accessChecks :AccessCheck[] = fromJS(authroizedEntitySetIdStudyIdMap)
+    const accessChecks :AccessCheck[] = fromJS(authorizedEntitySetIdsStudyIdMap)
       .keySeq()
       .map((entitySetId) => (
         new AccessCheckBuilder()
@@ -702,7 +702,7 @@ function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, 
       studyAuthorizations.forEach((authorization) => {
         if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
           const entitySetId = getIn(authorization, ['aclKey', 0]);
-          set.add(authroizedEntitySetIdStudyIdMap.get(entitySetId));
+          set.add(authorizedEntitySetIdsStudyIdMap.get(entitySetId));
         }
       });
     });
