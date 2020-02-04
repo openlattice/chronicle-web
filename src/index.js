@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom';
 
 import LatticeAuth from 'lattice-auth';
 import { ConnectedRouter } from 'connected-react-router/immutable';
+import { Route, Switch } from 'react-router';
 import { Colors } from 'lattice-ui-kit';
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
@@ -16,6 +17,7 @@ import AppContainer from './containers/app/AppContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
 import * as Routes from './core/router/Routes';
+import SurveyContainer from './containers/survey/SurveyContainer';
 
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;
@@ -87,7 +89,10 @@ if (APP_ROOT_NODE) {
     <Provider store={reduxStore}>
       <>
         <ConnectedRouter history={routerHistory}>
-          <AuthRoute path={Routes.ROOT} component={AppContainer} />
+          <Switch>
+            <Route path={Routes.SURVEY} component={SurveyContainer} />
+            <AuthRoute path={Routes.ROOT} component={AppContainer} />
+          </Switch>
         </ConnectedRouter>
         <NormalizeCSS />
         <GlobalStyle />
