@@ -15,6 +15,8 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  GET_STUDY_AUTHORIZATIONS,
+  UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -24,7 +26,9 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
-  updateStudy
+  getStudyAuthorizations,
+  updateParticipantsEntitySetPermissions,
+  updateStudy,
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -52,6 +56,12 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
   [GET_STUDY_PARTICIPANTS]: {
+    requestState: RequestStates.STANDBY
+  },
+  [GET_STUDY_AUTHORIZATIONS]: {
+    requestState: RequestStates.STANDBY
+  },
+  [UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS]: {
     requestState: RequestStates.STANDBY
   },
   [UPDATE_STUDY]: {
@@ -220,6 +230,22 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             .setIn(['participants', studyId, participantEntityKeyId, STATUS], [newEnrollmentStatus])
             .setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.SUCCESS);
         }
+      });
+    }
+
+    case updateParticipantsEntitySetPermissions.case(action.type): {
+      return updateParticipantsEntitySetPermissions.reducer(state, action, {
+        REQUEST: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.SUCCESS)
+      });
+    }
+
+    case getStudyAuthorizations.case(action.type): {
+      return getStudyAuthorizations.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
       });
     }
 
