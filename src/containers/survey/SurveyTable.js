@@ -1,4 +1,5 @@
 // @flow
+
 import React from 'react';
 
 import {
@@ -10,7 +11,7 @@ import {
 import styled from 'styled-components';
 
 import {
-  AppRow,
+  TableRow,
   TABLE_DATA,
   TABLE_HEADERS
 } from './components';
@@ -27,7 +28,7 @@ const SurveyTable = () => {
 
   const components = {
     Row: ({ data: rowData } :any) => (
-      <AppRow data={rowData} />
+      <TableRow data={rowData} />
     )
   };
 

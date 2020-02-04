@@ -6,7 +6,8 @@ const TABLE_HEADERS = [
     label: 'App',
     sortable: false,
     cellStyle: {
-      width: '50%'
+      width: '40%',
+      fontWeight: 500
     }
   },
   {
@@ -15,6 +16,8 @@ const TABLE_HEADERS = [
     sortable: false,
     cellStyle: {
       textAlign: 'center',
+      fontWeight: 500,
+      overflow: 'hidden'
     }
   },
   {
@@ -23,6 +26,7 @@ const TABLE_HEADERS = [
     sortable: false,
     cellStyle: {
       textAlign: 'center',
+      fontWeight: 500,
     }
   },
   {
@@ -31,6 +35,8 @@ const TABLE_HEADERS = [
     sortable: false,
     cellStyle: {
       textAlign: 'center',
+      fontWeight: 500,
+      wordBreak: 'break-word'
     }
   }
 ];

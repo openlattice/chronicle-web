@@ -1,15 +1,18 @@
 // @flow
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
 import {
   AppContentWrapper,
   Colors,
-  Sizes
+  Sizes,
 } from 'lattice-ui-kit';
 
 import SurveyTable from './SurveyTable';
+import { getChronicleUserApps } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
@@ -42,22 +45,34 @@ const Header = styled.div`
 
 const SurveyTitle = styled.h4`
   color: NEUTRALS[0];
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 400;
-  margin: 0 0 20px 0;
+  margin: 0;
   padding: 0;
 `;
-/* url: participant EKID, studyID
-// redirect to chronicle server to get data
-// data item: {
-//    app_full_name: Facebook
-//    id: com.facebook
-//    entity_key_id: unique for each app
-//
-// }
-*/
+
+const CurrentDate = styled.h5`
+  font-size: 16px;
+  font-weight: 400;
+  margin: 5px 0 20px 0;
+`;
 
 const SurveyContainer = () => {
+  const dispatch = useDispatch();
+
+  // temp
+  const studyId = 'e9174c42-2308-427c-b565-47b7fd54db3f';
+  const participantId = 'alfonce';
+
+  useEffect(() => {
+    dispatch(getChronicleUserApps({
+      studyId,
+      participantId
+    }));
+  }, [dispatch]);
+
+  const getCurrentDate = () => new Date().toDateString();
+
   return (
     <SurveyContainerWrapper>
       <Header>
@@ -68,6 +83,9 @@ const SurveyContainer = () => {
         <SurveyTitle>
           Apps Usage Survey
         </SurveyTitle>
+        <CurrentDate>
+          {getCurrentDate()}
+        </CurrentDate>
         <SurveyTable />
       </AppContentWrapper>
     </SurveyContainerWrapper>

@@ -6,14 +6,14 @@ import styled from 'styled-components';
 const { NEUTRALS } = Colors;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
-  border-bottom: 1px solid ${NEUTRALS[4]};
+  border-bottom: 1px solid ${NEUTRALS[6]};
 
   :focus {
     outline: none;
   }
 
   :hover {
-    background-color: ${NEUTRALS[8]};
+    background-color: ${NEUTRALS[10]};
   }
 `;
 
@@ -22,7 +22,7 @@ const CellContent = styled.div`
   -webkit-line-clamp: 2;
   display: -webkit-box;
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   overflow: hidden;
   padding: 0 5px;
 `;
@@ -38,7 +38,7 @@ type Props = {
   data :Object;
 };
 
-const AppRow = ({ data } :Props) => {
+const TableRow = ({ data } :Props) => {
   return (
     <>
       <RowWrapper onClick={() => {}}>
@@ -61,4 +61,4 @@ const AppRow = ({ data } :Props) => {
   );
 };
 
-export default AppRow;
+export default TableRow;
