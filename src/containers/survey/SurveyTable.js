@@ -1,9 +1,9 @@
 // @flow
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { Map } from 'immutable';
+import { Map, Set, List, fromJS } from 'immutable';
 import {
   Button,
   Card,
@@ -14,7 +14,9 @@ import {
 
 import TABLE_HEADERS from './utils/TableHeaders';
 import TableRow from './components/TableRow';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
+const { PERSON_ID } = PROPERTY_TYPE_FQNS;
 const { media } = StyleUtils;
 
 const SubmitButtonWrapper = styled.div`
@@ -41,25 +43,48 @@ const NoAppsFound = styled.h4`
 `;
 
 type Props = {
-  userApps :Map;
+  data :Map;
 }
 
-const SurveyTable = ({ userApps } :Props) => {
+const SurveyTable = ({ data } :Props) => {
+
+  const [userApps, setUserApps] = useState(data);
   const handleOnSubmit = () => {
     // to do
   };
 
+  const handleOnChange = (event :SyntheticInputEvent<HTMLInputElement>) => {
+    const { currentTarget } = event;
+    const { dataset } = currentTarget;
+    const { neighborId, usertypeId } = dataset;
+
+    const updatedApps = userApps.updateIn(
+      [neighborId, 'associationDetails', PERSON_ID.toString()],
+      Set(),
+      (users) => {
+        if (users.has(usertypeId)) {
+          return users.delete(usertypeId);
+        }
+        return users.add(usertypeId);
+      }
+    );
+
+    setUserApps(updatedApps);
+  };
+
   const components = {
     Row: ({ data: rowData } :any) => (
-      <TableRow data={rowData} />
+      <TableRow data={rowData} handleOnChange={handleOnChange} />
     )
   };
+
+  // console.log(userApps.valueSeq().toJS());
 
   return (
     <StyledCard>
       <StyledCardSegment vertical noBleed>
         {
-          userApps.isEmpty()
+          userApps.length === 0
             ? (
               <NoAppsFound>
                 No apps found. Please try refreshing the page.

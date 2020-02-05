@@ -148,7 +148,7 @@ const SurveyContainer = () => {
                 <CurrentDate>
                   {getCurrentDate()}
                 </CurrentDate>
-                <SurveyTable userApps={userApps} />
+                <SurveyTable data={userApps} />
               </SurveyContentInnerWrapper>
             </SurveyContentOuterWrapper>
           )

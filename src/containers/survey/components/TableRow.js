@@ -1,13 +1,16 @@
 // @flow
 import React from 'react';
-import { getIn } from 'immutable';
-import { Colors, Checkbox } from 'lattice-ui-kit';
-import styled from 'styled-components';
 
+import styled from 'styled-components';
+import { get, Set, getIn } from 'immutable';
+import { Checkbox, Colors } from 'lattice-ui-kit';
+
+import AppUserTypes from '../../../utils/constants/AppUserTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
-const { TITLE } = PROPERTY_TYPE_FQNS;
+const { PERSON_ID, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
+const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
@@ -40,25 +43,42 @@ const StyledCell = styled.td`
 
 type Props = {
   data :Object;
+  handleOnChange :(SyntheticInputEvent<HTMLInputElement>) => void;
 };
 
-const TableRow = ({ data } :Props) => {
+const TableRow = ({ data, handleOnChange } :Props) => {
+  const appName :string = getIn(data, ['neighborDetails', TITLE]);
+  const neighborId :UUID = get(data, 'neighborId');
+  const appUsers = getIn(data, ['associationDetails', PERSON_ID.toString()], Set());
+
   return (
     <>
       <RowWrapper onClick={() => {}}>
         <StyledCell textAlign="left">
           <CellContent>
-            {getIn(data, ['neighborDetails', TITLE])}
+            { appName }
           </CellContent>
         </StyledCell>
         <StyledCell textAlign="center">
-          <Checkbox />
+          <Checkbox
+              checked={appUsers.includes(PARENT)}
+              data-neighbor-id={neighborId}
+              data-usertype-id={PARENT}
+              onChange={handleOnChange} />
         </StyledCell>
         <StyledCell textAlign="center">
-          <Checkbox />
+          <Checkbox
+              checked={appUsers.includes(CHILD)}
+              data-neighbor-id={neighborId}
+              data-usertype-id={CHILD}
+              onChange={handleOnChange} />
         </StyledCell>
         <StyledCell textAlign="center">
-          <Checkbox />
+          <Checkbox
+              checked={appUsers.includes(PARENT_AND_CHILD)}
+              data-neighbor-id={neighborId}
+              data-usertype-id={PARENT_AND_CHILD}
+              onChange={handleOnChange} />
         </StyledCell>
       </RowWrapper>
     </>

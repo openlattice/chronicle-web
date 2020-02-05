@@ -25,7 +25,8 @@ const PROPERTY_TYPE_FQNS = {
   STATUS: new FullyQualifiedName('ol.status'),
 
   // survey
-  TITLE: new FullyQualifiedName('ol.title')
+  TITLE: new FullyQualifiedName('ol.title'),
+  DATE_TIME: new FullyQualifiedName('ol.datetime')
 };
 
 export {
