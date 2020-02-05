@@ -17,7 +17,8 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
-      overflow: 'hidden'
+      overflow: 'hidden',
+      wordBreak: 'break-word'
     }
   },
   {
@@ -31,12 +32,13 @@ const TABLE_HEADERS = [
   },
   {
     key: 'both',
-    label: 'Parent and Child',
+    label: 'Parent & Child',
     sortable: false,
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
-      wordBreak: 'break-word'
+      overflow: 'hidden',
+      wordBreak: 'break-word',
     }
   }
 ];

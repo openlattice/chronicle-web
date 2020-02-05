@@ -8,14 +8,36 @@ import {
   Button,
   Card,
   CardSegment,
-  Table
+  Table,
+  StyleUtils
 } from 'lattice-ui-kit';
 
-import { TABLE_HEADERS, TableRow } from './components';
+import TABLE_HEADERS from './utils/TableHeaders';
+import TableRow from './components/TableRow';
+
+const { media } = StyleUtils;
 
 const SubmitButtonWrapper = styled.div`
   margin-top: 20px;
-  text-align: end
+  text-align: end;
+`;
+
+const StyledCard = styled(Card)`
+  ${media.phone`
+    padding: 10px;
+  `}
+`;
+
+const StyledCardSegment = styled(CardSegment)`
+  ${media.phone`
+    margin: 0 10px 0 10px;
+  `}
+`;
+
+const NoAppsFound = styled.h4`
+  font-weight: 400;
+  font-size: 15px;
+  text-align: center;
 `;
 
 type Props = {
@@ -34,22 +56,35 @@ const SurveyTable = ({ userApps } :Props) => {
   };
 
   return (
-    <Card>
-      <CardSegment vertical>
-        <Table
-            data={userApps.valueSeq().toJS()}
-            components={components}
-            headers={TABLE_HEADERS} />
+    <StyledCard>
+      <StyledCardSegment vertical noBleed>
+        {
+          userApps.isEmpty()
+            ? (
+              <NoAppsFound>
+                No apps found. Please try refreshing the page.
+              </NoAppsFound>
+            )
+            : (
+              <>
+                <Table
+                    data={userApps.valueSeq().toJS()}
+                    components={components}
+                    headers={TABLE_HEADERS} />
 
-        <SubmitButtonWrapper>
-          <Button
-              mode="primary"
-              onClick={handleOnSubmit}>
-              Submit Survey
-          </Button>
-        </SubmitButtonWrapper>
-      </CardSegment>
-    </Card>
+                <SubmitButtonWrapper>
+                  <Button
+                      mode="primary"
+                      onClick={handleOnSubmit}>
+                      Submit Survey
+                  </Button>
+                </SubmitButtonWrapper>
+              </>
+            )
+        }
+
+      </StyledCardSegment>
+    </StyledCard>
   );
 };
 

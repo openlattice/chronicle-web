@@ -2,27 +2,49 @@
 
 import React, { useEffect } from 'react';
 
-import { Map } from 'immutable';
-import { useDispatch, useSelector } from 'react-redux';
-import { RequestStates } from 'redux-reqseq';
 import styled from 'styled-components';
+import { Map } from 'immutable';
 import {
-  AppContentWrapper,
   Colors,
   Sizes,
   Spinner,
+  StyleUtils
 } from 'lattice-ui-kit';
+import { useDispatch, useSelector } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
 
 import SurveyTable from './SurveyTable';
-import { getChronicleUserApps, GET_CHRONICLE_USER_APPS } from './SurveyActions';
+import { GET_CHRONICLE_USER_APPS, getChronicleUserApps } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
 const { NEUTRALS, WHITE } = Colors;
 const { APP_CONTENT_WIDTH } = Sizes;
+const { media } = StyleUtils;
 
 const SurveyContainerWrapper = styled.div`
   flex-direction: column;
+`;
+
+const SurveyContentOuterWrapper = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  position: relative;
+`;
+
+const SurveyContentInnerWrapper = styled.div`
+  flex: 1 0 auto;
+  max-width: ${APP_CONTENT_WIDTH}px;
+  min-width: 0;
+  width: 100%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  ${media.phone`
+    padding: 30px 10px 30px 10px;
+  `}
 `;
 
 const Header = styled.div`
@@ -118,15 +140,17 @@ const SurveyContainer = () => {
         requestStates[GET_CHRONICLE_USER_APPS] === RequestStates.FAILURE
           ? <ErrorMessage />
           : (
-            <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
-              <SurveyTitle>
-                    Apps Usage Survey
-              </SurveyTitle>
-              <CurrentDate>
-                {getCurrentDate()}
-              </CurrentDate>
-              <SurveyTable userApps={userApps} />
-            </AppContentWrapper>
+            <SurveyContentOuterWrapper>
+              <SurveyContentInnerWrapper>
+                <SurveyTitle>
+                      Apps Usage Survey
+                </SurveyTitle>
+                <CurrentDate>
+                  {getCurrentDate()}
+                </CurrentDate>
+                <SurveyTable userApps={userApps} />
+              </SurveyContentInnerWrapper>
+            </SurveyContentOuterWrapper>
           )
       }
     </SurveyContainerWrapper>
