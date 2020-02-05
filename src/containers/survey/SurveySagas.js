@@ -36,10 +36,11 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     });
 
     // create a map app_id -> neighbor
-    const userApps = fromJS(response.data)
+    let userApps = fromJS(response.data)
       .toMap()
       .mapKeys((index :number, neighbor :Map) => neighbor.get('neighborId'));
 
+    userApps = userApps.map((app, id) => app.set('id', id)); // id property required by LUK table
     yield put(getChronicleUserApps.success(action.id, userApps));
   }
 

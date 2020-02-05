@@ -22,7 +22,10 @@ const PROPERTY_TYPE_FQNS = {
 
   // study participants:
   PERSON_ID: new FullyQualifiedName('nc.SubjectIdentification'),
-  STATUS: new FullyQualifiedName('ol.status')
+  STATUS: new FullyQualifiedName('ol.status'),
+
+  // survey
+  TITLE: new FullyQualifiedName('ol.title')
 };
 
 export {

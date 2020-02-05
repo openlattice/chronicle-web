@@ -2,17 +2,19 @@
 
 import React, { useEffect } from 'react';
 
-import { useDispatch } from 'react-redux';
-
+import { Map } from 'immutable';
+import { useDispatch, useSelector } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
 import styled from 'styled-components';
 import {
   AppContentWrapper,
   Colors,
   Sizes,
+  Spinner,
 } from 'lattice-ui-kit';
 
 import SurveyTable from './SurveyTable';
-import { getChronicleUserApps } from './SurveyActions';
+import { getChronicleUserApps, GET_CHRONICLE_USER_APPS } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
@@ -43,6 +45,16 @@ const Header = styled.div`
   }
 `;
 
+const SpinnerWrapper = styled.div`
+  margin-top: 60px;
+  text-align: center;
+`;
+
+const ErrorWrapper = styled.div`
+  margin-top: 20px;
+  text-align: center;
+`;
+
 const SurveyTitle = styled.h4`
   color: NEUTRALS[0];
   font-size: 22px;
@@ -60,7 +72,7 @@ const CurrentDate = styled.h5`
 const SurveyContainer = () => {
   const dispatch = useDispatch();
 
-  // temp
+  // TODO: these values should be obtained from the url
   const studyId = 'e9174c42-2308-427c-b565-47b7fd54db3f';
   const participantId = 'alfonce';
 
@@ -71,7 +83,29 @@ const SurveyContainer = () => {
     }));
   }, [dispatch]);
 
+  const requestStates = {
+    [GET_CHRONICLE_USER_APPS]: useSelector(
+      (state) => state.getIn(['userApps', GET_CHRONICLE_USER_APPS, 'requestState'], RequestStates.PENDING)
+    )
+  };
+
+  const userApps = useSelector((state) => state.getIn(['userApps', 'userApps'], Map()));
+
   const getCurrentDate = () => new Date().toDateString();
+
+  if (requestStates[GET_CHRONICLE_USER_APPS] === RequestStates.PENDING) {
+    return (
+      <SpinnerWrapper>
+        <Spinner size="2x" />
+      </SpinnerWrapper>
+    );
+  }
+
+  const ErrorMessage = () => (
+    <ErrorWrapper>
+        Sorry, something went wrong. Please try refreshing the page, or contact support.
+    </ErrorWrapper>
+  );
 
   return (
     <SurveyContainerWrapper>
@@ -79,15 +113,22 @@ const SurveyContainer = () => {
         <img src={OpenLatticeIcon} alt="OpenLattice Application Icon" />
         <h6> Chronicle </h6>
       </Header>
-      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
-        <SurveyTitle>
-          Apps Usage Survey
-        </SurveyTitle>
-        <CurrentDate>
-          {getCurrentDate()}
-        </CurrentDate>
-        <SurveyTable />
-      </AppContentWrapper>
+
+      {
+        requestStates[GET_CHRONICLE_USER_APPS] === RequestStates.FAILURE
+          ? <ErrorMessage />
+          : (
+            <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+              <SurveyTitle>
+                    Apps Usage Survey
+              </SurveyTitle>
+              <CurrentDate>
+                {getCurrentDate()}
+              </CurrentDate>
+              <SurveyTable userApps={userApps} />
+            </AppContentWrapper>
+          )
+      }
     </SurveyContainerWrapper>
   );
 };

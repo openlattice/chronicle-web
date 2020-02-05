@@ -1,8 +1,12 @@
 // @flow
 import React from 'react';
+import { getIn } from 'immutable';
 import { Colors, Checkbox } from 'lattice-ui-kit';
 import styled from 'styled-components';
 
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+
+const { TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
@@ -44,7 +48,7 @@ const TableRow = ({ data } :Props) => {
       <RowWrapper onClick={() => {}}>
         <StyledCell textAlign="left">
           <CellContent>
-            {data.app_name}
+            {getIn(data, ['neighborDetails', TITLE])}
           </CellContent>
         </StyledCell>
         <StyledCell textAlign="center">

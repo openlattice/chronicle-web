@@ -2,26 +2,27 @@
 
 import React from 'react';
 
+import styled from 'styled-components';
+import { Map } from 'immutable';
 import {
-  Table,
+  Button,
   Card,
   CardSegment,
-  Button
+  Table
 } from 'lattice-ui-kit';
-import styled from 'styled-components';
 
-import {
-  TableRow,
-  TABLE_DATA,
-  TABLE_HEADERS
-} from './components';
+import { TABLE_HEADERS, TableRow } from './components';
 
 const SubmitButtonWrapper = styled.div`
   margin-top: 20px;
   text-align: end
 `;
 
-const SurveyTable = () => {
+type Props = {
+  userApps :Map;
+}
+
+const SurveyTable = ({ userApps } :Props) => {
   const handleOnSubmit = () => {
     // to do
   };
@@ -36,7 +37,7 @@ const SurveyTable = () => {
     <Card>
       <CardSegment vertical>
         <Table
-            data={TABLE_DATA}
+            data={userApps.valueSeq().toJS()}
             components={components}
             headers={TABLE_HEADERS} />
 

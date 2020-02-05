@@ -11,7 +11,7 @@ import {
   CardSegment,
   PlusButton,
   SearchInput,
-  Spinner
+  Spinner,
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
