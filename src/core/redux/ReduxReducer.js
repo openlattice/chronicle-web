@@ -19,6 +19,6 @@ export default function reduxReducer(routerHistory :any) {
     edm: edmReducer,
     router: connectRouter(routerHistory),
     studies: studiesReducer,
-    userApps: surveyReducer
+    appsData: surveyReducer
   });
 }

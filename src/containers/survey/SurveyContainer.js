@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 
 import SurveyTable from './SurveyTable';
-import { GET_CHRONICLE_USER_APPS, getChronicleUserApps } from './SurveyActions';
+import { GET_CHRONICLE_APPS_DATA, getChronicleAppsData, SUBMIT_SURVEY } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
@@ -73,7 +73,7 @@ const SpinnerWrapper = styled.div`
 `;
 
 const ErrorWrapper = styled.div`
-  margin-top: 20px;
+  margin-top: 50px;
   text-align: center;
 `;
 
@@ -99,23 +99,23 @@ const SurveyContainer = () => {
   const participantId = 'alfonce';
 
   useEffect(() => {
-    dispatch(getChronicleUserApps({
+    dispatch(getChronicleAppsData({
       studyId,
       participantId
     }));
   }, [dispatch]);
 
-  const requestStates = {
-    [GET_CHRONICLE_USER_APPS]: useSelector(
-      (state) => state.getIn(['userApps', GET_CHRONICLE_USER_APPS, 'requestState'], RequestStates.PENDING)
-    )
-  };
-
-  const userApps = useSelector((state) => state.getIn(['userApps', 'userApps'], Map()));
+  const { appsData, requestStates } = useSelector((state) => ({
+    appsData: state.getIn(['appsData', 'appsData'], Map()),
+    requestStates: {
+      [GET_CHRONICLE_APPS_DATA]: state.getIn(['appsData', GET_CHRONICLE_APPS_DATA, 'requestState']),
+      [SUBMIT_SURVEY]: state.getIn(['appsData', SUBMIT_SURVEY, 'requestState'])
+    }
+  }));
 
   const getCurrentDate = () => new Date().toDateString();
 
-  if (requestStates[GET_CHRONICLE_USER_APPS] === RequestStates.PENDING) {
+  if (requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.PENDING) {
     return (
       <SpinnerWrapper>
         <Spinner size="2x" />
@@ -135,11 +135,13 @@ const SurveyContainer = () => {
         <img src={OpenLatticeIcon} alt="OpenLattice Application Icon" />
         <h6> Chronicle </h6>
       </Header>
+      {
+        requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <ErrorMessage />
+      }
 
       {
-        requestStates[GET_CHRONICLE_USER_APPS] === RequestStates.FAILURE
-          ? <ErrorMessage />
-          : (
+        requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.SUCCESS
+          && (
             <SurveyContentOuterWrapper>
               <SurveyContentInnerWrapper>
                 <SurveyTitle>
@@ -148,7 +150,11 @@ const SurveyContainer = () => {
                 <CurrentDate>
                   {getCurrentDate()}
                 </CurrentDate>
-                <SurveyTable data={userApps} />
+                <SurveyTable
+                    submitRequestState={requestStates[SUBMIT_SURVEY]}
+                    data={appsData}
+                    participantId={participantId}
+                    studyId={studyId} />
               </SurveyContentInnerWrapper>
             </SurveyContentOuterWrapper>
           )

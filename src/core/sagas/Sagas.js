@@ -50,6 +50,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(StudiesSagas.updateStudyWatcher),
 
     // survey
-    fork(SurveySagas.getChronicleUserAppsWatcher)
+    fork(SurveySagas.getChronicleUserAppsWatcher),
+    fork(SurveySagas.submitSurveyWatcher)
   ]);
 }
