@@ -60,10 +60,12 @@ const ParticipantsTable = (props :Props) => {
   const { participants, study } = props;
 
   const dispatch = useDispatch();
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
 
   const studyId = study.getIn([STUDY_ID, 0]);
@@ -103,8 +105,7 @@ const ParticipantsTable = (props :Props) => {
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
     const { currentTarget } = event;
     const { dataset } = currentTarget;
-    const { actionId } = dataset;
-    const { keyId } = dataset;
+    const { actionId, keyId } = dataset;
 
     setParticipantEntityKeyId(keyId);
 

@@ -4,15 +4,27 @@ import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import {
-  Checkbox,
-  ChoiceGroup,
   Modal,
+  Button
 } from 'lattice-ui-kit';
 
 import ParticipantDataTypes from '../../../utils/constants/ParticipantDataTypes';
+import type { ParticipantDataType } from '../../../utils/constants/ParticipantDataTypes';
 import { getParticipantDataUrl } from '../../../utils/api/AppApi';
 
 const { PREPROCESSED, RAW } = ParticipantDataTypes;
+
+const ModalWrapper = styled.div`
+  min-width: 400px;
+  padding-bottom: 30px;
+`;
+
+const ButtonGrid = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 30px;
+`;
 
 type Props = {
   handleOnClose :() => void;
@@ -21,65 +33,53 @@ type Props = {
   studyId :UUID;
 }
 
-const ModalWrapper = styled.div`
-  min-width: 400px;
-`;
-
 const DownloadParticipantDataModal = (props :Props) => {
   const {
     handleOnClose,
     isVisible,
     participantEntityKeyId,
-    studyId
+    studyId,
   } = props;
 
-  const [rawDataSelected, setRawDataSelected] = useState(true);
-  const [preprocessedSelected, setPreprocessedSelected] = useState(true);
+  const handleOnClick = (event :SyntheticEvent<HTMLButtonElement>) => {
+    const { currentTarget } = event;
+    const { name } = currentTarget;
 
-  const handleOnDownload = () => {
+    const dataType :ParticipantDataType = name === PREPROCESSED
+      ? ParticipantDataTypes.PREPROCESSED
+      : ParticipantDataTypes.RAW;
+
     if (participantEntityKeyId != null) {
-      let dataUrl;
-
-      if (rawDataSelected) {
-        dataUrl = getParticipantDataUrl(RAW, participantEntityKeyId, studyId);
-        window.open(dataUrl, '_blank');
-      }
-
-      /*
-       * A second download works on Safari 13.0.
-       * However Chrome and Firefox will block unless the user enables popups
-       */
-      if (preprocessedSelected) {
-        dataUrl = getParticipantDataUrl(PREPROCESSED, participantEntityKeyId, studyId);
-        window.open(dataUrl, '_blank');
-      }
+      const downloadUrl = getParticipantDataUrl(dataType, participantEntityKeyId, studyId);
+      window.open(downloadUrl, '_blank');
     }
-    handleOnClose();
   };
 
   const renderModalBody = () => (
     <ModalWrapper>
-      <p style={{ fontWeight: 500 }}> Select type of data to download. </p>
-      <ChoiceGroup>
-        <Checkbox
-            checked={rawDataSelected}
-            label="Raw Data"
-            onChange={() => setRawDataSelected(!rawDataSelected)} />
-        <Checkbox
-            checked={preprocessedSelected}
-            label="Preprocessed Data"
-            onChange={() => setPreprocessedSelected(!preprocessedSelected)} />
-      </ChoiceGroup>
+      <p>
+        What kind of data do you want to download?
+      </p>
+      <ButtonGrid>
+        <Button mode="secondary" name={RAW} onClick={handleOnClick}>
+          Raw Data
+        </Button>
+
+        <Button mode="secondary" name={PREPROCESSED} onClick={handleOnClick}>
+          Preprocessed Data
+        </Button>
+
+        <Button onClick={handleOnClose}>
+          Close
+        </Button>
+      </ButtonGrid>
     </ModalWrapper>
   );
 
   return (
     <Modal
         isVisible={isVisible}
-        onClickPrimary={handleOnDownload}
         onClose={handleOnClose}
-        textPrimary="Download"
-        textSecondary="Cancel"
         textTitle="Download Data">
       {renderModalBody()}
     </Modal>
