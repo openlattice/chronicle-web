@@ -270,7 +270,7 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
 
       // mapping from participantEntityKeyId -> enrollment status
       const enrollmentStatus :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0]));
+        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0], ENROLLED));
       workerResponse.data = enrollmentStatus;
 
       // mapping from participantEntityKeyId -> association EKID
