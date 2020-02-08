@@ -17,7 +17,6 @@ import { Colors } from 'lattice-ui-kit';
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { getParticipantsDataUrl } from '../../../utils/api/AppApi';
 
 const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
@@ -81,7 +80,6 @@ type IconProps = {
   icon :any;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
   participantEKId :UUID;
-  studyId :UUID;
 };
 
 const ActionIcon = (props :IconProps) => {
@@ -91,7 +89,6 @@ const ActionIcon = (props :IconProps) => {
     icon,
     onClickIcon,
     participantEKId,
-    studyId
   } = props;
 
   let iconColor = NEUTRALS[0];
@@ -99,49 +96,26 @@ const ActionIcon = (props :IconProps) => {
     // eslint-disable-next-line prefer-destructuring
     iconColor = PURPLES[2];
   }
-  const participantDataUrl = getParticipantsDataUrl(participantEKId, studyId);
 
   return (
-    <>
-      {
-        action === DOWNLOAD
-          ? (
-            <a href={participantDataUrl} download target={participantEKId} rel="noopener noreferrer">
-              <IconCircleWrapper
-                  data-action-id={action}
-                  data-key-id={participantEKId}
-                  onClick={onClickIcon}>
-
-                <FontAwesomeIcon
-                    color={iconColor}
-                    icon={icon} />
-              </IconCircleWrapper>
-
-            </a>
-          )
-          : (
-            <IconCircleWrapper
-                data-action-id={action}
-                data-key-id={participantEKId}
-                onClick={onClickIcon}>
-              <FontAwesomeIcon
-                  color={iconColor}
-                  icon={icon} />
-            </IconCircleWrapper>
-          )
-      }
-    </>
+    <IconCircleWrapper
+        data-action-id={action}
+        data-key-id={participantEKId}
+        onClick={onClickIcon}>
+      <FontAwesomeIcon
+          color={iconColor}
+          icon={icon} />
+    </IconCircleWrapper>
   );
 };
 
 type Props = {
   data :Object;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
-  studyId :UUID;
 };
 
 const ParticipantRow = (props :Props) => {
-  const { data, onClickIcon, studyId } = props;
+  const { data, onClickIcon } = props;
 
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
@@ -174,8 +148,7 @@ const ParticipantRow = (props :Props) => {
                     icon={actionItem.icon}
                     key={actionItem.action}
                     onClickIcon={onClickIcon}
-                    participantEKId={participantEKId}
-                    studyId={studyId} />
+                    participantEKId={participantEKId} />
               ))
             }
           </CellContent>
