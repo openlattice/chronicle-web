@@ -33,7 +33,7 @@ const {
 
 const tableHeader = [
   {
-    key: 'id',
+    key: PERSON_ID,
     label: 'Participant ID',
   },
   {
