@@ -95,7 +95,7 @@ const SurveyContainer = () => {
   const dispatch = useDispatch();
 
   // TODO: these values should be obtained from the url
-  const studyId = 'e9174c42-2308-427c-b565-47b7fd54db3f';
+  const studyId = 'fe1d69ba-e8d9-4c60-9242-0ece0967038d';
   const participantId = 'alfonce';
 
   useEffect(() => {

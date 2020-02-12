@@ -5,6 +5,7 @@
 import uuid from 'uuid/v4';
 import {
   call,
+  all,
   put,
   select,
   takeEvery
@@ -12,6 +13,7 @@ import {
 import {
   List,
   Map,
+  Set,
   fromJS,
   getIn,
   setIn,
@@ -19,12 +21,16 @@ import {
 import { Constants, Models, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
+  AuthorizationsApiActions,
+  AuthorizationsApiSagas,
   DataApiActions,
   DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
+  PermissionsApiActions,
+  PermissionsApiSagas,
   SearchApiActions,
-  SearchApiSagas
+  SearchApiSagas,
 } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -37,6 +43,7 @@ import {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
+  GET_STUDY_AUTHORIZATIONS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -46,12 +53,14 @@ import {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyParticipants,
+  getStudyAuthorizations,
+  updateParticipantsEntitySetPermissions,
   updateStudy
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
-import { selectEntityTypeId } from '../../core/edm/EDMUtils';
+import { selectEntityType, selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
@@ -74,6 +83,10 @@ const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
+const { updateAcls } = PermissionsApiActions;
+const { updateAclsWorker } = PermissionsApiSagas;
+const { getAuthorizationsWorker } = AuthorizationsApiSagas;
+const { getAuthorizations } = AuthorizationsApiActions;
 
 const {
   findEntityAddressKeyFromMap,
@@ -85,10 +98,29 @@ const {
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 
-const { EntitySetBuilder } = Models;
-const { DeleteTypes, UpdateTypes } = Types;
+const {
+  AccessCheck,
+  AccessCheckBuilder,
+  Ace,
+  AceBuilder,
+  Acl,
+  AclBuilder,
+  AclData,
+  AclDataBuilder,
+  EntitySetBuilder,
+  Principal,
+  PrincipalBuilder,
+} = Models;
+const {
+  ActionTypes,
+  DeleteTypes,
+  PermissionTypes,
+  PrincipalTypes,
+  UpdateTypes
+} = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const DEFAULT_USER_PRINCIPAL_ID = 'auth0|5ae9026c04eb0b243f1d2bb6';
 
 const {
   CHRONICLE_STUDIES,
@@ -109,6 +141,7 @@ const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
+const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
 
 /*
  *
@@ -270,7 +303,7 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
 
       // mapping from participantEntityKeyId -> enrollment status
       const enrollmentStatus :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0]));
+        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0], ENROLLED));
       workerResponse.data = enrollmentStatus;
 
       // mapping from participantEntityKeyId -> association EKID
@@ -305,6 +338,7 @@ function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
  */
 
 function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
   try {
     yield put(getStudyParticipants.request(action.id));
 
@@ -346,11 +380,13 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
   }
   catch (error) {
     LOG.error(action.type, error);
+    workerResponse.error = error;
     yield put(getStudyParticipants.failure(action.id));
   }
   finally {
     yield put(getStudyParticipants.finally(action.id));
   }
+  return workerResponse;
 }
 
 function* getStudyParticipantsWatcher() :Generator<*, *, *> {
@@ -423,6 +459,66 @@ function* updateStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.updateParticipantsEntitySetPermissions()
+ *
+ */
+
+function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(updateParticipantsEntitySetPermissions.request(action.id));
+
+    const participantsEntitySetId :UUID = action.value;
+
+    const entityType = yield select(selectEntityType(PERSON));
+    const updates :AclData[] = [];
+
+    entityType.get('properties').forEach((propertyTypeId :UUID) => {
+
+      const aclKey = [participantsEntitySetId, propertyTypeId];
+      const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
+
+      const principal :Principal = new PrincipalBuilder()
+        .setId(DEFAULT_USER_PRINCIPAL_ID)
+        .setType(PrincipalTypes.USER)
+        .build();
+
+      const ace :Ace = new AceBuilder()
+        .setPermissions(permissions)
+        .setPrincipal(principal)
+        .build();
+
+      const acl :Acl = new AclBuilder()
+        .setAces([ace])
+        .setAclKey(aclKey)
+        .build();
+
+      const aclData :AclData = new AclDataBuilder()
+        .setAcl(acl)
+        .setAction(ActionTypes.ADD)
+        .build();
+      updates.push(aclData);
+    });
+
+    const response = yield call(updateAclsWorker, updateAcls(updates));
+    if (response.error) throw response.error;
+
+    yield put(updateParticipantsEntitySetPermissions.success(action.id));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+  }
+  finally {
+    yield put(updateParticipantsEntitySetPermissions.finally(action.id));
+  }
+
+  return workerResponse;
+}
+
+
+/*
+ *
  * StudiesActions.createParticipantsEntitySet()
  *
  */
@@ -450,14 +546,23 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
       .setEntityTypeId(entityTypeId)
       .setName(getParticipantsEntitySetName(studyId))
       .setTitle(`${studyName} Participants`)
+      .setOrganizationId(CAFE_ORGANIZATION_ID)
       .build();
 
-    const response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
+    let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
+    if (response.error) throw response.error;
+
+    // update permissions
+    const entitySetId = response.data[entitySet.name];
+    response = yield call(
+      updateParticipantsEntitySetPermissionsWorker,
+      updateParticipantsEntitySetPermissions(entitySetId)
+    );
     if (response.error) throw response.error;
 
     const responseObj = {
       entitySetName: entitySet.name,
-      entitySetId: response.data[entitySet.name]
+      entitySetId
     };
     yield put(createParticipantsEntitySet.success(action.id, responseObj));
 
@@ -554,6 +659,76 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.getStudyAuthorizations()
+ *
+ */
+
+function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getStudyAuthorizations.request(action.id));
+
+    const { studies, permissions } = action.value;
+
+    const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
+    const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
+
+    const responses :Object[] = yield all(
+      entitySetNames.toJS().map((entitySetName) => call(getEntitySetIdWorker, getEntitySetId(entitySetName)))
+    );
+
+    // look up map: participant entity setIds -> study Ids
+    const authorizedEntitySetIdsStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
+      responses.forEach((response, index) => {
+        if (!response.error) {
+          map.set(response.data, studyIds.get(index));
+        }
+      });
+    });
+
+    const accessChecks :AccessCheck[] = fromJS(authorizedEntitySetIdsStudyIdMap)
+      .keySeq()
+      .map((entitySetId) => (
+        new AccessCheckBuilder()
+          .setAclKey([entitySetId])
+          .setPermissions(permissions)
+          .build()
+      ))
+      .toJS();
+
+    const response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
+    if (response.error) throw response.error;
+    const studyAuthorizations = response.data;
+
+    const authorizedStudyIds :Set<UUID> = Set().withMutations((set :Set) => {
+      studyAuthorizations.forEach((authorization) => {
+        if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
+          const entitySetId = getIn(authorization, ['aclKey', 0]);
+          set.add(authorizedEntitySetIdsStudyIdMap.get(entitySetId));
+        }
+      });
+    });
+
+    workerResponse.data = authorizedStudyIds;
+
+    yield put(getStudyAuthorizations.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getStudyAuthorizations.failure(action.id));
+  }
+  finally {
+    yield put(getStudyAuthorizations.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
+}
+
+/*
+ *
  * StudiesActions.getStudies()
  *
  */
@@ -567,15 +742,24 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
 
-    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
+    let response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
     if (response.error) {
       throw response.error;
     }
+    const studies = fromJS(response.data);
 
-    const studies :Map<UUID, Map> = fromJS(response.data)
+    response = yield call(
+      getStudyAuthorizationsWorker,
+      getStudyAuthorizations({ studies, permissions: [PermissionTypes.READ] })
+    );
+    if (response.error) throw response.error;
+    const authorizedStudyIds = response.data;
+
+    const authorizedStudies :Map<UUID, Map> = studies
       .toMap()
+      .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])))
       .mapKeys((index :number, study :Map) => study.getIn([STUDY_ID, 0]));
-    yield put(getStudies.success(action.id, studies));
+    yield put(getStudies.success(action.id, authorizedStudies));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -665,6 +849,7 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
+  getStudyAuthorizationsWatcher,
   updateStudyWatcher,
-  updateStudyWorker
+  updateStudyWorker,
 };

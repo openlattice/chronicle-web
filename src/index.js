@@ -21,7 +21,7 @@ import SurveyContainer from './containers/survey/SurveyContainer';
 
 import generateEntitySets from './generateEntitySets';
 
-generateEntitySets();
+// generateEntitySets();
 
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;

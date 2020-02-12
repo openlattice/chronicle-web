@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ChangeEnrollment from './components/ChangeEnrollment';
 import DeleteParticipantModal from './components/DeleteParticipantModal';
+import DownloadParticipantDataModal from './components/DownloadParticipantDataModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
 
@@ -23,11 +24,16 @@ import {
 } from '../studies/StudiesActions';
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { DELETE, LINK, TOGGLE_ENROLLMENT } = ParticipantActionTypes;
+const {
+  DELETE,
+  DOWNLOAD,
+  LINK,
+  TOGGLE_ENROLLMENT
+} = ParticipantActionTypes;
 
 const tableHeader = [
   {
-    key: 'id',
+    key: PERSON_ID,
     label: 'Participant ID',
   },
   {
@@ -54,9 +60,12 @@ const ParticipantsTable = (props :Props) => {
   const { participants, study } = props;
 
   const dispatch = useDispatch();
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
 
   const studyId = study.getIn([STUDY_ID, 0]);
@@ -96,8 +105,7 @@ const ParticipantsTable = (props :Props) => {
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
     const { currentTarget } = event;
     const { dataset } = currentTarget;
-    const { actionId } = dataset;
-    const { keyId } = dataset;
+    const { actionId, keyId } = dataset;
 
     setParticipantEntityKeyId(keyId);
 
@@ -111,11 +119,14 @@ const ParticipantsTable = (props :Props) => {
     else if (actionId === TOGGLE_ENROLLMENT) {
       openEnrollmentModel();
     }
+    else if (actionId === DOWNLOAD) {
+      setDownloadModalOpen(true);
+    }
   };
 
   const components = {
     Row: ({ data: rowData } :any) => (
-      <ParticipantRow data={rowData} onClickIcon={onClickIcon} studyId={studyId} />
+      <ParticipantRow data={rowData} onClickIcon={onClickIcon} />
     )
   };
 
@@ -134,6 +145,7 @@ const ParticipantsTable = (props :Props) => {
           isVisible={infoModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           studyId={studyId} />
+
       <DeleteParticipantModal
           handleOnClose={() => setDeleteModalOpen(false)}
           handleOnDeleteParticipant={handleOnDeleteParticipant}
@@ -148,6 +160,12 @@ const ParticipantsTable = (props :Props) => {
           isVisible={enrollmentModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           requestState={requestStates[CHANGE_ENROLLMENT_STATUS]} />
+
+      <DownloadParticipantDataModal
+          handleOnClose={() => setDownloadModalOpen(false)}
+          isVisible={downloadModalOpen}
+          participantEntityKeyId={participantEntityKeyId}
+          studyId={studyId} />
     </>
   );
 };
