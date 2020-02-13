@@ -34,7 +34,7 @@ import {
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-const { STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { DATE_ENROLLED, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
@@ -225,9 +225,15 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { newEnrollmentStatus, participantEntityKeyId, studyId } = seqAction.value;
+          const {
+            enrollmentDate,
+            newEnrollmentStatus,
+            participantEntityKeyId,
+            studyId
+          } = seqAction.value;
           return state
             .setIn(['participants', studyId, participantEntityKeyId, STATUS], [newEnrollmentStatus])
+            .setIn(['participants', studyId, participantEntityKeyId, DATE_ENROLLED], [enrollmentDate])
             .setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.SUCCESS);
         }
       });

@@ -12,6 +12,7 @@ import DeleteParticipantModal from './components/DeleteParticipantModal';
 import DownloadParticipantDataModal from './components/DownloadParticipantDataModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
+import TABLE_HEADERS from './utils/tableHeaders';
 
 import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -30,22 +31,6 @@ const {
   LINK,
   TOGGLE_ENROLLMENT
 } = ParticipantActionTypes;
-
-const tableHeader = [
-  {
-    key: PERSON_ID,
-    label: 'Participant ID',
-  },
-  {
-    cellStyle: {
-      textAlign: 'center',
-      width: '180px',
-    },
-    key: 'actions',
-    label: 'Actions',
-    sortable: false
-  },
-];
 
 const TableWrapper = styled.div`
   margin-top: 20px;
@@ -136,7 +121,7 @@ const ParticipantsTable = (props :Props) => {
         <Table
             components={components}
             data={participants.valueSeq().toJS()}
-            headers={tableHeader}
+            headers={TABLE_HEADERS}
             paginated
             rowsPerPageOptions={[5, 20, 50]} />
       </TableWrapper>
