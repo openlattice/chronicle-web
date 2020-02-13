@@ -4,8 +4,8 @@
 
 import uuid from 'uuid/v4';
 import {
-  call,
   all,
+  call,
   put,
   select,
   takeEvery
@@ -42,8 +42,8 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_PARTICIPANTS,
   GET_STUDY_AUTHORIZATIONS,
+  GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -52,8 +52,8 @@ import {
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyParticipants,
   getStudyAuthorizations,
+  getStudyParticipants,
   updateParticipantsEntitySetPermissions,
   updateStudy
 } from './StudiesActions';
@@ -130,6 +130,7 @@ const {
 } = ENTITY_SET_NAMES;
 
 const {
+  DATE_ENROLLED,
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
@@ -162,22 +163,26 @@ function* changeEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, 
 
     const participantsEntitySetName = getParticipantsEntitySetName(studyId);
     const newEnrollmentStatus = enrollmentStatus === ENROLLED ? NOT_ENROLLED : ENROLLED;
+    const enrollmentDate = enrollmentStatus === ENROLLED ? null : new Date().toISOString();
 
     const {
       associationEntityKeyId,
       participatedInEntitySetId,
       statusPropertyTypeId,
+      startDateTimePropertyTypeId
     } = yield select((state) => ({
       associationEntityKeyId:
         state.getIn(['studies', 'associationKeyIds', participantsEntitySetName, participantEntityKeyId]),
       participatedInEntitySetId: state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN]),
       statusPropertyTypeId: state.getIn(['edm', 'propertyTypeIds', STATUS]),
+      startDateTimePropertyTypeId: state.getIn(['edm', 'propertyTypeIds', DATE_ENROLLED])
     }));
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
       entities: {
         [associationEntityKeyId]: {
-          [statusPropertyTypeId]: [newEnrollmentStatus]
+          [statusPropertyTypeId]: [newEnrollmentStatus],
+          [startDateTimePropertyTypeId]: [enrollmentDate]
         }
       },
       entitySetId: participatedInEntitySetId,
@@ -188,6 +193,7 @@ function* changeEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, 
 
     yield put(changeEnrollmentStatus.success(action.id, {
       newEnrollmentStatus,
+      enrollmentDate,
       participantEntityKeyId,
       studyId,
     }));
@@ -303,7 +309,7 @@ function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generat
 
       // mapping from participantEntityKeyId -> enrollment status
       const enrollmentStatus :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().getIn(['associationDetails', STATUS, 0], ENROLLED));
+        .map((associations :List) => associations.first().get('associationDetails'));
       workerResponse.data = enrollmentStatus;
 
       // mapping from participantEntityKeyId -> association EKID
@@ -368,7 +374,8 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
     // update participants with enrollment status
     participants = participants.map((participant, id) => participant
-      .set(STATUS, [enrollmentStatus.get(id)])
+      .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
+      .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
       .set('id', [id])); // required by LUK table
 
     yield put(getStudyParticipants.success(action.id, {
@@ -607,9 +614,11 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const participantsEntitySetName = getParticipantsEntitySetName(studyId);
     const participantsEntitySetId = participantEntitySetIds.get(participantsEntitySetName);
 
+    const dateEnrolled = new Date().toISOString();
     const associations = [
       [PARTICIPATED_IN, 0, participantsEntitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
-        [STATUS.toString()]: [ENROLLED]
+        [STATUS.toString()]: [ENROLLED],
+        [DATE_ENROLLED.toString()]: [dateEnrolled]
       }]
     ];
     let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
@@ -634,6 +643,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     let participantEntityData = fromJS(getIn(entityData, [participantsEntitySetId, 0]));
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
+      .set(DATE_ENROLLED, [dateEnrolled])
       .set('id', [participantEntityKeyId]); // required by LUK table
 
     yield put(addStudyParticipant.success(action.id, {

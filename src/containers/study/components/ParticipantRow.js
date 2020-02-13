@@ -17,8 +17,9 @@ import { Colors } from 'lattice-ui-kit';
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
 
-const { PERSON_ID, STATUS } = PROPERTY_TYPE_FQNS;
+const { PERSON_ID, STATUS, DATE_ENROLLED } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
 const {
@@ -120,6 +121,7 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
+  const enrollmentDate = getDateTimeFromIsoDate(getIn(data, [DATE_ENROLLED, 0]));
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
@@ -135,6 +137,12 @@ const ParticipantRow = (props :Props) => {
         <StyledCell>
           <CellContent>
             { participantId }
+          </CellContent>
+        </StyledCell>
+
+        <StyledCell>
+          <CellContent>
+            { enrollmentDate }
           </CellContent>
         </StyledCell>
 
