@@ -4,6 +4,7 @@ import ENV_URLS from '../constants/EnvUrls';
 import EnvTypes from '../constants/EnvTypes';
 import Logger from '../Logger';
 import { isValidUUID } from '../ValidationUtils';
+import { isNonEmptyString } from '../LangUtils';
 import {
   CHRONICLE,
   DATA,
@@ -57,17 +58,16 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
 };
 
 const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
-  // TODO : uncomment this validation later
 
-  // if (!isValidUUID(studyId)) {
-  //   LOG.error('studyId must be a valiud UUID', studyId);
-  //   return null;
-  // }
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
 
-  // if (!isString(participantId)) {
-  //   LOG.error('participant id must be a valid string', participantId);
-  //   return null;
-  // }
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
 
   const baseUrl = getBaseUrl();
 
