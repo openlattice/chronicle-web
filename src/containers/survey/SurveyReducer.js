@@ -6,10 +6,12 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   GET_CHRONICLE_APPS_DATA,
-  getChronicleAppsData,
   SUBMIT_SURVEY,
+  getChronicleAppsData,
   submitSurvey
 } from './SurveyActions';
+
+import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
 const INITIAL_STATE :Map<*, *, *> = fromJS({
   [GET_CHRONICLE_APPS_DATA]: {
@@ -23,6 +25,14 @@ const INITIAL_STATE :Map<*, *, *> = fromJS({
 
 export default function surveyReducer(state :Map = INITIAL_STATE, action :Object) {
   switch (action.type) {
+    case RESET_REQUEST_STATE: {
+      const { actionType } = action;
+      if (actionType && state.has(actionType)) {
+        return state.setIn([actionType, 'requestState'], RequestStates.STANDBY);
+      }
+      return state;
+    }
+
     case getChronicleAppsData.case(action.type): {
       const seqAction :SequenceAction = action;
       return getChronicleAppsData.reducer(state, action, {

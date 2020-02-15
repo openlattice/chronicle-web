@@ -2,7 +2,8 @@
 
 import axios from 'axios';
 import { call, put, takeEvery } from '@redux-saga/core/effects';
-import { List, fromJS, Set } from 'immutable';
+import { Map, fromJS } from 'immutable';
+import { Constants } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -13,12 +14,16 @@ import {
 } from './SurveyActions';
 
 import Logger from '../../utils/Logger';
-import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getParticipantUserAppsUrl } from '../../utils/api/AppApi';
 
-const { PERSON_ID } = PROPERTY_TYPE_FQNS;
-const LOG = new Logger('Survey Sagas');
+const { OPENLATTICE_ID_FQN } = Constants;
+const LOG = new Logger('SurveySagas');
 
+/*
+ *
+ * SurveyActions.submitSurvey()
+ *
+ */
 function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(submitSurvey.request(action.id));
@@ -30,20 +35,36 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     if (url === null) throw new Error('Invalid Url');
 
-    /*
-     * Remove 'id' field property from payload.
-     * The endpoint expects a list of NeighborEntityDetails objects with 6 properties:
-     * "neighborDetails", "associationDetails", "src", "neighborEntitySet", "associationEntitySet",
-     *" neighborId"
-     *
-     */
-    const payload :Object[] = appsData.valueSeq().map((appData :List) => appData.delete('id')).toJS();
+    let associationData :Map = Map().withMutations((map) => {
+      appsData.forEach((entry, key) => {
+        map.set(key, entry.get('associationDetails'));
+      });
+    });
 
-    // update chronicle_used_by association( chroncile_user_apps -> participant_ chronicle_participants)
-    // with a set of nc.SubjectIdentification values (parent, child, parent_and_child).
+    // delete entity key since it won't be used in DataApi.updateEntitiesInEntitySet()
+    associationData = associationData
+      .map((entity) => entity.delete(OPENLATTICE_ID_FQN));
+
+    /* send POST request to update chronicle_used_by associations
+     * url: chronicle/study/participant/data/<study_id>/<participant_id>/apps
+     * requestBody:
+        {
+          EKID_1: {
+            FQN1: [value1],
+            FQN2: [value2]
+          },
+          EKID_1: {
+            FQN1: [value3],
+            FQN2: [value4]
+          },
+        }
+     */
+
+    const axiosRequestBody :Object = associationData.toJS();
+
     const response = yield call(axios, {
       method: 'post',
-      data: payload,
+      data: axiosRequestBody,
       url,
     });
     if (response.error) throw response.error;
@@ -63,6 +84,11 @@ function* submitSurveyWatcher() :Generator<*, *, *> {
   yield takeEvery(SUBMIT_SURVEY, submitSurveyWorker);
 }
 
+/*
+ *
+ * SurveyActions.getChronicleApps()
+ *
+ */
 function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(getChronicleAppsData.request(action.id));
@@ -72,8 +98,21 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
 
     /*
      * send GET request to chronicle server to get neighbors of participant_id
-     * associated by chroncile_user_apps
+     * associated by chroncile_user_apps.
      * endpoint: chronicle/study/participant/data/<study_id>/<participant_id>/apps
+     * response data:
+          [
+            {
+              entityDetails: {
+                FQN1: [value1],
+                FQN2: [value2]
+             },
+             associationDetails: {
+                FQN3: [value3],
+                FQN4: [value4]
+             },
+            }
+          ]
      */
     const url = getParticipantUserAppsUrl(participantId, studyId);
     if (url === null) throw new Error('Invalid url');
@@ -82,17 +121,15 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
       method: 'get',
       url,
     });
+    if (response.error) throw response.error;
 
-    // mapping from neighborId -> entity details
+    // mapping from association EKID -> associationDetails & entityDetails
     let appsData = fromJS(response.data)
       .toMap()
-      .mapKeys((index, entity) => entity.get('neighborId'));
+      .mapKeys((index, entity) => entity.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
 
-    // update each entity with id property (needed by LUK table)
+    // set id property (needed by LUK table)
     appsData = appsData.map((entity, id) => entity.set('id', id));
-    appsData = appsData
-      .map((entity) => entity
-        .setIn(['associationDetails', PERSON_ID], Set(entity.getIn(['associationDetails', PERSON_ID]), Set())));
 
     yield put(getChronicleAppsData.success(action.id, appsData));
   }

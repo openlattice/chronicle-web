@@ -17,8 +17,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
-      overflow: 'hidden',
-      wordBreak: 'break-word'
+      wordWrap: 'normal'
     }
   },
   {
@@ -28,6 +27,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
+      wordWrap: 'normal'
     }
   },
   {
@@ -37,8 +37,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
-      overflow: 'hidden',
-      wordBreak: 'break-word',
+      wordWrap: 'normal'
     }
   }
 ];

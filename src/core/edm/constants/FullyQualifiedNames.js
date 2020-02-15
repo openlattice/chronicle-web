@@ -26,7 +26,8 @@ const PROPERTY_TYPE_FQNS = {
 
   // survey
   TITLE: new FullyQualifiedName('ol.title'),
-  DATE_ENROLLED: new FullyQualifiedName('ol.datetimestart')
+  DATE_ENROLLED: new FullyQualifiedName('ol.datetimestart'),
+  USER_FQN: new FullyQualifiedName('ol.user')
 };
 
 export {

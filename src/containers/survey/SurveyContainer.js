@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 
+import qs from 'qs';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
@@ -11,10 +12,13 @@ import {
   StyleUtils
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 
+import { getFullDateFromIsoDate } from '../../utils/DateUtils';
+import SubmissionSuccessful from './components/SubmissionSuccessful';
 import SurveyTable from './SurveyTable';
-import { GET_CHRONICLE_APPS_DATA, getChronicleAppsData, SUBMIT_SURVEY } from './SurveyActions';
+import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
@@ -79,7 +83,7 @@ const ErrorWrapper = styled.div`
 
 const SurveyTitle = styled.h4`
   color: NEUTRALS[0];
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   margin: 0;
   padding: 0;
@@ -93,17 +97,19 @@ const CurrentDate = styled.h5`
 
 const SurveyContainer = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
-  // TODO: these values should be obtained from the url
-  const studyId = 'fe1d69ba-e8d9-4c60-9242-0ece0967038d';
-  const participantId = 'alfonce';
+  const queryParams = qs.parse(history.location.search, { ignoreQueryPrefix: true });
+
+  // $FlowFixMe
+  const { studyId, participantId } :{ participantId :string, studyId :UUID } = queryParams;
 
   useEffect(() => {
     dispatch(getChronicleAppsData({
       studyId,
       participantId
     }));
-  }, [dispatch]);
+  }, [dispatch, participantId, studyId]);
 
   const { appsData, requestStates } = useSelector((state) => ({
     appsData: state.getIn(['appsData', 'appsData'], Map()),
@@ -113,7 +119,7 @@ const SurveyContainer = () => {
     }
   }));
 
-  const getCurrentDate = () => new Date().toDateString();
+  const getCurrentDate = () => getFullDateFromIsoDate(new Date().toISOString());
 
   if (requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.PENDING) {
     return (
@@ -144,17 +150,25 @@ const SurveyContainer = () => {
           && (
             <SurveyContentOuterWrapper>
               <SurveyContentInnerWrapper>
-                <SurveyTitle>
-                      Apps Usage Survey
-                </SurveyTitle>
-                <CurrentDate>
-                  {getCurrentDate()}
-                </CurrentDate>
-                <SurveyTable
-                    submitRequestState={requestStates[SUBMIT_SURVEY]}
-                    data={appsData}
-                    participantId={participantId}
-                    studyId={studyId} />
+                {
+                  requestStates[SUBMIT_SURVEY] === RequestStates.SUCCESS
+                    ? <SubmissionSuccessful />
+                    : (
+                      <>
+                        <SurveyTitle>
+                          Apps Usage Survey
+                        </SurveyTitle>
+                        <CurrentDate>
+                          {getCurrentDate()}
+                        </CurrentDate>
+                        <SurveyTable
+                            submitRequestState={requestStates[SUBMIT_SURVEY]}
+                            data={appsData}
+                            participantId={participantId}
+                            studyId={studyId} />
+                      </>
+                    )
+                }
               </SurveyContentInnerWrapper>
             </SurveyContentOuterWrapper>
           )

@@ -1,29 +1,29 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { List, Set } from 'immutable';
+import { Map, Set } from 'immutable';
 import {
   Button,
   Card,
   CardSegment,
   StyleUtils,
   Table,
-  Modal
 } from 'lattice-ui-kit';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import SubmissionFailureModal from './components/SubmissionFailureModal';
 import TABLE_HEADERS from './utils/TableHeaders';
 import TableRow from './components/TableRow';
-import { submitSurvey } from './SurveyActions';
+import { SUBMIT_SURVEY, submitSurvey } from './SurveyActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 
-
-const { PERSON_ID } = PROPERTY_TYPE_FQNS;
+const { USER_FQN } = PROPERTY_TYPE_FQNS;
 const { media } = StyleUtils;
 
 const SubmitButtonWrapper = styled.div`
@@ -43,10 +43,6 @@ const StyledCardSegment = styled(CardSegment)`
   `}
 `;
 
-const ModalWrapper = styled.div`
-  width: 400px;
-`;
-
 const NoAppsFound = styled.h4`
   font-weight: 400;
   font-size: 15px;
@@ -54,7 +50,7 @@ const NoAppsFound = styled.h4`
 `;
 
 type Props = {
-  data :List;
+  data :Map<UUID, Map>;
   participantId :string;
   studyId :UUID;
   submitRequestState :RequestState;
@@ -68,8 +64,13 @@ const SurveyTable = ({
 } :Props) => {
 
   const dispatch = useDispatch();
+
   const [appsData, setAppsData] = useState(data);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+
+  useEffect(() => {
+    setErrorModalVisible(submitRequestState === RequestStates.FAILURE);
+  }, [errorModalVisible, setErrorModalVisible, submitRequestState]);
 
   const handleOnSubmit = () => {
     dispatch(submitSurvey({
@@ -82,10 +83,10 @@ const SurveyTable = ({
   const handleOnChange = (event :SyntheticInputEvent<HTMLInputElement>) => {
     const { currentTarget } = event;
     const { dataset } = currentTarget;
-    const { neighborId, usertypeId } = dataset;
+    const { entityId, usertypeId } = dataset;
 
-    const updatedApps = appsData.updateIn(
-      [neighborId, 'associationDetails', PERSON_ID],
+    const updatedData = appsData.updateIn(
+      [entityId, 'associationDetails', USER_FQN.toString()],
       Set(),
       (users) => {
         if (users.has(usertypeId)) {
@@ -95,19 +96,18 @@ const SurveyTable = ({
       }
     );
 
-    setAppsData(updatedApps);
+    setAppsData(updatedData);
   };
 
-  const displaySuccessModal = () => (
-    <Modal
-        isVisible={successModalOpen}
-        onClose={() => setSuccessModalOpen(false)}
-        textSecondary="Close"
-        textTitle="Submission Successful">
-      <ModalWrapper>
-          Thank you for submitting
-      </ModalWrapper>
-    </Modal>
+  const hideErrorModal = () => {
+    setErrorModalVisible(false);
+    dispatch(resetRequestState(SUBMIT_SURVEY));
+  };
+
+  const renderErrorModal = () => (
+    <SubmissionFailureModal
+        handleOnClose={hideErrorModal}
+        isVisible={errorModalVisible} />
   );
 
   const components = {
@@ -135,13 +135,13 @@ const SurveyTable = ({
 
                 <SubmitButtonWrapper>
                   <Button
-                      isLoading={submitRequestState === RequestStates.SUCCESS}
+                      isLoading={submitRequestState === RequestStates.PENDING}
                       mode="primary"
                       onClick={handleOnSubmit}>
                       Submit Survey
                   </Button>
-                  { displaySuccessModal() }
                 </SubmitButtonWrapper>
+                { renderErrorModal() }
               </>
             )
         }
