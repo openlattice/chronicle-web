@@ -10,10 +10,11 @@ const getDateTimeFromIsoDate = (isoDate :string) => {
   return null;
 };
 
+// format: Tuesday, October 14, 1983
 const getFullDateFromIsoDate = (isoDate :string) => {
   const date :DateTime = DateTime.fromISO(isoDate);
   if (date.isValid) {
-    return date.toLocaleString(DateTime.DATE_FULL);
+    return date.toLocaleString(DateTime.DATE_HUGE);
   }
   return null;
 };
