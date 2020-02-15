@@ -10,14 +10,19 @@ import {
 } from '@redux-saga/core/effects';
 import type { SequenceAction } from 'redux-reqseq';
 
-import Logger from '../../utils/Logger';
 import { INITIALIZE_APPLICATION, initializeApplication } from './AppActions';
+
+import Logger from '../../utils/Logger';
 import {
+  getAllEntitySetIds,
   getEntityDataModelTypes,
 } from '../../core/edm/EDMActions';
 import {
+  getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
 } from '../../core/edm/EDMSagas';
+import { getStudies } from '../studies/StudiesActions';
+import { getStudiesWorker } from '../studies/StudiesSagas';
 
 const LOG = new Logger('AppSagas');
 
@@ -33,9 +38,16 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     yield put(initializeApplication.request(action.id));
     const responses :Object[] = yield all([
       call(getEntityDataModelTypesWorker, getEntityDataModelTypes()),
+      call(getAllEntitySetIdsWorker, getAllEntitySetIds()),
       // ...any other required requests
     ]);
-    if (responses[0].error) throw responses[0].error;
+    responses.forEach((res) => {
+      if (res.error) throw res.error;
+    });
+    // get all studies only after getting entitySetIds
+    const response = yield call(getStudiesWorker, getStudies());
+    if (response.error) throw response.error;
+
     yield put(initializeApplication.success(action.id));
   }
   catch (error) {

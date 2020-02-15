@@ -13,6 +13,7 @@ import {
   AppHeaderWrapper,
   AppNavigationWrapper,
   Spinner,
+  Sizes
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import {
@@ -27,11 +28,14 @@ import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
+import StudiesContainer from '../studies/StudiesContainer';
+import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as AppActions from './AppActions';
 import * as Routes from '../../core/router/Routes';
 import { isNonEmptyString } from '../../utils/LangUtils';
 
 const { INITIALIZE_APPLICATION } = AppActions;
+const { APP_CONTENT_WIDTH } = Sizes;
 
 const Error = styled.div`
   text-align: center;
@@ -73,10 +77,9 @@ class AppContainer extends Component<Props> {
     if (requestStates[INITIALIZE_APPLICATION] === RequestStates.SUCCESS) {
       return (
         <Switch>
-          <Route exact strict path={Routes.HOME} />
-          <Route path="/tab1" render={() => (<AppContentWrapper>Tab 1</AppContentWrapper>)} />
-          <Route path="/tab2" render={() => (<AppContentWrapper>Tab 2</AppContentWrapper>)} />
-          <Redirect to={Routes.HOME} />
+          <Route path={Routes.STUDY} component={StudyDetailsContainer} />
+          <Route path={Routes.STUDIES} component={StudiesContainer} />
+          <Redirect to={Routes.STUDIES} />
         </Switch>
       );
     }
@@ -113,13 +116,13 @@ class AppContainer extends Component<Props> {
       <AppContainerWrapper>
         <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" logout={this.logout} user={user}>
           <AppNavigationWrapper>
-            <NavLink to={Routes.ROOT} />
-            <NavLink to={Routes.HOME}>Home</NavLink>
-            <NavLink to="/tab1">Tab 1</NavLink>
-            <NavLink to="/tab2">Tab 2</NavLink>
+            <NavLink to={Routes.STUDIES} />
+            <NavLink to={Routes.STUDIES}> Studies </NavLink>
           </AppNavigationWrapper>
         </AppHeaderWrapper>
-        { this.renderAppContent() }
+        <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+          { this.renderAppContent() }
+        </AppContentWrapper>
       </AppContainerWrapper>
     );
   }
