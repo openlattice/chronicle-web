@@ -11,6 +11,9 @@ const addStudyParticipant :RequestSequence = newRequestSequence(ADD_PARTICIPANT)
 const CHANGE_ENROLLMENT_STATUS :'CHANGE_ENROLLMENT_STATUS' = 'CHANGE_ENROLLMENT_STATUS';
 const changeEnrollmentStatus :RequestSequence = newRequestSequence(CHANGE_ENROLLMENT_STATUS);
 
+const CREATE_NOTIFICATIONS_ENTITY_SETS :'CREATE_NOTIFICATIONS_ENTITY_SETS' = 'CREATE_NOTIFICATIONS_ENTITY_SETS';
+const createNotificationsEntitySets :RequestSequence = newRequestSequence(CREATE_NOTIFICATIONS_ENTITY_SETS);
+
 const CREATE_PARTICIPANTS_ENTITY_SET :'CREATE_PARTICIPANTS_ENTITY_SET' = 'CREATE_PARTICIPANTS_ENTITY_SET';
 const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_PARTICIPANTS_ENTITY_SET);
 
@@ -43,24 +46,26 @@ const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 export {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
+  CREATE_NOTIFICATIONS_ENTITY_SETS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_PARTICIPANTS,
   GET_STUDY_AUTHORIZATIONS,
+  GET_STUDY_PARTICIPANTS,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
+  createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyParticipants,
   getStudyAuthorizations,
+  getStudyParticipants,
   updateParticipantsEntitySetPermissions,
   updateStudy
 };

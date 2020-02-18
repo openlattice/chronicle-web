@@ -17,6 +17,8 @@ import {
   GET_STUDY_PARTICIPANTS,
   GET_STUDY_AUTHORIZATIONS,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
+  CREATE_NOTIFICATIONS_ENTITY_SETS,
+  createNotificationsEntitySets,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -38,6 +40,9 @@ const { DATE_ENROLLED, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
+    requestState: RequestStates.STANDBY
+  },
+  [CREATE_NOTIFICATIONS_ENTITY_SETS]: {
     requestState: RequestStates.STANDBY
   },
   [CREATE_STUDY]: {
@@ -252,6 +257,15 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
+      });
+    }
+
+    case createNotificationsEntitySets.case(action.type): {
+      // const seqAction :SequenceAction = action;
+      return createNotificationsEntitySets.reducer(state, action, {
+        REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
       });
     }
 
