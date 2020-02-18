@@ -89,10 +89,11 @@ const SurveyTable = ({
       [entityId, 'associationDetails', USER_FQN.toString()],
       Set(),
       (users) => {
-        if (users.has(usertypeId)) {
-          return users.delete(usertypeId);
+        const set = new Set(users);
+        if (set.has(usertypeId)) {
+          return set.delete(usertypeId);
         }
-        return users.add(usertypeId);
+        return set.add(usertypeId);
       }
     );
 
@@ -120,7 +121,7 @@ const SurveyTable = ({
     <StyledCard>
       <StyledCardSegment vertical noBleed>
         {
-          appsData.length === 0
+          appsData.isEmpty()
             ? (
               <NoAppsFound>
                 No apps found. Please try refreshing the page.
