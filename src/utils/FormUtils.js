@@ -9,13 +9,15 @@ import {
 import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { getParticipantsEntitySetName } from './ParticipantUtils';
+import { getNotificationsEntitySetName } from './NotificationsUtils';
 
 import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
+import { ENTITY_SET_NAMES } from '../core/edm/constants/EntitySetNames';
 
 const { getEntityAddressKey, getPageSectionKey, parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
-const { PERSON_ID } = PROPERTY_TYPE_FQNS;
+const { NOTIFICATION_DESCRIPTION, PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
 /*
  * returns a FormData object similar to this
  *  {
@@ -40,7 +42,7 @@ const { PERSON_ID } = PROPERTY_TYPE_FQNS;
  *
  */
 
-const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
+const createFormDataFromStudyEntity = (dataSchema :Object, notificationsEnabled :boolean, study :Map) => {
   let formData = {};
 
   if (!dataSchema || !study) {
@@ -58,6 +60,15 @@ const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
       formData = setIn(formData, [pageSectionKey, addressKey], propertyValue);
     });
   });
+
+  const studyId = study.getIn([STUDY_ID, 0]);
+  const notificationsEntitySetName = getNotificationsEntitySetName(studyId);
+
+  formData = setIn(
+    formData,
+    [getPageSectionKey(1, 1),
+      getEntityAddressKey(0, notificationsEntitySetName, NOTIFICATION_DESCRIPTION)], notificationsEnabled
+  );
 
   return formData;
 };

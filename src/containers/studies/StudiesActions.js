@@ -35,6 +35,9 @@ const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTI
 const GET_STUDY_AUTHORIZATIONS :'GET_STUDY_AUTHORIZATIONS' = 'GET_STUDY_AUTHORIZATIONS';
 const getStudyAuthorizations :RequestSequence = newRequestSequence(GET_STUDY_AUTHORIZATIONS);
 
+const GET_STUDY_NOTIFICATION_STATUS :'GET_STUDY_NOTIFICATION_STATUS' = 'GET_STUDY_NOTIFICATION_STATUS';
+const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY_NOTIFICATION_STATUS);
+
 const UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS
   :'UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS' = 'UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS';
 const updateParticipantsEntitySetPermissions
@@ -53,6 +56,7 @@ export {
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_AUTHORIZATIONS,
+  GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
@@ -65,6 +69,7 @@ export {
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyAuthorizations,
+  getStudyNotificationStatus,
   getStudyParticipants,
   updateParticipantsEntitySetPermissions,
   updateStudy

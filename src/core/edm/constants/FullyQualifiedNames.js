@@ -30,7 +30,7 @@ const PROPERTY_TYPE_FQNS = {
 
   // notifications
   NOTIFICATION_ID: new FullyQualifiedName('ol.id'),
-  DESCRIPTION: new FullyQualifiedName('ol.description')
+  NOTIFICATION_DESCRIPTION: new FullyQualifiedName('ol.description')
 };
 
 export {

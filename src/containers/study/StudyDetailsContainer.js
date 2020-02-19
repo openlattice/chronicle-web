@@ -5,7 +5,8 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Map } from 'immutable';
+import { Map, Set } from 'immutable';
+import { Constants } from 'lattice';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
@@ -22,6 +23,8 @@ import { goToRoot } from '../../core/router/RoutingActions';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -73,7 +76,15 @@ const StudyDetailsContainer = (props :Props) => {
 
   const studyUUID :UUID = getIdFromMatch(match) || '';
   const dispatch = useDispatch();
-  const study = useSelector((state :Map) => state.getIn(['studies', 'studies', studyUUID]));
+
+
+  const { study, notificationStatus } = useSelector((state) => ({
+    study: state.getIn(['studies', 'studies', studyUUID], Map()),
+    notificationStatus: state.getIn(['studies', 'notificationEnabledStudies'], Map())
+  }));
+
+  const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
+  const notificationsEnabled :boolean = notificationStatus.has(studyEntityKeyId);
 
   if (!study) {
     dispatch(goToRoot());
@@ -93,8 +104,12 @@ const StudyDetailsContainer = (props :Props) => {
         </TabLink>
       </Tabs>
       <Switch>
-        <Route path={Routes.PARTICIPANTS} render={() => <StudyParticipants study={study} />} />
-        <Route path={Routes.STUDY} render={() => <StudyDetails study={study} />} />
+        <Route
+            path={Routes.PARTICIPANTS}
+            render={() => <StudyParticipants study={study} />} />
+        <Route
+            path={Routes.STUDY}
+            render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
       </Switch>
     </>
   );

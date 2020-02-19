@@ -2,39 +2,48 @@
  * @flow
  */
 
-import { Map, fromJS } from 'immutable';
+import {
+  Map,
+  fromJS,
+  getIn
+} from 'immutable';
+import { Constants } from 'lattice';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
+  CREATE_NOTIFICATIONS_ENTITY_SETS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_PARTICIPANTS,
   GET_STUDY_AUTHORIZATIONS,
+  GET_STUDY_NOTIFICATION_STATUS,
+  GET_STUDY_PARTICIPANTS,
   UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
-  CREATE_NOTIFICATIONS_ENTITY_SETS,
-  createNotificationsEntitySets,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
+  createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyParticipants,
   getStudyAuthorizations,
+  getStudyNotificationStatus,
+  getStudyParticipants,
   updateParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const { DATE_ENROLLED, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
@@ -66,6 +75,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_AUTHORIZATIONS]: {
     requestState: RequestStates.STANDBY
   },
+  [GET_STUDY_NOTIFICATION_STATUS]: {
+    requestState: RequestStates.STANDBY
+  },
   [UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS]: {
     requestState: RequestStates.STANDBY
   },
@@ -73,6 +85,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
   associationKeyIds: Map(),
+  notificationEnabledStudies: Map(),
   participantEntitySetIds: Map(),
   participants: Map(),
   studies: Map(),
@@ -111,11 +124,19 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           .setIn([CREATE_STUDY, seqAction.id], seqAction),
         SUCCESS: () => {
           if (state.hasIn([CREATE_STUDY, seqAction.id])) {
-            const study :Map = fromJS(seqAction.value);
-            const entityKeyId :UUID = study.getIn([STUDY_ID, 0]);
+            const { studyEntityData, notificationsEnabled } = seqAction.value;
+
+            const studyId :UUID = getIn(studyEntityData, [STUDY_ID, 0]);
+            const entityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
+
+            let notificationsEnabledStudies = state.get('notificationEnabledStudies');
+            if (notificationsEnabled) {
+              notificationsEnabledStudies = notificationsEnabledStudies.add(entityKeyId);
+            }
             return state
-              .setIn(['studies', entityKeyId], study)
-              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+              .setIn(['studies', studyId], fromJS(studyEntityData))
+              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS)
+              .set('notificationEnabledStudies', notificationsEnabledStudies);
           }
           return state;
         },
@@ -266,6 +287,22 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
+      });
+    }
+    case getStudyNotificationStatus.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getStudyNotificationStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { value } = seqAction;
+          const { enabledNotifications, notificationsEntitySets } = value;
+
+          return state
+            .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
+            .set('notificationsEntitySets', notificationsEntitySets)
+            .set('notificationEnabledStudies', fromJS(enabledNotifications));
+        }
       });
     }
 
