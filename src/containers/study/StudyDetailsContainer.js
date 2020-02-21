@@ -5,7 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Map, Set } from 'immutable';
+import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +21,7 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 
-const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { NOTIFICATION_ID, STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -77,14 +77,16 @@ const StudyDetailsContainer = (props :Props) => {
   const studyUUID :UUID = getIdFromMatch(match) || '';
   const dispatch = useDispatch();
 
-
-  const { study, notificationStatus } = useSelector((state) => ({
-    study: state.getIn(['studies', 'studies', studyUUID], Map()),
-    notificationStatus: state.getIn(['studies', 'notificationEnabledStudies'], Map())
-  }));
-
+  const study = useSelector((state) => state.getIn(['studies', 'studies', studyUUID], Map()));
   const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
-  const notificationsEnabled :boolean = notificationStatus.has(studyEntityKeyId);
+
+  const notificationId = useSelector(
+    (state) => state.getIn(
+      ['studies', 'studyNotifications', studyEntityKeyId, 'associationDetails', NOTIFICATION_ID, 0]
+    )
+  );
+
+  const notificationsEnabled :boolean = notificationId === studyUUID;
 
   if (!study) {
     dispatch(goToRoot());

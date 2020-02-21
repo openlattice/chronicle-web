@@ -81,14 +81,12 @@ const {
   deleteEntitiesAndNeighborsWorker,
   getEntitySetDataWorker,
   updateEntityDataWorker,
-  createAssociationsWorker,
 } = DataApiSagas;
 
 const {
   deleteEntitiesAndNeighbors,
   getEntitySetData,
   updateEntityData,
-  createAssociations,
 } = DataApiActions;
 
 const { createEntitySetsWorker, getEntitySetIdWorker, getEntitySetIdsWorker } = EntitySetsApiSagas;
@@ -144,6 +142,7 @@ const {
 const {
   DATE_ENROLLED,
   NOTIFICATION_DESCRIPTION,
+  NOTIFICATION_ENABLED,
   NOTIFICATION_ID,
   STATUS,
   STUDY_EMAIL,
@@ -471,6 +470,64 @@ function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator
   return workerResponse;
 }
 
+function* associateExistingStudyWithNotification(
+  partOfEntitySetName, notificationEntitySetName, studyEKID, associationVal, formData
+) :Generator<*, *, *> {
+  const workerResponse = {};
+
+  try {
+    let response = yield call(
+      createNotificationsEntitySetsWorker, createNotificationsEntitySets(formData)
+    );
+    if (response.error) throw response.error;
+
+    const notificationEntitySets = fromJS(response.data);
+
+    workerResponse.partOfEntitySetId = notificationEntitySets.get(partOfEntitySetName);
+    workerResponse.notificationEntitySetId = notificationEntitySets.get(notificationEntitySetName);
+
+    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
+      entitySetIds: state.getIn(['edm', 'entitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
+
+    const associations = [
+      [partOfEntitySetName, 0, notificationEntitySetName, studyEKID, CHRONICLE_STUDIES, {
+        [NOTIFICATION_ID.toString()]: [associationVal],
+      }]
+    ];
+
+    const associationEntityData = processAssociationEntityData(
+      fromJS(associations), entitySetIds.merge(notificationEntitySets), propertyTypeIds
+    );
+
+    const notificationFormData = setIn(
+      {},
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)],
+      'Daily notification of User Awareness Questionnaire',
+    );
+
+    const entityData = processEntityData(
+      notificationFormData,
+      entitySetIds.merge(notificationEntitySets),
+      propertyTypeIds
+    );
+
+    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
+
+    const partOfEntitySetId = notificationEntitySets.get(partOfEntitySetName);
+    const partOfEntityKeyId = getIn(response.data, ['entitySetIds', partOfEntitySetId, 0]);
+
+    workerResponse.partOfEntityKeyId = partOfEntityKeyId;
+  }
+  catch (error) {
+    workerResponse.error = error;
+  }
+
+  return workerResponse;
+}
+
 /*
  *
  * StudiesActions.updateStudy()
@@ -496,121 +553,58 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const notificationEntitySetName = getNotificationsEntitySetName(studyId);
     const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
 
-    const { notificationEntitySetId, partOfEntitySetId, associationEntityKeyId } = yield select((state) => ({
-      notificationEntitySetId: state.getIn(['studies', 'notificationsEntitySets', notificationEntitySetName]),
-      partOfEntitySetId: state.getIn(['studies', 'notificationsEntitySets', partOfEntitySetName]),
-      associationEntityKeyId: state.getIn(['studies', 'notificationEnabledStudies', studyEKID])
-    }));
-
     const notificationsEnabled = getIn(formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)]);
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
 
-    const notificationIdVal = notificationsEnabled ? studyId : null;
-
-    // if ol.notification or ol.partof entity sets do not exist, create them first. This would be the case for
-    // pre-existing studies
-    let notificationEntitySets;
-    if (!notificationEntitySetId || !partOfEntitySetId) {
-      const response = yield call(createNotificationsEntitySetsWorker, createNotificationsEntitySets(formData));
-      if (response.error) throw response.error;
-
-      notificationEntitySets = fromJS(response.data);
-
-      const associations = [
-        [partOfEntitySetName, 0, notificationEntitySetName, studyEKID, CHRONICLE_STUDIES, {
-          [NOTIFICATION_ID.toString()]: [notificationIdVal],
-        }]
-      ];
-
-      const notificationPropertyId = yield select(
-        (state) => state.getIn(['edm', 'propertyTypeIds', NOTIFICATION_ID])
-      );
-
-      const entityData = {
-        [notificationEntitySets.get(partOfEntitySetName)]: {
-          [notificationPropertyId]: [studyId]
-        }
-      };
-
-      const associationEntityData = processAssociationEntityData(
-        fromJS(associations), entitySetIds.merge(notificationEntitySets), propertyTypeIds
-      );
-
-      console.log(associationEntityData);
-
-      // create the association between two entities that are not as great
-
-      // how else is this done? what are you tr
-      // create association
-      // which is the one thing that
-    }
-
-    // else : the entity sets exist. If the association exists, so update the
-
-    let response = yield call(getEntitySetIdsWorker, getEntitySetIds([notificationEntitySetName, partOfEntitySetName]));
-    if (response.error) throw response.error;
-
-    // if the NOTIFICATION -> PART_OF -> STUDY association doesn't exist, create it
-
-    if (!associationEntityKeyId) {
-      const associations = [
-        [partOfEntitySetName, 0, notificationEntitySetName, studyEKID, CHRONICLE_STUDIES, {
-          [NOTIFICATION_ID.toString()]: [notificationIdVal],
-        }]
-      ];
-
-      const associationEntityData = processAssociationEntityData(
-        fromJS(associations), entitySetIds.merge(notificationEntitySets), propertyTypeIds
-      );
-
-      let entityData = processEntityData(formData, entitySetIds.merge(notificationEntitySets), propertyTypeIds);
-
-      response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
-
-      // const entityData = {
-      //   [get(notificationEntitySets, partOfEntitySetName)]: {
-      //     [notificationPropertyId]: [notificationIdVal]
-      //   }
-      // };
-      //
-      // response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData: {}, entityData }));
-
-      // const associationEntityData = processAssociationEntityData(
-      //   fromJS(associations),
-      //   entitySetIds.merge(notificationEntitySets),
-      //   propertyTypeIds
-      // );
-      //
-      // console.log(associationEntityData);
-
-      // how many people are here for another one?
-    }
-
-    // remove notificationEntitySetName from form data since it is not needed
-    formData = removeIn(formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)]);
-
-    initialFormData = removeIn(initialFormData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)]);
-
-    // update association: if notification enabled set value to studyId else null
     const associationVal = notificationsEnabled ? studyId : null;
 
     formData = setIn(formData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, partOfEntitySetName, NOTIFICATION_ID)], associationVal);
 
-    // get entity set Id of partOfEntitySetName
-    response = yield call(getEntitySetIdsWorker, getEntitySetIds([partOfEntitySetName]));
-    if (response.error) throw response.error;
-    const partOfEntitySet = response.data;
+    // remove notification_enabled property since it is not a part of chronicle_studies entity set
+    formData = removeIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
 
-    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    initialFormData = removeIn(initialFormData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
 
+    // Step 1:  if ol.notification -> ol.partof -> ol.study association does not exist ->
+    // create the association, then save other study details
 
-    // if no associationEntityKeyId we need to create it
+    const studyNotifications = yield select(
+      (state) => state.getIn(['studies', 'studyNotifications', studyEKID], Map())
+    );
+    let { partOfEntitySetId, partOfEntityKeyId, notificationEntitySetId } = ({
+      partOfEntitySetId: studyNotifications.getIn(['associationEntitySet', 'id']),
+      partOfEntityKeyId: studyNotifications.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]),
+      notificationEntitySetId: studyNotifications.getIn(['neighborEntitySet', 'id'])
+    });
+
+    if (!partOfEntityKeyId) {
+
+      const response = yield call(
+        associateExistingStudyWithNotification,
+        partOfEntitySetName,
+        notificationEntitySetName,
+        studyEKID,
+        associationVal,
+        formData
+      );
+
+      if (response.error) throw response.error;
+      partOfEntityKeyId = response.partOfEntityKeyId;
+      partOfEntitySetId = response.partOfEntitySetId;
+      notificationEntitySetId = response.notificationEntitySetId;
+
+      // association has been created, so no need to update the association value
+      formData = removeIn(formData,
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, partOfEntitySetName, NOTIFICATION_ID)]);
+    }
+
+    // Step 2: update study details
     const entityIndexToIdMap :Map = Map()
       .setIn([CHRONICLE_STUDIES, 0], studyEKID)
-      .setIn([partOfEntitySetName, 0], associationEntityKeyId);
+      .setIn([partOfEntitySetName, 0], partOfEntityKeyId);
 
     const draftWithKeys = replaceEntityAddressKeys(
       formData,
@@ -622,22 +616,36 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       findEntityAddressKeyFromMap(entityIndexToIdMap)
     );
 
+    const partOfEntitySet = fromJS({
+      [partOfEntitySetName]: partOfEntitySetId
+    });
+
     let entityData = processEntityDataForPartialReplace(
       draftWithKeys,
       originalWithKeys,
-      entitySetIds,
+      entitySetIds.merge(partOfEntitySet),
       propertyTypeIds,
       {}
     );
 
-    response = yield call(submitPartialReplaceWorker, submitPartialReplace({ entityData }));
+    const response = yield call(submitPartialReplaceWorker, submitPartialReplace({ entityData }));
     if (response.error) throw response.error;
 
     // construct updated study
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
+
+    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
     const studyEntityData = getIn(entityData, [entitySetId, 0]);
 
-    yield put(updateStudy.success(action.id, studyEntityData));
+    // update notifications : set entity set ids, and association key id
+
+    yield put(updateStudy.success(action.id, {
+      associationVal,
+      notificationEntitySetId,
+      partOfEntityKeyId,
+      partOfEntitySetId,
+      studyEntityData,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -888,9 +896,9 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
       .map((entitySetName) => entitySetIds.get(entitySetName));
     partOfEntitySetIds = partOfEntitySetIds.filter((entitySetId) => entitySetId !== undefined);
 
-    let notificationsEntitySetIds :List = notificationEntitySetNames
+    let notificationEntitySetIds :List = notificationEntitySetNames
       .map((entitySetName) => entitySetIds.get(entitySetName));
-    notificationsEntitySetIds = notificationsEntitySetIds.filter((entitySetId) => entitySetId !== undefined);
+    notificationEntitySetIds = notificationEntitySetIds.filter((entitySetId) => entitySetId !== undefined);
 
     const studiesEntitySetId = yield select(
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
@@ -902,7 +910,7 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
       destinationEntitySetIds: [studiesEntitySetId],
       edgeEntitySetIds: partOfEntitySetIds.toArray(),
       entityKeyIds: studyEntityKeyIds.toArray(),
-      sourceEntitySetIds: notificationsEntitySetIds.toArray()
+      sourceEntitySetIds: notificationEntitySetIds.toArray()
     };
 
     response = yield call(
@@ -914,42 +922,10 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
     );
     if (response.error) throw response.error;
 
-    // if notifications for a study are enabled then the ol.id in the associationDetails == studyId
-    const entityNeighbors = fromJS(response.data);
+    const entityNeighbors = fromJS(response.data)
+      .mapEntries(([entityKeyId, neighbors]) => [entityKeyId, neighbors.first()]);
 
-    const enabledNotifications :Map<UUID, UUID> = Map().withMutations((map) => {
-      studies.forEach((study) => {
-        const studyId = study.getIn([STUDY_ID, 0]);
-        const entityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
-
-        const associationDetails = entityNeighbors.getIn([entityKeyId, 0, 'associationDetails'], Map());
-        if (associationDetails.getIn([NOTIFICATION_ID, 0]) === studyId) {
-          map.set(entityKeyId, associationDetails.getIn([OPENLATTICE_ID_FQN, 0]));
-        }
-      });
-    });
-
-
-    // get the entity set names and ids for each neighbor. This voids the need to call
-    // EntitySetsApi.getEntitySetId() should there be need to update the study
-
-    const notificationsEntitySets :Map<UUID, UUID> = Map().withMutations((map) => {
-      entityNeighbors.valueSeq().forEach((entity) => {
-
-        let entitySetName = entity.getIn([0, 'neighborEntitySet', 'name']);
-        let entitySetId = entity.getIn([0, 'neighborEntitySet', 'id']);
-
-        map.set(entitySetName, entitySetId);
-
-        entitySetName = entity.getIn([0, 'associationEntitySet', 'name']);
-        entitySetId = entity.getIn([0, 'associationEntitySet', 'id']);
-
-        map.set(entitySetName, entitySetId);
-      });
-    });
-
-
-    yield put(getStudyNotificationStatus.success(action.id, { enabledNotifications, notificationsEntitySets }));
+    yield put(getStudyNotificationStatus.success(action.id, entityNeighbors));
   }
   catch (error) {
     workerResponse.error = error;
@@ -1103,6 +1079,14 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     let { formData } = value;
     const { studyId } = value;
 
+    const notificationEntitySetName = getNotificationsEntitySetName(studyId);
+    const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
+
+    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
+      entitySetIds: state.getIn(['edm', 'entitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
+
     // generate a random study id
     formData = setIn(
       formData,
@@ -1110,32 +1094,36 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       studyId,
     );
 
+    const notificationsEnabled = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+
+    // remove notification_enabled property since it's not part of chronicle_studies entity set
+    formData = removeIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]
+    );
+
+    // update formData with a description string (entity data for notification entity set).
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)],
+      'Daily notification of User Awareness Questionnaire'
+    );
+
     // create a new participant entity set for the new study
     let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
     if (response.error) throw response.error;
 
-    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
-      entitySetIds: state.getIn(['edm', 'entitySetIds']),
-      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
-    }));
-
-    // create ol.partof -> ol.association entity sets
+    // create ol.notification -> ol.partof -> ol.study entity sets
     response = yield call(createNotificationsEntitySetsWorker, createNotificationsEntitySets(formData));
     if (response.error) throw response.error;
-
     const notificationEntitySets = fromJS(response.data); // Map<string, UUID>
 
     // create associations
-    const notificationEntitySetName = getNotificationsEntitySetName(studyId);
-    const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
-
-    const notificationsEnabled = getIn(formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)]);
-
-    const notificationIdVal = notificationsEnabled ? studyId : null;
+    const associationVal = notificationsEnabled ? studyId : null;
     const associations = [
       [partOfEntitySetName, 0, notificationEntitySetName, 0, CHRONICLE_STUDIES, {
-        [NOTIFICATION_ID.toString()]: [notificationIdVal],
+        [NOTIFICATION_ID.toString()]: [associationVal],
       }]
     ];
 
@@ -1145,34 +1133,35 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       propertyTypeIds
     );
 
-    // associations are not great!!!
-
-    // // set description in notificationEntitySet
-    // formData = setIn(
-    //   formData,
-    //   [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)],
-    //   'Daily notification of User Awareness Questionnaire',
-    // );
-
     let entityData = processEntityData(formData, entitySetIds.merge(notificationEntitySets), propertyTypeIds);
 
     response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
     if (response.error) throw response.error;
 
-    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
-    const entityKeyId :UUID = getIn(response.data, ['entityKeyIds', entitySetId, 0]);
+    const studyEntitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    const studyEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', studyEntitySetId, 0]);
 
+    const partOfEntitySetId :UUID = notificationEntitySets.get(partOfEntitySetName);
+    const partOfEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', partOfEntitySetId, 0]);
+
+    // reconstruct the created study
     // update the study entity with its entity key id
     formData = setIn(
       formData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)],
-      entityKeyId,
+      studyEntityKeyId,
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    const studyEntityData = getIn(entityData, [entitySetId, 0]);
+    const studyEntityData = getIn(entityData, [studyEntitySetId, 0]);
 
-    yield put(createStudy.success(action.id, { studyEntityData, notificationsEnabled }));
+    yield put(createStudy.success(action.id, {
+      associationVal,
+      notificationEntitySetId: notificationEntitySets.get(notificationEntitySetName),
+      partOfEntityKeyId,
+      partOfEntitySetId: notificationEntitySets.get(partOfEntitySetName),
+      studyEntityData,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);

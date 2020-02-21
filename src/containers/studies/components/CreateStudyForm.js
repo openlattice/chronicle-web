@@ -9,14 +9,13 @@ import { Map } from 'immutable';
 import { Form } from 'lattice-fabricate';
 import { useDispatch } from 'react-redux';
 
-import getFormSchema from './CreateStudySchemas';
+import { dataSchema, uiSchema } from './CreateStudySchemas';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { createFormDataFromStudyEntity } from '../../../utils/FormUtils';
 import { createStudy, updateStudy } from '../StudiesActions';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
-
 
 type Props = {
   notificationsEnabled :boolean;
@@ -32,8 +31,6 @@ const CreateStudyForm = (props:Props, ref) => {
   if (study) {
     studyId = study.getIn([STUDY_ID, 0]);
   }
-
-  const { dataSchema, uiSchema } = getFormSchema(studyId);
 
   useEffect(() => {
     if (study) {
