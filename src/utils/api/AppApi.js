@@ -1,4 +1,8 @@
-// @flow
+/*
+ * @flow
+ */
+
+import { AuthUtils } from 'lattice-auth';
 
 import ENV_URLS from '../constants/EnvUrls';
 import EnvTypes from '../constants/EnvTypes';
@@ -7,6 +11,7 @@ import ParticipantDataTypes from '../constants/ParticipantDataTypes';
 import { isValidUUID } from '../ValidationUtils';
 import {
   CHRONICLE,
+  CSRF_TOKEN,
   DATA,
   FILE_TYPE,
   PARTICIPANT,
@@ -44,16 +49,19 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
   }
 
   const baseUrl = getBaseUrl();
+  const csrfToken = AuthUtils.getCSRFToken();
 
   if (dataType === RAW) {
     return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
     + `${studyId}/${participantEntityKeyId}?`
-    + `${FILE_TYPE}=csv`;
+    + `${FILE_TYPE}=csv`
+    + `&${CSRF_TOKEN}=${csrfToken}`;
   }
 
   return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
     + `${studyId}/${participantEntityKeyId}/preprocessed?`
-    + `${FILE_TYPE}=csv`;
+    + `${FILE_TYPE}=csv`
+    + `&${CSRF_TOKEN}=${csrfToken}`;
 };
 
 export { getBaseUrl, getParticipantDataUrl };
