@@ -17,8 +17,6 @@ import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
 import * as Routes from './core/router/Routes';
 
-import generateEntitySets from './generateEntitySets';
-// generateEntitySets();
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;
 declare var __AUTH0_DOMAIN__ :string;
