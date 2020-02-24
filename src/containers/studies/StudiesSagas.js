@@ -1142,7 +1142,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const studyEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', studyEntitySetId, 0]);
 
     const partOfEntitySetId :UUID = notificationEntitySets.get(partOfEntitySetName);
-    const partOfEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', partOfEntitySetId, 0]);
+    const partOfEntityKeyId :UUID = getIn(response.data, ['entitySetIds', partOfEntitySetId, 0]);
 
     // reconstruct the created study
     // update the study entity with its entity key id
