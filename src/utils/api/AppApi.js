@@ -3,8 +3,9 @@
 import ENV_URLS from '../constants/EnvUrls';
 import EnvTypes from '../constants/EnvTypes';
 import Logger from '../Logger';
-import { isValidUUID } from '../ValidationUtils';
+import ParticipantDataTypes from '../constants/ParticipantDataTypes';
 import { isNonEmptyString } from '../LangUtils';
+import { isValidUUID } from '../ValidationUtils';
 import {
   CHRONICLE,
   DATA,
@@ -13,7 +14,6 @@ import {
   STUDY,
 } from '../constants/UrlConstants';
 import type { ParticipantDataType } from '../constants/ParticipantDataTypes';
-import ParticipantDataTypes from '../constants/ParticipantDataTypes';
 
 const LOG = new Logger('AppApi');
 const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
