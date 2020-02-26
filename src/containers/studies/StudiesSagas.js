@@ -892,13 +892,13 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
 
     const entitySetIds = fromJS(response.data);
 
-    let partOfEntitySetIds :List = partOfEntitySetNames
-      .map((entitySetName) => entitySetIds.get(entitySetName));
-    partOfEntitySetIds = partOfEntitySetIds.filter((entitySetId) => entitySetId !== undefined);
+    const partOfEntitySetIds :List = partOfEntitySetNames
+      .map((entitySetName) => entitySetIds.get(entitySetName))
+      .filter((entitySetId) => entitySetId !== undefined);
 
-    let notificationEntitySetIds :List = notificationEntitySetNames
-      .map((entitySetName) => entitySetIds.get(entitySetName));
-    notificationEntitySetIds = notificationEntitySetIds.filter((entitySetId) => entitySetId !== undefined);
+    const notificationEntitySetIds :List = notificationEntitySetNames
+      .map((entitySetName) => entitySetIds.get(entitySetName))
+      .filter((entitySetId) => entitySetId !== undefined);
 
     const studiesEntitySetId = yield select(
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
