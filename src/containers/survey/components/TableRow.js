@@ -2,15 +2,17 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Set, getIn, get } from 'immutable';
+import { Set, get, getIn } from 'immutable';
 import { Checkbox, Colors } from 'lattice-ui-kit';
 
 import AppUserTypes from '../../../utils/constants/AppUserTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { updateAppUserType } from '../SurveyActions';
 
 const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
+
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
@@ -41,15 +43,38 @@ const StyledCell = styled.td`
   text-align: ${(props) => props.textAlign};
 `;
 
+// function reducer(state, action) {
+//   const { entityId, usertypeId } = action;
+//   console.log(entityId, usertypeId, state);
+//   switch (action.type) {
+//     case UDPATE_APP_USER:
+//       return state;
+//     default:
+//       return state;
+//   }
+// }
+
 type Props = {
   data :Object;
-  handleOnChange :(SyntheticInputEvent<HTMLInputElement>) => void;
+  dispatch :any;
+  // handleOnChange :(SyntheticInputEvent<HTMLInputElement>) => void;
 };
 
-const TableRow = ({ data, handleOnChange } :Props) => {
+const TableRow = ({ data, ...otherProps } :Props) => {
+  const { dispatch } = otherProps;
+
   const appName :string = getIn(data, ['entityDetails', TITLE]);
   const appEntityId :UUID = get(data, 'id');
   const appUsers :Set = getIn(data, ['associationDetails', USER_FQN], Set());
+
+  const handleOnChange = (event :SyntheticInputEvent<HTMLInputElement>) => {
+
+    const { currentTarget } = event;
+    const { dataset } = currentTarget;
+
+    const { usertypeId, entityId } = dataset;
+    dispatch(updateAppUserType(usertypeId, entityId));
+  };
 
   return (
     <RowWrapper onClick={() => {}}>

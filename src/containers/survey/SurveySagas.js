@@ -14,7 +14,6 @@ import {
 
 import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
-import { getParticipantUserAppsUrl } from '../../utils/AppUtils';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const LOG = new Logger('SurveySagas');
@@ -31,16 +30,15 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
     const { value } = action;
     const { participantId, studyId, appsData } = value;
 
-    const url = getParticipantUserAppsUrl(participantId, studyId);
-    if (!url) throw new Error('Invalid Url');
-
     const associationData :Map = Map().withMutations((map) => {
       appsData.forEach((entry, key) => {
         map.set(key, entry.get('associationDetails').delete(OPENLATTICE_ID_FQN));
       });
     });
 
-    const response = yield call(ChronicleApi.updateAppsUsageAssociationData, url, associationData.toJS());
+    const response = yield call(
+      ChronicleApi.updateAppsUsageAssociationData, participantId, studyId, associationData.toJS()
+    );
     if (response.error) throw response.error;
 
     yield put(submitSurvey.success(action.id));
@@ -70,10 +68,7 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     const { value } = action;
     const { participantId, studyId } = value;
 
-    const url = getParticipantUserAppsUrl(participantId, studyId);
-    if (!url) throw new Error('Invalid Url');
-
-    const response = yield call(ChronicleApi.getParticipantAppsUsageData, url);
+    const response = yield call(ChronicleApi.getParticipantAppsUsageData, participantId, studyId);
     if (response.error) throw response.error;
 
     // mapping from association EKID -> associationDetails & entityDetails

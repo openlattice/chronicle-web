@@ -1,6 +1,11 @@
 // @flow
 
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useReducer,
+  useMemo
+} from 'react';
 
 import styled from 'styled-components';
 import { Map, Set } from 'immutable';
@@ -11,14 +16,13 @@ import {
   StyleUtils,
   Table,
 } from 'lattice-ui-kit';
-import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import SubmissionFailureModal from './components/SubmissionFailureModal';
 import TABLE_HEADERS from './utils/TableHeaders';
 import TableRow from './components/TableRow';
-import { SUBMIT_SURVEY, submitSurvey } from './SurveyActions';
+import { SUBMIT_SURVEY, submitSurvey, UPDATE_APP_USER_TYPE } from './SurveyActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
@@ -49,8 +53,32 @@ const NoAppsFound = styled.h4`
   text-align: center;
 `;
 
+function reducer(state, action :Object) {
+  const { userType, entityId } = action;
+
+  switch (action.type) {
+    case UPDATE_APP_USER_TYPE: {
+      const updatedData = state.updateIn(
+        [entityId, 'associationDetails', USER_FQN.toString()],
+        Set(),
+        (users) => {
+          const set = new Set(users);
+          if (set.has(userType)) {
+            return set.delete(userType);
+          }
+          return set.add(userType);
+        }
+      );
+      return updatedData;
+    }
+    default:
+      return state;
+  }
+}
+
+
 type Props = {
-  data :Map<UUID, Map>;
+  data :Map;
   participantId :string;
   studyId :UUID;
   submitRequestState :RequestState;
@@ -63,9 +91,9 @@ const SurveyTable = ({
   submitRequestState
 } :Props) => {
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
-  const [appsData, setAppsData] = useState(data);
+  const [appsData, dispatch] = useReducer(reducer, data);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   useEffect(() => {
@@ -80,42 +108,27 @@ const SurveyTable = ({
     }));
   };
 
-  const handleOnChange = (event :SyntheticInputEvent<HTMLInputElement>) => {
-    const { currentTarget } = event;
-    const { dataset } = currentTarget;
-    const { entityId, usertypeId } = dataset;
-
-    const updatedData = appsData.updateIn(
-      [entityId, 'associationDetails', USER_FQN.toString()],
-      Set(),
-      (users) => {
-        const set = new Set(users);
-        if (set.has(usertypeId)) {
-          return set.delete(usertypeId);
-        }
-        return set.add(usertypeId);
-      }
-    );
-
-    setAppsData(updatedData);
-  };
-
   const hideErrorModal = () => {
     setErrorModalVisible(false);
     dispatch(resetRequestState(SUBMIT_SURVEY));
   };
 
-  const components = {
+
+  const TableDataDispatch = React.createContext(null);
+
+  const components = useMemo(() => ({
     Row: ({ data: rowData } :any) => (
-      <TableRow data={rowData} handleOnChange={handleOnChange} />
+      <TableDataDispatch.Provider value={dispatch}>
+        <TableRow data={rowData} dispatch={dispatch} />
+      </TableDataDispatch.Provider>
     )
-  };
+  }), []);
 
   return (
     <StyledCard>
       <StyledCardSegment vertical noBleed>
         {
-          appsData.isEmpty()
+          appsData.length === 0
             ? (
               <NoAppsFound>
                 No apps found. Please try refreshing the page.

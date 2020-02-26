@@ -1,11 +1,12 @@
 // @flow
 
 import axios from 'axios';
-
+import { getParticipantUserAppsUrl } from '../AppUtils';
 /*
- * send GET request to chronicle server to get neighbors of participant_id
- * associated by chroncile_user_apps.
- * @param url: chronicle/study/participant/data/<study_id>/<participant_id>/apps
+ * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
+ *
+ * Fetch neighbors of participant_id associated by chroncile_user_apps.
+ *
  * response data:
       [
         {
@@ -20,17 +21,26 @@ import axios from 'axios';
         }
       ]
  */
-const getParticipantAppsUsageData = (url :string) => new Promise<*>((resolve, reject) => {
-  axios({
-    method: 'get',
-    url,
-  }).then((result) => resolve(result))
-    .catch((error) => reject(error));
-});
+function getParticipantAppsUsageData(participantId :string, studyId :UUID) {
+  return new Promise<*>((resolve, reject) => {
+    const url = getParticipantUserAppsUrl(participantId, studyId);
+    if (!url) return reject(new Error('Invalid Url'));
+
+    return axios({
+      method: 'get',
+      url,
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
 
 
-/* send POST request to update chronicle_used_by associations
- * @param url: chronicle/study/participant/data/<study_id>/<participant_id>/apps
+/*
+ * `POST chronicle/study/participant/data/<study_id>/<participant_id>/apps`
+ *
+ * Update chronicle_used_by associations with app user type (parent, child, parent_and_child)
+ *
+ *
  * requestBody:
     {
       EKID_1: {
@@ -44,14 +54,20 @@ const getParticipantAppsUsageData = (url :string) => new Promise<*>((resolve, re
     }
  */
 
-const updateAppsUsageAssociationData = (url :string, requestBody :Object) => new Promise<*>((resolve, reject) => {
-  axios({
-    method: 'post',
-    data: requestBody,
-    url,
-  }).then((result) => resolve(result))
-    .catch((error) => reject(error));
-});
+function updateAppsUsageAssociationData(participantId :string, studyId :UUID, requestBody :Object) {
+  return new Promise<*>((resolve, reject) => {
+
+    const url = getParticipantUserAppsUrl(participantId, studyId);
+    if (!url) return reject(new Error('Invalid Url'));
+
+    return axios({
+      method: 'post',
+      data: requestBody,
+      url,
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
 
 
 export {
