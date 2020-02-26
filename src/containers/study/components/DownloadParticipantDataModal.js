@@ -10,7 +10,7 @@ import {
 
 import ParticipantDataTypes from '../../../utils/constants/ParticipantDataTypes';
 import type { ParticipantDataType } from '../../../utils/constants/ParticipantDataTypes';
-import { getParticipantDataUrl } from '../../../utils/api/AppApi';
+import { getParticipantDataUrl } from '../../../utils/AppUtils';
 
 const { PREPROCESSED, RAW } = ParticipantDataTypes;
 

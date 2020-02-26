@@ -52,36 +52,34 @@ const TableRow = ({ data, handleOnChange } :Props) => {
   const appUsers :Set = getIn(data, ['associationDetails', USER_FQN], Set());
 
   return (
-    <>
-      <RowWrapper onClick={() => {}}>
-        <StyledCell textAlign="left">
-          <CellContent>
-            { appName }
-          </CellContent>
-        </StyledCell>
-        <StyledCell textAlign="center">
-          <Checkbox
-              checked={appUsers.includes(PARENT)}
-              data-entity-id={appEntityId}
-              data-usertype-id={PARENT}
-              onChange={handleOnChange} />
-        </StyledCell>
-        <StyledCell textAlign="center">
-          <Checkbox
-              checked={appUsers.includes(CHILD)}
-              data-entity-id={appEntityId}
-              data-usertype-id={CHILD}
-              onChange={handleOnChange} />
-        </StyledCell>
-        <StyledCell textAlign="center">
-          <Checkbox
-              checked={appUsers.includes(PARENT_AND_CHILD)}
-              data-entity-id={appEntityId}
-              data-usertype-id={PARENT_AND_CHILD}
-              onChange={handleOnChange} />
-        </StyledCell>
-      </RowWrapper>
-    </>
+    <RowWrapper onClick={() => {}}>
+      <StyledCell textAlign="left">
+        <CellContent>
+          { appName }
+        </CellContent>
+      </StyledCell>
+      <StyledCell textAlign="center">
+        <Checkbox
+            checked={appUsers.includes(PARENT)}
+            data-entity-id={appEntityId}
+            data-usertype-id={PARENT}
+            onChange={handleOnChange} />
+      </StyledCell>
+      <StyledCell textAlign="center">
+        <Checkbox
+            checked={appUsers.includes(CHILD)}
+            data-entity-id={appEntityId}
+            data-usertype-id={CHILD}
+            onChange={handleOnChange} />
+      </StyledCell>
+      <StyledCell textAlign="center">
+        <Checkbox
+            checked={appUsers.includes(PARENT_AND_CHILD)}
+            data-entity-id={appEntityId}
+            data-usertype-id={PARENT_AND_CHILD}
+            onChange={handleOnChange} />
+      </StyledCell>
+    </RowWrapper>
   );
 };
 

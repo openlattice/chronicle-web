@@ -11,11 +11,11 @@ import {
   Spinner,
   StyleUtils
 } from 'lattice-ui-kit';
+import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 
-import { getFullDateFromIsoDate } from '../../utils/DateUtils';
 import SubmissionSuccessful from './components/SubmissionSuccessful';
 import SurveyTable from './SurveyTable';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
@@ -95,11 +95,17 @@ const CurrentDate = styled.h5`
   margin: 5px 0 20px 0;
 `;
 
+const ErrorMessage = () => (
+  <ErrorWrapper>
+      Sorry, something went wrong. Please try refreshing the page, or contact support.
+  </ErrorWrapper>
+);
+
 const SurveyContainer = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const location = useLocation();
 
-  const queryParams = qs.parse(history.location.search, { ignoreQueryPrefix: true });
+  const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
 
   // $FlowFixMe
   const { studyId, participantId } :{ participantId :string, studyId :UUID } = queryParams;
@@ -119,8 +125,6 @@ const SurveyContainer = () => {
     }
   }));
 
-  const getCurrentDate = () => getFullDateFromIsoDate(new Date().toISOString());
-
   if (requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.PENDING) {
     return (
       <SpinnerWrapper>
@@ -128,12 +132,6 @@ const SurveyContainer = () => {
       </SpinnerWrapper>
     );
   }
-
-  const ErrorMessage = () => (
-    <ErrorWrapper>
-        Sorry, something went wrong. Please try refreshing the page, or contact support.
-    </ErrorWrapper>
-  );
 
   return (
     <SurveyContainerWrapper>
@@ -159,7 +157,7 @@ const SurveyContainer = () => {
                           Apps Usage Survey
                         </SurveyTitle>
                         <CurrentDate>
-                          {getCurrentDate()}
+                          { DateTime.local().toLocaleString(DateTime.DATE_FULL) }
                         </CurrentDate>
                         <SurveyTable
                             submitRequestState={requestStates[SUBMIT_SURVEY]}

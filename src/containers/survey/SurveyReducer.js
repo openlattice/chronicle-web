@@ -13,7 +13,7 @@ import {
 
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-const INITIAL_STATE :Map<*, *, *> = fromJS({
+const INITIAL_STATE :Map = fromJS({
   [GET_CHRONICLE_APPS_DATA]: {
     requestState: RequestStates.STANDBY
   },

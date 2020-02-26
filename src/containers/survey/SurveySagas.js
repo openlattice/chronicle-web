@@ -1,6 +1,5 @@
 // @flow
 
-import axios from 'axios';
 import { call, put, takeEvery } from '@redux-saga/core/effects';
 import { Map, fromJS } from 'immutable';
 import { Constants } from 'lattice';
@@ -14,7 +13,8 @@ import {
 } from './SurveyActions';
 
 import Logger from '../../utils/Logger';
-import { getParticipantUserAppsUrl } from '../../utils/api/AppApi';
+import * as ChronicleApi from '../../utils/api/ChronicleApi';
+import { getParticipantUserAppsUrl } from '../../utils/AppUtils';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const LOG = new Logger('SurveySagas');
@@ -32,41 +32,15 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
     const { participantId, studyId, appsData } = value;
 
     const url = getParticipantUserAppsUrl(participantId, studyId);
+    if (!url) throw new Error('Invalid Url');
 
-    if (url === null) throw new Error('Invalid Url');
-
-    let associationData :Map = Map().withMutations((map) => {
+    const associationData :Map = Map().withMutations((map) => {
       appsData.forEach((entry, key) => {
-        map.set(key, entry.get('associationDetails'));
+        map.set(key, entry.get('associationDetails').delete(OPENLATTICE_ID_FQN));
       });
     });
 
-    // delete entity key since it won't be used in DataApi.updateEntitiesInEntitySet()
-    associationData = associationData
-      .map((entity) => entity.delete(OPENLATTICE_ID_FQN));
-
-    /* send POST request to update chronicle_used_by associations
-     * url: chronicle/study/participant/data/<study_id>/<participant_id>/apps
-     * requestBody:
-        {
-          EKID_1: {
-            FQN1: [value1],
-            FQN2: [value2]
-          },
-          EKID_1: {
-            FQN1: [value3],
-            FQN2: [value4]
-          },
-        }
-     */
-
-    const axiosRequestBody :Object = associationData.toJS();
-
-    const response = yield call(axios, {
-      method: 'post',
-      data: axiosRequestBody,
-      url,
-    });
+    const response = yield call(ChronicleApi.updateAppsUsageAssociationData, url, associationData.toJS());
     if (response.error) throw response.error;
 
     yield put(submitSurvey.success(action.id));
@@ -96,31 +70,10 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     const { value } = action;
     const { participantId, studyId } = value;
 
-    /*
-     * send GET request to chronicle server to get neighbors of participant_id
-     * associated by chroncile_user_apps.
-     * endpoint: chronicle/study/participant/data/<study_id>/<participant_id>/apps
-     * response data:
-          [
-            {
-              entityDetails: {
-                FQN1: [value1],
-                FQN2: [value2]
-             },
-             associationDetails: {
-                FQN3: [value3],
-                FQN4: [value4]
-             },
-            }
-          ]
-     */
     const url = getParticipantUserAppsUrl(participantId, studyId);
-    if (url === null) throw new Error('Invalid url');
+    if (!url) throw new Error('Invalid Url');
 
-    const response = yield call(axios, {
-      method: 'get',
-      url,
-    });
+    const response = yield call(ChronicleApi.getParticipantAppsUsageData, url);
     if (response.error) throw response.error;
 
     // mapping from association EKID -> associationDetails & entityDetails

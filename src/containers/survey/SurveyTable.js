@@ -105,12 +105,6 @@ const SurveyTable = ({
     dispatch(resetRequestState(SUBMIT_SURVEY));
   };
 
-  const renderErrorModal = () => (
-    <SubmissionFailureModal
-        handleOnClose={hideErrorModal}
-        isVisible={errorModalVisible} />
-  );
-
   const components = {
     Row: ({ data: rowData } :any) => (
       <TableRow data={rowData} handleOnChange={handleOnChange} />
@@ -142,7 +136,9 @@ const SurveyTable = ({
                       Submit Survey
                   </Button>
                 </SubmitButtonWrapper>
-                { renderErrorModal() }
+                <SubmissionFailureModal
+                    handleOnClose={hideErrorModal}
+                    isVisible={errorModalVisible} />
               </>
             )
         }
