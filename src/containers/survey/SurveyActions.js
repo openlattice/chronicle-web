@@ -1,7 +1,7 @@
 // @flow
 
-import type { RequestSequence } from 'redux-reqseq';
 import { newRequestSequence } from 'redux-reqseq';
+import type { RequestSequence } from 'redux-reqseq';
 
 const GET_CHRONICLE_APPS_DATA :'GET_CHRONICLE_APPS_DATA' = 'GET_CHRONICLE_APPS_DATA';
 const getChronicleAppsData :RequestSequence = newRequestSequence(GET_CHRONICLE_APPS_DATA);

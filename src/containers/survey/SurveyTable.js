@@ -2,9 +2,9 @@
 
 import React, {
   useEffect,
-  useState,
+  useMemo,
   useReducer,
-  useMemo
+  useState
 } from 'react';
 
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ import type { RequestState } from 'redux-reqseq';
 import SubmissionFailureModal from './components/SubmissionFailureModal';
 import TABLE_HEADERS from './utils/TableHeaders';
 import TableRow from './components/TableRow';
-import { SUBMIT_SURVEY, submitSurvey, UPDATE_APP_USER_TYPE } from './SurveyActions';
+import { SUBMIT_SURVEY, UPDATE_APP_USER_TYPE, submitSurvey } from './SurveyActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
