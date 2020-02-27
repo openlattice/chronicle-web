@@ -6,9 +6,12 @@ import { Models } from 'lattice';
 
 const { FullyQualifiedName } = Models;
 
-const ASSOCIATION_ENTITY_TYPE_FQNS = {};
+const ASSOCIATION_ENTITY_TYPE_FQNS = {
+  PART_OF: new FullyQualifiedName('ol.partof'),
+};
 const ENTITY_TYPE_FQNS = {
-  PERSON: new FullyQualifiedName('general.person')
+  PERSON: new FullyQualifiedName('general.person'),
+  NOTIFICATION: new FullyQualifiedName('ol.notification')
 };
 
 const PROPERTY_TYPE_FQNS = {
@@ -27,7 +30,12 @@ const PROPERTY_TYPE_FQNS = {
   // survey
   TITLE: new FullyQualifiedName('ol.title'),
   DATE_ENROLLED: new FullyQualifiedName('ol.datetimestart'),
-  USER_FQN: new FullyQualifiedName('ol.user')
+  USER_FQN: new FullyQualifiedName('ol.user'),
+
+  // notifications
+  NOTIFICATION_ID: new FullyQualifiedName('ol.id'),
+  NOTIFICATION_DESCRIPTION: new FullyQualifiedName('ol.description'),
+  NOTIFICATION_ENABLED: new FullyQualifiedName('ol.status')
 };
 
 export {

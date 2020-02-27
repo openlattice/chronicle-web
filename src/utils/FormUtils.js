@@ -15,7 +15,7 @@ import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
 const { getEntityAddressKey, getPageSectionKey, parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
-const { PERSON_ID } = PROPERTY_TYPE_FQNS;
+const { NOTIFICATION_ENABLED, PERSON_ID } = PROPERTY_TYPE_FQNS;
 /*
  * returns a FormData object similar to this
  *  {
@@ -40,21 +40,26 @@ const { PERSON_ID } = PROPERTY_TYPE_FQNS;
  *
  */
 
-const createFormDataFromStudyEntity = (dataSchema :Object, study :Map) => {
+const createFormDataFromStudyEntity = (dataSchema :Object, notificationsEnabled :boolean, study :Map) => {
   let formData = {};
 
   if (!dataSchema || !study) {
     return {};
   }
 
+  // a study object does not have NOTIFICATION_DESCRIPTION property
+  const updatedStudy = study.set(NOTIFICATION_ENABLED, [notificationsEnabled]);
+
   const { properties } = dataSchema;
   const pageSectionKeys = Object.keys(properties).filter((key) => key.startsWith(PAGE_SECTION_PREFIX));
 
   pageSectionKeys.forEach((pageSectionKey) => {
     const addressKeys = getIn(properties, [pageSectionKey, 'properties'], {});
+
     Object.keys(addressKeys).forEach((addressKey) => {
       const { propertyTypeFQN } = parseEntityAddressKey(addressKey);
-      const propertyValue = study.getIn([propertyTypeFQN, 0]);
+      const propertyValue = updatedStudy.getIn([propertyTypeFQN, 0]);
+
       formData = setIn(formData, [pageSectionKey, addressKey], propertyValue);
     });
   });

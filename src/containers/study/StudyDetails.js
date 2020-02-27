@@ -10,8 +10,11 @@ import {
   Card,
   CardSegment,
   Colors,
-  EditButton
+  EditButton,
 } from 'lattice-ui-kit';
+
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDispatch } from 'react-redux';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
@@ -28,7 +31,7 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
-const { NEUTRALS } = Colors;
+const { GREEN_2, NEUTRALS } = Colors;
 
 const DetailsWrapper = styled.div`
   align-items: flex-start;
@@ -77,10 +80,28 @@ const ContactWrapper = styled.div`
   flex: 0 0 33.3%;
 `;
 
-const EditButtonWrapper = styled.div`
+const DetailsHeaderWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   margin-bottom: 5px;
+  align-items: center;
+`;
+
+const NotificationIconWrapper = styled.div`
+  margin-left: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+
+  > h3 {
+    margin: 0 0 0 10px;
+    font-weight: 400;
+    font-size: 15px;
+  }
+`;
+
+const StyledFontAwesome = styled(FontAwesomeIcon)`
+  font-size: 22px;
 `;
 
 type DetailProps = {
@@ -116,10 +137,13 @@ DetailWrapper.defaultProps = {
 };
 
 type Props = {
-  study :Map
+  notificationsEnabled :boolean;
+  study :Map;
 }
 
-const StudyDetails = ({ study } :Props) => {
+const StudyDetails = ({ notificationsEnabled, study } :Props) => {
+  const dispatch = useDispatch();
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
   const studyUUID = study.getIn([STUDY_ID, 0]);
@@ -127,8 +151,7 @@ const StudyDetails = ({ study } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
-  const dispatch = useDispatch();
-  const [editModalVisible, setEditModalVisible] = useState(false);
+  const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
@@ -173,11 +196,16 @@ const StudyDetails = ({ study } :Props) => {
   );
 
   const renderEditButton = () => (
-    <EditButtonWrapper>
+    <DetailsHeaderWrapper>
       <EditButton mode="primary" onClick={openEditModal}>
         Edit Details
       </EditButton>
-    </EditButtonWrapper>
+
+      <NotificationIconWrapper>
+        <StyledFontAwesome icon={notificationIcon} color={GREEN_2} />
+        <h3> Daily Notifications </h3>
+      </NotificationIconWrapper>
+    </DetailsHeaderWrapper>
   );
 
   return (
@@ -190,6 +218,7 @@ const StudyDetails = ({ study } :Props) => {
         </MainInfoContainer>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
+            notificationsEnabled={notificationsEnabled}
             isVisible={editModalVisible}
             study={study} />
       </CardSegment>

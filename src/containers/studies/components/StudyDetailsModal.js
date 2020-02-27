@@ -17,6 +17,7 @@ import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 type Props = {
   handleOnCloseModal :() => void;
   isVisible :boolean;
+  notificationsEnabled :boolean;
   requestStates :{
     CREATE_STUDY :RequestState,
     UPDATE_STUDY :RequestState
@@ -34,6 +35,7 @@ const StudyDetailsModal = (props :Props) => {
   const {
     handleOnCloseModal,
     isVisible,
+    notificationsEnabled,
     requestStates,
     study
   } = props;
@@ -47,7 +49,7 @@ const StudyDetailsModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <CreateStudyForm ref={formRef} study={study} />
+        <CreateStudyForm ref={formRef} study={study} notificationsEnabled={notificationsEnabled} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (
