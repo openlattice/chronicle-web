@@ -7,6 +7,7 @@ import React, {
   useState
 } from 'react';
 
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Map, Set } from 'immutable';
 import {
@@ -53,7 +54,7 @@ const NoAppsFound = styled.h4`
   text-align: center;
 `;
 
-function reducer(state, action :Object) {
+function appsDataReducer(state, action :Object) {
   const { userType, entityId } = action;
 
   switch (action.type) {
@@ -91,9 +92,9 @@ const SurveyTable = ({
   submitRequestState
 } :Props) => {
 
-  // const dispatch = useDispatch();
+  const rootDispatch = useDispatch();
 
-  const [appsData, dispatch] = useReducer(reducer, data);
+  const [appsData, dispatch] = useReducer(appsDataReducer, data);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   useEffect(() => {
@@ -101,7 +102,7 @@ const SurveyTable = ({
   }, [errorModalVisible, setErrorModalVisible, submitRequestState]);
 
   const handleOnSubmit = () => {
-    dispatch(submitSurvey({
+    rootDispatch(submitSurvey({
       participantId,
       studyId,
       appsData
@@ -110,7 +111,7 @@ const SurveyTable = ({
 
   const hideErrorModal = () => {
     setErrorModalVisible(false);
-    dispatch(resetRequestState(SUBMIT_SURVEY));
+    rootDispatch(resetRequestState(SUBMIT_SURVEY));
   };
 
 
