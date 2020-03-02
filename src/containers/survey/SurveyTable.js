@@ -127,7 +127,7 @@ const SurveyTable = ({
     <StyledCard>
       <StyledCardSegment vertical noBleed>
         {
-          appsData.length === 0
+          appsData.isEmpty()
             ? (
               <NoAppsFound>
                 No apps found. Please try refreshing the page.
