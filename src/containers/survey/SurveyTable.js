@@ -7,7 +7,6 @@ import React, {
   useState
 } from 'react';
 
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Map, Set } from 'immutable';
 import {
@@ -17,11 +16,13 @@ import {
   StyleUtils,
   Table,
 } from 'lattice-ui-kit';
+import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import SubmissionFailureModal from './components/SubmissionFailureModal';
 import TABLE_HEADERS from './utils/TableHeaders';
+import TableDataDispatch from './utils/TableDataDispatch';
 import TableRow from './components/TableRow';
 import { SUBMIT_SURVEY, UPDATE_APP_USER_TYPE, submitSurvey } from './SurveyActions';
 
@@ -114,13 +115,10 @@ const SurveyTable = ({
     rootDispatch(resetRequestState(SUBMIT_SURVEY));
   };
 
-
-  const TableDataDispatch = React.createContext(null);
-
   const components = useMemo(() => ({
     Row: ({ data: rowData } :any) => (
       <TableDataDispatch.Provider value={dispatch}>
-        <TableRow data={rowData} dispatch={dispatch} />
+        <TableRow data={rowData} />
       </TableDataDispatch.Provider>
     )
   }), []);

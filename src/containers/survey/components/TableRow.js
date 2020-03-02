@@ -6,6 +6,7 @@ import { Set, get, getIn } from 'immutable';
 import { Checkbox, Colors } from 'lattice-ui-kit';
 
 import AppUserTypes from '../../../utils/constants/AppUserTypes';
+import TableDataDispatch from '../utils/TableDataDispatch';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { updateAppUserType } from '../SurveyActions';
 
@@ -56,12 +57,10 @@ const StyledCell = styled.td`
 
 type Props = {
   data :Object;
-  dispatch :any;
-  // handleOnChange :(SyntheticInputEvent<HTMLInputElement>) => void;
 };
 
-const TableRow = ({ data, ...otherProps } :Props) => {
-  const { dispatch } = otherProps;
+const TableRow = ({ data } :Props) => {
+  const dispatch = React.useContext(TableDataDispatch);
 
   const appName :string = getIn(data, ['entityDetails', TITLE]);
   const appEntityId :UUID = get(data, 'id');
