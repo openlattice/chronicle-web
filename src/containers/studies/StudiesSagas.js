@@ -14,6 +14,7 @@ import {
   Map,
   Set,
   fromJS,
+  get,
   getIn,
   removeIn,
   setIn,
@@ -32,6 +33,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
+import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -56,7 +58,8 @@ import {
   getStudyAuthorizations,
   getStudyNotificationStatus,
   getStudyParticipants,
-  updateParticipantsEntitySetPermissions,
+  setNotificationsEntitySetPermissions,
+  setParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
 
@@ -126,7 +129,7 @@ const {
   DeleteTypes,
   PermissionTypes,
   PrincipalTypes,
-  UpdateTypes
+  UpdateTypes,
 } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -157,6 +160,33 @@ const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
+
+
+const createAclData = (aclKey :Array<string>) => {
+  const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
+
+  const principal :Principal = new PrincipalBuilder()
+    .setId(DEFAULT_USER_PRINCIPAL_ID)
+    .setType(PrincipalTypes.USER)
+    .build();
+
+  const ace :Ace = new AceBuilder()
+    .setPermissions(permissions)
+    .setPrincipal(principal)
+    .build();
+
+  const acl :Acl = new AclBuilder()
+    .setAces([ace])
+    .setAclKey(aclKey)
+    .build();
+
+  const aclData :AclData = new AclDataBuilder()
+    .setAcl(acl)
+    .setAction(ActionTypes.ADD)
+    .build();
+
+  return aclData;
+};
 
 /*
  *
@@ -414,6 +444,56 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
+/*
+ *
+ * StudiesActions.setNotificationsEntitySetPermissions()
+ *
+ */
+
+function* setNotificationsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(setNotificationsEntitySetPermissions.request(action.id));
+
+    const { value } = action;
+    const { entitySetId, entityTypeFqn } :{ entitySetId :UUID, entityTypeFqn :FQN } = value;
+
+    const entityType = yield select(selectEntityType(entityTypeFqn));
+
+    const aclData :AclData[] = [];
+
+    entityType.get('properties').forEach((propertyTypeId :UUID) => {
+      const aclKey = [entitySetId, propertyTypeId];
+      const aclDataItem = createAclData(aclKey);
+      aclData.push(aclDataItem);
+    });
+
+    const aclKey = [entitySetId];
+    const aclDataItem = createAclData(aclKey);
+    aclData.push(aclDataItem);
+
+    const response = yield call(updateAclsWorker, updateAcls(aclData));
+    if (response.error) throw response.error;
+
+    yield put(setNotificationsEntitySetPermissions.success(action.id));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    yield put(setParticipantsEntitySetPermissions.failure(action.id));
+  }
+  finally {
+    yield put(setNotificationsEntitySetPermissions.finally(action.id));
+  }
+
+  return workerResponse;
+}
+
+/*
+ *
+ * StudiesActions.createNotificationsEntitySets
+ *
+ */
+
 function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -456,6 +536,30 @@ function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator
     if (response.error) throw response.error;
 
     workerResponse.data = response.data;
+
+    // set read/write permissions for chronicle super user
+    const requests = [
+      call(
+        setNotificationsEntitySetPermissionsWorker,
+        setNotificationsEntitySetPermissions({
+          entitySetId: get(response.data, partOfEntitySetName),
+          entityTypeFqn: PART_OF
+        })
+      ),
+
+      call(
+        setNotificationsEntitySetPermissionsWorker,
+        setNotificationsEntitySetPermissions({
+          entitySetId: get(response.data, notificationEntitySetName),
+          entityTypeFqn: NOTIFICATION
+        })
+      )
+    ];
+
+    const responses = yield all(requests);
+    responses.forEach((res) => {
+      if (res.error) throw res.error;
+    });
 
     yield put(createNotificationsEntitySets.success(action.id, response.data));
   }
@@ -662,63 +766,45 @@ function* updateStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.updateParticipantsEntitySetPermissions()
+ * StudiesActions.setParticipantsEntitySetPermissions()
  *
  */
 
-function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
+function* setParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
-    yield put(updateParticipantsEntitySetPermissions.request(action.id));
+    yield put(setParticipantsEntitySetPermissions.request(action.id));
 
     const participantsEntitySetId :UUID = action.value;
 
     const entityType = yield select(selectEntityType(PERSON));
-    const updates :AclData[] = [];
+    const aclData :AclData[] = [];
 
     entityType.get('properties').forEach((propertyTypeId :UUID) => {
-
       const aclKey = [participantsEntitySetId, propertyTypeId];
-      const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
-
-      const principal :Principal = new PrincipalBuilder()
-        .setId(DEFAULT_USER_PRINCIPAL_ID)
-        .setType(PrincipalTypes.USER)
-        .build();
-
-      const ace :Ace = new AceBuilder()
-        .setPermissions(permissions)
-        .setPrincipal(principal)
-        .build();
-
-      const acl :Acl = new AclBuilder()
-        .setAces([ace])
-        .setAclKey(aclKey)
-        .build();
-
-      const aclData :AclData = new AclDataBuilder()
-        .setAcl(acl)
-        .setAction(ActionTypes.ADD)
-        .build();
-      updates.push(aclData);
+      const aclDataItem = createAclData(aclKey);
+      aclData.push(aclDataItem);
     });
 
-    const response = yield call(updateAclsWorker, updateAcls(updates));
+    const aclKey = [participantsEntitySetId];
+    const aclDataItem = createAclData(aclKey);
+    aclData.push(aclDataItem);
+
+    const response = yield call(updateAclsWorker, updateAcls(aclData));
     if (response.error) throw response.error;
 
-    yield put(updateParticipantsEntitySetPermissions.success(action.id));
+    yield put(setParticipantsEntitySetPermissions.success(action.id));
   }
   catch (error) {
     workerResponse.error = error;
     LOG.error(action.type, error);
   }
   finally {
-    yield put(updateParticipantsEntitySetPermissions.finally(action.id));
+    yield put(setParticipantsEntitySetPermissions.finally(action.id));
   }
 
   return workerResponse;
 }
-
 
 /*
  *
@@ -756,11 +842,11 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
     let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
     if (response.error) throw response.error;
 
-    // update permissions
+    // set read/write permissions for chronicle super user
     const entitySetId = response.data[entitySet.name];
     response = yield call(
-      updateParticipantsEntitySetPermissionsWorker,
-      updateParticipantsEntitySetPermissions(entitySetId)
+      setParticipantsEntitySetPermissionsWorker,
+      setParticipantsEntitySetPermissions(entitySetId)
     );
     if (response.error) throw response.error;
 
