@@ -96,8 +96,15 @@ const createAclData = (aclKey :Array<UUID>) :AclData => {
   return aclData;
 };
 
+/*
+ *
+ * PermissionsActions.updateEntitySetPermissions()
+ *
+ */
 
 function* updateEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+
   try {
     yield put(updateEntitySetPermissions.request(action.id));
 
@@ -123,13 +130,17 @@ function* updateEntitySetPermissionsWorker(action :SequenceAction) :Generator<*,
 
     yield put(updateEntitySetPermissions.success(action.id));
   }
+
   catch (error) {
     LOG.error(action.type, error);
+    workerResponse.error = error;
     yield put(updateEntitySetPermissions.failure(action.id));
   }
+
   finally {
     yield put(updateEntitySetPermissions.finally(action.id));
   }
+  return workerResponse;
 }
 
 function* updateEntitySetPermissionsWatcher() :Generator<*, *, *> {
