@@ -20,13 +20,9 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_AUTHORIZATIONS,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
-  SET_PARTICIPANTS_ENTITY_PERMISSIONS,
-  SET_NOTIFICATIONS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
-  setNotificationsEntitySetPermissions,
   addStudyParticipant,
   changeEnrollmentStatus,
   createNotificationsEntitySets,
@@ -35,10 +31,8 @@ import {
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyAuthorizations,
   getStudyNotificationStatus,
   getStudyParticipants,
-  setParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
 
@@ -79,16 +73,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  [GET_STUDY_AUTHORIZATIONS]: {
-    requestState: RequestStates.STANDBY
-  },
   [GET_STUDY_NOTIFICATION_STATUS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [SET_PARTICIPANTS_ENTITY_PERMISSIONS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [SET_NOTIFICATIONS_ENTITY_PERMISSIONS]: {
     requestState: RequestStates.STANDBY
   },
   [UPDATE_STUDY]: {
@@ -303,22 +288,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       });
     }
 
-    case setParticipantsEntitySetPermissions.case(action.type): {
-      return setParticipantsEntitySetPermissions.reducer(state, action, {
-        REQUEST: () => state.setIn([SET_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([SET_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([SET_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.SUCCESS)
-      });
-    }
-
-    case getStudyAuthorizations.case(action.type): {
-      return getStudyAuthorizations.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
-      });
-    }
-
     case createNotificationsEntitySets.case(action.type): {
       // const seqAction :SequenceAction = action;
       return createNotificationsEntitySets.reducer(state, action, {
@@ -335,14 +304,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         SUCCESS: () => state
           .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
           .set('studyNotifications', fromJS(seqAction.value))
-      });
-    }
-
-    case setNotificationsEntitySetPermissions.case(action.type): {
-      return setNotificationsEntitySetPermissions.reducer(state, action, {
-        REQUEST: () => state.setIn([SET_NOTIFICATIONS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([SET_NOTIFICATIONS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([SET_NOTIFICATIONS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.SUCCESS)
       });
     }
     default:
