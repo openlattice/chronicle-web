@@ -1024,7 +1024,7 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) {
       throw response.error;
     }
-    const studies = fromJS(response.data);
+    const studies = fromJS(response.data).filter((study) => study.getIn([STUDY_ID, 0]));
 
     response = yield call(
       getStudyAuthorizationsWorker,
