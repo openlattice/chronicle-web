@@ -12,8 +12,8 @@ import {
 import {
   List,
   Map,
-  Set,
   fromJS,
+  get,
   getIn,
   removeIn,
   setIn,
@@ -21,14 +21,10 @@ import {
 import { Constants, Models, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
-  AuthorizationsApiActions,
-  AuthorizationsApiSagas,
   DataApiActions,
   DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
-  PermissionsApiActions,
-  PermissionsApiSagas,
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
@@ -42,7 +38,6 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_AUTHORIZATIONS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
@@ -53,22 +48,28 @@ import {
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyAuthorizations,
   getStudyNotificationStatus,
   getStudyParticipants,
-  updateParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
-import { selectEntityType, selectEntityTypeId } from '../../core/edm/EDMUtils';
+import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
   ASSOCIATION_ENTITY_TYPE_FQNS,
   ENTITY_TYPE_FQNS,
   PROPERTY_TYPE_FQNS
 } from '../../core/edm/constants/FullyQualifiedNames';
+import {
+  getStudyAuthorizations,
+  updateEntitySetPermissions
+} from '../../core/permissions/PermissionsActions';
+import {
+  getStudyAuthorizationsWorker,
+  updateEntitySetPermissionsWorker
+} from '../../core/permissions/PermissionsSagas';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
 import {
@@ -93,10 +94,7 @@ const { createEntitySetsWorker, getEntitySetIdWorker, getEntitySetIdsWorker } = 
 const { createEntitySets, getEntitySetId, getEntitySetIds } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
-const { updateAcls } = PermissionsApiActions;
-const { updateAclsWorker } = PermissionsApiSagas;
-const { getAuthorizationsWorker } = AuthorizationsApiSagas;
-const { getAuthorizations } = AuthorizationsApiActions;
+
 
 const {
   findEntityAddressKeyFromMap,
@@ -108,29 +106,10 @@ const {
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 
-const {
-  AccessCheck,
-  AccessCheckBuilder,
-  Ace,
-  AceBuilder,
-  Acl,
-  AclBuilder,
-  AclData,
-  AclDataBuilder,
-  EntitySetBuilder,
-  Principal,
-  PrincipalBuilder,
-} = Models;
-const {
-  ActionTypes,
-  DeleteTypes,
-  PermissionTypes,
-  PrincipalTypes,
-  UpdateTypes
-} = Types;
+const { EntitySetBuilder } = Models;
+const { DeleteTypes, PermissionTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const DEFAULT_USER_PRINCIPAL_ID = 'auth0|5ae9026c04eb0b243f1d2bb6';
 
 const {
   CHRONICLE_STUDIES,
@@ -414,6 +393,13 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
+
+/*
+ *
+ * StudiesActions.createNotificationsEntitySets
+ *
+ */
+
 function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -456,6 +442,30 @@ function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator
     if (response.error) throw response.error;
 
     workerResponse.data = response.data;
+
+    // set read/write permissions for chronicle super user
+    const requests = [
+      call(
+        updateEntitySetPermissionsWorker,
+        updateEntitySetPermissions({
+          entitySetId: get(response.data, partOfEntitySetName),
+          entityTypeFQN: PART_OF
+        })
+      ),
+
+      call(
+        updateEntitySetPermissionsWorker,
+        updateEntitySetPermissions({
+          entitySetId: get(response.data, notificationEntitySetName),
+          entityTypeFQN: NOTIFICATION
+        })
+      )
+    ];
+
+    const responses = yield all(requests);
+    responses.forEach((res) => {
+      if (res.error) throw res.error;
+    });
 
     yield put(createNotificationsEntitySets.success(action.id, response.data));
   }
@@ -662,66 +672,6 @@ function* updateStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.updateParticipantsEntitySetPermissions()
- *
- */
-
-function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(updateParticipantsEntitySetPermissions.request(action.id));
-
-    const participantsEntitySetId :UUID = action.value;
-
-    const entityType = yield select(selectEntityType(PERSON));
-    const updates :AclData[] = [];
-
-    entityType.get('properties').forEach((propertyTypeId :UUID) => {
-
-      const aclKey = [participantsEntitySetId, propertyTypeId];
-      const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
-
-      const principal :Principal = new PrincipalBuilder()
-        .setId(DEFAULT_USER_PRINCIPAL_ID)
-        .setType(PrincipalTypes.USER)
-        .build();
-
-      const ace :Ace = new AceBuilder()
-        .setPermissions(permissions)
-        .setPrincipal(principal)
-        .build();
-
-      const acl :Acl = new AclBuilder()
-        .setAces([ace])
-        .setAclKey(aclKey)
-        .build();
-
-      const aclData :AclData = new AclDataBuilder()
-        .setAcl(acl)
-        .setAction(ActionTypes.ADD)
-        .build();
-      updates.push(aclData);
-    });
-
-    const response = yield call(updateAclsWorker, updateAcls(updates));
-    if (response.error) throw response.error;
-
-    yield put(updateParticipantsEntitySetPermissions.success(action.id));
-  }
-  catch (error) {
-    workerResponse.error = error;
-    LOG.error(action.type, error);
-  }
-  finally {
-    yield put(updateParticipantsEntitySetPermissions.finally(action.id));
-  }
-
-  return workerResponse;
-}
-
-
-/*
- *
  * StudiesActions.createParticipantsEntitySet()
  *
  */
@@ -756,11 +706,14 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
     let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
     if (response.error) throw response.error;
 
-    // update permissions
+    // set read/write permissions for chronicle super user
     const entitySetId = response.data[entitySet.name];
     response = yield call(
-      updateParticipantsEntitySetPermissionsWorker,
-      updateParticipantsEntitySetPermissions(entitySetId)
+      updateEntitySetPermissionsWorker,
+      updateEntitySetPermissions({
+        entitySetId,
+        entityTypeFQN: PERSON
+      })
     );
     if (response.error) throw response.error;
 
@@ -933,76 +886,6 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
     yield put(getStudyNotificationStatus.failure(action.id));
   }
   return workerResponse;
-}
-
-/*
- *
- * StudiesActions.getStudyAuthorizations()
- *
- */
-
-function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(getStudyAuthorizations.request(action.id));
-
-    const { studies, permissions } = action.value;
-
-    const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
-    const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
-
-    const responses :Object[] = yield all(
-      entitySetNames.toJS().map((entitySetName) => call(getEntitySetIdWorker, getEntitySetId(entitySetName)))
-    );
-
-    // look up map: participant entity setIds -> study Ids
-    const authorizedEntitySetIdsStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
-      responses.forEach((response, index) => {
-        if (!response.error) {
-          map.set(response.data, studyIds.get(index));
-        }
-      });
-    });
-
-    const accessChecks :AccessCheck[] = fromJS(authorizedEntitySetIdsStudyIdMap)
-      .keySeq()
-      .map((entitySetId) => (
-        new AccessCheckBuilder()
-          .setAclKey([entitySetId])
-          .setPermissions(permissions)
-          .build()
-      ))
-      .toJS();
-
-    const response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
-    if (response.error) throw response.error;
-    const studyAuthorizations = response.data;
-
-    const authorizedStudyIds :Set<UUID> = Set().withMutations((set :Set) => {
-      studyAuthorizations.forEach((authorization) => {
-        if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
-          const entitySetId = getIn(authorization, ['aclKey', 0]);
-          set.add(authorizedEntitySetIdsStudyIdMap.get(entitySetId));
-        }
-      });
-    });
-
-    workerResponse.data = authorizedStudyIds;
-
-    yield put(getStudyAuthorizations.success(action.id));
-  }
-  catch (error) {
-    LOG.error(action.type, error);
-    yield put(getStudyAuthorizations.failure(action.id));
-  }
-  finally {
-    yield put(getStudyAuthorizations.finally(action.id));
-  }
-  return workerResponse;
-}
-
-function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
 }
 
 /*
@@ -1189,7 +1072,6 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
-  getStudyAuthorizationsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
 };

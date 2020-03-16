@@ -20,10 +20,8 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_AUTHORIZATIONS,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
-  UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -33,10 +31,8 @@ import {
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyAuthorizations,
   getStudyNotificationStatus,
   getStudyParticipants,
-  updateParticipantsEntitySetPermissions,
   updateStudy,
 } from './StudiesActions';
 
@@ -77,13 +73,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  [GET_STUDY_AUTHORIZATIONS]: {
-    requestState: RequestStates.STANDBY
-  },
   [GET_STUDY_NOTIFICATION_STATUS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS]: {
     requestState: RequestStates.STANDBY
   },
   [UPDATE_STUDY]: {
@@ -295,22 +285,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             .setIn(['participants', studyId, participantEntityKeyId, DATE_ENROLLED], [enrollmentDate])
             .setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.SUCCESS);
         }
-      });
-    }
-
-    case updateParticipantsEntitySetPermissions.case(action.type): {
-      return updateParticipantsEntitySetPermissions.reducer(state, action, {
-        REQUEST: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([UPDATE_PARTICIPANTS_ENTITY_PERMISSIONS, 'requestState'], RequestStates.SUCCESS)
-      });
-    }
-
-    case getStudyAuthorizations.case(action.type): {
-      return getStudyAuthorizations.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
       });
     }
 
