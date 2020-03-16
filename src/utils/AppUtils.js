@@ -4,11 +4,12 @@
 
 import { AuthUtils } from 'lattice-auth';
 
-import ENV_URLS from '../constants/EnvUrls';
-import EnvTypes from '../constants/EnvTypes';
-import Logger from '../Logger';
-import ParticipantDataTypes from '../constants/ParticipantDataTypes';
-import { isValidUUID } from '../ValidationUtils';
+import ENV_URLS from './constants/EnvUrls';
+import EnvTypes from './constants/EnvTypes';
+import Logger from './Logger';
+import ParticipantDataTypes from './constants/ParticipantDataTypes';
+import { isNonEmptyString } from './LangUtils';
+import { isValidUUID } from './ValidationUtils';
 import {
   CHRONICLE,
   CSRF_TOKEN,
@@ -16,8 +17,8 @@ import {
   FILE_TYPE,
   PARTICIPANT,
   STUDY,
-} from '../constants/UrlConstants';
-import type { ParticipantDataType } from '../constants/ParticipantDataTypes';
+} from './constants/UrlConstants';
+import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
 const LOG = new Logger('AppApi');
 const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
@@ -64,4 +65,22 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
     + `&${CSRF_TOKEN}=${csrfToken}`;
 };
 
-export { getBaseUrl, getParticipantDataUrl };
+const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
+
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  const baseUrl = getBaseUrl();
+
+  return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}`
+    + `/${studyId}/${participantId}/apps`;
+};
+
+export { getBaseUrl, getParticipantDataUrl, getParticipantUserAppsUrl };

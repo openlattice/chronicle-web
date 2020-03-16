@@ -7,6 +7,7 @@ const LOGIN :string = '/login';
 const STUDIES :string = '/studies';
 const STUDY :string = `${STUDIES}/${ID_PARAM}`;
 const PARTICIPANTS :string = `${STUDIES}/${ID_PARAM}/participants`;
+const SURVEY :string = '/survey';
 
 export {
   ID_PARAM,
@@ -14,5 +15,6 @@ export {
   PARTICIPANTS,
   ROOT,
   STUDIES,
-  STUDY
+  STUDY,
+  SURVEY
 };

@@ -10,9 +10,11 @@ import { ConnectedRouter } from 'connected-react-router/immutable';
 import { Colors } from 'lattice-ui-kit';
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
+import { Route, Switch } from 'react-router';
 import { createGlobalStyle } from 'styled-components';
 
 import AppContainer from './containers/app/AppContainer';
+import SurveyContainer from './containers/survey/SurveyContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
 import * as Routes from './core/router/Routes';
@@ -87,7 +89,10 @@ if (APP_ROOT_NODE) {
     <Provider store={reduxStore}>
       <>
         <ConnectedRouter history={routerHistory}>
-          <AuthRoute path={Routes.ROOT} component={AppContainer} />
+          <Switch>
+            <Route path={Routes.SURVEY} component={SurveyContainer} />
+            <AuthRoute path={Routes.ROOT} component={AppContainer} />
+          </Switch>
         </ConnectedRouter>
         <NormalizeCSS />
         <GlobalStyle />

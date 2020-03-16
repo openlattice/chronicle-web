@@ -18,8 +18,8 @@ import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 
-import StudyDetailsModal from './components/StudyDetailsModal';
 import StudyCard from './components/StudyCard';
+import StudyDetailsModal from './components/StudyDetailsModal';
 import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
 import * as RoutingActions from '../../core/router/RoutingActions';
