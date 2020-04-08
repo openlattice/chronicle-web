@@ -20,7 +20,7 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_NOTIFICATION_STATUS,
+  // GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
@@ -31,7 +31,7 @@ import {
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyNotificationStatus,
+  // getStudyNotificationStatus,
   getStudyParticipants,
   updateStudy,
 } from './StudiesActions';
@@ -73,9 +73,10 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  [GET_STUDY_NOTIFICATION_STATUS]: {
-    requestState: RequestStates.STANDBY
-  },
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // [GET_STUDY_NOTIFICATION_STATUS]: {
+  //   requestState: RequestStates.STANDBY
+  // },
   [UPDATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
@@ -296,16 +297,19 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
       });
     }
-    case getStudyNotificationStatus.case(action.type): {
-      const seqAction :SequenceAction = action;
-      return getStudyNotificationStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state
-          .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
-          .set('studyNotifications', fromJS(seqAction.value))
-      });
-    }
+
+    // 2020-04-08 NOTE: disabling notification feature for now
+    // case getStudyNotificationStatus.case(action.type): {
+    //   const seqAction :SequenceAction = action;
+    //   return getStudyNotificationStatus.reducer(state, action, {
+    //     REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
+    //     FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
+    //     SUCCESS: () => state
+    //       .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
+    //       .set('studyNotifications', fromJS(seqAction.value))
+    //   });
+    // }
+
     default:
       return state;
   }
