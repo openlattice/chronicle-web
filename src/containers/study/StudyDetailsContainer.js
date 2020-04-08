@@ -78,15 +78,17 @@ const StudyDetailsContainer = (props :Props) => {
   const dispatch = useDispatch();
 
   const study = useSelector((state) => state.getIn(['studies', 'studies', studyUUID], Map()));
-  const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
+  // const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
-  const notificationId = useSelector(
-    (state) => state.getIn(
-      ['studies', 'studyNotifications', studyEntityKeyId, 'associationDetails', NOTIFICATION_ID, 0]
-    )
-  );
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // const notificationId = useSelector(
+  //   (state) => state.getIn(
+  //     ['studies', 'studyNotifications', studyEntityKeyId, 'associationDetails', NOTIFICATION_ID, 0]
+  //   )
+  // );
 
-  const notificationsEnabled :boolean = notificationId === studyUUID;
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // const notificationsEnabled :boolean = notificationId === studyUUID;
 
   if (!study) {
     dispatch(goToRoot());
@@ -111,7 +113,7 @@ const StudyDetailsContainer = (props :Props) => {
             render={() => <StudyParticipants study={study} />} />
         <Route
             path={Routes.STUDY}
-            render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
+            render={() => <StudyDetails study={study} notificationsEnabled={false} />} />
       </Switch>
     </>
   );

@@ -117,11 +117,12 @@ DetailWrapper.defaultProps = {
 };
 
 type Props = {
-  notificationsEnabled :boolean;
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // notificationsEnabled :boolean;
   study :Map;
 }
 
-const StudyDetails = ({ notificationsEnabled, study } :Props) => {
+const StudyDetails = ({ study } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
 
@@ -194,7 +195,7 @@ const StudyDetails = ({ notificationsEnabled, study } :Props) => {
         </MainInfoContainer>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
-            notificationsEnabled={notificationsEnabled}
+            notificationsEnabled={false}
             isVisible={editModalVisible}
             study={study} />
       </CardSegment>
