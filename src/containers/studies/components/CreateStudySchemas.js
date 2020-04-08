@@ -2,8 +2,9 @@
  * @flow
  */
 
-import { DataProcessingUtils } from 'lattice-fabricate';
 import { Constants } from 'lattice';
+import { DataProcessingUtils } from 'lattice-fabricate';
+
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
@@ -15,7 +16,8 @@ const {
   STUDY_GROUP,
   STUDY_ID,
   STUDY_NAME,
-  STUDY_VERSION
+  STUDY_VERSION,
+  NOTIFICATION_ENABLED
 } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 
@@ -51,8 +53,11 @@ const dataSchema = {
         [getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)]: {
           title: '',
           type: 'string'
-        }
-
+        },
+        [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
+          title: 'Enable daily notifications',
+          type: 'boolean'
+        },
       },
       required: [
         getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME),
@@ -90,11 +95,11 @@ const uiSchema = {
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)]: {
       classNames: 'hidden'
+    },
+    [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
+      classNames: 'column-span-12'
     }
   },
 };
 
-export {
-  dataSchema,
-  uiSchema
-};
+export { dataSchema, uiSchema };

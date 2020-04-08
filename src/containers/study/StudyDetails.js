@@ -10,7 +10,7 @@ import {
   Card,
   CardSegment,
   Colors,
-  EditButton
+  EditButton,
 } from 'lattice-ui-kit';
 import { useDispatch } from 'react-redux';
 
@@ -77,10 +77,11 @@ const ContactWrapper = styled.div`
   flex: 0 0 33.3%;
 `;
 
-const EditButtonWrapper = styled.div`
+const DetailsHeaderWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   margin-bottom: 5px;
+  align-items: center;
 `;
 
 type DetailProps = {
@@ -116,10 +117,13 @@ DetailWrapper.defaultProps = {
 };
 
 type Props = {
-  study :Map
+  notificationsEnabled :boolean;
+  study :Map;
 }
 
-const StudyDetails = ({ study } :Props) => {
+const StudyDetails = ({ notificationsEnabled, study } :Props) => {
+  const dispatch = useDispatch();
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
   const studyUUID = study.getIn([STUDY_ID, 0]);
@@ -127,8 +131,8 @@ const StudyDetails = ({ study } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
-  const dispatch = useDispatch();
-  const [editModalVisible, setEditModalVisible] = useState(false);
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
@@ -173,11 +177,11 @@ const StudyDetails = ({ study } :Props) => {
   );
 
   const renderEditButton = () => (
-    <EditButtonWrapper>
+    <DetailsHeaderWrapper>
       <EditButton mode="primary" onClick={openEditModal}>
         Edit Details
       </EditButton>
-    </EditButtonWrapper>
+    </DetailsHeaderWrapper>
   );
 
   return (
@@ -190,6 +194,7 @@ const StudyDetails = ({ study } :Props) => {
         </MainInfoContainer>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
+            notificationsEnabled={notificationsEnabled}
             isVisible={editModalVisible}
             study={study} />
       </CardSegment>

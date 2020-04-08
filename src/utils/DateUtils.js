@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 
 // @return 10/20/2020, 1:30 PM
 const getDateTimeFromIsoDate = (isoDate :string) => {
-  console.log('date', isoDate);
   const date :DateTime = DateTime.fromISO(isoDate);
   if (date.isValid) {
     return date.toLocaleString(DateTime.DATETIME_SHORT);
@@ -12,5 +11,5 @@ const getDateTimeFromIsoDate = (isoDate :string) => {
 };
 
 export {
-  getDateTimeFromIsoDate
+  getDateTimeFromIsoDate,
 };

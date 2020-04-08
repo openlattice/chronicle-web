@@ -11,6 +11,7 @@ import * as AppSagas from '../../containers/app/AppSagas';
 import * as EDMSagas from '../edm/EDMSagas';
 import * as RoutingSagas from '../router/RoutingSagas';
 import * as StudiesSagas from '../../containers/studies/StudiesSagas';
+import * as SurveySagas from '../../containers/survey/SurveySagas';
 
 export default function* sagas() :Generator<*, *, *> {
 
@@ -24,6 +25,10 @@ export default function* sagas() :Generator<*, *, *> {
 
     // AppSagas
     fork(AppSagas.initializeApplicationWatcher),
+
+    // DataSagas
+    fork(DataSagas.submitDataGraphWatcher),
+    fork(DataSagas.submitPartialReplaceWatcher),
 
     // EDMSagas
     fork(EDMSagas.getEntityDataModelTypesWatcher),
@@ -42,11 +47,10 @@ export default function* sagas() :Generator<*, *, *> {
     fork(StudiesSagas.getParticipantsEnrollmentStatusWatcher),
     fork(StudiesSagas.getStudiesWatcher),
     fork(StudiesSagas.getStudyParticipantsWatcher),
-    fork(StudiesSagas.getStudyAuthorizationsWatcher),
     fork(StudiesSagas.updateStudyWatcher),
 
-    // DataSagas
-    fork(DataSagas.submitDataGraphWatcher),
-    fork(DataSagas.submitPartialReplaceWatcher)
+    // survey
+    fork(SurveySagas.getChronicleUserAppsWatcher),
+    fork(SurveySagas.submitSurveyWatcher)
   ]);
 }

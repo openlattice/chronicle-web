@@ -2,7 +2,6 @@
  * @flow
  */
 
-import uuid from 'uuid/v4';
 import {
   all,
   call,
@@ -13,22 +12,19 @@ import {
 import {
   List,
   Map,
-  Set,
   fromJS,
+  get,
   getIn,
+  removeIn,
   setIn,
 } from 'immutable';
 import { Constants, Models, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
-  AuthorizationsApiActions,
-  AuthorizationsApiSagas,
   DataApiActions,
   DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
-  PermissionsApiActions,
-  PermissionsApiSagas,
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
@@ -42,51 +38,62 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  GET_STUDY_AUTHORIZATIONS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
+  createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  getStudyAuthorizations,
+  // getStudyNotificationStatus,
   getStudyParticipants,
-  updateParticipantsEntitySetPermissions,
-  updateStudy
+  updateStudy,
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
-import { selectEntityType, selectEntityTypeId } from '../../core/edm/EDMUtils';
+import { selectEntityTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
-import { ENTITY_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import {
+  ASSOCIATION_ENTITY_TYPE_FQNS,
+  ENTITY_TYPE_FQNS,
+  PROPERTY_TYPE_FQNS
+} from '../../core/edm/constants/FullyQualifiedNames';
+import {
+  getStudyAuthorizations,
+  updateEntitySetPermissions
+} from '../../core/permissions/PermissionsActions';
+import {
+  getStudyAuthorizationsWorker,
+  updateEntitySetPermissionsWorker
+} from '../../core/permissions/PermissionsSagas';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
+import {
+  getNotificationsEntitySetName,
+  getPartOfAssociationEntitySetName
+} from '../../utils/NotificationsUtils';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 
 const {
   deleteEntitiesAndNeighborsWorker,
   getEntitySetDataWorker,
-  updateEntityDataWorker
+  updateEntityDataWorker,
 } = DataApiSagas;
 
 const {
   deleteEntitiesAndNeighbors,
   getEntitySetData,
-  updateEntityData
+  updateEntityData,
 } = DataApiActions;
 
-const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
-const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker /* getEntitySetIdsWorker */ } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetId /* getEntitySetIds */ } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
-const { updateAcls } = PermissionsApiActions;
-const { updateAclsWorker } = PermissionsApiSagas;
-const { getAuthorizationsWorker } = AuthorizationsApiSagas;
-const { getAuthorizations } = AuthorizationsApiActions;
 
 const {
   findEntityAddressKeyFromMap,
@@ -98,29 +105,10 @@ const {
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 
-const {
-  AccessCheck,
-  AccessCheckBuilder,
-  Ace,
-  AceBuilder,
-  Acl,
-  AclBuilder,
-  AclData,
-  AclDataBuilder,
-  EntitySetBuilder,
-  Principal,
-  PrincipalBuilder,
-} = Models;
-const {
-  ActionTypes,
-  DeleteTypes,
-  PermissionTypes,
-  PrincipalTypes,
-  UpdateTypes
-} = Types;
+const { EntitySetBuilder } = Models;
+const { DeleteTypes, PermissionTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const DEFAULT_USER_PRINCIPAL_ID = 'auth0|5ae9026c04eb0b243f1d2bb6';
 
 const {
   CHRONICLE_STUDIES,
@@ -131,14 +119,18 @@ const {
 
 const {
   DATE_ENROLLED,
+  NOTIFICATION_DESCRIPTION,
+  NOTIFICATION_ENABLED,
+  NOTIFICATION_ID,
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
   STUDY_NAME,
 } = PROPERTY_TYPE_FQNS;
 
+const { PART_OF } = ASSOCIATION_ENTITY_TYPE_FQNS;
 const { PARTICIPATED_IN } = ASSOCIATION_ENTITY_SET_NAMES;
-const { PERSON } = ENTITY_TYPE_FQNS;
+const { NOTIFICATION, PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
@@ -400,6 +392,151 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
+
+/*
+ *
+ * StudiesActions.createNotificationsEntitySets
+ *
+ */
+
+function* createNotificationsEntitySetsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(createNotificationsEntitySets.request(action.id));
+
+    const formData = action.value;
+
+    const studyName = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]);
+    const studyId = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)]);
+    const email = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]);
+
+    // create ol.partof association
+    const partOfEntityTypeId = yield select(selectEntityTypeId(PART_OF));
+    const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
+    const partOfEntitySet = new EntitySetBuilder()
+      .setContacts([email])
+      .setDescription('Chronicle study part of Daily notification of User Awareness Questionnaire')
+      .setEntityTypeId(partOfEntityTypeId)
+      .setName(partOfEntitySetName)
+      .setTitle(`${studyName} Part-Of Association`)
+      .setOrganizationId(CAFE_ORGANIZATION_ID)
+      .build();
+
+    // create ol.notification entity
+    const notificationEntityTypeId = yield select(selectEntityTypeId(NOTIFICATION));
+    const notificationEntitySetName = getNotificationsEntitySetName(studyId);
+    const notificationEntitySet = new EntitySetBuilder()
+      .setContacts([email])
+      .setDescription('Daily notification of User Awareness Questionnaire')
+      .setEntityTypeId(notificationEntityTypeId)
+      .setName(notificationEntitySetName)
+      .setTitle(`${studyName} Daily Notification`)
+      .setOrganizationId(CAFE_ORGANIZATION_ID)
+      .build();
+
+    const response = yield call(createEntitySetsWorker, createEntitySets([partOfEntitySet, notificationEntitySet]));
+    if (response.error) throw response.error;
+
+    workerResponse.data = response.data;
+
+    // set read/write permissions for chronicle super user
+    const requests = [
+      call(
+        updateEntitySetPermissionsWorker,
+        updateEntitySetPermissions({
+          entitySetId: get(response.data, partOfEntitySetName),
+          entityTypeFQN: PART_OF
+        })
+      ),
+
+      call(
+        updateEntitySetPermissionsWorker,
+        updateEntitySetPermissions({
+          entitySetId: get(response.data, notificationEntitySetName),
+          entityTypeFQN: NOTIFICATION
+        })
+      )
+    ];
+
+    const responses = yield all(requests);
+    responses.forEach((res) => {
+      if (res.error) throw res.error;
+    });
+
+    yield put(createNotificationsEntitySets.success(action.id, response.data));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    workerResponse.error = error;
+    yield put(createNotificationsEntitySets.failure(action.id));
+  }
+  finally {
+    yield put(createNotificationsEntitySets.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* associateExistingStudyWithNotification(
+  partOfEntitySetName, notificationEntitySetName, studyEKID, associationVal, formData
+) :Generator<*, *, *> {
+  const workerResponse = {};
+
+  try {
+    let response = yield call(
+      createNotificationsEntitySetsWorker, createNotificationsEntitySets(formData)
+    );
+    if (response.error) throw response.error;
+
+    const notificationEntitySets = fromJS(response.data);
+
+    workerResponse.partOfEntitySetId = notificationEntitySets.get(partOfEntitySetName);
+    workerResponse.notificationEntitySetId = notificationEntitySets.get(notificationEntitySetName);
+
+    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
+      entitySetIds: state.getIn(['edm', 'entitySetIds']),
+      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
+    }));
+
+    const associations = [
+      [partOfEntitySetName, 0, notificationEntitySetName, studyEKID, CHRONICLE_STUDIES, {
+        [NOTIFICATION_ID.toString()]: [associationVal],
+      }]
+    ];
+
+    const associationEntityData = processAssociationEntityData(
+      fromJS(associations), entitySetIds.merge(notificationEntitySets), propertyTypeIds
+    );
+
+    const notificationFormData = setIn(
+      {},
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)],
+      'Daily notification of User Awareness Questionnaire',
+    );
+
+    const entityData = processEntityData(
+      notificationFormData,
+      entitySetIds.merge(notificationEntitySets),
+      propertyTypeIds
+    );
+
+    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
+
+    const partOfEntitySetId = notificationEntitySets.get(partOfEntitySetName);
+    const partOfEntityKeyId = getIn(response.data, ['entitySetIds', partOfEntitySetId, 0]);
+
+    workerResponse.partOfEntityKeyId = partOfEntityKeyId;
+  }
+  catch (error) {
+    workerResponse.error = error;
+  }
+
+  return workerResponse;
+}
+
 /*
  *
  * StudiesActions.updateStudy()
@@ -411,18 +548,72 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(updateStudy.request(action.id));
 
     const { value } = action;
-    const { formData, initialFormData, study } = value;
+    const { study } = value;
+    let { formData, initialFormData } = value;
+
+    const studyId :UUID = study.getIn([STUDY_ID, 0]);
+    const studyEKID :UUID = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
     const { entitySetIds, propertyTypeIds } = yield select((state) => ({
       entitySetIds: state.getIn(['edm', 'entitySetIds']),
       propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
     }));
 
-    const studyEKID :UUID = study.getIn([OPENLATTICE_ID_FQN, 0]);
-    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    const notificationEntitySetName = getNotificationsEntitySetName(studyId);
+    const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
 
+    const notificationsEnabled = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+
+    const associationVal = notificationsEnabled ? studyId : null;
+
+    formData = setIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, partOfEntitySetName, NOTIFICATION_ID)], associationVal);
+
+    // remove notification_enabled property since it is not a part of chronicle_studies entity set
+    formData = removeIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+
+    initialFormData = removeIn(initialFormData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+
+    // Step 1:  if ol.notification -> ol.partof -> ol.study association does not exist ->
+    // create the association, then save other study details
+
+    const studyNotifications = yield select(
+      (state) => state.getIn(['studies', 'studyNotifications', studyEKID], Map())
+    );
+    let { partOfEntitySetId, partOfEntityKeyId, notificationEntitySetId } = ({
+      partOfEntitySetId: studyNotifications.getIn(['associationEntitySet', 'id']),
+      partOfEntityKeyId: studyNotifications.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]),
+      notificationEntitySetId: studyNotifications.getIn(['neighborEntitySet', 'id'])
+    });
+
+    if (!partOfEntityKeyId) {
+
+      const response = yield call(
+        associateExistingStudyWithNotification,
+        partOfEntitySetName,
+        notificationEntitySetName,
+        studyEKID,
+        associationVal,
+        formData
+      );
+
+      if (response.error) throw response.error;
+      partOfEntityKeyId = response.partOfEntityKeyId;
+      partOfEntitySetId = response.partOfEntitySetId;
+      notificationEntitySetId = response.notificationEntitySetId;
+
+      // association has been created, so no need to update the association value
+      formData = removeIn(formData,
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, partOfEntitySetName, NOTIFICATION_ID)]);
+    }
+
+    // Step 2: update study details
     const entityIndexToIdMap :Map = Map()
-      .setIn([CHRONICLE_STUDIES, 0], studyEKID);
+      .setIn([CHRONICLE_STUDIES, 0], studyEKID)
+      .setIn([partOfEntitySetName, 0], partOfEntityKeyId);
 
     const draftWithKeys = replaceEntityAddressKeys(
       formData,
@@ -434,10 +625,14 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       findEntityAddressKeyFromMap(entityIndexToIdMap)
     );
 
+    const partOfEntitySet = fromJS({
+      [partOfEntitySetName]: partOfEntitySetId
+    });
+
     let entityData = processEntityDataForPartialReplace(
       draftWithKeys,
       originalWithKeys,
-      entitySetIds,
+      entitySetIds.merge(partOfEntitySet),
       propertyTypeIds,
       {}
     );
@@ -447,9 +642,19 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     // construct updated study
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
+
+    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
     const studyEntityData = getIn(entityData, [entitySetId, 0]);
 
-    yield put(updateStudy.success(action.id, studyEntityData));
+    // update notifications : set entity set ids, and association key id
+
+    yield put(updateStudy.success(action.id, {
+      associationVal,
+      notificationEntitySetId,
+      partOfEntityKeyId,
+      partOfEntitySetId,
+      studyEntityData,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -466,66 +671,6 @@ function* updateStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.updateParticipantsEntitySetPermissions()
- *
- */
-
-function* updateParticipantsEntitySetPermissionsWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(updateParticipantsEntitySetPermissions.request(action.id));
-
-    const participantsEntitySetId :UUID = action.value;
-
-    const entityType = yield select(selectEntityType(PERSON));
-    const updates :AclData[] = [];
-
-    entityType.get('properties').forEach((propertyTypeId :UUID) => {
-
-      const aclKey = [participantsEntitySetId, propertyTypeId];
-      const permissions = [PermissionTypes.READ, PermissionTypes.WRITE];
-
-      const principal :Principal = new PrincipalBuilder()
-        .setId(DEFAULT_USER_PRINCIPAL_ID)
-        .setType(PrincipalTypes.USER)
-        .build();
-
-      const ace :Ace = new AceBuilder()
-        .setPermissions(permissions)
-        .setPrincipal(principal)
-        .build();
-
-      const acl :Acl = new AclBuilder()
-        .setAces([ace])
-        .setAclKey(aclKey)
-        .build();
-
-      const aclData :AclData = new AclDataBuilder()
-        .setAcl(acl)
-        .setAction(ActionTypes.ADD)
-        .build();
-      updates.push(aclData);
-    });
-
-    const response = yield call(updateAclsWorker, updateAcls(updates));
-    if (response.error) throw response.error;
-
-    yield put(updateParticipantsEntitySetPermissions.success(action.id));
-  }
-  catch (error) {
-    workerResponse.error = error;
-    LOG.error(action.type, error);
-  }
-  finally {
-    yield put(updateParticipantsEntitySetPermissions.finally(action.id));
-  }
-
-  return workerResponse;
-}
-
-
-/*
- *
  * StudiesActions.createParticipantsEntitySet()
  *
  */
@@ -538,6 +683,7 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
     yield put(createParticipantsEntitySet.request(action.id));
 
     const newStudyData = action.value;
+
     const studyName = getIn(newStudyData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]);
     const studyId = getIn(newStudyData,
@@ -559,11 +705,14 @@ function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*
     let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
     if (response.error) throw response.error;
 
-    // update permissions
+    // set read/write permissions for chronicle super user
     const entitySetId = response.data[entitySet.name];
     response = yield call(
-      updateParticipantsEntitySetPermissionsWorker,
-      updateParticipantsEntitySetPermissions(entitySetId)
+      updateEntitySetPermissionsWorker,
+      updateEntitySetPermissions({
+        entitySetId,
+        entityTypeFQN: PERSON
+      })
     );
     if (response.error) throw response.error;
 
@@ -667,75 +816,77 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
   yield takeEvery(ADD_PARTICIPANT, addStudyParticipantWorker);
 }
 
+
 /*
  *
- * StudiesActions.getStudyAuthorizations()
+ * StudiesActions.getStudyNotificationStatus()
  *
  */
 
-function* getStudyAuthorizationsWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(getStudyAuthorizations.request(action.id));
-
-    const { studies, permissions } = action.value;
-
-    const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
-    const entitySetNames = studyIds.map((studyId) => getParticipantsEntitySetName(studyId));
-
-    const responses :Object[] = yield all(
-      entitySetNames.toJS().map((entitySetName) => call(getEntitySetIdWorker, getEntitySetId(entitySetName)))
-    );
-
-    // look up map: participant entity setIds -> study Ids
-    const authorizedEntitySetIdsStudyIdMap :Map<UUID, UUID> = Map().withMutations((map :Map) => {
-      responses.forEach((response, index) => {
-        if (!response.error) {
-          map.set(response.data, studyIds.get(index));
-        }
-      });
-    });
-
-    const accessChecks :AccessCheck[] = fromJS(authorizedEntitySetIdsStudyIdMap)
-      .keySeq()
-      .map((entitySetId) => (
-        new AccessCheckBuilder()
-          .setAclKey([entitySetId])
-          .setPermissions(permissions)
-          .build()
-      ))
-      .toJS();
-
-    const response = yield call(getAuthorizationsWorker, getAuthorizations(accessChecks));
-    if (response.error) throw response.error;
-    const studyAuthorizations = response.data;
-
-    const authorizedStudyIds :Set<UUID> = Set().withMutations((set :Set) => {
-      studyAuthorizations.forEach((authorization) => {
-        if (getIn(authorization, ['permissions', PermissionTypes.READ], false)) {
-          const entitySetId = getIn(authorization, ['aclKey', 0]);
-          set.add(authorizedEntitySetIdsStudyIdMap.get(entitySetId));
-        }
-      });
-    });
-
-    workerResponse.data = authorizedStudyIds;
-
-    yield put(getStudyAuthorizations.success(action.id));
-  }
-  catch (error) {
-    LOG.error(action.type, error);
-    yield put(getStudyAuthorizations.failure(action.id));
-  }
-  finally {
-    yield put(getStudyAuthorizations.finally(action.id));
-  }
-  return workerResponse;
-}
-
-function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
-}
+// 2020-04-08 NOTE: disabling notification feature for now
+// function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*, *, *> {
+//   const workerResponse = {};
+//
+//   try {
+//     yield put(getStudyNotificationStatus.request(action.id));
+//
+//     const studies = action.value;
+//
+//     const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
+//
+//     const partOfEntitySetNames :List = studyIds.map((studyId) => getPartOfAssociationEntitySetName(studyId));
+//     const notificationEntitySetNames :List = studyIds.map((studyId) => getNotificationsEntitySetName(studyId));
+//
+//     let response = yield call(
+//       getEntitySetIdsWorker,
+//       getEntitySetIds(notificationEntitySetNames.concat(partOfEntitySetNames).toJS())
+//     );
+//     if (response.error) throw response.error;
+//
+//     const entitySetIds = fromJS(response.data);
+//
+//     const partOfEntitySetIds :List = partOfEntitySetNames
+//       .map((entitySetName) => entitySetIds.get(entitySetName))
+//       .filter((entitySetId) => entitySetId !== undefined);
+//
+//     const notificationEntitySetIds :List = notificationEntitySetNames
+//       .map((entitySetName) => entitySetIds.get(entitySetName))
+//       .filter((entitySetId) => entitySetId !== undefined);
+//
+//     const studiesEntitySetId = yield select(
+//       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
+//     );
+//
+//     const studyEntityKeyIds :List = studies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0]));
+//
+//     const searchFilter = {
+//       destinationEntitySetIds: [studiesEntitySetId],
+//       edgeEntitySetIds: partOfEntitySetIds.toArray(),
+//       entityKeyIds: studyEntityKeyIds.toArray(),
+//       sourceEntitySetIds: notificationEntitySetIds.toArray()
+//     };
+//
+//     response = yield call(
+//       searchEntityNeighborsWithFilterWorker,
+//       searchEntityNeighborsWithFilter({
+//         entitySetId: studiesEntitySetId,
+//         filter: searchFilter
+//       })
+//     );
+//     if (response.error) throw response.error;
+//
+//     const entityNeighbors = fromJS(response.data)
+//       .mapEntries(([entityKeyId, neighbors]) => [entityKeyId, neighbors.first()]);
+//
+//     yield put(getStudyNotificationStatus.success(action.id, entityNeighbors));
+//   }
+//   catch (error) {
+//     workerResponse.error = error;
+//     LOG.error(action.type, error);
+//     yield put(getStudyNotificationStatus.failure(action.id));
+//   }
+//   return workerResponse;
+// }
 
 /*
  *
@@ -756,7 +907,7 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) {
       throw response.error;
     }
-    const studies = fromJS(response.data);
+    const studies = fromJS(response.data).filter((study) => study.getIn([STUDY_ID, 0]));
 
     response = yield call(
       getStudyAuthorizationsWorker,
@@ -765,10 +916,20 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) throw response.error;
     const authorizedStudyIds = response.data;
 
-    const authorizedStudies :Map<UUID, Map> = studies
+    let authorizedStudies :Map<UUID, Map> = studies
+      .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])));
+
+    // 2020-04-08 NOTE: disabling notification feature for now
+    // // get notification status for authorized studies
+    // if (!authorizedStudies.isEmpty()) {
+    //   response = yield call(getStudyNotificationStatusWorker, getStudyNotificationStatus(authorizedStudies));
+    //   if (response.error) throw response.error;
+    // }
+
+    authorizedStudies = authorizedStudies
       .toMap()
-      .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])))
       .mapKeys((index :number, study :Map) => study.getIn([STUDY_ID, 0]));
+
     yield put(getStudies.success(action.id, authorizedStudies));
   }
   catch (error) {
@@ -797,41 +958,94 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(createStudy.request(action.id));
 
-    let { value: formData } = action;
+    const { value } = action;
 
-    // generate a random study id
-    formData = setIn(
-      formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
-      uuid(),
-    );
+    let { formData } = value;
+    const { studyId } = value;
 
-    // create a new participant entity set for the new study
-    let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
-    if (response.error) throw response.error;
+    const notificationEntitySetName = getNotificationsEntitySetName(studyId);
+    const partOfEntitySetName = getPartOfAssociationEntitySetName(studyId);
 
     const { entitySetIds, propertyTypeIds } = yield select((state) => ({
       entitySetIds: state.getIn(['edm', 'entitySetIds']),
       propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
     }));
 
-    let entityData = processEntityData(formData, entitySetIds, propertyTypeIds);
-    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData: {}, entityData }));
+    // generate a random study id
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_ID)],
+      studyId,
+    );
+
+    const notificationsEnabled = getIn(formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+
+    // remove notification_enabled property since it's not part of chronicle_studies entity set
+    formData = removeIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]
+    );
+
+    // update formData with a description string (entity data for notification entity set).
+    formData = setIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, notificationEntitySetName, NOTIFICATION_DESCRIPTION)],
+      'Daily notification of User Awareness Questionnaire'
+    );
+
+    // create a new participant entity set for the new study
+    let response = yield call(createParticipantsEntitySetWorker, createParticipantsEntitySet(formData));
     if (response.error) throw response.error;
 
-    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
-    const entityKeyId :UUID = getIn(response.data, ['entityKeyIds', entitySetId, 0]);
+    // create ol.notification -> ol.partof -> ol.study entity sets
+    response = yield call(createNotificationsEntitySetsWorker, createNotificationsEntitySets(formData));
+    if (response.error) throw response.error;
+    const notificationEntitySets = fromJS(response.data); // Map<string, UUID>
 
+    // create associations
+    const associationVal = notificationsEnabled ? studyId : null;
+    const associations = [
+      [partOfEntitySetName, 0, notificationEntitySetName, 0, CHRONICLE_STUDIES, {
+        [NOTIFICATION_ID.toString()]: [associationVal],
+      }]
+    ];
+
+    const associationEntityData = processAssociationEntityData(
+      fromJS(associations),
+      entitySetIds.merge(notificationEntitySets),
+      propertyTypeIds
+    );
+
+    let entityData = processEntityData(formData, entitySetIds.merge(notificationEntitySets), propertyTypeIds);
+
+    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
+
+    const studyEntitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    const studyEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', studyEntitySetId, 0]);
+
+    const partOfEntitySetId :UUID = notificationEntitySets.get(partOfEntitySetName);
+    const partOfEntityKeyId :UUID = getIn(response.data, ['entitySetIds', partOfEntitySetId, 0]);
+
+    // reconstruct the created study
     // update the study entity with its entity key id
     formData = setIn(
       formData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)],
-      entityKeyId,
+      studyEntityKeyId,
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    const studyEntityData = getIn(entityData, [entitySetId, 0]);
-    yield put(createStudy.success(action.id, studyEntityData));
+    const studyEntityData = getIn(entityData, [studyEntitySetId, 0]);
+
+    yield put(createStudy.success(action.id, {
+      associationVal,
+      notificationEntitySetId: notificationEntitySets.get(notificationEntitySetName),
+      partOfEntityKeyId,
+      partOfEntitySetId: notificationEntitySets.get(partOfEntitySetName),
+      studyEntityData,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -859,7 +1073,6 @@ export {
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
-  getStudyAuthorizationsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
 };
