@@ -12,9 +12,6 @@ import {
   Colors,
   EditButton,
 } from 'lattice-ui-kit';
-
-import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDispatch } from 'react-redux';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
@@ -31,7 +28,7 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
-const { GREEN_2, NEUTRALS } = Colors;
+const { NEUTRALS } = Colors;
 
 const DetailsWrapper = styled.div`
   align-items: flex-start;
@@ -87,23 +84,6 @@ const DetailsHeaderWrapper = styled.div`
   align-items: center;
 `;
 
-const NotificationIconWrapper = styled.div`
-  margin-left: 30px;
-  display: flex;
-  align-items: center;
-  padding: 0 3px;
-
-  > h3 {
-    margin: 0 0 0 10px;
-    font-weight: 400;
-    font-size: 15px;
-  }
-`;
-
-const StyledFontAwesome = styled(FontAwesomeIcon)`
-  font-size: 22px;
-`;
-
 type DetailProps = {
   label :string;
   missingValue?:boolean;
@@ -151,7 +131,8 @@ const StudyDetails = ({ notificationsEnabled, study } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
-  const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
+  // 2020-04-08 NOTE: disabling notification feature for now
+  // const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
@@ -200,11 +181,6 @@ const StudyDetails = ({ notificationsEnabled, study } :Props) => {
       <EditButton mode="primary" onClick={openEditModal}>
         Edit Details
       </EditButton>
-
-      <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={GREEN_2} />
-        <h3> Daily Notifications </h3>
-      </NotificationIconWrapper>
     </DetailsHeaderWrapper>
   );
 
