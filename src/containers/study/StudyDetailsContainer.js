@@ -6,7 +6,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import { Constants } from 'lattice';
+// import { Constants } from 'lattice';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
@@ -21,10 +21,10 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 
-const { NOTIFICATION_ID, STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 
-const { OPENLATTICE_ID_FQN } = Constants;
+// const { OPENLATTICE_ID_FQN } = Constants;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
