@@ -1016,6 +1016,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     // if (response.error) throw response.error;
     // const notificationEntitySets = fromJS(response.data); // Map<string, UUID>
 
+    // 2020-04-08 NOTE: disabling notification feature for now
     // create associations
     // const associationVal = notificationsEnabled ? studyId : null;
     // const associations = [
@@ -1023,15 +1024,16 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     //     [NOTIFICATION_ID.toString()]: [associationVal],
     //   }]
     // ];
+    const associations = [];
 
     // 2020-04-08 NOTE: disabling notification feature for now
-    // const associationEntityData = processAssociationEntityData(
-    //   fromJS(associations),
-    //   // 2020-04-08 NOTE: disabling notification feature for now
-    //   // entitySetIds.merge(notificationEntitySets),
-    //   entitySetIds,
-    //   propertyTypeIds
-    // );
+    const associationEntityData = processAssociationEntityData(
+      fromJS(associations),
+      // 2020-04-08 NOTE: disabling notification feature for now
+      // entitySetIds.merge(notificationEntitySets),
+      entitySetIds,
+      propertyTypeIds
+    );
 
     let entityData = processEntityData(
       formData,
@@ -1041,7 +1043,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       propertyTypeIds
     );
 
-    response = yield call(submitDataGraphWorker, submitDataGraph({ /* associationEntityData, */ entityData }));
+    response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
     if (response.error) throw response.error;
 
     const studyEntitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
