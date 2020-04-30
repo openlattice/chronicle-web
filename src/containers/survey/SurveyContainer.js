@@ -11,6 +11,7 @@ import {
   AppHeaderWrapper,
   Sizes,
   Spinner,
+  StyleUtils,
 } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,6 +25,7 @@ import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
 const { APP_CONTENT_WIDTH } = Sizes;
+const { media } = StyleUtils;
 
 const SpinnerWrapper = styled.div`
   margin-top: 60px;
@@ -36,7 +38,6 @@ const ErrorWrapper = styled.div`
 `;
 
 const SurveyTitle = styled.h4`
-  color: NEUTRALS[0];
   font-size: 20px;
   font-weight: 400;
   margin: 0;
@@ -47,6 +48,32 @@ const CurrentDate = styled.h5`
   font-size: 16px;
   font-weight: 400;
   margin: 5px 0 20px 0;
+`;
+
+// TODO: add responsive logic to LUK
+const StyledAppContainerWrapper = styled(AppContainerWrapper)`
+  ${media.tablet`min-width: 600px;`}
+  ${media.phone`min-width: 360px;`}
+`;
+
+const StyledAppHeaderWrapper = styled(AppHeaderWrapper)`
+  > div {
+    ${media.tablet`min-width: 600px;`}
+    ${media.phone`
+      min-width: 360px;
+      padding: 0 20px;
+    `}
+  }
+`;
+
+const StyledAppContentWrapper = styled(AppContentWrapper)`
+  > div {
+    ${media.tablet`min-width: 600px;`}
+    ${media.phone`
+      min-width: 360px;
+      padding: 20px;
+    `}
+  }
 `;
 
 const ErrorMessage = () => (
@@ -88,9 +115,9 @@ const SurveyContainer = () => {
   }
 
   return (
-    <AppContainerWrapper>
-      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
-      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+    <StyledAppContainerWrapper>
+      <StyledAppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
+      <StyledAppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
         {
           requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <ErrorMessage />
         }
@@ -119,8 +146,8 @@ const SurveyContainer = () => {
             </>
           )
         }
-      </AppContentWrapper>
-    </AppContainerWrapper>
+      </StyledAppContentWrapper>
+    </StyledAppContainerWrapper>
   );
 };
 
