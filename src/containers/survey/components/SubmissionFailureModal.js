@@ -19,11 +19,11 @@ const SubmissionFailureModal = (props :Props) => {
     <Modal
         isVisible={isVisible}
         onClose={handleOnClose}
-        textSecondary="Cancel"
+        textSecondary="Close"
         textTitle="Submission Failure">
       <ModalBody>
         <p>
-          An error occurred while submitting. Please try again later or contact support
+          An error occurred while submitting. Please try again later or contact support.
         </p>
       </ModalBody>
     </Modal>
