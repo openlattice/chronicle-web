@@ -34,7 +34,7 @@ const CreateStudyForm = (props:Props, ref) => {
 
   useEffect(() => {
     if (study) {
-      const formData :Object = createFormDataFromStudyEntity(dataSchema, false, study);
+      const formData :Object = createFormDataFromStudyEntity(dataSchema, notificationsEnabled, study);
       setInitialFormData(formData);
     }
   }, [study, notificationsEnabled]);
