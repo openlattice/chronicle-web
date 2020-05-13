@@ -62,7 +62,7 @@ type Props = {
 const TableRow = ({ data } :Props) => {
   const dispatch = React.useContext(TableDataDispatch);
 
-  const appName :string = getIn(data, ['entityDetails', TITLE]);
+  const appName :string = getIn(data, ['entityDetails', TITLE, 0]);
   const appEntityId :UUID = get(data, 'id');
   const appUsers :Set = getIn(data, ['associationDetails', USER_FQN], Set());
 
