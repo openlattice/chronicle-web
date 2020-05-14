@@ -1,7 +1,10 @@
 // @flow
 
 import axios from 'axios';
+import { DateTime } from 'luxon';
+
 import { getParticipantUserAppsUrl } from '../AppUtils';
+
 /*
  * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
  *
@@ -28,6 +31,7 @@ function getParticipantAppsUsageData(participantId :string, studyId :UUID) {
 
     return axios({
       method: 'get',
+      params: { date: DateTime.local().toISODate() },
       url,
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
