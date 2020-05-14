@@ -67,9 +67,9 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     yield put(getChronicleAppsData.request(action.id));
 
     const { value } = action;
-    const { participantId, studyId } = value;
+    const { date, participantId, studyId } = value;
 
-    const response = yield call(ChronicleApi.getParticipantAppsUsageData, participantId, studyId);
+    const response = yield call(ChronicleApi.getParticipantAppsUsageData, date, participantId, studyId);
     if (response.error) throw response.error;
 
     // mapping from association EKID -> associationDetails & entityDetails

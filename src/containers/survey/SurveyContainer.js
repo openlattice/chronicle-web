@@ -89,14 +89,15 @@ const SurveyContainer = () => {
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
 
   // $FlowFixMe
-  const { studyId, participantId } :{ participantId :string, studyId :UUID } = queryParams;
+  const { date, participantId, studyId } :{ date :string, participantId :string, studyId :UUID } = queryParams;
 
   useEffect(() => {
     dispatch(getChronicleAppsData({
+      date: date || DateTime.local().toISODate(),
+      participantId,
       studyId,
-      participantId
     }));
-  }, [dispatch, participantId, studyId]);
+  }, [dispatch, participantId, studyId, date]);
 
   const { appsData, requestStates } = useSelector((state) => ({
     appsData: state.getIn(['appsData', 'appsData'], Map()),
