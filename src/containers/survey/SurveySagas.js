@@ -11,6 +11,7 @@ import {
   getChronicleAppsData,
   submitSurvey,
 } from './SurveyActions';
+import { getAppNameFromUserAppsEntity } from './utils/Utils';
 
 import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -72,12 +73,11 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     if (response.error) throw response.error;
 
     // mapping from association EKID -> associationDetails & entityDetails
-    let appsData = fromJS(response.data)
+    const appsData = fromJS(response.data)
       .toMap()
-      .mapKeys((index, entity) => entity.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
-
-    // set id property (needed by LUK table)
-    appsData = appsData.map((entity, id) => entity.set('id', id));
+      .mapKeys((index, entity) => entity.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]))
+      .map((entity, id) => entity.set('id', id))
+      .map((entity) => entity.setIn(['entityDetails', 'ol.title', 0], getAppNameFromUserAppsEntity(entity)));
 
     yield put(getChronicleAppsData.success(action.id, appsData));
   }
