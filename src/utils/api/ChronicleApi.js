@@ -1,7 +1,6 @@
 // @flow
 
 import axios from 'axios';
-import { DateTime } from 'luxon';
 
 import { getParticipantUserAppsUrl } from '../AppUtils';
 
