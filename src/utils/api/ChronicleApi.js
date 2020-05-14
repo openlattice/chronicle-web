@@ -24,14 +24,14 @@ import { getParticipantUserAppsUrl } from '../AppUtils';
         }
       ]
  */
-function getParticipantAppsUsageData(participantId :string, studyId :UUID) {
+function getParticipantAppsUsageData(date :string, participantId :string, studyId :UUID) {
   return new Promise<*>((resolve, reject) => {
     const url = getParticipantUserAppsUrl(participantId, studyId);
     if (!url) return reject(new Error('Invalid Url'));
 
     return axios({
       method: 'get',
-      params: { date: DateTime.local().toISODate() },
+      params: { date },
       url,
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
