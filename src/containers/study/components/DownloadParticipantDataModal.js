@@ -24,7 +24,7 @@ const ButtonGrid = styled.div`
   align-items: center;
   justify-content: space-between;
   padding-top: 30px;
-  grid-template-columns: repeat(1, minmax(100px, 1fr));
+  grid-template-columns: 1fr;
   grid-gap: 10px;
 `;
 
@@ -85,9 +85,6 @@ const DownloadParticipantDataModal = (props :Props) => {
           App Usage
         </Button>
 
-        <Button onClick={handleOnClose}>
-          Close
-        </Button>
       </ButtonGrid>
     </ModalWrapper>
   );
@@ -96,6 +93,8 @@ const DownloadParticipantDataModal = (props :Props) => {
     <Modal
         isVisible={isVisible}
         onClose={handleOnClose}
+        textSecondary="Close"
+        shoudStretchButtons
         textTitle="Download Data">
       {renderModalBody()}
     </Modal>
