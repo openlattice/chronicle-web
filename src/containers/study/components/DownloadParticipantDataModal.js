@@ -50,14 +50,14 @@ const DownloadParticipantDataModal = (props :Props) => {
 
     let dataType;
     switch (name) {
-      default:
-        dataType = ParticipantDataType.RAW;
-        break;
       case PREPROCESSED:
         dataType = ParticipantDataTypes.PREPROCESSED;
         break;
       case APP_USAGE:
         dataType = ParticipantDataTypes.APP_USAGE;
+        break;
+      default:
+        dataType = ParticipantDataType.RAW;
         break;
     }
 

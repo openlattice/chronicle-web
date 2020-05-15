@@ -53,11 +53,6 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
   const csrfToken = AuthUtils.getCSRFToken();
 
   switch (dataType) {
-    default:
-      return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
-        + `${studyId}/${participantEntityKeyId}?`
-        + `${FILE_TYPE}=csv`
-        + `&${CSRF_TOKEN}=${csrfToken}`;
     case PREPROCESSED:
       return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
         + `${studyId}/${participantEntityKeyId}/preprocessed?`
@@ -66,6 +61,11 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
     case APP_USAGE:
       return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
         + `${studyId}/${participantEntityKeyId}/usage?`
+        + `${FILE_TYPE}=csv`
+        + `&${CSRF_TOKEN}=${csrfToken}`;
+    default:
+      return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
+        + `${studyId}/${participantEntityKeyId}?`
         + `${FILE_TYPE}=csv`
         + `&${CSRF_TOKEN}=${csrfToken}`;
   }
