@@ -1,17 +1,17 @@
 // @flow
 
 type ParticipantDataTypeEnum = {|
-  RAW :'Raw';
-  PREPROCESSED :'Preprocessed';
   APP_USAGE :'App Usage';
+  PREPROCESSED :'Preprocessed';
+  RAW :'Raw';
 |};
 
 type ParticipantDataType = $Values<ParticipantDataTypeEnum>
 
 const ParticipantDataTypes :{|...ParticipantDataTypeEnum |} = Object.freeze({
-  RAW: 'Raw',
+  APP_USAGE: 'App Usage',
   PREPROCESSED: 'Preprocessed',
-  APP_USAGE: 'App Usage'
+  RAW: 'Raw'
 });
 
 export type { ParticipantDataType };

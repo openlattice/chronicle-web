@@ -20,12 +20,11 @@ const ModalWrapper = styled.div`
 `;
 
 const ButtonGrid = styled.div`
-  /* display: flex; */
   display: grid;
   align-items: center;
   justify-content: space-between;
   padding-top: 30px;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  grid-template-columns: repeat(1, minmax(100px, 1fr));
   grid-gap: 10px;
 `;
 
