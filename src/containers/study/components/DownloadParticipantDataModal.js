@@ -12,7 +12,7 @@ import ParticipantDataTypes from '../../../utils/constants/ParticipantDataTypes'
 import type { ParticipantDataType } from '../../../utils/constants/ParticipantDataTypes';
 import { getParticipantDataUrl } from '../../../utils/AppUtils';
 
-const { PREPROCESSED, RAW } = ParticipantDataTypes;
+const { PREPROCESSED, RAW, APP_USAGE } = ParticipantDataTypes;
 
 const ModalWrapper = styled.div`
   min-width: 400px;
@@ -20,11 +20,15 @@ const ModalWrapper = styled.div`
 `;
 
 const ButtonGrid = styled.div`
-  display: flex;
+  /* display: flex; */
+  display: grid;
   align-items: center;
   justify-content: space-between;
   padding-top: 30px;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  grid-gap: 10px;
 `;
+
 
 type Props = {
   handleOnClose :() => void;
@@ -45,9 +49,18 @@ const DownloadParticipantDataModal = (props :Props) => {
     const { currentTarget } = event;
     const { name } = currentTarget;
 
-    const dataType :ParticipantDataType = name === PREPROCESSED
-      ? ParticipantDataTypes.PREPROCESSED
-      : ParticipantDataTypes.RAW;
+    let dataType;
+    switch (name) {
+      default:
+        dataType = ParticipantDataType.RAW;
+        break;
+      case PREPROCESSED:
+        dataType = ParticipantDataTypes.PREPROCESSED;
+        break;
+      case APP_USAGE:
+        dataType = ParticipantDataTypes.APP_USAGE;
+        break;
+    }
 
     if (participantEntityKeyId != null) {
       const downloadUrl = getParticipantDataUrl(dataType, participantEntityKeyId, studyId);
@@ -67,6 +80,10 @@ const DownloadParticipantDataModal = (props :Props) => {
 
         <Button mode="secondary" name={PREPROCESSED} onClick={handleOnClick}>
           Preprocessed Data
+        </Button>
+
+        <Button mode="secondary" name={APP_USAGE} onClick={handleOnClick}>
+          App Usage
         </Button>
 
         <Button onClick={handleOnClose}>
