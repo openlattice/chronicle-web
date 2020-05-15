@@ -44,7 +44,7 @@ const SurveyTitle = styled.h4`
   padding: 0;
 `;
 
-const CurrentDate = styled.h5`
+const SurveyDate = styled.h5`
   font-size: 16px;
   font-weight: 400;
   margin: 5px 0 20px 0;
@@ -107,6 +107,8 @@ const SurveyContainer = () => {
     }
   }));
 
+  const surveyDate = date ? DateTime.fromISO(date) : DateTime.local();
+
   if (requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.PENDING) {
     return (
       <SpinnerWrapper>
@@ -133,9 +135,9 @@ const SurveyContainer = () => {
                       <SurveyTitle>
                         Apps Usage Survey
                       </SurveyTitle>
-                      <CurrentDate>
-                        { DateTime.local().toLocaleString(DateTime.DATE_FULL) }
-                      </CurrentDate>
+                      <SurveyDate>
+                        { surveyDate.toLocaleString(DateTime.DATE_FULL) }
+                      </SurveyDate>
                       <SurveyTable
                           submitRequestState={requestStates[SUBMIT_SURVEY]}
                           data={appsData}
