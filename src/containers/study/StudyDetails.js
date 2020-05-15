@@ -91,6 +91,7 @@ const NotificationIconWrapper = styled.div`
   display: flex;
   align-items: center;
   padding: 0 3px;
+
   > h3 {
     margin: 0 0 0 10px;
     font-weight: 400;
