@@ -201,7 +201,7 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
       </EditButton>
 
       <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={GREEN_2} />
+        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN_2 : NEUTRALS[3]} />
         <h3> Daily Notifications </h3>
       </NotificationIconWrapper>
     </DetailsHeaderWrapper>
