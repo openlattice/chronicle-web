@@ -1,22 +1,23 @@
-// @flow
+/*
+ * @flow
+ */
 
 import React from 'react';
 
 import styled from 'styled-components';
-import {
-  Modal,
-  Button
-} from 'lattice-ui-kit';
+import { Button, Modal } from 'lattice-ui-kit';
 
 import ParticipantDataTypes from '../../../utils/constants/ParticipantDataTypes';
-import type { ParticipantDataType } from '../../../utils/constants/ParticipantDataTypes';
 import { getParticipantDataUrl } from '../../../utils/AppUtils';
 
-const { PREPROCESSED, RAW, APP_USAGE } = ParticipantDataTypes;
+const {
+  APP_USAGE,
+  PREPROCESSED,
+  RAW,
+} = ParticipantDataTypes;
 
 const ModalWrapper = styled.div`
   min-width: 400px;
-  padding-bottom: 30px;
 `;
 
 const ButtonGrid = styled.div`
@@ -51,13 +52,13 @@ const DownloadParticipantDataModal = (props :Props) => {
     let dataType;
     switch (name) {
       case PREPROCESSED:
-        dataType = ParticipantDataTypes.PREPROCESSED;
+        dataType = PREPROCESSED;
         break;
       case APP_USAGE:
-        dataType = ParticipantDataTypes.APP_USAGE;
+        dataType = APP_USAGE;
         break;
       default:
-        dataType = ParticipantDataType.RAW;
+        dataType = RAW;
         break;
     }
 
@@ -84,7 +85,6 @@ const DownloadParticipantDataModal = (props :Props) => {
         <Button mode="secondary" name={APP_USAGE} onClick={handleOnClick}>
           App Usage
         </Button>
-
       </ButtonGrid>
     </ModalWrapper>
   );
