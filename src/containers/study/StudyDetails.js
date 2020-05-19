@@ -5,6 +5,8 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
   Card,
@@ -28,7 +30,7 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
-const { NEUTRALS } = Colors;
+const { NEUTRALS, GREEN_2 } = Colors;
 
 const DetailsWrapper = styled.div`
   align-items: flex-start;
@@ -84,6 +86,23 @@ const DetailsHeaderWrapper = styled.div`
   align-items: center;
 `;
 
+const NotificationIconWrapper = styled.div`
+  margin-left: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+
+  > h3 {
+    margin: 0 0 0 10px;
+    font-weight: 400;
+    font-size: 15px;
+  }
+`;
+
+const StyledFontAwesome = styled(FontAwesomeIcon)`
+  font-size: 22px;
+`;
+
 type DetailProps = {
   label :string;
   missingValue?:boolean;
@@ -117,12 +136,11 @@ DetailWrapper.defaultProps = {
 };
 
 type Props = {
-  // 2020-04-08 NOTE: disabling notification feature for now
-  // notificationsEnabled :boolean;
+  notificationsEnabled :boolean;
   study :Map;
 }
 
-const StudyDetails = ({ study } :Props) => {
+const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
 
@@ -132,8 +150,7 @@ const StudyDetails = ({ study } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
-  // 2020-04-08 NOTE: disabling notification feature for now
-  // const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
+  const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
@@ -182,6 +199,11 @@ const StudyDetails = ({ study } :Props) => {
       <EditButton mode="primary" onClick={openEditModal}>
         Edit Details
       </EditButton>
+
+      <NotificationIconWrapper>
+        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN_2 : NEUTRALS[3]} />
+        <h3> Daily Notifications </h3>
+      </NotificationIconWrapper>
     </DetailsHeaderWrapper>
   );
 
@@ -195,7 +217,7 @@ const StudyDetails = ({ study } :Props) => {
         </MainInfoContainer>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
-            notificationsEnabled={false}
+            notificationsEnabled={notificationsEnabled}
             isVisible={editModalVisible}
             study={study} />
       </CardSegment>

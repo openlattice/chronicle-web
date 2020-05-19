@@ -17,7 +17,7 @@ import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 type Props = {
   handleOnCloseModal :() => void;
   isVisible :boolean;
-  // notificationsEnabled :boolean;
+  notificationsEnabled :boolean;
   requestStates :{
     CREATE_STUDY :RequestState,
     UPDATE_STUDY :RequestState
@@ -26,7 +26,7 @@ type Props = {
 };
 
 const ModalBodyWrapper = styled.div`
-  min-width: 440px;
+  min-width: 500px;
 `;
 
 const StudyDetailsModal = (props :Props) => {
@@ -35,8 +35,7 @@ const StudyDetailsModal = (props :Props) => {
   const {
     handleOnCloseModal,
     isVisible,
-    // 2020-04-08 NOTE: disabling notification feature for now
-    // notificationsEnabled,
+    notificationsEnabled,
     requestStates,
     study
   } = props;
@@ -50,7 +49,7 @@ const StudyDetailsModal = (props :Props) => {
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
       <ModalBodyWrapper>
-        <CreateStudyForm ref={formRef} study={study} notificationsEnabled={false} />
+        <CreateStudyForm ref={formRef} study={study} notificationsEnabled={notificationsEnabled} />
       </ModalBodyWrapper>
     ),
     [RequestStates.FAILURE]: (

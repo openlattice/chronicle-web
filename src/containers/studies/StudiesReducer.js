@@ -7,31 +7,31 @@ import {
   fromJS,
   getIn
 } from 'immutable';
-// import { Constants } from 'lattice';
+import { Constants } from 'lattice';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
-  // CREATE_NOTIFICATIONS_ENTITY_SETS,
+  CREATE_NOTIFICATIONS_ENTITY_SETS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  // GET_STUDY_NOTIFICATION_STATUS,
+  GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
-  // createNotificationsEntitySets,
+  createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
   getStudies,
-  // getStudyNotificationStatus,
+  getStudyNotificationStatus,
   getStudyParticipants,
   updateStudy,
 } from './StudiesActions';
@@ -39,11 +39,11 @@ import {
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
-// const { OPENLATTICE_ID_FQN } = Constants;
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   DATE_ENROLLED,
-  // NOTIFICATION_ID,
+  NOTIFICATION_ID,
   STATUS,
   STUDY_ID,
 } = PROPERTY_TYPE_FQNS;
@@ -52,10 +52,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
     requestState: RequestStates.STANDBY
   },
-  // 2020-04-08 NOTE: disabling notification feature for now
-  // [CREATE_NOTIFICATIONS_ENTITY_SETS]: {
-  //   requestState: RequestStates.STANDBY
-  // },
+  [CREATE_NOTIFICATIONS_ENTITY_SETS]: {
+    requestState: RequestStates.STANDBY
+  },
   [CREATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
@@ -74,10 +73,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDY_PARTICIPANTS]: {
     requestState: RequestStates.STANDBY
   },
-  // 2020-04-08 NOTE: disabling notification feature for now
-  // [GET_STUDY_NOTIFICATION_STATUS]: {
-  //   requestState: RequestStates.STANDBY
-  // },
+  [GET_STUDY_NOTIFICATION_STATUS]: {
+    requestState: RequestStates.STANDBY
+  },
   [UPDATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
@@ -85,7 +83,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   participantEntitySetIds: Map(),
   participants: Map(),
   studies: Map(),
-  // studyNotifications: Map()
+  studyNotifications: Map()
 });
 
 export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -123,30 +121,28 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           if (state.hasIn([CREATE_STUDY, seqAction.id])) {
 
             const {
-              // associationVal,
-              // notificationEntitySetId,
-              // partOfEntityKeyId,
-              // partOfEntitySetId,
+              notificationId,
+              notificationEntitySetId,
+              partOfEntityKeyId,
+              partOfEntitySetId,
               studyEntityData
             } = seqAction.value;
 
             const studyId :UUID = getIn(studyEntityData, [STUDY_ID, 0]);
-            // const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
+            const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
 
-            // 2020-04-08 NOTE: disabling notification feature for now
-            // const notificationsMap = Map().withMutations((map) => {
-            //   map
-            //     .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
-            //     .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
-            //     .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
-            //     .setIn(['associationDetails', NOTIFICATION_ID], [associationVal]);
-            // });
+            const notificationsMap = Map().withMutations((map) => {
+              map
+                .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
+                .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
+                .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
+                .setIn(['associationDetails', NOTIFICATION_ID], [notificationId]);
+            });
 
             return state
               .setIn(['studies', studyId], fromJS(studyEntityData))
-              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
-            // 2020-04-08 NOTE: disabling notification feature for now
-            // .setIn(['studyNotifications', studyEntityKeyId], notificationsMap);
+              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS)
+              .setIn(['studyNotifications', studyEntityKeyId], notificationsMap);
           }
           return state;
         },
@@ -161,27 +157,26 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.PENDING),
         SUCCESS: () => {
           const {
-            // associationVal,
-            // notificationEntitySetId,
-            // partOfEntityKeyId,
-            // partOfEntitySetId,
+            notificationId,
+            notificationEntitySetId,
+            partOfEntityKeyId,
+            partOfEntitySetId,
             studyEntityData
           } = seqAction.value;
 
           const studyId :UUID = getIn(studyEntityData, [STUDY_ID, 0]);
-          // const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
+          const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
 
-          // const notificationsMap = Map().withMutations((map) => {
-          //   map
-          //     .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
-          //     .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
-          //     .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
-          //     .setIn(['associationDetails', NOTIFICATION_ID], [associationVal]);
-          // });
+          const notificationsMap = Map().withMutations((map) => {
+            map
+              .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
+              .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
+              .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
+              .setIn(['associationDetails', NOTIFICATION_ID], [notificationId]);
+          });
           return state
             .setIn(['studies', studyId], fromJS(studyEntityData))
-            // 2020-04-08 NOTE: disabling notification feature for now
-            // .setIn(['studyNotifications', studyEntityKeyId], notificationsMap)
+            .setIn(['studyNotifications', studyEntityKeyId], notificationsMap)
             .setIn([UPDATE_STUDY, 'requestState'], RequestStates.SUCCESS);
         },
         FAILURE: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.FAILURE)
@@ -293,26 +288,24 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       });
     }
 
-    // case createNotificationsEntitySets.case(action.type): {
-    //   // const seqAction :SequenceAction = action;
-    //   return createNotificationsEntitySets.reducer(state, action, {
-    //     REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.PENDING),
-    //     FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.FAILURE),
-    //     SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
-    //   });
-    // }
+    case createNotificationsEntitySets.case(action.type): {
+      return createNotificationsEntitySets.reducer(state, action, {
+        REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
+      });
+    }
 
-    // 2020-04-08 NOTE: disabling notification feature for now
-    // case getStudyNotificationStatus.case(action.type): {
-    //   const seqAction :SequenceAction = action;
-    //   return getStudyNotificationStatus.reducer(state, action, {
-    //     REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
-    //     FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
-    //     SUCCESS: () => state
-    //       .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
-    //       .set('studyNotifications', fromJS(seqAction.value))
-    //   });
-    // }
+    case getStudyNotificationStatus.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getStudyNotificationStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
+          .set('studyNotifications', fromJS(seqAction.value))
+      });
+    }
 
     default:
       return state;
