@@ -11,7 +11,10 @@ const ASSOCIATION_ENTITY_TYPE_FQNS = {
 };
 const ENTITY_TYPE_FQNS = {
   PERSON: new FullyQualifiedName('general.person'),
-  NOTIFICATION: new FullyQualifiedName('ol.notification')
+  NOTIFICATION: new FullyQualifiedName('ol.notification'),
+  SURVEY_FQN: new FullyQualifiedName('ol.survey'),
+  ANSWER_FQN: new FullyQualifiedName('ol.answer'),
+  QUESTION_FQN: new FullyQualifiedName('ol.question')
 };
 
 const PROPERTY_TYPE_FQNS = {
@@ -33,10 +36,15 @@ const PROPERTY_TYPE_FQNS = {
   USER_FQN: new FullyQualifiedName('ol.user'),
 
   // notifications
-  NOTIFICATION_ID: new FullyQualifiedName('ol.id'),
+  ID_FQN: new FullyQualifiedName('ol.id'),
   NOTIFICATION_DESCRIPTION: new FullyQualifiedName('ol.description'),
   NOTIFICATION_ENABLED: new FullyQualifiedName('ol.status'),
-  ID_FQN: new FullyQualifiedName('ol.id'),
+
+  // survey
+  NAME_FQN: new FullyQualifiedName('ol.name'),
+  DESCRIPTION_FQN: new FullyQualifiedName('ol.description'),
+  CRON_FQN: new FullyQualifiedName('ol.cron'),
+  VALUES_FQN: new FullyQualifiedName('ol.values'),
 };
 
 export {
