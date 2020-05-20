@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-import { getParticipantUserAppsUrl } from '../AppUtils';
+import { getParticipantUserAppsUrl, getQuestionnaireUrl } from '../AppUtils';
 
 /*
  * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
@@ -72,8 +72,40 @@ function updateAppsUsageAssociationData(participantId :string, studyId :UUID, re
   });
 }
 
+/*
+ * 'GET chronicle/study/<studyId>/questionnaire/<questionnaireEKID>'
+ *
+ * Retrieve questionnaire details and associated questions
+ * response data:
+   {
+     questionnaireDetails: {
+       FQN1: [value1],
+       FQN2: [value2]
+     },
+     questions: [
+        {
+          FQN3 [value]
+          FQN4: [value]
+        }
+     ]
+   }
+ */
+
+function getQuestionnaireMetadata(studyId :UUID, questionnaireEKID :UUID) {
+  return new Promise<*>((resolve, reject) => {
+    const url = getQuestionnaireUrl(studyId, questionnaireEKID);
+    if (!url) return reject(new Error('Invalid url'));
+
+    return axios({
+      method: 'get',
+      url
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
 
 export {
   getParticipantAppsUsageData,
-  updateAppsUsageAssociationData
+  updateAppsUsageAssociationData,
+  getQuestionnaireMetadata
 };

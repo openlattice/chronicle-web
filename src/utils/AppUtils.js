@@ -17,6 +17,7 @@ import {
   FILE_TYPE,
   PARTICIPANT,
   STUDY,
+  QUESTIONNAIRE
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
@@ -90,4 +91,23 @@ const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
     + `/${studyId}/${participantId}/apps`;
 };
 
-export { getBaseUrl, getParticipantDataUrl, getParticipantUserAppsUrl };
+const getQuestionnaireUrl = (studyId :UUID, questionnaireEKID :UUID) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valid UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(questionnaireEKID)) {
+    LOG.error('questionnaireEKID must be a valid UUID', questionnaireEKID);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
+};
+
+export {
+  getBaseUrl,
+  getParticipantDataUrl,
+  getParticipantUserAppsUrl,
+  getQuestionnaireUrl
+};
