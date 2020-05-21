@@ -5,8 +5,7 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Map } from 'immutable';
-import { Constants } from 'lattice';
+import { Map, Set } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
@@ -20,11 +19,13 @@ import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
+import { STUDIES_REDUCER_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const { NOTIFICATION_ID, STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
+
+const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUCER_CONSTANTS;
+
 const { NEUTRALS, PURPLES } = Colors;
-
-const { OPENLATTICE_ID_FQN } = Constants;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -73,20 +74,16 @@ const StudyDetailsContainer = (props :Props) => {
   const {
     match,
   } = props;
-
-  const studyUUID :UUID = getIdFromMatch(match) || '';
   const dispatch = useDispatch();
 
-  const study = useSelector((state) => state.getIn(['studies', 'studies', studyUUID], Map()));
-  const studyEntityKeyId = study.getIn([OPENLATTICE_ID_FQN, 0]);
+  const studyUUID :UUID = getIdFromMatch(match) || '';
 
-  const notificationId = useSelector(
-    (state) => state.getIn(
-      ['studies', 'studyNotifications', studyEntityKeyId, 'associationDetails', NOTIFICATION_ID, 0]
-    )
+  const study = useSelector((state) => state.getIn([STUDIES, STUDIES, studyUUID], Map()));
+  const notificationsEnabledStudies = useSelector(
+    (state) => state.getIn([STUDIES, NOTIFICATIONS_ENABLED_STUDIES], Set())
   );
 
-  const notificationsEnabled :boolean = notificationId === studyUUID;
+  const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyUUID);
 
   if (!study) {
     dispatch(goToRoot());
