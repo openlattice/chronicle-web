@@ -226,7 +226,7 @@ function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
 
 /*
  *
- * PermissionsActions.getStudyAuthorizations()
+ * PermissionsActions.getNotificationsAuthorizations()
  *
  */
 
@@ -253,11 +253,11 @@ function* getNotificationsAuthorizationsWorker(action :SequenceAction) :Generato
     Object.entries(response).forEach(([esName, value]) => {
       const tokens = esName.split('_');
 
-      const errorRes = get(value, 'error');
+      const error = get(value, 'error');
       const data = get(value, 'data');
 
-      if (errorRes instanceof Error) {
-        if (errorRes.response.status === 401 && errorRes.response.statusText === 'Unauthorized') {
+      if (error instanceof Error) {
+        if (error.response.status === 401 && error.response.statusText === 'Unauthorized') {
           unauthorizedStudyIds.push(tokens[2]);
         }
       }
