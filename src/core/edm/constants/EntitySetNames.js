@@ -4,6 +4,7 @@
 
 const ASSOCIATION_ENTITY_SET_NAMES = {
   PARTICIPATED_IN: 'chronicle_participated_in',
+  CHRONICLE_PARTOF: 'chronicle_partof'
 };
 
 const ENTITY_SET_NAMES = {
@@ -11,6 +12,7 @@ const ENTITY_SET_NAMES = {
   CHRONICLE_DEVICES: 'chronicle_device',
   CHRONICLE_STUDIES: 'chronicle_study',
   PREPROCESSED_DATA: 'chronicle_preprocessed_app_data',
+  CHRONICLE_NOTIFICATIONS: 'chronicle_notifications',
 };
 
 const ENTITY_SET_NAMES_LIST = [];

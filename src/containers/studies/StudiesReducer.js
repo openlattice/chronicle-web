@@ -5,7 +5,8 @@
 import {
   Map,
   fromJS,
-  getIn
+  getIn,
+  Set
 } from 'immutable';
 import { Constants } from 'lattice';
 import { RequestStates } from 'redux-reqseq';
@@ -303,7 +304,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => state
           .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
-          .set('studyNotifications', fromJS(seqAction.value))
+          .set('studiesWithNotifications', Set(seqAction.value))
       });
     }
 
