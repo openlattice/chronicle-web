@@ -7,10 +7,11 @@ import {
   takeEvery
 } from '@redux-saga/core/effects';
 import {
+  Map,
   Set,
   fromJS,
   getIn,
-  Map
+  get
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import {
@@ -25,13 +26,19 @@ import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  GET_NOTIFICATIONS_AUTHORIZATIONS,
   GET_STUDY_AUTHORIZATIONS,
   UPDATE_ES_PERMISSIONS,
+  getNotificationsAuthorizations,
   getStudyAuthorizations,
-  updateEntitySetPermissions
+  updateEntitySetPermissions,
 } from './PermissionsActions';
 
 import Logger from '../../utils/Logger';
+import {
+  getNotificationsEntitySetName,
+  getPartOfAssociationEntitySetName
+} from '../../utils/NotificationsUtils';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { selectEntityType } from '../edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../edm/constants/FullyQualifiedNames';
@@ -217,9 +224,78 @@ function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
 }
 
+/*
+ *
+ * PermissionsActions.getStudyAuthorizations()
+ *
+ */
+
+function* getNotificationsAuthorizationsWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getNotificationsAuthorizations.request(action.id));
+
+    const studyIds :string[] = action.value;
+
+    const partOfEntitySetNames = studyIds.map((studyId) => getPartOfAssociationEntitySetName(studyId));
+    const notificationEntitySetName = studyIds.map((studyId) => getNotificationsEntitySetName(studyId));
+
+    const calls = partOfEntitySetNames.concat(notificationEntitySetName).reduce((result, esName :string) => ({
+      ...result,
+      [esName]: call(getEntitySetIdWorker, getEntitySetId(esName))
+    }), {});
+    const response = yield all(calls);
+
+    const partOfEntitySetIds = [];
+    const notificationEntitySetIds = [];
+    const unauthorizedStudyIds = [];
+
+    Object.entries(response).forEach(([esName, value]) => {
+      const tokens = esName.split('_');
+
+      const errorRes = get(value, 'error');
+      const data = get(value, 'data');
+
+      if (errorRes instanceof Error) {
+        if (errorRes.response.status === 401 && errorRes.response.statusText === 'Unauthorized') {
+          unauthorizedStudyIds.push(tokens[2]);
+        }
+      }
+
+      if (data && !unauthorizedStudyIds.includes(tokens[2])) {
+        if (tokens[1] === 'partof') {
+          partOfEntitySetIds.push(data);
+        }
+        else {
+          notificationEntitySetIds.push(data);
+        }
+      }
+    });
+
+    workerResponse.data = { unauthorizedStudyIds, notificationEntitySetIds, partOfEntitySetIds };
+
+    yield put(getNotificationsAuthorizations.success(action.id));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    yield put(getNotificationsAuthorizations.failure(action.id));
+  }
+  finally {
+    yield put(getNotificationsAuthorizations.finally(action.id));
+  }
+
+  return workerResponse;
+}
+
+function* getNotificationsAuthorizationsWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_NOTIFICATIONS_AUTHORIZATIONS, getNotificationsAuthorizationsWorker);
+}
+
 export {
+  getNotificationsAuthorizationsWatcher,
+  getNotificationsAuthorizationsWorker,
+  getStudyAuthorizationsWatcher,
+  getStudyAuthorizationsWorker,
   updateEntitySetPermissionsWatcher,
   updateEntitySetPermissionsWorker,
-  getStudyAuthorizationsWatcher,
-  getStudyAuthorizationsWorker
 };

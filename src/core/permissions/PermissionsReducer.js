@@ -4,8 +4,10 @@ import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 
 import {
-  UPDATE_ES_PERMISSIONS,
+  GET_NOTIFICATIONS_AUTHORIZATIONS,
   GET_STUDY_AUTHORIZATIONS,
+  UPDATE_ES_PERMISSIONS,
+  getNotificationsAuthorizations,
   getStudyAuthorizations,
   updateEntitySetPermissions
 } from './PermissionsActions';
@@ -15,6 +17,9 @@ const INITIAL_STATE :Map = fromJS({
     requestState: RequestStates.STANDBY
   },
   [UPDATE_ES_PERMISSIONS]: {
+    requestState: RequestStates.STANDBY
+  },
+  [GET_NOTIFICATIONS_AUTHORIZATIONS]: {
     requestState: RequestStates.STANDBY
   }
 });
@@ -34,6 +39,14 @@ export default function permissionsReducer(state :Map = INITIAL_STATE, action :O
         REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
+      });
+    }
+
+    case getNotificationsAuthorizations.case(action.type): {
+      return getNotificationsAuthorizations.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_NOTIFICATIONS_AUTHORIZATIONS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_NOTIFICATIONS_AUTHORIZATIONS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([GET_NOTIFICATIONS_AUTHORIZATIONS, 'requestState'], RequestStates.SUCCESS)
       });
     }
 

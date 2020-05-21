@@ -63,12 +63,14 @@ import {
   PROPERTY_TYPE_FQNS
 } from '../../core/edm/constants/FullyQualifiedNames';
 import {
+  getNotificationsAuthorizations,
   getStudyAuthorizations,
   updateEntitySetPermissions
 } from '../../core/permissions/PermissionsActions';
 import {
+  getNotificationsAuthorizationsWorker,
   getStudyAuthorizationsWorker,
-  updateEntitySetPermissionsWorker
+  updateEntitySetPermissionsWorker,
 } from '../../core/permissions/PermissionsSagas';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
@@ -90,8 +92,8 @@ const {
   updateEntityData,
 } = DataApiActions;
 
-const { createEntitySetsWorker, getEntitySetIdWorker, getEntitySetIdsWorker } = EntitySetsApiSagas;
-const { createEntitySets, getEntitySetId, getEntitySetIds } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
+const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
@@ -830,43 +832,21 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
   try {
     yield put(getStudyNotificationStatus.request(action.id));
 
-    const studies = action.value;
-
-    const studyIds = studies.map((study) => study.getIn([STUDY_ID, 0]));
-
-    const partOfEntitySetNames :List = studyIds.map((studyId) => getPartOfAssociationEntitySetName(studyId));
-    const notificationEntitySetNames :List = studyIds.map((studyId) => getNotificationsEntitySetName(studyId));
-
-    let response = yield call(
-      getEntitySetIdsWorker,
-      getEntitySetIds(notificationEntitySetNames.concat(partOfEntitySetNames).toJS())
-    );
-    if (response.error) throw response.error;
-
-    const entitySetIds = fromJS(response.data);
-
-    const partOfEntitySetIds :List = partOfEntitySetNames
-      .map((entitySetName) => entitySetIds.get(entitySetName))
-      .filter((entitySetId) => entitySetId !== undefined);
-
-    const notificationEntitySetIds :List = notificationEntitySetNames
-      .map((entitySetName) => entitySetIds.get(entitySetName))
-      .filter((entitySetId) => entitySetId !== undefined);
-
-    const studiesEntitySetId = yield select(
-      (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
-    );
-
-    const studyEntityKeyIds :List = studies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0]));
+    const {
+      notificationEntitySetIds,
+      partOfEntitySetIds,
+      studyEntityKeyIds,
+      studiesEntitySetId
+    } = action.value;
 
     const searchFilter = {
       destinationEntitySetIds: [studiesEntitySetId],
-      edgeEntitySetIds: partOfEntitySetIds.toArray(),
-      entityKeyIds: studyEntityKeyIds.toArray(),
-      sourceEntitySetIds: notificationEntitySetIds.toArray()
+      edgeEntitySetIds: partOfEntitySetIds,
+      entityKeyIds: studyEntityKeyIds,
+      sourceEntitySetIds: notificationEntitySetIds
     };
 
-    response = yield call(
+    const response = yield call(
       searchEntityNeighborsWithFilterWorker,
       searchEntityNeighborsWithFilter({
         entitySetId: studiesEntitySetId,
@@ -899,11 +879,12 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(getStudies.request(action.id));
 
-    const entitySetId = yield select(
+    const studiesEntitySetId = yield select(
       (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
     );
 
-    let response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
+
+    let response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId: studiesEntitySetId }));
     if (response.error) {
       throw response.error;
     }
@@ -914,14 +895,25 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       getStudyAuthorizations({ studies, permissions: [PermissionTypes.READ] })
     );
     if (response.error) throw response.error;
-    const authorizedStudyIds = response.data;
+    let authorizedStudyIds = response.data;
+
+    response = yield call(getNotificationsAuthorizationsWorker, getNotificationsAuthorizations(authorizedStudyIds));
+    if (response.error) throw response.error;
+
+    const { unauthorizedStudyIds, notificationEntitySetIds, partOfEntitySetIds } = response.data;
+    authorizedStudyIds = authorizedStudyIds.filter((studyId) => !unauthorizedStudyIds.includes(studyId));
 
     let authorizedStudies :Map<UUID, Map> = studies
       .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])));
 
-    // // get notification status for authorized studies
+    // get notification status for authorized studies
     if (!authorizedStudies.isEmpty()) {
-      response = yield call(getStudyNotificationStatusWorker, getStudyNotificationStatus(authorizedStudies));
+      response = yield call(getStudyNotificationStatusWorker, getStudyNotificationStatus({
+        notificationEntitySetIds,
+        partOfEntitySetIds,
+        studiesEntitySetId,
+        studyEntityKeyIds: authorizedStudies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0])).toJS()
+      }));
       if (response.error) throw response.error;
     }
 
