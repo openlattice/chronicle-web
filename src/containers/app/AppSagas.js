@@ -21,8 +21,8 @@ import {
   getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
 } from '../../core/edm/EDMSagas';
-import { getStudies } from '../studies/StudiesActions';
-import { getStudiesWorker } from '../studies/StudiesSagas';
+import { getStudies, getGlobalNotificationsEKID } from '../studies/StudiesActions';
+import { getStudiesWorker, getGlobalNotificationsEKIDWorker } from '../studies/StudiesSagas';
 
 const LOG = new Logger('AppSagas');
 
@@ -45,7 +45,11 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
       if (res.error) throw res.error;
     });
     // get all studies only after getting entitySetIds
-    const response = yield call(getStudiesWorker, getStudies());
+    let response = yield call(getStudiesWorker, getStudies());
+    if (response.error) throw response.error;
+
+    // get entity key id of entity in global notifications entity set
+    response = yield call(getGlobalNotificationsEKIDWorker, getGlobalNotificationsEKID());
     if (response.error) throw response.error;
 
     yield put(initializeApplication.success(action.id));
