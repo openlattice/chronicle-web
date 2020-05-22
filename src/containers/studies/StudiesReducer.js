@@ -4,10 +4,9 @@
 
 import {
   Map,
+  Set,
   fromJS,
-  getIn
 } from 'immutable';
-import { Constants } from 'lattice';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -18,6 +17,7 @@ import {
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
+  GET_GLOBAL_NOTIFICATIONS_EKID,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
@@ -29,6 +29,7 @@ import {
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
+  getGlobalNotificationsEKID,
   getParticipantsEnrollmentStatus,
   getStudies,
   getStudyNotificationStatus,
@@ -38,15 +39,16 @@ import {
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
+import { STUDIES_REDUCER_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const { OPENLATTICE_ID_FQN } = Constants;
+const { DATE_ENROLLED, STATUS } = PROPERTY_TYPE_FQNS;
 
 const {
-  DATE_ENROLLED,
-  NOTIFICATION_ID,
-  STATUS,
-  STUDY_ID,
-} = PROPERTY_TYPE_FQNS;
+  GLOBAL_NOTIFICATIONS_EKID,
+  NOTIFICATIONS_ENABLED_STUDIES,
+  PART_OF_ASSOCIATION_EKID_MAP,
+  STUDIES
+} = STUDIES_REDUCER_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
@@ -64,6 +66,9 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [DELETE_STUDY_PARTICIPANT]: {
     requestState: RequestStates.STANDBY
   },
+  [GET_GLOBAL_NOTIFICATIONS_EKID]: {
+    requestState: RequestStates.STANDBY
+  },
   [GET_PARTICIPANTS_ENROLLMENT]: {
     requestState: RequestStates.STANDBY
   },
@@ -79,11 +84,13 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [UPDATE_STUDY]: {
     requestState: RequestStates.STANDBY
   },
+  [GLOBAL_NOTIFICATIONS_EKID]: undefined,
+  [NOTIFICATIONS_ENABLED_STUDIES]: Set(),
+  [PART_OF_ASSOCIATION_EKID_MAP]: Map(),
+  [STUDIES]: Map(),
   associationKeyIds: Map(),
   participantEntitySetIds: Map(),
   participants: Map(),
-  studies: Map(),
-  studyNotifications: Map()
 });
 
 export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -119,30 +126,21 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           .setIn([CREATE_STUDY, seqAction.id], seqAction),
         SUCCESS: () => {
           if (state.hasIn([CREATE_STUDY, seqAction.id])) {
-
             const {
-              notificationId,
-              notificationEntitySetId,
+              notificationsEnabled,
               partOfEntityKeyId,
-              partOfEntitySetId,
-              studyEntityData
+              studyEntityData,
+              studyId
             } = seqAction.value;
 
-            const studyId :UUID = getIn(studyEntityData, [STUDY_ID, 0]);
-            const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
-
-            const notificationsMap = Map().withMutations((map) => {
-              map
-                .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
-                .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
-                .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
-                .setIn(['associationDetails', NOTIFICATION_ID], [notificationId]);
-            });
+            const notificationEnabledStudies = state.get(NOTIFICATIONS_ENABLED_STUDIES, Set());
 
             return state
-              .setIn(['studies', studyId], fromJS(studyEntityData))
-              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS)
-              .setIn(['studyNotifications', studyEntityKeyId], notificationsMap);
+              .set(NOTIFICATIONS_ENABLED_STUDIES,
+                notificationsEnabled ? notificationEnabledStudies.add(studyId) : notificationEnabledStudies)
+              .setIn([STUDIES, studyId], fromJS(studyEntityData))
+              .setIn([PART_OF_ASSOCIATION_EKID_MAP, studyId], partOfEntityKeyId)
+              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
           }
           return state;
         },
@@ -157,26 +155,25 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.PENDING),
         SUCCESS: () => {
           const {
-            notificationId,
-            notificationEntitySetId,
+            notificationsEnabled,
             partOfEntityKeyId,
-            partOfEntitySetId,
-            studyEntityData
+            studyEntityData,
+            studyId
           } = seqAction.value;
 
-          const studyId :UUID = getIn(studyEntityData, [STUDY_ID, 0]);
-          const studyEntityKeyId :UUID = getIn(studyEntityData, [OPENLATTICE_ID_FQN, 0]);
+          let notificationEnabledStudies = state.get(NOTIFICATIONS_ENABLED_STUDIES, Set()).asMutable();
 
-          const notificationsMap = Map().withMutations((map) => {
-            map
-              .setIn(['associationEntitySet', 'id'], partOfEntitySetId)
-              .setIn(['neighborEntitySet', 'id'], notificationEntitySetId)
-              .setIn(['associationDetails', OPENLATTICE_ID_FQN], [partOfEntityKeyId])
-              .setIn(['associationDetails', NOTIFICATION_ID], [notificationId]);
-          });
+          if (notificationsEnabled) {
+            notificationEnabledStudies = notificationEnabledStudies.add(studyId);
+          }
+          else {
+            notificationEnabledStudies = notificationEnabledStudies.delete(studyId);
+          }
+
           return state
-            .setIn(['studies', studyId], fromJS(studyEntityData))
-            .setIn(['studyNotifications', studyEntityKeyId], notificationsMap)
+            .set(NOTIFICATIONS_ENABLED_STUDIES, notificationEnabledStudies.asImmutable())
+            .setIn([STUDIES, studyId], fromJS(studyEntityData))
+            .setIn([PART_OF_ASSOCIATION_EKID_MAP, studyId], partOfEntityKeyId)
             .setIn([UPDATE_STUDY, 'requestState'], RequestStates.SUCCESS);
         },
         FAILURE: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.FAILURE)
@@ -301,9 +298,24 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       return getStudyNotificationStatus.reducer(state, action, {
         REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { studiesWithNotifications, associationEKIDMap } = seqAction.value;
+          return state
+            .set(NOTIFICATIONS_ENABLED_STUDIES, studiesWithNotifications)
+            .set(PART_OF_ASSOCIATION_EKID_MAP, associationEKIDMap)
+            .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case getGlobalNotificationsEKID.case(action.type): {
+      const seqAction :SequenceAction = action;
+      return getGlobalNotificationsEKID.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => state
-          .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS)
-          .set('studyNotifications', fromJS(seqAction.value))
+          .setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.SUCCESS)
+          .set(GLOBAL_NOTIFICATIONS_EKID, seqAction.value)
       });
     }
 
