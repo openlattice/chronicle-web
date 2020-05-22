@@ -10,15 +10,20 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   Sizes,
-  StyleUtils,
-  Spinner
+  Spinner,
+  StyleUtils
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 
 import QuestionnaireForm from './components/QuestionnaireForm';
-import { getQuestionnaire, GET_QUESTIONNAIRE } from './QuestionnaireActions';
+import SubmissionStatus from './components/SubmissionStatus';
+import {
+  GET_QUESTIONNAIRE,
+  SUBMIT_QUESTIONNAIRE,
+  getQuestionnaire
+} from './QuestionnaireActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -26,13 +31,7 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 const { media } = StyleUtils;
 const { APP_CONTENT_WIDTH } = Sizes;
 
-const {
-  NAME_FQN,
-  DESCRIPTION_FQN,
-  VALUES_FQN,
-  TITLE,
-  ID_FQN
-} = PROPERTY_TYPE_FQNS;
+const { NAME_FQN, DESCRIPTION_FQN } = PROPERTY_TYPE_FQNS;
 
 const StyledAppContainerWrapper = styled(AppContainerWrapper)`
   ${media.tablet`min-width: 600px;`}
@@ -79,23 +78,22 @@ const QuestionnaireContainer = () => {
 
   const questionnaire = useSelector((state) => state.getIn(['questionnaire', 'data'], Map()));
   const requestStates = useSelector((state) => ({
-    [GET_QUESTIONNAIRE]: state.getIn(['questionnaire', GET_QUESTIONNAIRE, 'requestState'])
+    [GET_QUESTIONNAIRE]: state.getIn(['questionnaire', GET_QUESTIONNAIRE, 'requestState']),
+    [SUBMIT_QUESTIONNAIRE]: state.getIn(['questionnaire', SUBMIT_QUESTIONNAIRE, 'requestState'])
   }));
-
-  // const questionnaireID :UUID = questionnaireDetails.getIn([ID_FQN, 0]);
-  // const studyId = '2dd399da-8cd6-4738-81ae-9a48488bd9af';
 
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
   const {
-    studyId,
-    questionnaireId
+    participantId,
+    questionnaireId,
+    studyId
   } :{
-    studyId :UUID,
-    questionnaireId :UUID
+    participantId :UUID,
+    questionnaireId :UUID,
+    studyId :UUID
     // $FlowFixMe
   } = queryParams;
 
-  // need
   useEffect(() => {
     dispatch(getQuestionnaire({ studyId, questionnaireId }));
   }, [dispatch, questionnaireId, studyId]);
@@ -121,7 +119,19 @@ const QuestionnaireContainer = () => {
           )
         }
         {
-          requestStates[GET_QUESTIONNAIRE] === RequestStates.SUCCESS && (
+          requestStates[SUBMIT_QUESTIONNAIRE] === RequestStates.FAILURE && (
+            <SubmissionStatus />
+          )
+        }
+        {
+          requestStates[SUBMIT_QUESTIONNAIRE] === RequestStates.SUCCESS && (
+            <SubmissionStatus success />
+          )
+        }
+        {
+          requestStates[GET_QUESTIONNAIRE] === RequestStates.SUCCESS
+          && requestStates[SUBMIT_QUESTIONNAIRE] !== RequestStates.SUCCESS
+          && (
             <>
               <Title>
                 { questionnaireDetails.getIn([NAME_FQN, 0]) }
@@ -130,8 +140,10 @@ const QuestionnaireContainer = () => {
                 { questionnaireDetails.getIn([DESCRIPTION_FQN, 0])}
               </Description>
               <QuestionnaireForm
+                  participantId={participantId}
+                  questions={questionnaire.get('questions', List())}
                   studyId={studyId}
-                  questions={questionnaire.get('questions', List())} />
+                  submitRequestState={requestStates[SUBMIT_QUESTIONNAIRE]} />
             </>
           )
         }

@@ -8,6 +8,7 @@ const { FullyQualifiedName } = Models;
 
 const ASSOCIATION_ENTITY_TYPE_FQNS = {
   PART_OF: new FullyQualifiedName('ol.partof'),
+  RESPONDS_WITH_FQN: new FullyQualifiedName('ol.respondswith')
 };
 const ENTITY_TYPE_FQNS = {
   PERSON: new FullyQualifiedName('general.person'),

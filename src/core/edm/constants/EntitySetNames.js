@@ -13,6 +13,11 @@ const ENTITY_SET_NAMES = {
   CHRONICLE_STUDIES: 'chronicle_study',
   PREPROCESSED_DATA: 'chronicle_preprocessed_app_data',
   CHRONICLE_NOTIFICATIONS: 'chronicle_notifications',
+  QUESTIONNAIRE_ES_NAME: 'chronicle_questionnaires',
+  QUESTIONS_ES_NAME: 'chronicle_questions',
+  ANSWERS_ES_NAME: 'chronicle_answers',
+  RESPONDS_WITH_ES_NAME: 'chronicle_respondswith',
+  ADDRESSES_ES_NAME: 'chronicle_addresses'
 };
 
 const ENTITY_SET_NAMES_LIST = [];

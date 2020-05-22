@@ -16,8 +16,8 @@ import {
   DATA,
   FILE_TYPE,
   PARTICIPANT,
-  STUDY,
-  QUESTIONNAIRE
+  QUESTIONNAIRE,
+  STUDY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
@@ -105,9 +105,24 @@ const getQuestionnaireUrl = (studyId :UUID, questionnaireEKID :UUID) => {
   return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
 };
 
+const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
+};
+
 export {
   getBaseUrl,
   getParticipantDataUrl,
   getParticipantUserAppsUrl,
-  getQuestionnaireUrl
+  getQuestionnaireUrl,
+  getSubmitQuestionnaireUrl
 };

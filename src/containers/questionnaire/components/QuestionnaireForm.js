@@ -1,25 +1,35 @@
 // @flow
 
 import React from 'react';
+
 import { List } from 'immutable';
+import { Form } from 'lattice-fabricate';
 import {
   Card,
   CardSegment
 } from 'lattice-ui-kit';
-import { Form } from 'lattice-fabricate';
+import { useDispatch } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
-import {
-  getSchemaProperties,
-  getUiSchemaOptions,
-} from '../utils/utils';
 import createSchema from '../utils/formSchema';
+import { submitQuestionnaire } from '../QuestionnaireActions';
+import { getSchemaProperties, getUiSchemaOptions } from '../utils/utils';
 
 type Props = {
-  questions :List,
-  studyId :UUID
+  participantId :UUID;
+  questions :List;
+  studyId :UUID;
+  submitRequestState :RequestState
 }
 const QuestionnaireForm = (props :Props) => {
-  const { questions, studyId } = props;
+  const {
+    participantId,
+    questions,
+    studyId,
+    submitRequestState
+  } = props;
+  const dispatch = useDispatch();
 
   const schemaProperties = getSchemaProperties(questions, studyId);
   const uiSchemaOptions = getUiSchemaOptions(schemaProperties);
@@ -27,7 +37,11 @@ const QuestionnaireForm = (props :Props) => {
 
 
   const handleSubmit = ({ formData } :Object) => {
-    console.log(formData);
+    dispatch(submitQuestionnaire({
+      studyId,
+      participantId,
+      formData
+    }));
   };
 
   const transformErrors = (errors) => errors.map((error) => {
@@ -42,7 +56,9 @@ const QuestionnaireForm = (props :Props) => {
     <Card>
       <CardSegment vertical noBleed>
         <Form
+            isSubmitting={submitRequestState === RequestStates.PENDING}
             onSubmit={handleSubmit}
+            noHtml5Validate
             schema={schema}
             transformErrors={transformErrors}
             uiSchema={uiSchema} />

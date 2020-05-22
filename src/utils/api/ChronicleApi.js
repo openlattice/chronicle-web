@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-import { getParticipantUserAppsUrl, getQuestionnaireUrl } from '../AppUtils';
+import { getParticipantUserAppsUrl, getQuestionnaireUrl, getSubmitQuestionnaireUrl } from '../AppUtils';
 
 /*
  * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
@@ -91,7 +91,7 @@ function updateAppsUsageAssociationData(participantId :string, studyId :UUID, re
    }
  */
 
-function getQuestionnaireMetadata(studyId :UUID, questionnaireEKID :UUID) {
+function getQuestionnaire(studyId :UUID, questionnaireEKID :UUID) {
   return new Promise<*>((resolve, reject) => {
     const url = getQuestionnaireUrl(studyId, questionnaireEKID);
     if (!url) return reject(new Error('Invalid url'));
@@ -104,8 +104,23 @@ function getQuestionnaireMetadata(studyId :UUID, questionnaireEKID :UUID) {
   });
 }
 
+function submitQuestionnaire(studyId :UUID, participantId :UUID, questionAnswerMapping :Object) {
+  return new Promise<*>((resolve, reject) => {
+    const url = getSubmitQuestionnaireUrl(studyId, participantId);
+    if (!url) return reject(new Error('Invalid url'));
+
+    return axios({
+      method: 'post',
+      url,
+      data: questionAnswerMapping
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
+
 export {
   getParticipantAppsUsageData,
   updateAppsUsageAssociationData,
-  getQuestionnaireMetadata
+  getQuestionnaire,
+  submitQuestionnaire
 };

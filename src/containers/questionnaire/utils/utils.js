@@ -3,13 +3,17 @@
 import {
   List,
   Map,
+  set,
+  get,
+  getIn,
+  setIn
 } from 'immutable';
 import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
-const { getEntityAddressKey } = DataProcessingUtils;
+const { getEntityAddressKey, parseEntityAddressKey } = DataProcessingUtils;
 const { TITLE, VALUES_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -18,6 +22,10 @@ export const getQuestionnaireQuestionsESName = (studyId :UUID) => `chronicle_que
 export const getQuestionnaireESName = (studyId :UUID) => `chronicle_questionnaires_${studyId}`;
 
 export const getQuestionnaireAnswersESName = (studyId :UUID) => `chronicle_questionnaire_answers_${studyId}`;
+
+export const getRespondsWithESName = (studyId :UUID) => `chronicle_responds_with_${studyId}`;
+
+export const getAddressesESName = (studyId :UUID) => `chronicle_addresses_${studyId}`;
 
 export const getSchemaProperties = (questions :List, studyId :UUID) => {
 
@@ -44,13 +52,27 @@ export const getSchemaProperties = (questions :List, studyId :UUID) => {
 export const getUiSchemaOptions = (schemaProperties :Object) => {
   const result = Map().withMutations((mutator) => {
     Object.keys(schemaProperties).forEach((property) => {
-      mutator
-        .setIn([property, 'classNames'], 'column-span-12')
-        .setIn([property, 'ui:widget'], 'radio')
-        .setIn([property, 'ui:options', 'row'], true)
-        .setIn([property, 'ui:options', 'mode'], 'button');
+      mutator.setIn([property, 'classNames'], 'column-span-12');
+
+      if (getIn(schemaProperties, [property, 'enum'])) {
+        mutator
+          .setIn([property, 'ui:widget'], 'radio')
+          .setIn([property, 'ui:options', 'row'], true)
+          .setIn([property, 'ui:options', 'mode'], 'button');
+      }
     });
   });
 
   return result.toJS();
+};
+
+export const getQuestionAnswerMapping = (formData :Object) => {
+  let result = {};
+  Object.values(formData).forEach((addressKeys :Object) => {
+    Object.entries(addressKeys).forEach(([key, value]) => {
+      const { entityKeyId } = parseEntityAddressKey(key);
+      result = setIn(result, [entityKeyId, VALUES_FQN], [value]);
+    });
+  });
+  return result;
 };
