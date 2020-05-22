@@ -121,7 +121,6 @@ const {
   DATE_ENROLLED,
   ID_FQN,
   NOTIFICATION_ENABLED,
-  NOTIFICATION_ID,
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
@@ -859,7 +858,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     if (notificationsEnabled) {
       associations = [
         [CHRONICLE_PARTOF, globalNotificationsEKID, CHRONICLE_NOTIFICATIONS, 0, CHRONICLE_STUDIES, {
-          [NOTIFICATION_ID.toString()]: [studyId],
+          [ID_FQN.toString()]: [studyId],
         }]
       ];
     }
