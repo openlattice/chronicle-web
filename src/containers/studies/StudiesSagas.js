@@ -473,7 +473,9 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     }
     else {
       formData = setIn(formData,
-        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_PARTOF, NOTIFICATION_ID)], partOfAssociationVal);
+        [getPageSectionKey(1, 1), getEntityAddressKey(
+          partOfEntityKeyId, CHRONICLE_PARTOF, ID_FQN
+        )], partOfAssociationVal);
     }
 
     // remove notification_enabled property since it is not a part of chronicle_studies entity set
