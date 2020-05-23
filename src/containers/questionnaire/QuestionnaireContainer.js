@@ -27,11 +27,13 @@ import {
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { media } = StyleUtils;
 const { APP_CONTENT_WIDTH } = Sizes;
 
 const { NAME_FQN, DESCRIPTION_FQN } = PROPERTY_TYPE_FQNS;
+const { QUESTIONNAIRE_DATA } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const StyledAppContainerWrapper = styled(AppContainerWrapper)`
   ${media.tablet`min-width: 600px;`}
@@ -76,7 +78,7 @@ const QuestionnaireContainer = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const questionnaire = useSelector((state) => state.getIn(['questionnaire', 'data'], Map()));
+  const questionnaire = useSelector((state) => state.getIn(['questionnaire', QUESTIONNAIRE_DATA], Map()));
   const requestStates = useSelector((state) => ({
     [GET_QUESTIONNAIRE]: state.getIn(['questionnaire', GET_QUESTIONNAIRE, 'requestState']),
     [SUBMIT_QUESTIONNAIRE]: state.getIn(['questionnaire', SUBMIT_QUESTIONNAIRE, 'requestState'])

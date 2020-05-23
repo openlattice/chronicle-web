@@ -56,6 +56,8 @@ export default function* sagas() :Generator<*, *, *> {
 
     // questionnaire
     fork(QuestionnaireSagas.getQuestionnaireWatcher),
-    fork(QuestionnaireSagas.submitQuestionnaireWatcher)
+    fork(QuestionnaireSagas.submitQuestionnaireWatcher),
+    fork(QuestionnaireSagas.getStudyQuestionnairesWatcher),
+    fork(QuestionnaireSagas.getQuestionnaireResponsesWatcher)
   ]);
 }

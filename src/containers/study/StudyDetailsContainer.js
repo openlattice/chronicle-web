@@ -19,11 +19,11 @@ import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
-import { STUDIES_REDUCER_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 
-const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUCER_CONSTANTS;
+const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
 
 const { NEUTRALS, PURPLES } = Colors;
 

@@ -4,7 +4,9 @@
 
 const ASSOCIATION_ENTITY_SET_NAMES = {
   PARTICIPATED_IN: 'chronicle_participated_in',
-  CHRONICLE_PARTOF: 'chronicle_partof'
+  PART_OF_ES_NAME: 'chronicle_partof',
+  RESPONDS_WITH_ES_NAME: 'chronicle_respondswith',
+  ADDRESSES_ES_NAME: 'chronicle_addresses'
 };
 
 const ENTITY_SET_NAMES = {
@@ -16,8 +18,6 @@ const ENTITY_SET_NAMES = {
   QUESTIONNAIRE_ES_NAME: 'chronicle_questionnaires',
   QUESTIONS_ES_NAME: 'chronicle_questions',
   ANSWERS_ES_NAME: 'chronicle_answers',
-  RESPONDS_WITH_ES_NAME: 'chronicle_respondswith',
-  ADDRESSES_ES_NAME: 'chronicle_addresses'
 };
 
 const ENTITY_SET_NAMES_LIST = [];

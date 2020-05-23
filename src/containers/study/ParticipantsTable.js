@@ -5,6 +5,9 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { Table } from 'lattice-ui-kit';
+import { Constants } from 'lattice';
+import { v4 as uuid } from 'uuid';
+
 import { useDispatch, useSelector } from 'react-redux';
 
 import ChangeEnrollment from './components/ChangeEnrollment';
@@ -23,6 +26,8 @@ import {
   changeEnrollmentStatus,
   deleteStudyParticipant,
 } from '../studies/StudiesActions';
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 const {
@@ -51,7 +56,7 @@ const ParticipantsTable = (props :Props) => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
-  const [participantEntityKeyId, setParticipantEntityKeyId] = useState(null);
+  const [participantEntityKeyId, setParticipantEntityKeyId] = useState(uuid());
 
   const studyId = study.getIn([STUDY_ID, 0]);
 
@@ -150,6 +155,7 @@ const ParticipantsTable = (props :Props) => {
           handleOnClose={() => setDownloadModalOpen(false)}
           isVisible={downloadModalOpen}
           participantEntityKeyId={participantEntityKeyId}
+          studyEntityKeyId={study.getIn([OPENLATTICE_ID_FQN, 0])}
           studyId={studyId} />
     </>
   );
