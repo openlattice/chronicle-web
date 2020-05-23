@@ -2,20 +2,27 @@
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
-const { PERSON_ID, DATE_ENROLLED } = PROPERTY_TYPE_FQNS;
+const { PERSON_ID, DATE_ENROLLED, DATE_ENROLLED_BIS } = PROPERTY_TYPE_FQNS;
 const TABLE_HEADERS = [
   {
     key: PERSON_ID,
     label: 'Participant ID',
     cellStyle: {
-      width: '40%',
+      width: '25%',
     }
   },
   {
     key: DATE_ENROLLED,
     label: 'Enrollment Date',
     cellStyle: {
-      width: '40%',
+      width: '25%',
+    }
+  },
+  {
+    key: DATE_ENROLLED_BIS,
+    label: 'Enrollment Date Bis',
+    cellStyle: {
+      width: '25%'
     }
   },
   {

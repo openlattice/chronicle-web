@@ -47,6 +47,7 @@ import {
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
+  getParticipantsMetadata,
   getStudies,
   // getStudyNotificationStatus,
   getStudyParticipants,
@@ -119,6 +120,7 @@ const {
 
 const {
   DATE_ENROLLED,
+  DATE_ENROLLED_BIS,
   // NOTIFICATION_DESCRIPTION,
   // NOTIFICATION_ENABLED,
   // NOTIFICATION_ID,
@@ -331,6 +333,80 @@ function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.getParticipantsMetadata()
+ *
+ */
+
+function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getParticipantsMetadata.request(action.id));
+
+    const { value } = action;
+    const { participants, participantsEntitySetId, participantsEntitySetName } = value;
+
+    if (!participants.isEmpty()) {
+      const participatedInEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN])
+      );
+      const studiesEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
+      );
+      const participantsEntityKeyIds = participants.keySeq().toJS();
+
+      const searchFilter = {
+        destinationEntitySetIds: [studiesEntitySetId],
+        edgeEntitySetIds: [participatedInEntitySetId],
+        entityKeyIds: participantsEntityKeyIds,
+        sourceEntitySetIds: [participantsEntitySetId]
+      };
+      
+      console.log("GETTINGTHERE");
+
+      const response = yield call(
+        searchEntityNeighborsWithFilterWorker,
+        searchEntityNeighborsWithFilter({
+          entitySetId: participantsEntitySetId,
+          filter: searchFilter,
+        })
+      );
+      if (response.error) throw response.error;
+
+      // mapping from participantEntityKeyId -> enrollment status
+      const metadata :Map = fromJS(response.data)
+        .map((associations :List) => associations.first().get('associationDetails'));
+      workerResponse.data = metadata;
+      
+      console.log("YAYAYA");
+      console.log(metadata);
+
+      // mapping from participantEntityKeyId -> association EKID
+      const associationKeyIds :Map = fromJS(response.data)
+        .map((associations :List) => associations.first().getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
+
+      yield put(getParticipantsMetadata.success(action.id, { associationKeyIds, participantsEntitySetName }));
+    }
+    else {
+      yield put(getParticipantsMetadata.success(action.id));
+    }
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    workerResponse.error = error;
+    yield put(getParticipantsMetadata.failure(action.id));
+  }
+  finally {
+    yield put(getParticipantsMetadata.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* getParticipantsMetadataWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_PARTICIPANTS_ENROLLMENT, getParticipantsMetadataWorker);
+}
+
+/*
+ *
  * StudiesActions.getStudyParticipants()
  *
  */
@@ -359,15 +435,24 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     // get enrollment status
     response = yield call(
       getParticipantsEnrollmentStatusWorker,
-      getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName })
+      getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName }),
     );
     if (response.error) throw response.error;
     const enrollmentStatus :Map = response.data;
+
+    // get participant metadata
+    response = yield call(
+      getParticipantsMetadataWorker,
+      getParticipantsMetadata({ participants, participantsEntitySetId, participantsEntitySetName })
+    );
+    if (response.error) throw response.error;
+    const metadata :Map = response.data;
 
     // update participants with enrollment status
     participants = participants.map((participant, id) => participant
       .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
       .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
+      .set(DATE_ENROLLED_BIS, [metadata.getIn([id, DATE_ENROLLED, 0])])
       .set('id', [id])); // required by LUK table
 
     yield put(getStudyParticipants.success(action.id, {
@@ -1094,6 +1179,8 @@ export {
   deleteStudyParticipantWatcher,
   getParticipantsEnrollmentStatusWatcher,
   getParticipantsEnrollmentStatusWorker,
+  getParticipantsMetadataWatcher,
+  getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,

@@ -27,6 +27,9 @@ const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_
 const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
 const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
 
+const GET_PARTICIPANTS_METADATA :'GET PARTICIPANTS_METADATA' = 'GET_PARTICIPANTS_METADATA';
+const getParticipantsMetadata :RequestSequence = newRequestSequence(GET_PARTICIPANTS_METADATA);
+
 const GET_STUDIES :'GET_STUDIES' = 'GET_STUDIES';
 const getStudies :RequestSequence = newRequestSequence(GET_STUDIES);
 
@@ -48,6 +51,7 @@ export {
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_PARTICIPANTS_ENROLLMENT,
+  GET_PARTICIPANTS_METADATA,
   GET_STUDIES,
   // GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
@@ -59,6 +63,7 @@ export {
   createStudy,
   deleteStudyParticipant,
   getParticipantsEnrollmentStatus,
+  getParticipantsMetadata,
   getStudies,
   // getStudyNotificationStatus,
   getStudyParticipants,

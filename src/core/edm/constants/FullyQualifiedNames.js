@@ -32,6 +32,10 @@ const PROPERTY_TYPE_FQNS = {
   DATE_ENROLLED: new FullyQualifiedName('ol.datetimestart'),
   USER_FQN: new FullyQualifiedName('ol.user'),
 
+  // metadata
+  DATE_LOGGED: new FullyQualifiedName('ol.recordeddate'),
+  DATE_ENROLLED_BIS: new FullyQualifiedName('ol.recordeddate'),
+
   // notifications
   NOTIFICATION_ID: new FullyQualifiedName('ol.id'),
   NOTIFICATION_DESCRIPTION: new FullyQualifiedName('ol.description'),
