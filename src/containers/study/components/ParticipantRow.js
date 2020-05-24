@@ -20,7 +20,8 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
 
 const {
-  PERSON_ID, STATUS, DATE_ENROLLED
+  PERSON_ID, STATUS, DATE_ENROLLED,
+  DATE_LAST_PUSHED, EVENT_COUNT
 } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
@@ -120,14 +121,12 @@ type Props = {
 const ParticipantRow = (props :Props) => {
   const { data, onClickIcon } = props;
 
-  console.log(data);
-
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
   const enrollmentDate = getDateTimeFromIsoDate(getIn(data, [DATE_ENROLLED, 0]));
-  // const enrollmentDateBis = getDateTimeFromIsoDate(getIn(data, [DATE_ENROLLED_BIS, 0]));
-  const enrollmentDateBis = 'jippieee';
+  const lastDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_LAST_PUSHED, 0]));
+  const numDays = getIn(data, [EVENT_COUNT, 0]);
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
@@ -154,7 +153,13 @@ const ParticipantRow = (props :Props) => {
 
         <StyledCell>
           <CellContent>
-            { enrollmentDateBis }
+            { lastDataDate }
+          </CellContent>
+        </StyledCell>
+
+        <StyledCell>
+          <CellContent>
+            { numDays }
           </CellContent>
         </StyledCell>
 

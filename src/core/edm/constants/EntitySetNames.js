@@ -4,7 +4,7 @@
 
 const ASSOCIATION_ENTITY_SET_NAMES = {
   PARTICIPATED_IN: 'chronicle_participated_in',
-  HAS: 'chronicle_has',
+  CHRONICLE_HAS: 'chronicle_has',
   CHRONICLE_PARTOF: 'chronicle_partof'
 };
 

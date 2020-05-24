@@ -114,13 +114,16 @@ const {
   CHRONICLE_NOTIFICATIONS,
   CHRONICLE_STUDIES,
   PREPROCESSED_DATA,
+  CHRONICLE_METADATA,
 } = ENTITY_SET_NAMES;
 
-const { PARTICIPATED_IN, CHRONICLE_PARTOF } = ASSOCIATION_ENTITY_SET_NAMES;
+const { PARTICIPATED_IN, CHRONICLE_PARTOF, CHRONICLE_HAS } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const {
   DATE_ENROLLED,
-  DATE_ENROLLED_BIS,
+  DATE_LOGGED,
+  DATE_LAST_PUSHED,
+  EVENT_COUNT,
   // NOTIFICATION_DESCRIPTION,
   ID_FQN,
   NOTIFICATION_ENABLED,
@@ -351,22 +354,20 @@ function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *,
     const { participants, participantsEntitySetId, participantsEntitySetName } = value;
 
     if (!participants.isEmpty()) {
-      const participatedInEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN])
+      const hasEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_HAS])
       );
-      const studiesEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
+      const metadataEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_METADATA])
       );
       const participantsEntityKeyIds = participants.keySeq().toJS();
 
       const searchFilter = {
-        destinationEntitySetIds: [studiesEntitySetId],
-        edgeEntitySetIds: [participatedInEntitySetId],
+        destinationEntitySetIds: [metadataEntitySetId],
+        edgeEntitySetIds: [hasEntitySetId],
         entityKeyIds: participantsEntityKeyIds,
         sourceEntitySetIds: [participantsEntitySetId]
       };
-      
-      console.log("GETTINGTHERE");
 
       const response = yield call(
         searchEntityNeighborsWithFilterWorker,
@@ -379,17 +380,14 @@ function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *,
 
       // mapping from participantEntityKeyId -> enrollment status
       const metadata :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().get('associationDetails'));
+        .map((neighbors :List) => neighbors.first().get('neighborDetails'));
       workerResponse.data = metadata;
-      
-      console.log("YAYAYA");
-      console.log(metadata);
 
       // mapping from participantEntityKeyId -> association EKID
-      const associationKeyIds :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
+      const neighborKeyIds :Map = fromJS(response.data)
+        .map((neighbors :List) => neighbors.first().getIn(['neighborDetails', OPENLATTICE_ID_FQN, 0]));
 
-      yield put(getParticipantsMetadata.success(action.id, { associationKeyIds, participantsEntitySetName }));
+      yield put(getParticipantsMetadata.success(action.id, { neighborKeyIds, participantsEntitySetName }));
     }
     else {
       yield put(getParticipantsMetadata.success(action.id));
@@ -454,11 +452,22 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     const metadata :Map = response.data;
 
     // update participants with enrollment status
-    participants = participants.map((participant, id) => participant
-      .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
-      .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
-      .set(DATE_ENROLLED_BIS, [metadata.getIn([id, DATE_ENROLLED, 0])])
-      .set('id', [id])); // required by LUK table
+    participants = participants.map((participant, id) => {
+
+      // If participant doesn't have metadata neighbor
+      const datesLogged = metadata.getIn([id, DATE_LOGGED]);
+      let count = 0;
+      if (datesLogged !== undefined) {
+        count = datesLogged.size;
+      }
+
+      return participant
+        .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
+        .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
+        .set(DATE_LAST_PUSHED, [metadata.getIn([id, DATE_LAST_PUSHED, 0])])
+        .set(EVENT_COUNT, [count])
+        .set('id', [id]);
+    }); // required by LUK table
 
     yield put(getStudyParticipants.success(action.id, {
       participants,
