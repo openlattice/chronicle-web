@@ -8,10 +8,12 @@ import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
   getStudyQuestionnaires,
@@ -31,16 +33,19 @@ const {
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const INITIAL_STATE = fromJS({
-  [GET_QUESTIONNAIRE]: {
+  [DOWNLOAD_QUESTIONNAIRE_RESPONSES]: {
     requestState: RequestStates.STANDBY
   },
-  [SUBMIT_QUESTIONNAIRE]: {
+  [GET_QUESTIONNAIRE]: {
     requestState: RequestStates.STANDBY
   },
   [GET_QUESTIONNAIRE_RESPONSES]: {
     requestState: RequestStates.STANDBY
   },
   [GET_STUDY_QUESTIONNAIRES]: {
+    requestState: RequestStates.STANDBY
+  },
+  [SUBMIT_QUESTIONNAIRE]: {
     requestState: RequestStates.STANDBY
   },
   [ANSWER_QUESTION_ID_MAP]: Map(),
@@ -60,6 +65,14 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
         return state.setIn([actionType, 'requestState'], RequestStates.STANDBY);
       }
       return state;
+    }
+
+    case downloadQuestionnaireResponses.case(action.type): {
+      return downloadQuestionnaireResponses.reducer(state, action, {
+        REQUEST: () => state.setIn([DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.PENDING),
+        SUCCESS: () => state.setIn([DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.SUCCESS),
+        FAILURE: () => state.setIn([DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.FAILURE)
+      });
     }
 
     case getStudyQuestionnaires.case(action.type): {

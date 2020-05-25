@@ -17,9 +17,9 @@ import {
   Button,
   Colors,
   Modal,
-  Spinner,
   Select,
-  Sizes
+  Sizes,
+  Spinner
 } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,8 +30,10 @@ import QuestionnaireForm from '../../questionnaire/components/QuestionnaireForm'
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../../utils/constants/ReduxConstants';
 import {
+  DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
+  downloadQuestionnaireResponses,
   getQuestionnaireResponses,
   getStudyQuestionnaires
 } from '../../questionnaire/QuestionnaireActions';
@@ -57,10 +59,10 @@ const ModalWrapper = styled.div`
 `;
 
 const HeaderWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 30px;
   align-items: flex-end;
-  width: 100%;
   border-bottom: 1px solid ${NEUTRALS[4]};
   padding-bottom: 30px;
   position: sticky;
@@ -174,6 +176,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
   const questionAnswersMap = useSelector((state) => state.getIn(['questionnaire', QUESTION_ANSWERS_MAP], Map()));
   const answerQuestionIdMap = useSelector((state) => state.getIn(['questionnaire', ANSWER_QUESTION_ID_MAP], Map()));
   const requestStates = useSelector((state) => ({
+    [DOWNLOAD_QUESTIONNAIRE_RESPONSES]: state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState']),
     [GET_QUESTIONNAIRE_RESPONSES]: state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, 'requestState']),
     [GET_STUDY_QUESTIONNAIRES]: state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
   }));
@@ -202,10 +205,6 @@ const DownloadQuestionnaireResponses = (props :Props) => {
     selectedAnswers
   ), [answerQuestionIdMap, answersById, selectedAnswers, selectedQuestions]);
 
-  // console.log(studyQuestionnaires);
-  // console.log(questionnaireQuestions);
-  // console.log(questionnaireResponses);
-  // console.log(requestStates);
   useEffect(() => {
     if (answersById.isEmpty()) {
       dispatch(getQuestionnaireResponses({
@@ -260,6 +259,18 @@ const DownloadQuestionnaireResponses = (props :Props) => {
     setselectedQuestionnaire(selectedVal);
   };
 
+  const onDownloadData = () => {
+    if (selectedQuestionnaire) {
+      dispatch(downloadQuestionnaireResponses({
+        participantEKID,
+        participantId,
+        questionnaireId: selectedQuestionnaire.value,
+        questionnaireName: selectedQuestionnaire.label
+      }));
+    }
+
+  };
+
   const fetchingData = requestStates[GET_STUDY_QUESTIONNAIRES] === RequestStates.PENDING
     || requestStates[GET_QUESTIONNAIRE_RESPONSES] === RequestStates.PENDING;
 
@@ -282,22 +293,25 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                   <h5> Select Questionnaire </h5>
                   <Select
                       isDisabled={fetchingData || questionnaireOptions.length === 0}
+                      isSearchable
+                      onChange={onSelectQuestionnaire}
                       options={questionnaireOptions}
-                      value={selectedQuestionnaire}
-                      onChange={onSelectQuestionnaire} />
+                      value={selectedQuestionnaire} />
                 </SelectWrapper>
                 <SelectWrapper>
                   <h5> Select Date Completed </h5>
                   <Select
                       isDisabled={fetchingData || selectDateOptions.length === 0}
+                      onChange={onSelectDate}
                       options={selectDateOptions}
-                      value={selectedDate}
-                      onChange={onSelectDate} />
+                      value={selectedDate} />
                 </SelectWrapper>
-                <div>
+                <div style={{ textAlign: 'end' }}>
                   <Button
                       disabled={fetchingData || selectDateOptions.length === 0}
-                      mode="primary">
+                      isLoading={requestStates[DOWNLOAD_QUESTIONNAIRE_RESPONSES] === RequestStates.PENDING}
+                      mode="primary"
+                      onClick={onDownloadData}>
                       Download All
                   </Button>
                 </div>

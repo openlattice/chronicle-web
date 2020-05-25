@@ -46,7 +46,8 @@ const PROPERTY_TYPE_FQNS = {
   DESCRIPTION_FQN: new FullyQualifiedName('ol.description'),
   CRON_FQN: new FullyQualifiedName('ol.cron'),
   VALUES_FQN: new FullyQualifiedName('ol.values'),
-  DATE_TIME_FQN: new FullyQualifiedName('ol.datetime')
+  DATE_TIME_FQN: new FullyQualifiedName('ol.datetime'),
+  TITLE_FQN: new FullyQualifiedName('ol.title')
 };
 
 export {

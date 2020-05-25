@@ -1,5 +1,7 @@
 // @flow
 
+import FS from 'file-saver';
+import Papa from 'papaparse';
 import {
   call,
   put,
@@ -9,8 +11,8 @@ import {
 import {
   List,
   Map,
-  fromJS,
-  Set
+  Set,
+  fromJS
 } from 'immutable';
 import { Constants } from 'lattice';
 import {
@@ -19,19 +21,22 @@ import {
   SearchApiActions,
   SearchApiSagas
 } from 'lattice-sagas';
+import { DateTime } from 'luxon';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
   getStudyQuestionnaires,
   submitQuestionnaire,
 } from './QuestionnaireActions';
-import { getQuestionAnswerMapping } from './utils/utils';
+import { getCsvFileName, getQuestionAnswerMapping } from './utils/utils';
 
 import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -39,15 +44,23 @@ import { selectEntitySetId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
+import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
+
 const { OPENLATTICE_ID_FQN } = Constants;
+const {
+  QUESTIONNAIRE_QUESTIONS,
+  QUESTIONNAIRE_RESPONSES,
+  QUESTION_ANSWERS_MAP,
+} = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const {
   DATE_TIME_FQN,
+  TITLE_FQN,
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
 
@@ -57,6 +70,7 @@ const {
   QUESTIONNAIRE_ES_NAME,
   QUESTIONS_ES_NAME
 } = ENTITY_SET_NAMES;
+
 const {
   ADDRESSES_ES_NAME,
   PART_OF_ES_NAME,
@@ -64,7 +78,6 @@ const {
 } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const LOG = new Logger('QuestionnaireSagas');
-
 
 /*
  *
@@ -120,6 +133,12 @@ function* submitQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
 function* submitQuestionnaireWatcher() :Generator<*, *, *> {
   yield takeEvery(SUBMIT_QUESTIONNAIRE, submitQuestionnaireWorker);
 }
+
+/*
+ *
+ * QuestionnaireActions.getStudyQuestionnaires()
+ *
+ */
 
 function* getStudyQuestionnairesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
@@ -207,6 +226,12 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Generator<*, *, 
 function* getStudyQuestionnairesWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_QUESTIONNAIRES, getStudyQuestionnairesWorker);
 }
+
+/*
+ *
+ * QuestionnaireActions.getQuestionnaireResponses()
+ *
+ */
 
 function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
@@ -310,9 +335,83 @@ function* getQuestionnaireResponsesWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_QUESTIONNAIRE_RESPONSES, getQuestionnaireResponsesWorker);
 }
 
+/*
+ *
+ * QuestionnaireActions.downloadQuestionnaireResponses()
+ *
+ */
+
+function* downloadQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(downloadQuestionnaireResponses.request(action.id));
+
+    const {
+      questionnaireId,
+      participantEKID,
+      participantId,
+      questionnaireName
+    } = action.value;
+    const questions = yield select(
+      (state) => state.getIn(['questionnaire', QUESTIONNAIRE_QUESTIONS, questionnaireId], List())
+    );
+    const answersById = yield select(
+      (state) => state.getIn(['questionnaire', QUESTIONNAIRE_RESPONSES, participantEKID], Map())
+    );
+    const questionAnswersMap = yield select((state) => state.getIn(['questionnaire', QUESTION_ANSWERS_MAP], Map()));
+
+    let csvData :Object[] = [];
+
+    questions.forEach((question) => {
+      const questionId = question.getIn([OPENLATTICE_ID_FQN, 0]);
+      const answerIds :Set<UUID> = questionAnswersMap.get(questionId);
+
+      answerIds.forEach((answerId) => {
+        const csvObject :Object = {};
+        const date = answersById.getIn([answerId, DATE_TIME_FQN, 0]);
+        csvObject.Question = question.getIn([TITLE_FQN, 0]);
+        csvObject.Answer = answersById.getIn([answerId, VALUES_FQN, 0]);
+        csvObject.Date = date;
+
+        csvData.push(csvObject);
+      });
+    });
+
+    csvData = csvData
+      .sort((row1 :Object, row2 :Object) => {
+        if (row1.Date > row2.Date) return 1;
+        if (row1.Date < row2.Date) return -1;
+        return 0;
+      }).map((row) => {
+        const result = row;
+        result.Date = DateTime.fromISO(row.Date).toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+        return result;
+      });
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], {
+      type: 'application/json'
+    });
+    FS.saveAs(blob, getCsvFileName(questionnaireName, participantId));
+
+    yield put(downloadQuestionnaireResponses.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type);
+    yield put(downloadQuestionnaireResponses.failure(action.id));
+  }
+  finally {
+    yield put(downloadQuestionnaireResponses.finally(action.id));
+  }
+}
+
+function* downloadQuestionnaireResponsesWatcher() :Generator<*, *, *> {
+  yield takeEvery(DOWNLOAD_QUESTIONNAIRE_RESPONSES, downloadQuestionnaireResponsesWorker);
+}
+
 export {
+  downloadQuestionnaireResponsesWatcher,
   getQuestionnaireResponsesWatcher,
   getQuestionnaireWatcher,
   getStudyQuestionnairesWatcher,
-  submitQuestionnaireWatcher,
+  submitQuestionnaireWatcher
 };

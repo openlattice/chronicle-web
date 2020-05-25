@@ -9,8 +9,8 @@ import {
 import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const {
   getEntityAddressKey,
@@ -89,9 +89,14 @@ const createInitialFormData = (answersById :Map, answerQuestionIdMap :Map, quest
   return result.toJS();
 };
 
+const getCsvFileName = (questionnaireName :string, participantId :UUID) => {
+  return `${questionnaireName}_${participantId}.csv`;
+};
+
 export {
-  getSchemaProperties,
-  getQuestionAnswerMapping,
   createInitialFormData,
+  getCsvFileName,
+  getQuestionAnswerMapping,
+  getSchemaProperties,
   getUiSchemaOptions
 };
