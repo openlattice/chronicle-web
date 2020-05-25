@@ -3,8 +3,6 @@
 import {
   List,
   Map,
-  set,
-  get,
   getIn,
   setIn
 } from 'immutable';
@@ -12,28 +10,25 @@ import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 
-const { getEntityAddressKey, parseEntityAddressKey } = DataProcessingUtils;
-const { TITLE, VALUES_FQN } = PROPERTY_TYPE_FQNS;
+const {
+  getEntityAddressKey,
+  getPageSectionKey,
+  parseEntityAddressKey
+} = DataProcessingUtils;
+
 const { OPENLATTICE_ID_FQN } = Constants;
+const { TITLE, VALUES_FQN } = PROPERTY_TYPE_FQNS;
+const { QUESTIONS_ES_NAME } = ENTITY_SET_NAMES;
 
-export const getQuestionnaireQuestionsESName = (studyId :UUID) => `chronicle_questionnaire_questions_${studyId}`;
 
-export const getQuestionnaireESName = (studyId :UUID) => `chronicle_questionnaires_${studyId}`;
+const getSchemaProperties = (questions :List) => {
 
-export const getQuestionnaireAnswersESName = (studyId :UUID) => `chronicle_questionnaire_answers_${studyId}`;
-
-export const getRespondsWithESName = (studyId :UUID) => `chronicle_responds_with_${studyId}`;
-
-export const getAddressesESName = (studyId :UUID) => `chronicle_addresses_${studyId}`;
-
-export const getSchemaProperties = (questions :List, studyId :UUID) => {
-
-  const questionESName = getQuestionnaireQuestionsESName(studyId);
   const properties = Map().withMutations((mutator) => {
     questions.forEach((question) => {
       const entityKeyId = question.getIn([OPENLATTICE_ID_FQN, 0]);
-      const addressKey = getEntityAddressKey(entityKeyId, questionESName, VALUES_FQN);
+      const addressKey = getEntityAddressKey(entityKeyId, QUESTIONS_ES_NAME, VALUES_FQN);
 
       mutator
         .setIn([addressKey, 'title'], question.getIn([TITLE, 0]))
@@ -49,7 +44,7 @@ export const getSchemaProperties = (questions :List, studyId :UUID) => {
   return properties.toJS();
 };
 
-export const getUiSchemaOptions = (schemaProperties :Object) => {
+const getUiSchemaOptions = (schemaProperties :Object) => {
   const result = Map().withMutations((mutator) => {
     Object.keys(schemaProperties).forEach((property) => {
       mutator.setIn([property, 'classNames'], 'column-span-12');
@@ -66,7 +61,7 @@ export const getUiSchemaOptions = (schemaProperties :Object) => {
   return result.toJS();
 };
 
-export const getQuestionAnswerMapping = (formData :Object) => {
+const getQuestionAnswerMapping = (formData :Object) => {
   let result = {};
   Object.values(formData).forEach((addressKeys :Object) => {
     Object.entries(addressKeys).forEach(([key, value]) => {
@@ -75,4 +70,28 @@ export const getQuestionAnswerMapping = (formData :Object) => {
     });
   });
   return result;
+};
+
+const createInitialFormData = (answersById :Map, answerQuestionIdMap :Map, questions :List, answers :Map = Map()) => {
+  // create data to populate form
+  const pageSection = getPageSectionKey(1, 1);
+  const result = Map().withMutations((mutator) => {
+    //
+    answers.forEach((answer, answerId) => {
+      const questionId = answerQuestionIdMap.get(answerId);
+      const addressKey = getEntityAddressKey(questionId, QUESTIONS_ES_NAME, VALUES_FQN);
+
+      const value = answersById.get(answerId).getIn([VALUES_FQN, 0]);
+      mutator.setIn([pageSection, addressKey], value);
+    });
+  });
+
+  return result.toJS();
+};
+
+export {
+  getSchemaProperties,
+  getQuestionAnswerMapping,
+  createInitialFormData,
+  getUiSchemaOptions
 };

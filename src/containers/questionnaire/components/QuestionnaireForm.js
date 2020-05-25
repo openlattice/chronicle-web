@@ -17,21 +17,25 @@ import { submitQuestionnaire } from '../QuestionnaireActions';
 import { getSchemaProperties, getUiSchemaOptions } from '../utils/utils';
 
 type Props = {
-  participantId :UUID;
+  participantId ?:UUID;
   questions :List;
-  studyId :UUID;
-  submitRequestState :RequestState
+  studyId ?:UUID;
+  submitRequestState ?:RequestState;
+  editable ?:boolean;
+  initialFormData ?:Object;
 }
 const QuestionnaireForm = (props :Props) => {
   const {
+    editable,
     participantId,
     questions,
     studyId,
-    submitRequestState
+    submitRequestState,
+    initialFormData
   } = props;
   const dispatch = useDispatch();
 
-  const schemaProperties = getSchemaProperties(questions, studyId);
+  const schemaProperties = getSchemaProperties(questions);
   const uiSchemaOptions = getUiSchemaOptions(schemaProperties);
   const { schema, uiSchema } = createSchema(schemaProperties, uiSchemaOptions);
 
@@ -56,15 +60,25 @@ const QuestionnaireForm = (props :Props) => {
     <Card>
       <CardSegment vertical noBleed>
         <Form
+            disabled={!editable}
+            formData={initialFormData}
             isSubmitting={submitRequestState === RequestStates.PENDING}
-            onSubmit={handleSubmit}
             noHtml5Validate
+            onSubmit={handleSubmit}
             schema={schema}
             transformErrors={transformErrors}
             uiSchema={uiSchema} />
       </CardSegment>
     </Card>
   );
+};
+
+QuestionnaireForm.defaultProps = {
+  editable: true,
+  initialFormData: {},
+  participantId: undefined,
+  studyId: undefined,
+  submitRequestState: undefined,
 };
 
 export default QuestionnaireForm;

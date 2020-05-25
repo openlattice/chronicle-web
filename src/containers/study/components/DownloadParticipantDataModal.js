@@ -36,8 +36,9 @@ type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
   participantEntityKeyId :UUID;
-  studyId :UUID;
+  participantId :UUID;
   studyEntityKeyId :UUID;
+  studyId :UUID;
 }
 
 const DownloadParticipantDataModal = (props :Props) => {
@@ -45,8 +46,9 @@ const DownloadParticipantDataModal = (props :Props) => {
     handleOnClose,
     isVisible,
     participantEntityKeyId,
-    studyId,
-    studyEntityKeyId
+    participantId,
+    studyEntityKeyId,
+    studyId
   } = props;
 
   const [questionnaireModalOpen, setQuestionnaireModalOpen] = useState(false);
@@ -115,11 +117,12 @@ const DownloadParticipantDataModal = (props :Props) => {
   if (questionnaireModalOpen) {
     return (
       <DownloadQuestionnaireResponses
-          participantEKID={participantEntityKeyId}
-          studyId={studyId}
-          studyEntityKeyId={studyEntityKeyId}
           isModalOpen={questionnaireModalOpen}
-          onCloseModal={handleOnCloseQuestionnaireModal} />
+          onCloseModal={handleOnCloseQuestionnaireModal}
+          participantEKID={participantEntityKeyId}
+          participantId={participantId}
+          studyEKID={studyEntityKeyId}
+          studyId={studyId} />
     );
   }
 

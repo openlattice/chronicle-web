@@ -8,10 +8,11 @@ const STUDIES_REDUX_CONSTANTS = {
 };
 
 const QUESTIONNAIRE_REDUX_CONSTANTS = {
+  ANSWER_QUESTION_ID_MAP: 'answerQuestionIdMap',
   QUESTIONNAIRE_DATA: 'questionnaireData',
-  QUESTIONNAIRE_RESPONSES: 'questionnaireResponses',
-  ANSWERS_TO_QUESTIONS_MAP: 'answersToQuestionsMap',
   QUESTIONNAIRE_QUESTIONS: 'questionnaireQuestions',
+  QUESTIONNAIRE_RESPONSES: 'questionnaireResponses',
+  QUESTION_ANSWERS_MAP: 'answersToQuestionsMap',
   STUDY_QUESTIONNAIRES: 'studyQuestionnaires'
 };
 

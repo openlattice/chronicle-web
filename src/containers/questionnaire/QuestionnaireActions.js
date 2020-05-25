@@ -9,9 +9,6 @@ const getQuestionnaire :RequestSequence = newRequestSequence(GET_QUESTIONNAIRE);
 const GET_QUESTIONNAIRE_RESPONSES :'GET_QUESTIONNAIRE_RESPONSES' = 'GET_QUESTIONNAIRE_RESPONSES';
 const getQuestionnaireResponses :RequestSequence = newRequestSequence(GET_QUESTIONNAIRE_RESPONSES);
 
-const GET_QUESTIONNAIRE_QUESTIONS :'GET_QUESTIONNAIRE_QUESTIONS' = 'GET_QUESTIONNAIRE_QUESTIONS';
-const getQuestionnaireQuestions :RequestSequence = newRequestSequence(GET_QUESTIONNAIRE_QUESTIONS);
-
 const GET_STUDY_QUESTIONNAIRES :'GET_STUDY_QUESTIONNAIRES' = 'GET_STUDY_QUESTIONNAIRES';
 const getStudyQuestionnaires :RequestSequence = newRequestSequence(GET_STUDY_QUESTIONNAIRES);
 
@@ -20,12 +17,10 @@ const submitQuestionnaire :RequestSequence = newRequestSequence(SUBMIT_QUESTIONN
 
 export {
   GET_QUESTIONNAIRE,
-  GET_QUESTIONNAIRE_QUESTIONS,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
   getQuestionnaire,
-  getQuestionnaireQuestions,
   getQuestionnaireResponses,
   getStudyQuestionnaires,
   submitQuestionnaire,

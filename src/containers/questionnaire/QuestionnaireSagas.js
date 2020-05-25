@@ -9,8 +9,10 @@ import {
 import {
   List,
   Map,
-  fromJS
+  fromJS,
+  Set
 } from 'immutable';
+import { Constants } from 'lattice';
 import {
   EntitySetsApiActions,
   EntitySetsApiSagas,
@@ -42,6 +44,7 @@ const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   DATE_TIME_FQN,
@@ -178,7 +181,7 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Generator<*, *, 
       );
       if (response.error) throw response.error;
 
-      // create mapping from questionEKID -> list of questions
+      // create mapping from questionEKID -> questionId -> question details
       fromJS(response.data).forEach((value, key) => {
         const questions = value.map((question) => question.get('neighborDetails'));
         questionnaireToQuestionsMap.set(key, questions);
@@ -241,14 +244,15 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, 
     if (response.error) throw response.error;
 
     // create a map of answerID -> answer value & timestamp.
-    const answerValuesMap = Map().withMutations((mutator) => {
+
+    // console.log(response.data);
+    const answersById = Map().withMutations((mutator) => {
       fromJS(response.data).forEach((neighbors :List) => {
         neighbors.forEach((neighbor) => {
           const answerEKID = neighbor.get('neighborId');
-
           mutator.set(answerEKID, fromJS({
-            [VALUES_FQN.toString()]: neighbor.getIn(['neighborDetails', VALUES_FQN, 0]),
-            [DATE_TIME_FQN.toString()]: neighbor.getIn(['associationDetails', DATE_TIME_FQN, 0])
+            [VALUES_FQN.toString()]: [neighbor.getIn(['neighborDetails', VALUES_FQN, 0])],
+            [DATE_TIME_FQN.toString()]: [neighbor.getIn(['associationDetails', DATE_TIME_FQN, 0])]
           }));
         });
       });
@@ -258,9 +262,10 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, 
      * STEP 2: filtered search to get questions associated with answers
      */
 
-    const answerIdToQuestionIdMap = Map().asMutable();
+    const questionAnswersMap = Map().asMutable();
+    const answerQuestionIdMap = Map().asMutable();
 
-    if (!answerValuesMap.isEmpty()) {
+    if (!answersById.isEmpty()) {
       response = yield call(
         searchEntityNeighborsWithFilterWorker,
         searchEntityNeighborsWithFilter({
@@ -268,24 +273,28 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, 
           filter: {
             destinationEntitySetIds: [questionsESID],
             edgeEntitySetIds: [addressesESID],
-            entityKeyIds: answerValuesMap.keySeq().toJS(),
+            entityKeyIds: answersById.keySeq().toJS(),
             sourceEntitySetIds: [answersESID]
           },
         })
       );
       if (response.error) throw response.error;
 
-      // create mapping from answerEKID -> question
-      // each answer is mapped to only one question, so we only explore the first neighbor
-      fromJS(response.data).forEach((neighbors, key) => {
-        answerIdToQuestionIdMap.set(key, neighbors.first().get('neighborId'));
+      // create map question id -> set of answers associated
+      // each answer has at most one question associated, so we explore the first neighbor
+      fromJS(response.data).forEach((neighbors :List, answerId :UUID) => {
+        const questionId = neighbors.first().get('neighborId');
+
+        answerQuestionIdMap.set(answerId, questionId);
+        questionAnswersMap.updateIn([questionId], Set(), (result) => result.add(answerId));
       });
     }
 
     yield put(getQuestionnaireResponses.success(action.id, {
-      answerIdToQuestionIdMap: answerIdToQuestionIdMap.asImmutable(),
-      answerValuesMap,
-      participantEKID
+      answerQuestionIdMap: answerQuestionIdMap.asImmutable(),
+      answersById,
+      participantEKID,
+      questionAnswersMap: questionAnswersMap.asImmutable()
     }));
   }
   catch (error) {

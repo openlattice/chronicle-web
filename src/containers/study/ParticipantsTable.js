@@ -155,6 +155,7 @@ const ParticipantsTable = (props :Props) => {
           handleOnClose={() => setDownloadModalOpen(false)}
           isVisible={downloadModalOpen}
           participantEntityKeyId={participantEntityKeyId}
+          participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           studyEntityKeyId={study.getIn([OPENLATTICE_ID_FQN, 0])}
           studyId={studyId} />
     </>

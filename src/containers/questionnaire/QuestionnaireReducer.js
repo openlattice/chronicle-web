@@ -22,11 +22,12 @@ import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const {
-  ANSWERS_TO_QUESTIONS_MAP,
+  ANSWER_QUESTION_ID_MAP,
+  QUESTION_ANSWERS_MAP,
   QUESTIONNAIRE_DATA,
   QUESTIONNAIRE_QUESTIONS,
   QUESTIONNAIRE_RESPONSES,
-  STUDY_QUESTIONNAIRES
+  STUDY_QUESTIONNAIRES,
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const INITIAL_STATE = fromJS({
@@ -42,7 +43,8 @@ const INITIAL_STATE = fromJS({
   [GET_STUDY_QUESTIONNAIRES]: {
     requestState: RequestStates.STANDBY
   },
-  [ANSWERS_TO_QUESTIONS_MAP]: Map(),
+  [ANSWER_QUESTION_ID_MAP]: Map(),
+  [QUESTION_ANSWERS_MAP]: Map(),
   [QUESTIONNAIRE_DATA]: Map(),
   [QUESTIONNAIRE_QUESTIONS]: Map(),
   [QUESTIONNAIRE_RESPONSES]: Map(),
@@ -62,7 +64,7 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
 
     case getStudyQuestionnaires.case(action.type): {
       return getStudyQuestionnaires.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_QUESTIONNAIRES, 'requestState'], RequestStates.STANDBY),
+        REQUEST: () => state.setIn([GET_STUDY_QUESTIONNAIRES, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_STUDY_QUESTIONNAIRES, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
@@ -82,18 +84,20 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
     case getQuestionnaireResponses.case(action.type): {
       const seqAction :SequenceAction = action;
       return getQuestionnaireResponses.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.STANDBY),
+        REQUEST: () => state.setIn([GET_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
-            answerIdToQuestionIdMap,
-            answerValuesMap,
-            participantEKID
+            answerQuestionIdMap,
+            answersById,
+            participantEKID,
+            questionAnswersMap,
           } = seqAction.value;
 
           return state
-            .mergeIn([ANSWERS_TO_QUESTIONS_MAP], answerIdToQuestionIdMap)
-            .setIn([QUESTIONNAIRE_RESPONSES, participantEKID], answerValuesMap)
+            .mergeIn([QUESTION_ANSWERS_MAP], questionAnswersMap)
+            .setIn([QUESTIONNAIRE_RESPONSES, participantEKID], answersById)
+            .mergeIn([ANSWER_QUESTION_ID_MAP], answerQuestionIdMap)
             .setIn([GET_QUESTIONNAIRE_RESPONSES, 'requestState'], RequestStates.SUCCESS);
         }
       });
