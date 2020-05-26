@@ -61,6 +61,7 @@ const getUiSchemaOptions = (schemaProperties :Object) => {
   return result.toJS();
 };
 
+// create a mapping from questionId -> ol.values value
 const getQuestionAnswerMapping = (formData :Object) => {
   let result = {};
   Object.values(formData).forEach((addressKeys :Object) => {
@@ -72,11 +73,10 @@ const getQuestionAnswerMapping = (formData :Object) => {
   return result;
 };
 
+// create data to prefill the form
 const createInitialFormData = (answersById :Map, answerQuestionIdMap :Map, questions :List, answers :Map = Map()) => {
-  // create data to populate form
   const pageSection = getPageSectionKey(1, 1);
   const result = Map().withMutations((mutator) => {
-    //
     answers.forEach((answer, answerId) => {
       const questionId = answerQuestionIdMap.get(answerId);
       const addressKey = getEntityAddressKey(questionId, QUESTIONS_ES_NAME, VALUES_FQN);

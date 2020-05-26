@@ -108,6 +108,12 @@ function* getQuestionnaireWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_QUESTIONNAIRE, getQuestionnaireWorker);
 }
 
+/*
+ *
+ * QuestionnaireActions.submitQuestionnaire()
+ *
+ */
+
 function* submitQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
     yield put(submitQuestionnaire.request(action.id));
