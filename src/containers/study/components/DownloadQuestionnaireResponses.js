@@ -76,7 +76,7 @@ const SelectWrapper = styled.div`
 
   > h5 {
     color: ${NEUTRALS[0]};
-    font-size: 14px;
+    font-size: 15px;
     font-weight: normal;
     margin-bottom: 5px;
     padding: 0;
