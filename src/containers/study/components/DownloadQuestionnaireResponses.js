@@ -283,7 +283,6 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                   <h5> Select Questionnaire </h5>
                   <Select
                       isDisabled={fetchingData || questionnaireOptions.length === 0}
-                      isSearchable
                       onChange={onSelectQuestionnaire}
                       options={questionnaireOptions}
                       value={selectedQuestionnaire} />
