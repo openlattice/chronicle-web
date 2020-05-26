@@ -97,12 +97,7 @@ const selectSubmissionDateMap = createSelector(
   (_, questionsByQuestionnaireId, questionAnswersMap) => questionAnswersMap,
   (answersById, questionsByQuestionnaireId, questionAnswersMap) => {
 
-    // answersById : answerId -> answer map
-    // questionsByQuestionnaireId: questionnaireId -> questionsList
-    // questionAnswersMap: questionId -> set of answers
-
     // Create a map of questionnaireID -> List of submission dates
-
     const result = Map().withMutations((mutator) => {
       questionsByQuestionnaireId.forEach((questionEntities, questionnaireID) => {
         const questionId = questionEntities.first().getIn([OPENLATTICE_ID_FQN, 0]);
@@ -148,7 +143,6 @@ type Props = {
   studyEKID :UUID;
   studyId :UUID;
 }
-/* eslint-disable react/jsx-props-no-spreading */
 const DownloadQuestionnaireResponses = (props :Props) => {
   const {
     isModalOpen,
@@ -234,7 +228,6 @@ const DownloadQuestionnaireResponses = (props :Props) => {
   }, [studyQuestionnaires]);
 
   // Each time a questionnaire is selected, create select date options
-  // create select options for date completed
   useEffect(() => {
     if (!answersById.isEmpty() && selectedQuestionnaire !== null) {
 
@@ -248,8 +241,6 @@ const DownloadQuestionnaireResponses = (props :Props) => {
       setSelectedDate(options.first());
     }
   }, [answersById, selectedQuestionnaire, submissionDateMap]);
-
-  // TODO: each time a date is selected, get survey and corresponding questions
 
   const onSelectDate = (selectedValue) => {
     setSelectedDate(selectedValue);
@@ -268,7 +259,6 @@ const DownloadQuestionnaireResponses = (props :Props) => {
         questionnaireName: selectedQuestionnaire.label
       }));
     }
-
   };
 
   const fetchingData = requestStates[GET_STUDY_QUESTIONNAIRES] === RequestStates.PENDING
