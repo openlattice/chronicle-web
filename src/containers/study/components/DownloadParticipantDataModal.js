@@ -27,6 +27,7 @@ const ButtonGrid = styled.div`
   align-items: center;
   justify-content: space-between;
   padding-top: 30px;
+  padding-bottom: '30px';
   grid-template-columns: 1fr;
   grid-gap: 10px;
 `;
