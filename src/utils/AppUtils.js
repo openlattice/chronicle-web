@@ -22,7 +22,7 @@ import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
 const LOG = new Logger('AppApi');
 const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
-const { RAW } = ParticipantDataTypes;
+const { PREPROCESSED, APP_USAGE } = ParticipantDataTypes;
 
 const getBaseUrl = () => {
   const { hostname } = window.location;
@@ -51,18 +51,25 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
 
   const baseUrl = getBaseUrl();
   const csrfToken = AuthUtils.getCSRFToken();
+  let dataTypePath;
 
-  if (dataType === RAW) {
-    return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
-    + `${studyId}/${participantEntityKeyId}?`
-    + `${FILE_TYPE}=csv`
-    + `&${CSRF_TOKEN}=${csrfToken}`;
+  switch (dataType) {
+    case PREPROCESSED:
+      dataTypePath = '/preprocessed';
+      break;
+    case APP_USAGE:
+      dataTypePath = '/usage';
+      break;
+    default:
+      dataTypePath = '';
+      break;
   }
 
   return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
-    + `${studyId}/${participantEntityKeyId}/preprocessed?`
-    + `${FILE_TYPE}=csv`
-    + `&${CSRF_TOKEN}=${csrfToken}`;
+  + `${studyId}/${participantEntityKeyId}${dataTypePath}`
+  + `?${FILE_TYPE}=csv`
+  + `&${CSRF_TOKEN}=${csrfToken}`;
+
 };
 
 const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {

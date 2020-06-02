@@ -17,7 +17,7 @@ const {
   STUDY_ID,
   STUDY_NAME,
   STUDY_VERSION,
-  // NOTIFICATION_ENABLED
+  NOTIFICATION_ENABLED
 } = PROPERTY_TYPE_FQNS;
 const { CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 
@@ -54,11 +54,10 @@ const dataSchema = {
           title: '',
           type: 'string'
         },
-        // 2020-04-08 NOTE: disabling notification feature for now
-        // [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
-        //   title: 'Enable daily notifications',
-        //   type: 'boolean'
-        // },
+        [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
+          title: 'Enable daily notifications',
+          type: 'boolean'
+        },
       },
       required: [
         getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME),
@@ -83,10 +82,10 @@ const uiSchema = {
       'ui:widget': 'textarea'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_GROUP)]: {
-      classNames: 'column-span-12'
+      classNames: 'column-span-6'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_VERSION)]: {
-      classNames: 'column-span-12'
+      classNames: 'column-span-6'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]: {
       classNames: 'column-span-12'
@@ -97,10 +96,9 @@ const uiSchema = {
     [getEntityAddressKey(0, CHRONICLE_STUDIES, OPENLATTICE_ID_FQN)]: {
       classNames: 'hidden'
     },
-    // 2020-04-08 NOTE: disabling notification feature for now
-    // [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
-    //   classNames: 'column-span-12'
-    // }
+    [getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]: {
+      classNames: 'column-span-12'
+    }
   },
 };
 

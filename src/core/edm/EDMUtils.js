@@ -13,7 +13,15 @@ const selectEntityType = (entityTypeFQN :FQN) => (state :Map) => {
   return state.getIn(['edm', 'entityTypes', entityTypeIndex]);
 };
 
+const selectPropertyTypeId = (propertyTypeFQN :FQN) => (state :Map) => {
+  return state.getIn(['edm', 'propertyTypeIds', propertyTypeFQN]);
+};
+
+const selectEntitySetId = (esName :string) => (state :Map) => state.getIn(['edm', 'entitySetIds', esName]);
+
 export {
   selectEntityType,
-  selectEntityTypeId
+  selectEntityTypeId,
+  selectEntitySetId,
+  selectPropertyTypeId
 };

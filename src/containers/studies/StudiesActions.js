@@ -11,9 +11,8 @@ const addStudyParticipant :RequestSequence = newRequestSequence(ADD_PARTICIPANT)
 const CHANGE_ENROLLMENT_STATUS :'CHANGE_ENROLLMENT_STATUS' = 'CHANGE_ENROLLMENT_STATUS';
 const changeEnrollmentStatus :RequestSequence = newRequestSequence(CHANGE_ENROLLMENT_STATUS);
 
-// 2020-04-08 NOTE: disabling notification feature for now
-// const CREATE_NOTIFICATIONS_ENTITY_SETS :'CREATE_NOTIFICATIONS_ENTITY_SETS' = 'CREATE_NOTIFICATIONS_ENTITY_SETS';
-// const createNotificationsEntitySets :RequestSequence = newRequestSequence(CREATE_NOTIFICATIONS_ENTITY_SETS);
+const CREATE_NOTIFICATIONS_ENTITY_SETS :'CREATE_NOTIFICATIONS_ENTITY_SETS' = 'CREATE_NOTIFICATIONS_ENTITY_SETS';
+const createNotificationsEntitySets :RequestSequence = newRequestSequence(CREATE_NOTIFICATIONS_ENTITY_SETS);
 
 const CREATE_PARTICIPANTS_ENTITY_SET :'CREATE_PARTICIPANTS_ENTITY_SET' = 'CREATE_PARTICIPANTS_ENTITY_SET';
 const createParticipantsEntitySet :RequestSequence = newRequestSequence(CREATE_PARTICIPANTS_ENTITY_SET);
@@ -24,6 +23,9 @@ const createStudy :RequestSequence = newRequestSequence(CREATE_STUDY);
 const DELETE_STUDY_PARTICIPANT :'DELETE_STUDY_PARTICIPANT' = 'DELETE_STUDY_PARTICIPANT';
 const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_PARTICIPANT);
 
+const GET_GLOBAL_NOTIFICATIONS_EKID :'GET_GLOBAL_NOTIFICATIONS_EKID' = 'GET_GLOBAL_NOTIFICATIONS_EKID';
+const getGlobalNotificationsEKID = newRequestSequence(GET_GLOBAL_NOTIFICATIONS_EKID);
+
 const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
 const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
 
@@ -33,9 +35,8 @@ const getStudies :RequestSequence = newRequestSequence(GET_STUDIES);
 const GET_STUDY_PARTICIPANTS :'GET_STUDY_PARTICIPANTS' = 'GET_STUDY_PARTICIPANTS';
 const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTICIPANTS);
 
-// 2020-04-08 NOTE: disabling notification feature for now
-// const GET_STUDY_NOTIFICATION_STATUS :'GET_STUDY_NOTIFICATION_STATUS' = 'GET_STUDY_NOTIFICATION_STATUS';
-// const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY_NOTIFICATION_STATUS);
+const GET_STUDY_NOTIFICATION_STATUS :'GET_STUDY_NOTIFICATION_STATUS' = 'GET_STUDY_NOTIFICATION_STATUS';
+const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY_NOTIFICATION_STATUS);
 
 const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
 const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
@@ -43,24 +44,26 @@ const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 export {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
-  // CREATE_NOTIFICATIONS_ENTITY_SETS,
+  CREATE_NOTIFICATIONS_ENTITY_SETS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
+  GET_GLOBAL_NOTIFICATIONS_EKID,
   GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
-  // GET_STUDY_NOTIFICATION_STATUS,
+  GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
-  // createNotificationsEntitySets,
+  createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
+  getGlobalNotificationsEKID,
   getParticipantsEnrollmentStatus,
   getStudies,
-  // getStudyNotificationStatus,
+  getStudyNotificationStatus,
   getStudyParticipants,
   updateStudy
 };

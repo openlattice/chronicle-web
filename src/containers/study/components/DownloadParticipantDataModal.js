@@ -1,30 +1,34 @@
-// @flow
+/*
+ * @flow
+ */
 
 import React from 'react';
 
 import styled from 'styled-components';
-import {
-  Modal,
-  Button
-} from 'lattice-ui-kit';
+import { Button, Modal } from 'lattice-ui-kit';
 
 import ParticipantDataTypes from '../../../utils/constants/ParticipantDataTypes';
-import type { ParticipantDataType } from '../../../utils/constants/ParticipantDataTypes';
 import { getParticipantDataUrl } from '../../../utils/AppUtils';
 
-const { PREPROCESSED, RAW } = ParticipantDataTypes;
+const {
+  APP_USAGE,
+  PREPROCESSED,
+  RAW,
+} = ParticipantDataTypes;
 
 const ModalWrapper = styled.div`
   min-width: 400px;
-  padding-bottom: 30px;
 `;
 
 const ButtonGrid = styled.div`
-  display: flex;
+  display: grid;
   align-items: center;
   justify-content: space-between;
   padding-top: 30px;
+  grid-template-columns: 1fr;
+  grid-gap: 10px;
 `;
+
 
 type Props = {
   handleOnClose :() => void;
@@ -45,9 +49,18 @@ const DownloadParticipantDataModal = (props :Props) => {
     const { currentTarget } = event;
     const { name } = currentTarget;
 
-    const dataType :ParticipantDataType = name === PREPROCESSED
-      ? ParticipantDataTypes.PREPROCESSED
-      : ParticipantDataTypes.RAW;
+    let dataType;
+    switch (name) {
+      case PREPROCESSED:
+        dataType = PREPROCESSED;
+        break;
+      case APP_USAGE:
+        dataType = APP_USAGE;
+        break;
+      default:
+        dataType = RAW;
+        break;
+    }
 
     if (participantEntityKeyId != null) {
       const downloadUrl = getParticipantDataUrl(dataType, participantEntityKeyId, studyId);
@@ -69,8 +82,8 @@ const DownloadParticipantDataModal = (props :Props) => {
           Preprocessed Data
         </Button>
 
-        <Button onClick={handleOnClose}>
-          Close
+        <Button mode="secondary" name={APP_USAGE} onClick={handleOnClick}>
+          App Usage
         </Button>
       </ButtonGrid>
     </ModalWrapper>
@@ -80,6 +93,8 @@ const DownloadParticipantDataModal = (props :Props) => {
     <Modal
         isVisible={isVisible}
         onClose={handleOnClose}
+        textSecondary="Close"
+        shoudStretchButtons
         textTitle="Download Data">
       {renderModalBody()}
     </Modal>

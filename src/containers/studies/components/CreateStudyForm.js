@@ -4,10 +4,10 @@
 
 import React, { useEffect, useState } from 'react';
 
-import uuid from 'uuid/v4';
 import { Map } from 'immutable';
 import { Form } from 'lattice-fabricate';
 import { useDispatch } from 'react-redux';
+import { v4 as uuid } from 'uuid';
 
 import { dataSchema, uiSchema } from './CreateStudySchemas';
 
@@ -34,7 +34,7 @@ const CreateStudyForm = (props:Props, ref) => {
 
   useEffect(() => {
     if (study) {
-      const formData :Object = createFormDataFromStudyEntity(dataSchema, false, study);
+      const formData :Object = createFormDataFromStudyEntity(dataSchema, notificationsEnabled, study);
       setInitialFormData(formData);
     }
   }, [study, notificationsEnabled]);
