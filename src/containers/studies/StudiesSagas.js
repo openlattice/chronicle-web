@@ -725,10 +725,10 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
       const studyId = study.getIn([STUDY_ID, 0]);
 
       const associationDetails = getIn(response.data, [entityKeyId, 0, 'associationDetails'], {});
+      associationEKIDMap.set(studyId, getIn(associationDetails, [OPENLATTICE_ID_FQN, 0]));
 
       if (getIn(associationDetails, [ID_FQN, 0]) === studyId) {
         studiesWithNotifications.add(studyId);
-        associationEKIDMap.set(studyId, getIn(associationDetails, [OPENLATTICE_ID_FQN, 0]));
       }
     });
 
