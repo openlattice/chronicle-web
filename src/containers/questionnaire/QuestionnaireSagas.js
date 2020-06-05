@@ -276,7 +276,6 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, 
 
     // create a map of answerID -> answer value & timestamp.
 
-    // console.log(response.data);
     const answersById = Map().withMutations((mutator) => {
       fromJS(response.data).forEach((neighbors :List) => {
         neighbors.forEach((neighbor) => {
