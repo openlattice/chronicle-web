@@ -122,7 +122,7 @@ function* submitQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
     const questionAnswerMapping = getQuestionAnswerMapping(formData);
 
     const response = yield call(ChronicleApi.submitQuestionnaire, studyId, participantId, questionAnswerMapping);
-    if (!response.data) throw new Error('Submission failed');
+    if (response.error) throw response.error;
 
     yield put(submitQuestionnaire.success(action.id));
 
