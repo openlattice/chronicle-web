@@ -11,7 +11,6 @@ import {
   AppHeaderWrapper,
   Sizes,
   Spinner,
-  StyleUtils
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
@@ -29,36 +28,10 @@ import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const { media } = StyleUtils;
 const { APP_CONTENT_WIDTH } = Sizes;
 
 const { NAME_FQN, DESCRIPTION_FQN } = PROPERTY_TYPE_FQNS;
 const { QUESTIONNAIRE_DATA } = QUESTIONNAIRE_REDUX_CONSTANTS;
-
-const StyledAppContainerWrapper = styled(AppContainerWrapper)`
-  ${media.tablet`min-width: 600px;`}
-  ${media.phone`min-width: 360px;`}
-`;
-
-const StyledAppHeaderWrapper = styled(AppHeaderWrapper)`
-  > div {
-    ${media.tablet`min-width: 600px;`}
-    ${media.phone`
-      min-width: 360px;
-      padding: 0 20px;
-    `}
-  }
-`;
-
-const StyledAppContentWrapper = styled(AppContentWrapper)`
-  > div {
-    ${media.tablet`min-width: 600px;`}
-    ${media.phone`
-      min-width: 360px;
-      padding: 20px;
-    `}
-  }
-`;
 
 const Title = styled.h4`
   font-size: 20px;
@@ -110,9 +83,9 @@ const QuestionnaireContainer = () => {
     );
   }
   return (
-    <StyledAppContainerWrapper>
-      <StyledAppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
-      <StyledAppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+    <AppContainerWrapper>
+      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
+      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
         {
           requestStates[GET_QUESTIONNAIRE] === RequestStates.FAILURE && (
             <div style={{ marginTop: '60px', textAlign: 'center' }}>
@@ -149,8 +122,8 @@ const QuestionnaireContainer = () => {
             </>
           )
         }
-      </StyledAppContentWrapper>
-    </StyledAppContainerWrapper>
+      </AppContentWrapper>
+    </AppContainerWrapper>
   );
 };
 
