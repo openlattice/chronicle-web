@@ -7,14 +7,16 @@ const LOGIN :string = '/login';
 const STUDIES :string = '/studies';
 const STUDY :string = `${STUDIES}/${ID_PARAM}`;
 const PARTICIPANTS :string = `${STUDIES}/${ID_PARAM}/participants`;
+const QUESTIONNAIRES :string = `${STUDIES}/${ID_PARAM}/questionnaires`;
 const SURVEY :string = '/survey';
 
 export {
   ID_PARAM,
   LOGIN,
   PARTICIPANTS,
+  QUESTIONNAIRES,
   ROOT,
   STUDIES,
   STUDY,
-  SURVEY
+  SURVEY,
 };

@@ -15,6 +15,7 @@ import type { Match } from 'react-router';
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
+import QuestionnairesContainer from '../questionnaires/QuestionnairesContainer';
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
@@ -101,11 +102,17 @@ const StudyDetailsContainer = (props :Props) => {
         <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
           Participants
         </TabLink>
+        <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyUUID)}>
+          Questionnaires
+        </TabLink>
       </Tabs>
       <Switch>
         <Route
             path={Routes.PARTICIPANTS}
             render={() => <StudyParticipants study={study} />} />
+        <Route
+            path={Routes.QUESTIONNAIRES}
+            render={() => <QuestionnairesContainer study={study} />} />
         <Route
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
