@@ -14,8 +14,9 @@ import {
   Table
 } from 'lattice-ui-kit';
 
-import TableRow from './table/TableRow';
+import CreateQuestionnaireForm from './components/CreateQuestionnaireForm';
 import TableHeaderRow from './table/TableHeaderRow';
+import TableRow from './table/TableRow';
 import { STATUS_SELECT_OPTIONS } from './constants/constants';
 
 const { NEUTRALS } = Colors;
@@ -83,6 +84,8 @@ const HeadCell = ({ width } :HeadCellProps) => (
 
 const QuestionnairesContainer = () => {
   const [selectedStatus, setSelectedStatus] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+
   const onSearchInputChange = (event :SytheticEvent<HTMLInputElement>) => {
 
   };
@@ -104,20 +107,33 @@ const QuestionnairesContainer = () => {
               placeholder="Filter by status"
               value={selectedStatus} />
         </SelectWrapper>
-        <PlusButton mode="primary"> New Questionnaire </PlusButton>
+        <PlusButton
+            mode="primary"
+            onClick={() => setIsEditing(true)}>
+          New Questionnaire
+        </PlusButton>
       </HeaderRow>
       <Card>
-        <CardHeader>
-          <SearchWrapper>
-            <SearchInput placeholder="Search" />
-          </SearchWrapper>
-        </CardHeader>
-        <CardSegment padding="0">
-          <Table
-              components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}
-              data={data}
-              headers={tableHeaders} />
-        </CardSegment>
+        {
+          isEditing ? (
+            <CreateQuestionnaireForm onExitEditMode={() => setIsEditing(false)} />
+          ) : (
+            <>
+              <CardHeader>
+                <SearchWrapper>
+                  <SearchInput placeholder="Search" />
+                </SearchWrapper>
+              </CardHeader>
+              <CardSegment padding="0">
+                <Table
+                    components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}
+                    data={data}
+                    headers={tableHeaders} />
+              </CardSegment>
+            </>
+          )
+        }
+
       </Card>
     </>
   );

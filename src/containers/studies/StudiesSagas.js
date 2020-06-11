@@ -115,13 +115,12 @@ const {
   PREPROCESSED_DATA,
 } = ENTITY_SET_NAMES;
 
-const { PARTICIPATED_IN, CHRONICLE_PARTOF } = ASSOCIATION_ENTITY_SET_NAMES;
+const { PARTICIPATED_IN, PART_OF_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const {
   DATE_ENROLLED,
   ID_FQN,
   NOTIFICATION_ENABLED,
-  NOTIFICATION_ID,
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
@@ -401,7 +400,7 @@ function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Ge
   const workerResponse = {};
   try {
     const studyEntitySetId = yield select(selectEntitySetId(CHRONICLE_STUDIES));
-    const partOfEntitySetId = yield select(selectEntitySetId(CHRONICLE_PARTOF));
+    const partOfEntitySetId = yield select(selectEntitySetId(PART_OF_ES_NAME));
     const notificationsEntitySetId = yield select(selectEntitySetId(CHRONICLE_NOTIFICATIONS));
 
     const IdFQNPropertyTypeId = yield select(selectPropertyTypeId(ID_FQN));
@@ -474,7 +473,7 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     else {
       formData = setIn(formData,
         [getPageSectionKey(1, 1), getEntityAddressKey(
-          partOfEntityKeyId, CHRONICLE_PARTOF, ID_FQN
+          partOfEntityKeyId, PART_OF_ES_NAME, ID_FQN
         )], partOfAssociationVal);
     }
 
@@ -488,7 +487,7 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     // Step 2: update study details
     const entityIndexToIdMap :Map = Map()
       .setIn([CHRONICLE_STUDIES, 0], studyEntityKeyId)
-      .setIn([CHRONICLE_PARTOF, 0], partOfEntityKeyId);
+      .setIn([PART_OF_ES_NAME, 0], partOfEntityKeyId);
 
     const draftWithKeys = replaceEntityAddressKeys(
       formData,
@@ -700,7 +699,7 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
     const studyEntityKeyIds = studies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0]));
 
     const notificationsEntitySetId = yield select(selectEntitySetId(CHRONICLE_NOTIFICATIONS));
-    const partOfEntitySetId = yield select(selectEntitySetId(CHRONICLE_PARTOF));
+    const partOfEntitySetId = yield select(selectEntitySetId(PART_OF_ES_NAME));
 
     const searchFilter = {
       destinationEntitySetIds: [studiesEntitySetId],
@@ -858,8 +857,8 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     let associations = [];
     if (notificationsEnabled) {
       associations = [
-        [CHRONICLE_PARTOF, globalNotificationsEKID, CHRONICLE_NOTIFICATIONS, 0, CHRONICLE_STUDIES, {
-          [NOTIFICATION_ID.toString()]: [studyId],
+        [PART_OF_ES_NAME, globalNotificationsEKID, CHRONICLE_NOTIFICATIONS, 0, CHRONICLE_STUDIES, {
+          [ID_FQN.toString()]: [studyId],
         }]
       ];
     }
@@ -881,7 +880,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     const studyEntitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
     const studyEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', studyEntitySetId, 0]);
-    const partOfEntityKeyId :UUID = getIn(response.data, ['entitySetIds', CHRONICLE_PARTOF, 0]);
+    const partOfEntityKeyId :UUID = getIn(response.data, ['entitySetIds', PART_OF_ES_NAME, 0]);
 
     // reconstruct the created study
     // update the study entity with its entity key id
