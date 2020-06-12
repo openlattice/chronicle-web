@@ -29,7 +29,6 @@ const ButtonGrid = styled.div`
   grid-gap: 10px;
 `;
 
-
 type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
