@@ -70,7 +70,6 @@ const StudyParticipants = ({ study } :Props) => {
     [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
   };
 
-
   const openAddParticipantModal = () => {
     dispatch(resetRequestState(ADD_PARTICIPANT));
     setModalOpen(true);
