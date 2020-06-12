@@ -33,7 +33,7 @@ const CellContent = styled.div`
   font-weight: 400;
   overflow: hidden;
   padding: 0 5px;
-  font-size: 14.5px;
+  font-size: 14px;
 `;
 /* stylelint-enable */
 
