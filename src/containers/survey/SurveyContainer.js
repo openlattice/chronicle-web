@@ -9,7 +9,6 @@ import {
   AppContainerWrapper,
   AppContentWrapper,
   AppHeaderWrapper,
-  Sizes,
   Spinner,
 } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
@@ -22,8 +21,6 @@ import SurveyTable from './SurveyTable';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
-
-const { APP_CONTENT_WIDTH } = Sizes;
 
 const SpinnerWrapper = styled.div`
   margin-top: 60px;
@@ -92,7 +89,7 @@ const SurveyContainer = () => {
   return (
     <AppContainerWrapper>
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
-      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+      <AppContentWrapper>
         {
           requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <ErrorMessage />
         }
