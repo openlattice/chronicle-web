@@ -78,7 +78,6 @@ function appsDataReducer(state, action :Object) {
   }
 }
 
-
 type Props = {
   data :Map;
   participantId :string;

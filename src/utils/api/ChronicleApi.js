@@ -41,7 +41,6 @@ function getParticipantAppsUsageData(date :string, participantId :string, studyI
   });
 }
 
-
 /*
  * `POST chronicle/study/participant/data/<study_id>/<participant_id>/apps`
  *

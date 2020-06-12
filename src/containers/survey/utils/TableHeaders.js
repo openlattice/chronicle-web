@@ -7,6 +7,7 @@ const TABLE_HEADERS = [
     sortable: false,
     cellStyle: {
       width: '40%',
+      fontSize: '15px',
       fontWeight: 500
     }
   },
@@ -17,6 +18,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
+      fontSize: '15px',
       wordWrap: 'normal'
     }
   },
@@ -27,6 +29,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
+      fontSize: '15px',
       wordWrap: 'normal'
     }
   },
@@ -37,6 +40,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       textAlign: 'center',
       fontWeight: 500,
+      fontSize: '15px',
       wordWrap: 'normal'
     }
   }
