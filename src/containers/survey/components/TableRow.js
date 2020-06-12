@@ -3,7 +3,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Set, get, getIn } from 'immutable';
-import { Checkbox, Colors } from 'lattice-ui-kit';
+import { Checkbox, Colors, StyleUtils } from 'lattice-ui-kit';
 
 import AppUserTypes from '../../../utils/constants/AppUserTypes';
 import TableDataDispatch from '../utils/TableDataDispatch';
@@ -14,6 +14,7 @@ const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
+const { media } = StyleUtils;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
@@ -35,6 +36,7 @@ const CellContent = styled.div`
   font-weight: 400;
   overflow: hidden;
   padding: 0 5px;
+  font-size: 15px;
 `;
 /* stylelint-enable */
 
