@@ -3,7 +3,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Set, get, getIn } from 'immutable';
-import { Checkbox, Colors, StyleUtils } from 'lattice-ui-kit';
+import { Checkbox, Colors } from 'lattice-ui-kit';
 
 import AppUserTypes from '../../../utils/constants/AppUserTypes';
 import TableDataDispatch from '../utils/TableDataDispatch';
@@ -13,8 +13,6 @@ import { updateAppUserType } from '../SurveyActions';
 const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
-
-const { media } = StyleUtils;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
@@ -32,11 +30,10 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
 const CellContent = styled.div`
   -webkit-line-clamp: 2;
   display: -webkit-box;
-  font-size: 15px;
   font-weight: 400;
   overflow: hidden;
   padding: 0 5px;
-  font-size: 15px;
+  font-size: 14.5px;
 `;
 /* stylelint-enable */
 
