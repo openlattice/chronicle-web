@@ -396,7 +396,6 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
-
 function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -432,7 +431,6 @@ function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Ge
   }
   return workerResponse;
 }
-
 
 /*
  *
@@ -678,7 +676,6 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
 function* addStudyParticipantWatcher() :Generator<*, *, *> {
   yield takeEvery(ADD_PARTICIPANT, addStudyParticipantWorker);
 }
-
 
 /*
  *
