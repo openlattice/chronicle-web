@@ -40,9 +40,18 @@ const DAYS_OF_WEEK = {
   SA: 'Saturday'
 };
 
+// questionnaire summary
+const QUESTIONNAIRE_SUMMARY = {
+  TITLE: 'title',
+  DESCRIPTION: 'description',
+  NUM_SINGLE_ANSWER: 'numSingleAnswer',
+  NUM_MULTIPLE_CHOICE: 'numMultipleChoice'
+};
+
 export {
   DAYS_OF_WEEK,
   QUESTIONNAIRE_FORM_PAGES,
+  QUESTIONNAIRE_SUMMARY,
   STATUS_SELECT_OPTIONS,
   TABLE_ROW_ACTIONS
 };

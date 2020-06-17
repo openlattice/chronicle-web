@@ -9,11 +9,13 @@ import {
   Paged
 } from 'lattice-fabricate';
 import {
+  Button,
   CardSegment,
   Colors,
-  IconButton,
-  Button
+  IconButton
 } from 'lattice-ui-kit';
+
+import NewQuestionnaireConfirmation from './NewQuestionnaireConfirmation';
 
 import { QUESTIONNAIRE_FORM_PAGES } from '../constants/constants';
 import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
@@ -50,7 +52,7 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 
   h3 {
     font-weight: 500;
@@ -121,7 +123,9 @@ const CreateQuestionnaireForm = (props :Props) => {
                   )
                 }
                 {
-                  pageName === CONFIRMATION_PAGE && <h3> confirmation scheduler </h3>
+                  pageName === CONFIRMATION_PAGE && (
+                    <NewQuestionnaireConfirmation formData={pagedData} />
+                  )
                 }
                 <ActionRow>
                   <Button
