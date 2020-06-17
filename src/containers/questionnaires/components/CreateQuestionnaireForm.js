@@ -18,8 +18,8 @@ import {
 import { QUESTIONNAIRE_FORM_PAGES } from '../constants/constants';
 import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
 
-const { aboutSchema, questionsSchema } = SCHEMAS;
-const { aboutUiSchema, questionsUiSchema } = UI_SCHEMAS;
+const { aboutSchema, questionsSchema, schedulerSchema } = SCHEMAS;
+const { aboutUiSchema, questionsUiSchema, schedulerUiSchema } = UI_SCHEMAS;
 const {
   ABOUT_PAGE,
   CONFIRMATION_PAGE,
@@ -32,12 +32,14 @@ const pages = [ABOUT_PAGE, QUESTIONS_PAGE, SCHEDULER_PAGE, CONFIRMATION_PAGE];
 
 const pageUiSchemaMap = {
   [ABOUT_PAGE]: aboutUiSchema,
-  [QUESTIONS_PAGE]: questionsUiSchema
+  [QUESTIONS_PAGE]: questionsUiSchema,
+  [SCHEDULER_PAGE]: schedulerUiSchema
 };
 
 const pageSchemaMap = {
   [ABOUT_PAGE]: aboutSchema,
-  [QUESTIONS_PAGE]: questionsSchema
+  [QUESTIONS_PAGE]: questionsSchema,
+  [SCHEDULER_PAGE]: schedulerSchema
 };
 
 const CloseIcon = (
@@ -107,7 +109,7 @@ const CreateQuestionnaireForm = (props :Props) => {
             return (
               <>
                 {
-                  (pageName === ABOUT_PAGE || pageName === QUESTIONS_PAGE) && (
+                  (pageName === ABOUT_PAGE || pageName === QUESTIONS_PAGE || pageName === SCHEDULER_PAGE) && (
                     <Form
                         formData={pagedData}
                         hideSubmit
@@ -117,9 +119,6 @@ const CreateQuestionnaireForm = (props :Props) => {
                         schema={pageSchemaMap[pageName]}
                         uiSchema={pageUiSchemaMap[pageName]} />
                   )
-                }
-                {
-                  pageName === SCHEDULER_PAGE && <h3> Scheduler placeholder </h3>
                 }
                 {
                   pageName === CONFIRMATION_PAGE && <h3> confirmation scheduler </h3>

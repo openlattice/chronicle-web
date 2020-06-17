@@ -29,7 +29,19 @@ const QUESTIONNAIRE_FORM_PAGES = {
   ABOUT_PAGE, QUESTIONS_PAGE, SCHEDULER_PAGE, CONFIRMATION_PAGE
 };
 
+// days of week
+const DAYS_OF_WEEK = {
+  SU: 'Sunday',
+  MO: 'Monday',
+  TU: 'Tuesday',
+  WE: 'Wednesday',
+  TH: 'Thursday',
+  FR: 'Friday',
+  SA: 'Saturday'
+};
+
 export {
+  DAYS_OF_WEEK,
   QUESTIONNAIRE_FORM_PAGES,
   STATUS_SELECT_OPTIONS,
   TABLE_ROW_ACTIONS

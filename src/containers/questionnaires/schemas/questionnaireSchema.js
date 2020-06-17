@@ -4,6 +4,7 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import { DAYS_OF_WEEK } from '../constants/constants';
 
 const {
   ANSWERS_ES_NAME,
@@ -73,8 +74,20 @@ const questionsSchema = {
             type: 'string'
           },
           [getEntityAddressKey(0, ANSWERS_ES_NAME, VALUES_FQN)]: {
-            title: 'Comma-separated answer choices',
-            type: 'string'
+            title: '',
+            type: 'array',
+            items: {
+              type: 'object',
+              title: '',
+              properties: {
+                choice: {
+                  type: 'string',
+                  title: 'Answer choice'
+                },
+              },
+              required: ['choice']
+            },
+            uniqueItems: true
           }
         },
         required: [
@@ -89,26 +102,114 @@ const questionsSchema = {
 const questionsUiSchema = {
   [getPageSectionKey(1, 2)]: {
     classNames: 'column-span-12',
+    'ui:options': {
+      addButtonText: '+ Add Question'
+    },
     items: {
       classNames: 'grid-container',
       [getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)]: {
         classNames: 'column-span-6'
       },
       [getEntityAddressKey(0, ANSWERS_ES_NAME, VALUES_FQN)]: {
-        classNames: 'column-span-6'
+        classNames: 'column-span-6',
+        'ui:options': {
+          addButtonText: '+ Add Choice'
+        },
+        items: {
+          classNames: 'grid-container',
+          choice: {
+            classNames: 'column-span-12'
+          }
+        }
       }
     },
   }
 };
 
+const schedulerSchema = {
+  type: 'object',
+  title: '',
+  properties: {
+    [getPageSectionKey(1, 3)]: {
+      type: 'object',
+      title: 'Notification trigger settings',
+      properties: {
+        daysOfWeek: {
+          title: 'Days of week to send notification',
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: Object.values(DAYS_OF_WEEK)
+          },
+          minItems: 1,
+          uniqueItems: true
+        },
+        time: {
+          type: 'array',
+          title: '',
+          items: {
+            type: 'object',
+            properties: {
+              time: {
+                type: 'string',
+                title: 'Notification time'
+              }
+            },
+            required: ['time']
+          },
+          minItems: 1,
+          uniqueItems: true
+        }
+      },
+      required: ['daysOfWeek', 'time']
+    }
+  }
+};
+
+const schedulerUiSchema = {
+  [getPageSectionKey(1, 3)]: {
+    classNames: 'column-span-12 grid-container',
+    daysOfWeek: {
+      classNames: 'column-span-12',
+      'ui:widget': 'checkboxes',
+      'ui:options': {
+        mode: 'button',
+        row: true
+      }
+    },
+    time: {
+      classNames: 'column-span-12',
+      'ui:options': {
+        showIndex: false,
+        addButtonText: '+ Add Time',
+      },
+      items: {
+        classNames: 'grid-container',
+        time: {
+          classNames: 'column-span-12',
+          'ui:widget': 'TimeWidget',
+          'ui:options': {
+            format: 'H:mm',
+            showIndex: false,
+            addButtonText: '+ Add Time',
+            mask: '__:__',
+          },
+        }
+      }
+    }
+  }
+};
+
 const SCHEMAS = {
   aboutSchema,
-  questionsSchema
+  questionsSchema,
+  schedulerSchema
 };
 
 const UI_SCHEMAS = {
   aboutUiSchema,
-  questionsUiSchema
+  questionsUiSchema,
+  schedulerUiSchema
 };
 
 export {
