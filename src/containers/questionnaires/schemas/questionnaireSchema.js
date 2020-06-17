@@ -94,6 +94,7 @@ const questionsSchema = {
           getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)
         ]
       },
+      minItems: 1,
       default: [{}]
     }
   }
