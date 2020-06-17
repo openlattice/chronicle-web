@@ -14,7 +14,6 @@ const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
-
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
 
@@ -31,10 +30,10 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
 const CellContent = styled.div`
   -webkit-line-clamp: 2;
   display: -webkit-box;
-  font-size: 15px;
   font-weight: 400;
   overflow: hidden;
   padding: 0 5px;
+  font-size: 14px;
 `;
 /* stylelint-enable */
 

@@ -28,7 +28,6 @@ Object.keys(ENTITY_SET_NAMES).forEach((name :string) => {
   ENTITY_SET_NAMES_LIST.push(ENTITY_SET_NAMES[name]);
 });
 
-
 export {
   ASSOCIATION_ENTITY_SET_NAMES,
   ENTITY_SET_NAMES,
