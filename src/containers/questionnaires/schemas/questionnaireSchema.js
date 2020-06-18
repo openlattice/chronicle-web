@@ -87,7 +87,8 @@ const questionsSchema = {
               },
               required: ['choice']
             },
-            uniqueItems: true
+            uniqueItems: true,
+            minItems: 0 || 2
           }
         },
         required: [
