@@ -433,7 +433,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
         .set(DATE_LAST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_LAST_PUSHED, 0])])
         .set(EVENT_COUNT, [count])
         .set('id', [participantEntityKeyId]);
-    }); // required by LUK table
+    });
 
     yield put(getStudyParticipants.success(action.id, {
       participants,
