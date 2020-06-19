@@ -1,5 +1,6 @@
 // @flow
 
+const AUTHENTICATED :'authenticated' = 'authenticated';
 const CHRONICLE :'chronicle' = 'chronicle';
 const CSRF_TOKEN :'csrfToken' = 'csrfToken';
 const DATA :'data' = 'data';
@@ -9,6 +10,7 @@ const STUDY :'study' = 'study';
 const QUESTIONNAIRE = 'questionnaire';
 
 export {
+  AUTHENTICATED,
   CHRONICLE,
   CSRF_TOKEN,
   DATA,
