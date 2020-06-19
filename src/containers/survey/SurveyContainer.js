@@ -9,9 +9,7 @@ import {
   AppContainerWrapper,
   AppContentWrapper,
   AppHeaderWrapper,
-  Sizes,
   Spinner,
-  StyleUtils,
 } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,18 +20,11 @@ import SubmissionSuccessful from './components/SubmissionSuccessful';
 import SurveyTable from './SurveyTable';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
-
-const { APP_CONTENT_WIDTH } = Sizes;
-const { media } = StyleUtils;
 
 const SpinnerWrapper = styled.div`
   margin-top: 60px;
-  text-align: center;
-`;
-
-const ErrorWrapper = styled.div`
-  margin-top: 50px;
   text-align: center;
 `;
 
@@ -49,38 +40,6 @@ const SurveyDate = styled.h5`
   font-weight: 400;
   margin: 5px 0 20px 0;
 `;
-
-// TODO: add responsive logic to LUK
-const StyledAppContainerWrapper = styled(AppContainerWrapper)`
-  ${media.tablet`min-width: 600px;`}
-  ${media.phone`min-width: 360px;`}
-`;
-
-const StyledAppHeaderWrapper = styled(AppHeaderWrapper)`
-  > div {
-    ${media.tablet`min-width: 600px;`}
-    ${media.phone`
-      min-width: 360px;
-      padding: 0 20px;
-    `}
-  }
-`;
-
-const StyledAppContentWrapper = styled(AppContentWrapper)`
-  > div {
-    ${media.tablet`min-width: 600px;`}
-    ${media.phone`
-      min-width: 360px;
-      padding: 20px;
-    `}
-  }
-`;
-
-const ErrorMessage = () => (
-  <ErrorWrapper>
-      Sorry, something went wrong. Please try refreshing the page, or contact support.
-  </ErrorWrapper>
-);
 
 const SurveyContainer = () => {
   const dispatch = useDispatch();
@@ -118,11 +77,11 @@ const SurveyContainer = () => {
   }
 
   return (
-    <StyledAppContainerWrapper>
-      <StyledAppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
-      <StyledAppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+    <AppContainerWrapper>
+      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
+      <AppContentWrapper>
         {
-          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <ErrorMessage />
+          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <BasicErrorComponent />
         }
         {
           requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.SUCCESS && (
@@ -149,8 +108,8 @@ const SurveyContainer = () => {
             </>
           )
         }
-      </StyledAppContentWrapper>
-    </StyledAppContainerWrapper>
+      </AppContentWrapper>
+    </AppContainerWrapper>
   );
 };
 

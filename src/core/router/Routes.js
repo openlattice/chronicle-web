@@ -8,6 +8,7 @@ const STUDIES :string = '/studies';
 const STUDY :string = `${STUDIES}/${ID_PARAM}`;
 const PARTICIPANTS :string = `${STUDIES}/${ID_PARAM}/participants`;
 const SURVEY :string = '/survey';
+const QUESTIONNAIRE :string = '/questionnaire';
 
 export {
   ID_PARAM,
@@ -16,5 +17,6 @@ export {
   ROOT,
   STUDIES,
   STUDY,
-  SURVEY
+  SURVEY,
+  QUESTIONNAIRE
 };
