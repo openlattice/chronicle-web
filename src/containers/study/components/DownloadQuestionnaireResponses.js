@@ -314,7 +314,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                       isLoading={downloadRS === RequestStates.PENDING}
                       mode="primary"
                       onClick={onDownloadData}>
-                      Download All
+                    Download All
                   </Button>
                 </div>
               </HeaderWrapper>

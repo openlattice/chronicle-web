@@ -85,7 +85,6 @@ const createInitialFormData = (answersById :Map, answerQuestionIdMap :Map, quest
   return result;
 };
 
-
 const getCsvFileName = (questionnaireName :string, participantId :UUID) => `${questionnaireName}_${participantId}.csv`;
 
 const createSchema = (schemaProperties :Object, uiSchemaOptions :Object) => {
