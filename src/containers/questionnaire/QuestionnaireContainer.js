@@ -9,7 +9,6 @@ import {
   AppContainerWrapper,
   AppContentWrapper,
   AppHeaderWrapper,
-  Sizes,
   Spinner,
 } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,11 +23,10 @@ import {
   getQuestionnaire
 } from './QuestionnaireActions';
 
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
-
-const { APP_CONTENT_WIDTH } = Sizes;
 
 const { NAME_FQN, DESCRIPTION_FQN } = PROPERTY_TYPE_FQNS;
 const { QUESTIONNAIRE_DATA } = QUESTIONNAIRE_REDUX_CONSTANTS;
@@ -75,23 +73,19 @@ const QuestionnaireContainer = () => {
 
   const questionnaireDetails = questionnaire.get('questionnaireDetails', Map());
 
-  if (requestStates[GET_QUESTIONNAIRE] === RequestStates.PENDING) {
-    return (
-      <div style={{ marginTop: '60px', textAlign: 'center' }}>
-        <Spinner size="2x" />
-      </div>
-    );
-  }
   return (
     <AppContainerWrapper>
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
-      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+      <AppContentWrapper>
         {
-          requestStates[GET_QUESTIONNAIRE] === RequestStates.FAILURE && (
+          requestStates[GET_QUESTIONNAIRE] === RequestStates.PENDING && (
             <div style={{ marginTop: '60px', textAlign: 'center' }}>
-              Sorry, something went wrong. Please try refreshing the page, or contact support.
+              <Spinner size="2x" />
             </div>
           )
+        }
+        {
+          requestStates[GET_QUESTIONNAIRE] === RequestStates.FAILURE && <BasicErrorComponent />
         }
         {
           requestStates[SUBMIT_QUESTIONNAIRE] === RequestStates.FAILURE && (
