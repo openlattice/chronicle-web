@@ -3,10 +3,10 @@
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const {
-  PERSON_ID,
   DATE_FIRST_PUSHED,
   DATE_LAST_PUSHED,
-  EVENT_COUNT
+  EVENT_COUNT,
+  PERSON_ID
 } = PROPERTY_TYPE_FQNS;
 const TABLE_HEADERS = [
   {
