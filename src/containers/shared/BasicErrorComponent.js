@@ -11,8 +11,8 @@ const Error = styled.div`
 
 type Props = {
   children ?:React.Node;
-  message ?:string
-}
+  message ?:string;
+};
 const BasicErrorComponent = ({ children, message } :Props) => (
   <Error>
     {children || (
