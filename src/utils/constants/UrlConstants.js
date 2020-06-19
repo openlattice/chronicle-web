@@ -7,6 +7,7 @@ const DATA :'data' = 'data';
 const FILE_TYPE :'fileType' = 'fileType';
 const PARTICIPANT :'participant' = 'participant';
 const STUDY :'study' = 'study';
+const QUESTIONNAIRE = 'questionnaire';
 
 export {
   AUTHENTICATED,
@@ -16,4 +17,5 @@ export {
   FILE_TYPE,
   PARTICIPANT,
   STUDY,
+  QUESTIONNAIRE
 };

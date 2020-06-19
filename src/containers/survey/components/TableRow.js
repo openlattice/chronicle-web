@@ -10,7 +10,7 @@ import TableDataDispatch from '../utils/TableDataDispatch';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { updateAppUserType } from '../SurveyActions';
 
-const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
+const { USER_FQN, TITLE_FQN } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
@@ -61,7 +61,7 @@ type Props = {
 const TableRow = ({ data } :Props) => {
   const dispatch = React.useContext(TableDataDispatch);
 
-  const appName :string = getIn(data, ['entityDetails', TITLE, 0]);
+  const appName :string = getIn(data, ['entityDetails', TITLE_FQN, 0]);
   const appEntityId :UUID = get(data, 'id');
   const appUsers :Set = getIn(data, ['associationDetails', USER_FQN], Set());
 
