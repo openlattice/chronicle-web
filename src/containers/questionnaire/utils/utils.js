@@ -19,7 +19,7 @@ const {
 } = DataProcessingUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const { TITLE, VALUES_FQN } = PROPERTY_TYPE_FQNS;
+const { TITLE_FQN, VALUES_FQN } = PROPERTY_TYPE_FQNS;
 const { QUESTIONS_ES_NAME } = ENTITY_SET_NAMES;
 
 
@@ -31,7 +31,7 @@ const getSchemaProperties = (questions :List) => {
       const addressKey = getEntityAddressKey(entityKeyId, QUESTIONS_ES_NAME, VALUES_FQN);
 
       mutator
-        .setIn([addressKey, 'title'], question.getIn([TITLE, 0]))
+        .setIn([addressKey, 'title'], question.getIn([TITLE_FQN, 0]))
         .setIn([addressKey, 'type'], 'string');
 
       const answerChoices = question.get(VALUES_FQN, List());

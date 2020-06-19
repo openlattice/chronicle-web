@@ -32,19 +32,16 @@ const PROPERTY_TYPE_FQNS = {
   STATUS: new FullyQualifiedName('ol.status'),
 
   // survey
-  TITLE: new FullyQualifiedName('ol.title'),
   DATE_ENROLLED: new FullyQualifiedName('ol.datetimestart'),
   USER_FQN: new FullyQualifiedName('ol.user'),
 
   // notifications
   ID_FQN: new FullyQualifiedName('ol.id'),
-  NOTIFICATION_DESCRIPTION: new FullyQualifiedName('ol.description'),
   NOTIFICATION_ENABLED: new FullyQualifiedName('ol.status'),
 
   // survey
   NAME_FQN: new FullyQualifiedName('ol.name'),
   DESCRIPTION_FQN: new FullyQualifiedName('ol.description'),
-  CRON_FQN: new FullyQualifiedName('ol.cron'),
   VALUES_FQN: new FullyQualifiedName('ol.values'),
   DATE_TIME_FQN: new FullyQualifiedName('ol.datetime'),
   TITLE_FQN: new FullyQualifiedName('ol.title')
