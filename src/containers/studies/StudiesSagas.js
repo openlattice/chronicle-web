@@ -450,18 +450,18 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     const metadata :Map = response.data || Map();
 
     // update participants with enrollment status
-    participants = participants.map((participant, id) => {
+    participants = participants.map((participant, participantEntityKeyId) => {
 
       // If participant doesn't have metadata neighbor
-      const datesLogged = metadata.getIn([id, DATE_LOGGED], List());
-      const count :number = datesLogged.count()
+      const datesLogged = metadata.getIn([participantEntityKeyId, DATE_LOGGED], List());
+      const count :number = datesLogged.count();
 
       return participant
-        .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
-        .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
-        .set(DATE_LAST_PUSHED, [metadata.getIn([id, DATE_LAST_PUSHED, 0])])
+        .set(STATUS, [enrollmentStatus.getIn([participantEntityKeyId, STATUS, 0], ENROLLED)])
+        .set(DATE_ENROLLED, [enrollmentStatus.getIn([participantEntityKeyId, DATE_ENROLLED, 0])])
+        .set(DATE_LAST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_LAST_PUSHED, 0])])
         .set(EVENT_COUNT, [count])
-        .set('id', [id]);
+        .set('id', [participantEntityKeyId]);
     }); // required by LUK table
 
     yield put(getStudyParticipants.success(action.id, {
@@ -744,7 +744,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
       .set(DATE_ENROLLED, [dateEnrolled])
-      .set('id', [participantEntityKeyId]); // required by LUK table
+      .set('id', [participantEntityKeyId]);
 
     yield put(addStudyParticipant.success(action.id, {
       participantEntityData,
