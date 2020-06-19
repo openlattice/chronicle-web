@@ -447,8 +447,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       getParticipantsMetadataWorker,
       getParticipantsMetadata({ participants, participantsEntitySetId, participantsEntitySetName })
     );
-    if (response.error) throw response.error;
-    const metadata :Map = response.data;
+    const metadata :Map = response.data || Map();
 
     // update participants with enrollment status
     participants = participants.map((participant, id) => {
