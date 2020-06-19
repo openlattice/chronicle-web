@@ -22,6 +22,7 @@ import {
   SearchApiSagas
 } from 'lattice-sagas';
 import { DateTime } from 'luxon';
+import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -84,7 +85,7 @@ const LOG = new Logger('QuestionnaireSagas');
  * QuestionnaireActions.getQuestionnaire()
  *
  */
-function* getQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
+function* getQuestionnaireWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(getQuestionnaire.request(action.id));
 
@@ -104,7 +105,7 @@ function* getQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
   }
 }
 
-function* getQuestionnaireWatcher() :Generator<*, *, *> {
+function* getQuestionnaireWatcher() :Saga<*> {
   yield takeEvery(GET_QUESTIONNAIRE, getQuestionnaireWorker);
 }
 
@@ -114,7 +115,7 @@ function* getQuestionnaireWatcher() :Generator<*, *, *> {
  *
  */
 
-function* submitQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
+function* submitQuestionnaireWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(submitQuestionnaire.request(action.id));
 
@@ -136,7 +137,7 @@ function* submitQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
   }
 }
 
-function* submitQuestionnaireWatcher() :Generator<*, *, *> {
+function* submitQuestionnaireWatcher() :Saga<*> {
   yield takeEvery(SUBMIT_QUESTIONNAIRE, submitQuestionnaireWorker);
 }
 
@@ -146,7 +147,7 @@ function* submitQuestionnaireWatcher() :Generator<*, *, *> {
  *
  */
 
-function* getStudyQuestionnairesWorker(action :SequenceAction) :Generator<*, *, *> {
+function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(getStudyQuestionnaires.request(action.id));
 
@@ -229,7 +230,7 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Generator<*, *, 
   }
 }
 
-function* getStudyQuestionnairesWatcher() :Generator<*, *, *> {
+function* getStudyQuestionnairesWatcher() :Saga<*> {
   yield takeEvery(GET_STUDY_QUESTIONNAIRES, getStudyQuestionnairesWorker);
 }
 
@@ -239,7 +240,7 @@ function* getStudyQuestionnairesWatcher() :Generator<*, *, *> {
  *
  */
 
-function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, *, *> {
+function* getQuestionnaireResponsesWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(getQuestionnaireResponses.request(action.id));
 
@@ -336,7 +337,7 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, 
   }
 }
 
-function* getQuestionnaireResponsesWatcher() :Generator<*, *, *> {
+function* getQuestionnaireResponsesWatcher() :Saga<*> {
   yield takeEvery(GET_QUESTIONNAIRE_RESPONSES, getQuestionnaireResponsesWorker);
 }
 
@@ -346,7 +347,7 @@ function* getQuestionnaireResponsesWatcher() :Generator<*, *, *> {
  *
  */
 
-function* downloadQuestionnaireResponsesWorker(action :SequenceAction) :Generator<*, *, *> {
+function* downloadQuestionnaireResponsesWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(downloadQuestionnaireResponses.request(action.id));
 
@@ -409,7 +410,7 @@ function* downloadQuestionnaireResponsesWorker(action :SequenceAction) :Generato
   }
 }
 
-function* downloadQuestionnaireResponsesWatcher() :Generator<*, *, *> {
+function* downloadQuestionnaireResponsesWatcher() :Saga<*> {
   yield takeEvery(DOWNLOAD_QUESTIONNAIRE_RESPONSES, downloadQuestionnaireResponsesWorker);
 }
 
