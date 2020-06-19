@@ -453,11 +453,8 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     participants = participants.map((participant, id) => {
 
       // If participant doesn't have metadata neighbor
-      const datesLogged = metadata.getIn([id, DATE_LOGGED]);
-      let count = 0;
-      if (datesLogged !== undefined) {
-        count = datesLogged.size;
-      }
+      const datesLogged = metadata.getIn([id, DATE_LOGGED], List());
+      const count :number = datesLogged.count()
 
       return participant
         .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
