@@ -74,7 +74,6 @@ const IconCircleWrapper = styled.span`
   }
 `;
 
-
 type IconProps = {
   action :string;
   enrollmentStatus :string;

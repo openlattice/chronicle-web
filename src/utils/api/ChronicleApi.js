@@ -37,7 +37,6 @@ function getParticipantAppsUsageData(date :string, participantId :string, studyI
   });
 }
 
-
 /*
  * `POST chronicle/study/participant/data/<study_id>/<participant_id>/apps`
  *
@@ -71,7 +70,6 @@ function updateAppsUsageAssociationData(participantId :string, studyId :UUID, re
       .catch((error) => reject(error));
   });
 }
-
 
 export {
   getParticipantAppsUsageData,

@@ -2,7 +2,6 @@
  * @flow
  */
 
-
 import type { Match } from 'react-router';
 
 const getIdFromMatch = (match :Match) :?string => {

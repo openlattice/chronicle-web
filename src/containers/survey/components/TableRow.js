@@ -14,7 +14,6 @@ const { USER_FQN, TITLE } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
-
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
   border-bottom: 1px solid ${NEUTRALS[6]};
 
