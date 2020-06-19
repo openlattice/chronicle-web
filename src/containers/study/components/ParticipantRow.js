@@ -51,13 +51,14 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
 
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
-  -webkit-line-clamp: 2;
-  display: -webkit-box;
+  display: flex;
   font-size: 15px;
   font-weight: 300;
   overflow: hidden;
   padding: 0 5px;
+  justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')}
 `;
+
 /* stylelint-enable */
 
 const IconCircleWrapper = styled.span`
@@ -157,7 +158,7 @@ const ParticipantRow = (props :Props) => {
         </StyledCell>
 
         <StyledCell>
-          <CellContent>
+          <CellContent centerContent>
             { numDays }
           </CellContent>
         </StyledCell>
