@@ -47,7 +47,7 @@ const SurveyDate = styled.h5`
 
 const ErrorMessage = () => (
   <ErrorWrapper>
-      Sorry, something went wrong. Please try refreshing the page, or contact support.
+    Sorry, something went wrong. Please try refreshing the page, or contact support.
   </ErrorWrapper>
 );
 
