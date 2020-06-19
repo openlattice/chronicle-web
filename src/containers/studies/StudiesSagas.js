@@ -491,7 +491,6 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
-
 function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -527,7 +526,6 @@ function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Ge
   }
   return workerResponse;
 }
-
 
 /*
  *
@@ -774,7 +772,6 @@ function* addStudyParticipantWatcher() :Generator<*, *, *> {
   yield takeEvery(ADD_PARTICIPANT, addStudyParticipantWorker);
 }
 
-
 /*
  *
  * StudiesActions.getStudyNotificationStatus()
@@ -821,10 +818,10 @@ function* getStudyNotificationStatusWorker(action :SequenceAction) :Generator<*,
       const studyId = study.getIn([STUDY_ID, 0]);
 
       const associationDetails = getIn(response.data, [entityKeyId, 0, 'associationDetails'], {});
+      associationEKIDMap.set(studyId, getIn(associationDetails, [OPENLATTICE_ID_FQN, 0]));
 
       if (getIn(associationDetails, [ID_FQN, 0]) === studyId) {
         studiesWithNotifications.add(studyId);
-        associationEKIDMap.set(studyId, getIn(associationDetails, [OPENLATTICE_ID_FQN, 0]));
       }
     });
 

@@ -78,7 +78,6 @@ function appsDataReducer(state, action :Object) {
   }
 }
 
-
 type Props = {
   data :Map;
   participantId :string;
@@ -145,7 +144,7 @@ const SurveyTable = ({
                       isLoading={submitRequestState === RequestStates.PENDING}
                       mode="primary"
                       onClick={handleOnSubmit}>
-                      Submit Survey
+                    Submit Survey
                   </Button>
                 </SubmitButtonWrapper>
                 <SubmissionFailureModal

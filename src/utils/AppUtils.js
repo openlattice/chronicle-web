@@ -11,6 +11,7 @@ import ParticipantDataTypes from './constants/ParticipantDataTypes';
 import { isNonEmptyString } from './LangUtils';
 import { isValidUUID } from './ValidationUtils';
 import {
+  AUTHENTICATED,
   CHRONICLE,
   CSRF_TOKEN,
   DATA,
@@ -65,7 +66,7 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
       break;
   }
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
+  return `${baseUrl}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
   + `${studyId}/${participantEntityKeyId}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
