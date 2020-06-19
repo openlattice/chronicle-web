@@ -70,7 +70,8 @@ const ParticipantsTable = (props :Props) => {
   const handleOnDeleteParticipant = () => {
     dispatch(deleteStudyParticipant({
       participantEntityKeyId,
-      studyId
+      participantId: participants.getIn([participantEntityKeyId, PERSON_ID, 0]),
+      studyId,
     }));
   };
 

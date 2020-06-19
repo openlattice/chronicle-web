@@ -8,7 +8,7 @@ const TABLE_HEADERS = [
     key: PERSON_ID,
     label: 'Participant ID',
     cellStyle: {
-      width: '40%',
+      width: '45%',
     }
   },
   {

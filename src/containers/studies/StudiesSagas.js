@@ -54,6 +54,7 @@ import {
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
+import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectEntityTypeId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
@@ -74,14 +75,12 @@ import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const {
-  deleteEntitiesAndNeighborsWorker,
   getEntitySetDataWorker,
   updateEntityDataWorker,
   createAssociationsWorker,
 } = DataApiSagas;
 
 const {
-  deleteEntitiesAndNeighbors,
   getEntitySetData,
   updateEntityData,
   createAssociations
@@ -103,17 +102,11 @@ const {
 } = DataProcessingUtils;
 
 const { EntitySetBuilder } = Models;
-const { DeleteTypes, PermissionTypes, UpdateTypes } = Types;
+const { PermissionTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
-const {
-  APPLICATION_DATA,
-  CHRONICLE_DEVICES,
-  CHRONICLE_NOTIFICATIONS,
-  CHRONICLE_STUDIES,
-  PREPROCESSED_DATA,
-} = ENTITY_SET_NAMES;
+const { CHRONICLE_NOTIFICATIONS, CHRONICLE_STUDIES } = ENTITY_SET_NAMES;
 
 const { PARTICIPATED_IN, PART_OF_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
 
@@ -216,33 +209,9 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
   try {
     yield put(deleteStudyParticipant.request(action.id));
 
-    const { studyId, participantEntityKeyId } = action.value;
+    const { studyId, participantEntityKeyId, participantId } = action.value;
 
-    const participantsEntityName = getParticipantsEntitySetName(studyId);
-
-    const {
-      applicationDataEntitySetId,
-      devicesEntitySetId,
-      participantsEntitySetId,
-      preprocessedDataEntitySetId
-    } = yield select((state) => ({
-      applicationDataEntitySetId: state.getIn(['edm', 'entitySetIds', APPLICATION_DATA]),
-      devicesEntitySetId: state.getIn(['edm', 'entitySetIds', CHRONICLE_DEVICES]),
-      participantsEntitySetId: state.getIn(['studies', 'participantEntitySetIds', participantsEntityName]),
-      preprocessedDataEntitySetId: state.getIn(['edm', 'entitySetIds', PREPROCESSED_DATA]),
-    }));
-
-    const response = yield call(
-      deleteEntitiesAndNeighborsWorker,
-      deleteEntitiesAndNeighbors({
-        entitySetId: participantsEntitySetId,
-        filter: {
-          entityKeyIds: [participantEntityKeyId],
-          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId, preprocessedDataEntitySetId]
-        },
-        deleteType: DeleteTypes.HARD
-      })
-    );
+    const response = yield call(ChronicleApi.deleteStudyParticipant, participantId, studyId);
     if (response.error) throw response.error;
 
     yield put(deleteStudyParticipant.success(action.id, {
