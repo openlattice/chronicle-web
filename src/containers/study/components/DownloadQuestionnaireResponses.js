@@ -25,6 +25,7 @@ import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import { createSelector } from 'reselect';
+import type { RequestState } from 'redux-reqseq';
 
 import QuestionnaireForm from '../../questionnaire/components/QuestionnaireForm';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
@@ -161,20 +162,31 @@ const DownloadQuestionnaireResponses = (props :Props) => {
   const [selectDateOptions, setSelectDateOptions] = useState([]);
 
   // selectors
-  /* eslint-disable max-len */
-  const studyQuestionnaires = useSelector((state) => state.getIn(['questionnaire', STUDY_QUESTIONNAIRES, studyEKID], Map()));
+  const studyQuestionnaires = useSelector(
+    (state) => state.getIn(['questionnaire', STUDY_QUESTIONNAIRES, studyEKID], Map())
+  );
   const questionsByQuestionnaireId = useSelector(
     (state) => state.getIn(['questionnaire', QUESTIONNAIRE_QUESTIONS], Map())
   );
-  const answersById = useSelector((state) => state.getIn(['questionnaire', QUESTIONNAIRE_RESPONSES, participantEKID], Map()));
-  const questionAnswersMap = useSelector((state) => state.getIn(['questionnaire', QUESTION_ANSWERS_MAP], Map()));
-  const answerQuestionIdMap = useSelector((state) => state.getIn(['questionnaire', ANSWER_QUESTION_ID_MAP], Map()));
-  const requestStates = useSelector((state) => ({
-    [DOWNLOAD_QUESTIONNAIRE_RESPONSES]: state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState']),
-    [GET_QUESTIONNAIRE_RESPONSES]: state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, 'requestState']),
-    [GET_STUDY_QUESTIONNAIRES]: state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
-  }));
-  /* eslint-enable */
+  const answersById = useSelector(
+    (state) => state.getIn(['questionnaire', QUESTIONNAIRE_RESPONSES, participantEKID], Map())
+  );
+  const questionAnswersMap = useSelector(
+    (state) => state.getIn(['questionnaire', QUESTION_ANSWERS_MAP], Map())
+  );
+  const answerQuestionIdMap = useSelector(
+    (state) => state.getIn(['questionnaire', ANSWER_QUESTION_ID_MAP], Map())
+  );
+  const downloadRS :RequestState = useSelector(
+    (state) => state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'])
+  );
+  const getQuestionnaireResponsesRS :RequestState = useSelector(
+    (state) => state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, 'requestState'])
+  );
+
+  const getStudyQuestionnairesRS :RequestState = useSelector(
+    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
+  );
 
   const submissionDateMap = selectSubmissionDateMap(
     answersById,
@@ -261,8 +273,8 @@ const DownloadQuestionnaireResponses = (props :Props) => {
     }
   };
 
-  const fetchingData = requestStates[GET_STUDY_QUESTIONNAIRES] === RequestStates.PENDING
-    || requestStates[GET_QUESTIONNAIRE_RESPONSES] === RequestStates.PENDING;
+  const fetchingData = getStudyQuestionnairesRS === RequestStates.PENDING
+  || getQuestionnaireResponsesRS === RequestStates.PENDING;
 
   return (
     <Modal
@@ -298,7 +310,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                 <div style={{ textAlign: 'end' }}>
                   <Button
                       disabled={fetchingData || selectDateOptions.length === 0}
-                      isLoading={requestStates[DOWNLOAD_QUESTIONNAIRE_RESPONSES] === RequestStates.PENDING}
+                      isLoading={downloadRS === RequestStates.PENDING}
                       mode="primary"
                       onClick={onDownloadData}>
                       Download All
