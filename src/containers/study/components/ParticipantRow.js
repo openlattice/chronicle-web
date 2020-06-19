@@ -20,7 +20,7 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
 
 const {
-  PERSON_ID, STATUS, DATE_ENROLLED,
+  PERSON_ID, STATUS, DATE_FIRST_PUSHED,
   DATE_LAST_PUSHED, EVENT_COUNT
 } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
@@ -123,7 +123,7 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
-  const enrollmentDate = getDateTimeFromIsoDate(getIn(data, [DATE_ENROLLED, 0]));
+  const firstDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_FIRST_PUSHED, 0]));
   const lastDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_LAST_PUSHED, 0]));
   const numDays = getIn(data, [EVENT_COUNT, 0]);
 
@@ -146,7 +146,7 @@ const ParticipantRow = (props :Props) => {
 
         <StyledCell>
           <CellContent>
-            { enrollmentDate }
+            { firstDataDate }
           </CellContent>
         </StyledCell>
 
