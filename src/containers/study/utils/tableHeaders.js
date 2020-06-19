@@ -13,11 +13,7 @@ const TABLE_HEADERS = [
     key: PERSON_ID,
     label: 'Participant ID',
     cellStyle: {
-<<<<<<< HEAD
       width: '18%',
-=======
-      width: '45%',
->>>>>>> develop
     }
   },
   {
