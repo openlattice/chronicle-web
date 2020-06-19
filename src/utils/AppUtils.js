@@ -11,6 +11,7 @@ import ParticipantDataTypes from './constants/ParticipantDataTypes';
 import { isNonEmptyString } from './LangUtils';
 import { isValidUUID } from './ValidationUtils';
 import {
+  AUTHENTICATED,
   CHRONICLE,
   CSRF_TOKEN,
   DATA,
@@ -65,7 +66,7 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
       break;
   }
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
+  return `${baseUrl}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
   + `${studyId}/${participantEntityKeyId}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
@@ -90,4 +91,23 @@ const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
     + `/${studyId}/${participantId}/apps`;
 };
 
-export { getBaseUrl, getParticipantDataUrl, getParticipantUserAppsUrl };
+const getDeleteParticipantPath = (participantId :string, studyId :UUID) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${studyId}/${participantId}`;
+};
+
+export {
+  getBaseUrl,
+  getDeleteParticipantPath,
+  getParticipantDataUrl,
+  getParticipantUserAppsUrl
+};

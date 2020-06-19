@@ -15,6 +15,8 @@ const getIdFromMatch = (match :Match) :?string => {
   return id;
 };
 
+/* eslint-disable import/prefer-default-export */
 export {
   getIdFromMatch,
 };
+/* eslint-enable */

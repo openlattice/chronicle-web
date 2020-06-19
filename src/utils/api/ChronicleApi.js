@@ -1,8 +1,12 @@
 // @flow
 
 import axios from 'axios';
+import { Types } from 'lattice';
+import { AuthUtils } from 'lattice-auth';
 
-import { getParticipantUserAppsUrl } from '../AppUtils';
+import { getDeleteParticipantPath, getParticipantUserAppsUrl } from '../AppUtils';
+
+const { DeleteTypes } = Types;
 
 /*
  * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
@@ -71,7 +75,27 @@ function updateAppsUsageAssociationData(participantId :string, studyId :UUID, re
   });
 }
 
+// delete a participant and neighbors
+function deleteStudyParticipant(participantId :string, studyId :UUID) {
+  return new Promise<*>((resolve, reject) => {
+
+    const url = getDeleteParticipantPath(participantId, studyId);
+    if (!url) return reject(new Error('Invalid Url'));
+
+    const authToken = AuthUtils.getAuthToken();
+
+    return axios({
+      method: 'delete',
+      url,
+      headers: { Authorization: `Bearer ${authToken}` },
+      params: { type: DeleteTypes.HARD }
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
+
 export {
+  deleteStudyParticipant,
   getParticipantAppsUsageData,
   updateAppsUsageAssociationData
 };
