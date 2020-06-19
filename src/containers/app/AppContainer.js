@@ -27,7 +27,6 @@ import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
 import BasicErrorComponent from '../shared/BasicErrorComponent';
 
-
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
