@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 
-import styled from 'styled-components';
 import { Map } from 'immutable';
 import { AuthActions, AuthUtils } from 'lattice-auth';
 import {
@@ -26,6 +25,8 @@ import { NavLink } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
+import BasicErrorComponent from '../shared/BasicErrorComponent';
+
 
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
@@ -36,10 +37,6 @@ import { isNonEmptyString } from '../../utils/LangUtils';
 
 const { INITIALIZE_APPLICATION } = AppActions;
 const { APP_CONTENT_WIDTH } = Sizes;
-
-const Error = styled.div`
-  text-align: center;
-`;
 
 type Props = {
   actions :{
@@ -84,19 +81,13 @@ class AppContainer extends Component<Props> {
       );
     }
 
-    if (requestStates[INITIALIZE_APPLICATION] === RequestStates.FAILURE) {
-      return (
-        <AppContentWrapper>
-          <Error>
-            Sorry, something went wrong. Please try refreshing the page, or contact support.
-          </Error>
-        </AppContentWrapper>
-      );
-    }
-
     return (
       <AppContentWrapper>
-        <Spinner size="2x" />
+        {
+          requestStates[INITIALIZE_APPLICATION] === RequestStates.FAILURE
+            ? <BasicErrorComponent />
+            : <Spinner size="2x" />
+        }
       </AppContentWrapper>
     );
   }

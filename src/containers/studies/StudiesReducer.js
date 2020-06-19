@@ -41,7 +41,7 @@ import {
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
-import { STUDIES_REDUCER_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { DATE_ENROLLED, STATUS } = PROPERTY_TYPE_FQNS;
 
@@ -50,7 +50,7 @@ const {
   NOTIFICATIONS_ENABLED_STUDIES,
   PART_OF_ASSOCIATION_EKID_MAP,
   STUDIES
-} = STUDIES_REDUCER_CONSTANTS;
+} = STUDIES_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [ADD_PARTICIPANT]: {
