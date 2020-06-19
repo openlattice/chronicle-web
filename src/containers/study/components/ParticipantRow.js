@@ -56,7 +56,7 @@ const CellContent = styled.div`
   font-weight: 300;
   overflow: hidden;
   padding: 0 5px;
-  justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')}
+  justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')};
 `;
 
 /* stylelint-enable */

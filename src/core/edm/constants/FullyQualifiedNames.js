@@ -38,6 +38,7 @@ const PROPERTY_TYPE_FQNS = {
   // metadata
   DATE_FIRST_PUSHED: new FullyQualifiedName('ol.recordeddate'),
   DATE_LAST_PUSHED: new FullyQualifiedName('ol.datetimeend'),
+  DATE_LOGGED: new FullyQualifiedName('ol.datelogged'),
   EVENT_COUNT: new FullyQualifiedName('ol.eventcount'),
 
   // notifications
