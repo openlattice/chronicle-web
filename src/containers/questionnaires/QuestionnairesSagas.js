@@ -19,7 +19,7 @@ import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
 import {
-  createQuestionnaireQuestionsAssociation,
+  createQuestionnaireAssociations,
   createQuestionEntitiesFromFormData,
 } from './utils/dataUtils';
 
@@ -74,7 +74,9 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
     );
 
     // associations
-    const associations = createQuestionnaireQuestionsAssociation(formData);
+    const associations = createQuestionnaireAssociations(formData, studyEKID);
+    console.log(studyEKID);
+    console.log(associations);
     const associationEntityData = processAssociationEntityData(
       associations,
       entitySetIds,
@@ -84,6 +86,7 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
     console.log(entityData);
     console.log(associationEntityData);
     const response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
     console.log(response);
 
     // TODO: reconstruct questionnaire + questions and put that somewhere in redux
