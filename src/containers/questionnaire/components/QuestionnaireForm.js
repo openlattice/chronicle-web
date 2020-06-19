@@ -12,9 +12,16 @@ import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-import createSchema from '../utils/formSchema';
 import { submitQuestionnaire } from '../QuestionnaireActions';
-import { getSchemaProperties, getUiSchemaOptions } from '../utils/utils';
+import { createSchema, getSchemaProperties, getUiSchemaOptions } from '../utils';
+
+const transformErrors = (errors) => errors.map((error) => {
+  if (error.name === 'required') {
+    /* eslint-disable no-param-reassign */
+    error.message = 'Response is required';
+  }
+  return error;
+});
 
 type Props = {
   participantId ?:UUID;
@@ -36,9 +43,9 @@ const QuestionnaireForm = (props :Props) => {
   const dispatch = useDispatch();
 
   const schemaProperties = getSchemaProperties(questions);
+
   const uiSchemaOptions = getUiSchemaOptions(schemaProperties);
   const { schema, uiSchema } = createSchema(schemaProperties, uiSchemaOptions);
-
 
   const handleSubmit = ({ formData } :Object) => {
     dispatch(submitQuestionnaire({
@@ -48,17 +55,9 @@ const QuestionnaireForm = (props :Props) => {
     }));
   };
 
-  const transformErrors = (errors) => errors.map((error) => {
-    if (error.name === 'required') {
-      /* eslint-disable no-param-reassign */
-      error.message = 'Response is required';
-    }
-    return error;
-  });
-
   return (
     <Card>
-      <CardSegment vertical noBleed>
+      <CardSegment noBleed>
         <Form
             disabled={!editable}
             formData={initialFormData}

@@ -38,7 +38,7 @@ import {
   getQuestionnaireResponses,
   getStudyQuestionnaires
 } from '../../questionnaire/QuestionnaireActions';
-import { createInitialFormData } from '../../questionnaire/utils/utils';
+import { createInitialFormData } from '../../questionnaire/utils';
 
 const {
   ANSWER_QUESTION_ID_MAP,
@@ -105,7 +105,8 @@ const selectSubmissionDateMap = createSelector(
 
         const answerIds :Set<UUID> = questionAnswersMap.get(questionId, Set());
         const dates :List = answerIds
-          .map((answerId :UUID) => answersById.getIn([answerId, DATE_TIME_FQN, 0])).filter((val) => val);
+          .map((answerId :UUID) => answersById.getIn([answerId, DATE_TIME_FQN, 0]))
+          .filter((val) => val);
         mutator.updateIn([questionnaireID], List(), (res) => res.concat(dates));
       });
     });
@@ -156,7 +157,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
 
   const dispatch = useDispatch();
 
-  const [selectedQuestionnaire, setselectedQuestionnaire] = useState(null);
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [questionnaireOptions, setQuestionnaireOptions] = useState([]);
   const [selectDateOptions, setSelectDateOptions] = useState([]);
@@ -235,7 +236,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
       }));
 
       setQuestionnaireOptions(options.toJS());
-      setselectedQuestionnaire(options.first());
+      setSelectedQuestionnaire(options.first());
     }
   }, [studyQuestionnaires]);
 
@@ -259,7 +260,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
   };
 
   const onSelectQuestionnaire = (selectedVal) => {
-    setselectedQuestionnaire(selectedVal);
+    setSelectedQuestionnaire(selectedVal);
   };
 
   const onDownloadData = () => {

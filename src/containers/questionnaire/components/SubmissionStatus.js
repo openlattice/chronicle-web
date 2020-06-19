@@ -54,8 +54,8 @@ const SubmissionStatus = (props :Props) => {
     return (
       <Wrapper>
         <FontAwesomeIcon color={GREEN_2} icon={faCheckCircle} size="3x" />
-        <h3> Submission Successful! </h3>
-        <p> Your responses were successfully submitted.</p>
+        <h3>Submission Successful!</h3>
+        <p>Your responses were successfully submitted.</p>
       </Wrapper>
     );
   }

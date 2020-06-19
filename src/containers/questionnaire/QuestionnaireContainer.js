@@ -106,7 +106,7 @@ const QuestionnaireContainer = () => {
                 { questionnaireDetails.getIn([NAME_FQN, 0]) }
               </Title>
               <Description>
-                { questionnaireDetails.getIn([DESCRIPTION_FQN, 0])}
+                { questionnaireDetails.getIn([DESCRIPTION_FQN, 0]) }
               </Description>
               <QuestionnaireForm
                   participantId={participantId}

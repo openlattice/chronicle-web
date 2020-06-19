@@ -37,7 +37,7 @@ import {
   getStudyQuestionnaires,
   submitQuestionnaire,
 } from './QuestionnaireActions';
-import { getCsvFileName, getQuestionAnswerMapping } from './utils/utils';
+import { getCsvFileName, getQuestionAnswerMapping } from './utils';
 
 import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -208,9 +208,9 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
       if (response.error) throw response.error;
 
       // create mapping from questionEKID -> questionId -> question details
-      fromJS(response.data).forEach((value, key) => {
-        const questions = value.map((question) => question.get('neighborDetails'));
-        questionnaireToQuestionsMap.set(key, questions);
+      fromJS(response.data).forEach((neighbors :List, questionnaireEKID :UUID) => {
+        const questions = neighbors.map((question) => question.get('neighborDetails'));
+        questionnaireToQuestionsMap.set(questionnaireEKID, questions);
       });
     }
 
@@ -395,7 +395,7 @@ function* downloadQuestionnaireResponsesWorker(action :SequenceAction) :Saga<*> 
 
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], {
-      type: 'application/json'
+      type: 'text/csv'
     });
     FS.saveAs(blob, getCsvFileName(questionnaireName, participantId));
 

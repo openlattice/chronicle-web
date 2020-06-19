@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 
-import styled from 'styled-components';
 import { Map } from 'immutable';
 import { AuthActions, AuthUtils } from 'lattice-auth';
 import {
@@ -38,10 +37,6 @@ import { isNonEmptyString } from '../../utils/LangUtils';
 
 const { INITIALIZE_APPLICATION } = AppActions;
 const { APP_CONTENT_WIDTH } = Sizes;
-
-const Error = styled.div`
-  text-align: center;
-`;
 
 type Props = {
   actions :{
