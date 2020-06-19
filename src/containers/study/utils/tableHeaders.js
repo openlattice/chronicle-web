@@ -35,7 +35,7 @@ const TABLE_HEADERS = [
     label: 'Days collected',
     cellStyle: {
       width: '18%',
-      textAligh: 'center',
+      textAlign: 'center',
     }
   },
   {
