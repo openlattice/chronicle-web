@@ -8,7 +8,7 @@ import {
   faLink,
   faToggleOff,
   faToggleOn,
-  faTrashAlt
+  // faTrashAlt
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
@@ -26,7 +26,7 @@ const {
 const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
 const {
-  DELETE,
+  // DELETE,
   DOWNLOAD,
   LINK,
   TOGGLE_ENROLLMENT
@@ -132,7 +132,7 @@ const ParticipantRow = (props :Props) => {
   const actionsData = [
     { action: LINK, icon: faLink },
     { action: DOWNLOAD, icon: faCloudDownload },
-    { action: DELETE, icon: faTrashAlt },
+    // { action: DELETE, icon: faTrashAlt }, 06-19-2020: temporary remove delete participant
     { action: TOGGLE_ENROLLMENT, icon: toggleIcon },
   ];
 
