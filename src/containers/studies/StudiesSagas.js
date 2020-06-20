@@ -117,6 +117,7 @@ const { PARTICIPATED_IN, PART_OF_ES_NAME, HAS_ES_NAME } = ASSOCIATION_ENTITY_SET
 
 const {
   DATE_ENROLLED,
+  DATE_FIRST_PUSHED,
   DATE_LOGGED,
   DATE_LAST_PUSHED,
   EVENT_COUNT,
@@ -426,12 +427,14 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       // If participant doesn't have metadata neighbor
       const datesLogged = metadata.getIn([participantEntityKeyId, DATE_LOGGED], List());
       const count :number = datesLogged.count();
+      const countValue = count === 0 ? '---' : count;
 
       return participant
         .set(STATUS, [enrollmentStatus.getIn([participantEntityKeyId, STATUS, 0], ENROLLED)])
         .set(DATE_ENROLLED, [enrollmentStatus.getIn([participantEntityKeyId, DATE_ENROLLED, 0])])
+        .set(DATE_FIRST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_FIRST_PUSHED, 0])])
         .set(DATE_LAST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_LAST_PUSHED, 0])])
-        .set(EVENT_COUNT, [count])
+        .set(EVENT_COUNT, [countValue])
         .set('id', [participantEntityKeyId]);
     });
 
