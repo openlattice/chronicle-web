@@ -31,6 +31,7 @@ import {
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
   getParticipantsEnrollmentStatus,
+  getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,

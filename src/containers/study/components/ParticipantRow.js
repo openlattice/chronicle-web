@@ -19,7 +19,10 @@ import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTy
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
 
-const { PERSON_ID, STATUS, DATE_ENROLLED } = PROPERTY_TYPE_FQNS;
+const {
+  PERSON_ID, STATUS, DATE_FIRST_PUSHED,
+  DATE_LAST_PUSHED, EVENT_COUNT
+} = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
 const {
@@ -48,13 +51,14 @@ const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
 
 /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
-  -webkit-line-clamp: 2;
-  display: -webkit-box;
+  display: flex;
   font-size: 15px;
   font-weight: 300;
   overflow: hidden;
   padding: 0 5px;
+  justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')};
 `;
+
 /* stylelint-enable */
 
 const IconCircleWrapper = styled.span`
@@ -120,7 +124,9 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
-  const enrollmentDate = getDateTimeFromIsoDate(getIn(data, [DATE_ENROLLED, 0]));
+  const firstDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_FIRST_PUSHED, 0]));
+  const lastDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_LAST_PUSHED, 0]));
+  const numDays = getIn(data, [EVENT_COUNT, 0]);
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
@@ -141,7 +147,19 @@ const ParticipantRow = (props :Props) => {
 
         <StyledCell>
           <CellContent>
-            { enrollmentDate }
+            { firstDataDate }
+          </CellContent>
+        </StyledCell>
+
+        <StyledCell>
+          <CellContent>
+            { lastDataDate }
+          </CellContent>
+        </StyledCell>
+
+        <StyledCell>
+          <CellContent centerContent>
+            { numDays }
           </CellContent>
         </StyledCell>
 
