@@ -36,9 +36,9 @@ const PROPERTY_TYPE_FQNS = {
   USER_FQN: new FullyQualifiedName('ol.user'),
 
   // metadata
-  DATE_FIRST_PUSHED: new FullyQualifiedName('ol.recordeddate'),
+  DATE_FIRST_PUSHED: new FullyQualifiedName('ol.datetimestart'),
   DATE_LAST_PUSHED: new FullyQualifiedName('ol.datetimeend'),
-  DATE_LOGGED: new FullyQualifiedName('ol.datelogged'),
+  DATE_LOGGED: new FullyQualifiedName('ol.recordeddate'),
   EVENT_COUNT: new FullyQualifiedName('ol.eventcount'),
 
   // notifications
