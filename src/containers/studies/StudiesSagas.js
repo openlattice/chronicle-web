@@ -46,6 +46,7 @@ import {
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
   getParticipantsEnrollmentStatus,
+  getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
@@ -54,6 +55,7 @@ import {
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import Logger from '../../utils/Logger';
+import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectEntityTypeId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
@@ -71,17 +73,15 @@ import {
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
-import { STUDIES_REDUCER_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const {
-  deleteEntitiesAndNeighborsWorker,
   getEntitySetDataWorker,
   updateEntityDataWorker,
   createAssociationsWorker,
 } = DataApiSagas;
 
 const {
-  deleteEntitiesAndNeighbors,
   getEntitySetData,
   updateEntityData,
   createAssociations
@@ -103,22 +103,24 @@ const {
 } = DataProcessingUtils;
 
 const { EntitySetBuilder } = Models;
-const { DeleteTypes, PermissionTypes, UpdateTypes } = Types;
+const { PermissionTypes, UpdateTypes } = Types;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
-  APPLICATION_DATA,
-  CHRONICLE_DEVICES,
   CHRONICLE_NOTIFICATIONS,
   CHRONICLE_STUDIES,
-  PREPROCESSED_DATA,
+  CHRONICLE_METADATA,
 } = ENTITY_SET_NAMES;
 
-const { PARTICIPATED_IN, PART_OF_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
+const { PARTICIPATED_IN, PART_OF_ES_NAME, HAS_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const {
   DATE_ENROLLED,
+  DATE_FIRST_PUSHED,
+  DATE_LOGGED,
+  DATE_LAST_PUSHED,
+  EVENT_COUNT,
   ID_FQN,
   NOTIFICATION_ENABLED,
   STATUS,
@@ -131,7 +133,7 @@ const {
   GLOBAL_NOTIFICATIONS_EKID,
   PART_OF_ASSOCIATION_EKID_MAP,
   STUDIES,
-} = STUDIES_REDUCER_CONSTANTS;
+} = STUDIES_REDUX_CONSTANTS;
 
 const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
@@ -216,33 +218,9 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
   try {
     yield put(deleteStudyParticipant.request(action.id));
 
-    const { studyId, participantEntityKeyId } = action.value;
+    const { studyId, participantEntityKeyId, participantId } = action.value;
 
-    const participantsEntityName = getParticipantsEntitySetName(studyId);
-
-    const {
-      applicationDataEntitySetId,
-      devicesEntitySetId,
-      participantsEntitySetId,
-      preprocessedDataEntitySetId
-    } = yield select((state) => ({
-      applicationDataEntitySetId: state.getIn(['edm', 'entitySetIds', APPLICATION_DATA]),
-      devicesEntitySetId: state.getIn(['edm', 'entitySetIds', CHRONICLE_DEVICES]),
-      participantsEntitySetId: state.getIn(['studies', 'participantEntitySetIds', participantsEntityName]),
-      preprocessedDataEntitySetId: state.getIn(['edm', 'entitySetIds', PREPROCESSED_DATA]),
-    }));
-
-    const response = yield call(
-      deleteEntitiesAndNeighborsWorker,
-      deleteEntitiesAndNeighbors({
-        entitySetId: participantsEntitySetId,
-        filter: {
-          entityKeyIds: [participantEntityKeyId],
-          sourceEntitySetIds: [applicationDataEntitySetId, devicesEntitySetId, preprocessedDataEntitySetId]
-        },
-        deleteType: DeleteTypes.HARD
-      })
-    );
+    const response = yield call(ChronicleApi.deleteStudyParticipant, participantId, studyId);
     if (response.error) throw response.error;
 
     yield put(deleteStudyParticipant.success(action.id, {
@@ -334,6 +312,75 @@ function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
 
 /*
  *
+ * StudiesActions.getParticipantsMetadata()
+ *
+ */
+
+function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *, *> {
+  const workerResponse = {};
+  try {
+    yield put(getParticipantsMetadata.request(action.id));
+
+    const { value } = action;
+    const { participants, participantsEntitySetId, participantsEntitySetName } = value;
+
+    if (!participants.isEmpty()) {
+      const hasEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', HAS_ES_NAME])
+      );
+      const metadataEntitySetId = yield select(
+        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_METADATA])
+      );
+      const participantsEntityKeyIds = participants.keySeq().toJS();
+
+      const searchFilter = {
+        destinationEntitySetIds: [metadataEntitySetId],
+        edgeEntitySetIds: [hasEntitySetId],
+        entityKeyIds: participantsEntityKeyIds,
+        sourceEntitySetIds: [participantsEntitySetId]
+      };
+
+      const response = yield call(
+        searchEntityNeighborsWithFilterWorker,
+        searchEntityNeighborsWithFilter({
+          entitySetId: participantsEntitySetId,
+          filter: searchFilter,
+        })
+      );
+      if (response.error) throw response.error;
+
+      // mapping from participantEntityKeyId -> enrollment status
+      const metadata :Map = fromJS(response.data)
+        .map((neighbors :List) => neighbors.first().get('neighborDetails'));
+      workerResponse.data = metadata;
+
+      // mapping from participantEntityKeyId -> association EKID
+      const neighborKeyIds :Map = fromJS(response.data)
+        .map((neighbors :List) => neighbors.first().getIn(['neighborDetails', OPENLATTICE_ID_FQN, 0]));
+
+      yield put(getParticipantsMetadata.success(action.id, { neighborKeyIds, participantsEntitySetName }));
+    }
+    else {
+      yield put(getParticipantsMetadata.success(action.id));
+    }
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    workerResponse.error = error;
+    yield put(getParticipantsMetadata.failure(action.id));
+  }
+  finally {
+    yield put(getParticipantsMetadata.finally(action.id));
+  }
+  return workerResponse;
+}
+
+function* getParticipantsMetadataWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_PARTICIPANTS_ENROLLMENT, getParticipantsMetadataWorker);
+}
+
+/*
+ *
  * StudiesActions.getStudyParticipants()
  *
  */
@@ -362,16 +409,34 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     // get enrollment status
     response = yield call(
       getParticipantsEnrollmentStatusWorker,
-      getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName })
+      getParticipantsEnrollmentStatus({ participants, participantsEntitySetId, participantsEntitySetName }),
     );
     if (response.error) throw response.error;
     const enrollmentStatus :Map = response.data;
 
+    // get participant metadata
+    response = yield call(
+      getParticipantsMetadataWorker,
+      getParticipantsMetadata({ participants, participantsEntitySetId, participantsEntitySetName })
+    );
+    const metadata :Map = response.data || Map();
+
     // update participants with enrollment status
-    participants = participants.map((participant, id) => participant
-      .set(STATUS, [enrollmentStatus.getIn([id, STATUS, 0], ENROLLED)])
-      .set(DATE_ENROLLED, [enrollmentStatus.getIn([id, DATE_ENROLLED, 0])])
-      .set('id', [id])); // required by LUK table
+    participants = participants.map((participant, participantEntityKeyId) => {
+
+      // If participant doesn't have metadata neighbor
+      const datesLogged = metadata.getIn([participantEntityKeyId, DATE_LOGGED], List());
+      const count :number = datesLogged.count();
+      const countValue = count === 0 ? '---' : count;
+
+      return participant
+        .set(STATUS, [enrollmentStatus.getIn([participantEntityKeyId, STATUS, 0], ENROLLED)])
+        .set(DATE_ENROLLED, [enrollmentStatus.getIn([participantEntityKeyId, DATE_ENROLLED, 0])])
+        .set(DATE_FIRST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_FIRST_PUSHED, 0])])
+        .set(DATE_LAST_PUSHED, [metadata.getIn([participantEntityKeyId, DATE_LAST_PUSHED, 0])])
+        .set(EVENT_COUNT, [countValue])
+        .set('id', [participantEntityKeyId]);
+    });
 
     yield put(getStudyParticipants.success(action.id, {
       participants,
@@ -653,7 +718,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
       .set(DATE_ENROLLED, [dateEnrolled])
-      .set('id', [participantEntityKeyId]); // required by LUK table
+      .set('id', [participantEntityKeyId]);
 
     yield put(addStudyParticipant.success(action.id, {
       participantEntityData,
@@ -952,6 +1017,8 @@ export {
   deleteStudyParticipantWatcher,
   getParticipantsEnrollmentStatusWatcher,
   getParticipantsEnrollmentStatusWorker,
+  getParticipantsMetadataWatcher,
+  getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,

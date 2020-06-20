@@ -4,6 +4,7 @@
 
 const ASSOCIATION_ENTITY_SET_NAMES = {
   PARTICIPATED_IN: 'chronicle_participated_in',
+  HAS_ES_NAME: 'chronicle_has',
   PART_OF_ES_NAME: 'chronicle_partof',
   RESPONDS_WITH_ES_NAME: 'chronicle_respondswith',
   ADDRESSES_ES_NAME: 'chronicle_addresses'
@@ -14,6 +15,7 @@ const ENTITY_SET_NAMES = {
   CHRONICLE_DEVICES: 'chronicle_device',
   CHRONICLE_STUDIES: 'chronicle_study',
   PREPROCESSED_DATA: 'chronicle_preprocessed_app_data',
+  CHRONICLE_METADATA: 'chronicle_metadata',
   CHRONICLE_NOTIFICATIONS: 'chronicle_notifications',
   QUESTIONNAIRE_ES_NAME: 'chronicle_questionnaires',
   QUESTIONS_ES_NAME: 'chronicle_questions',

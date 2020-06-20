@@ -15,8 +15,10 @@ import { createGlobalStyle } from 'styled-components';
 
 import AppContainer from './containers/app/AppContainer';
 import SurveyContainer from './containers/survey/SurveyContainer';
+import QuestionnaireContainer from './containers/questionnaire/QuestionnaireContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
+
 import * as Routes from './core/router/Routes';
 
 // injected by Webpack.DefinePlugin
@@ -91,6 +93,7 @@ if (APP_ROOT_NODE) {
         <ConnectedRouter history={routerHistory}>
           <Switch>
             <Route path={Routes.SURVEY} component={SurveyContainer} />
+            <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
             <AuthRoute path={Routes.ROOT} component={AppContainer} />
           </Switch>
         </ConnectedRouter>

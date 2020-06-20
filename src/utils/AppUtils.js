@@ -11,12 +11,14 @@ import ParticipantDataTypes from './constants/ParticipantDataTypes';
 import { isNonEmptyString } from './LangUtils';
 import { isValidUUID } from './ValidationUtils';
 import {
+  AUTHENTICATED,
   CHRONICLE,
   CSRF_TOKEN,
   DATA,
   FILE_TYPE,
   PARTICIPANT,
-  STUDY,
+  QUESTIONNAIRE,
+  STUDY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
@@ -65,7 +67,7 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
       break;
   }
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}/`
+  return `${baseUrl}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
   + `${studyId}/${participantEntityKeyId}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
@@ -90,4 +92,53 @@ const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
     + `/${studyId}/${participantId}/apps`;
 };
 
-export { getBaseUrl, getParticipantDataUrl, getParticipantUserAppsUrl };
+const getDeleteParticipantPath = (participantId :string, studyId :UUID) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${studyId}/${participantId}`;
+};
+
+const getQuestionnaireUrl = (studyId :UUID, questionnaireEKID :UUID) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valid UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(questionnaireEKID)) {
+    LOG.error('questionnaireEKID must be a valid UUID', questionnaireEKID);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
+};
+
+const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
+};
+
+export {
+  getBaseUrl,
+  getParticipantDataUrl,
+  getParticipantUserAppsUrl,
+  getQuestionnaireUrl,
+  getSubmitQuestionnaireUrl,
+  getDeleteParticipantPath,
+};

@@ -20,15 +20,11 @@ import SubmissionSuccessful from './components/SubmissionSuccessful';
 import SurveyTable from './SurveyTable';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 
 const SpinnerWrapper = styled.div`
   margin-top: 60px;
-  text-align: center;
-`;
-
-const ErrorWrapper = styled.div`
-  margin-top: 50px;
   text-align: center;
 `;
 
@@ -44,12 +40,6 @@ const SurveyDate = styled.h5`
   font-weight: 400;
   margin: 5px 0 20px 0;
 `;
-
-const ErrorMessage = () => (
-  <ErrorWrapper>
-      Sorry, something went wrong. Please try refreshing the page, or contact support.
-  </ErrorWrapper>
-);
 
 const SurveyContainer = () => {
   const dispatch = useDispatch();
@@ -91,7 +81,7 @@ const SurveyContainer = () => {
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
       <AppContentWrapper>
         {
-          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <ErrorMessage />
+          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <BasicErrorComponent />
         }
         {
           requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.SUCCESS && (

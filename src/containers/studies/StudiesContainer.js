@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
-  Banner,
   Button,
   Card,
   Spinner
@@ -22,6 +21,7 @@ import StudyCard from './components/StudyCard';
 import StudyDetailsModal from './components/StudyDetailsModal';
 import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
 
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import * as RoutingActions from '../../core/router/RoutingActions';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 
@@ -107,7 +107,7 @@ class StudiesContainer extends Component<Props, State> {
 
     if (requestStates[GET_STUDIES] === RequestStates.FAILURE) {
       return (
-        <Banner isOpen> Sorry, something went wrong. Please try refreshing the page, or contact support. </Banner>
+        <BasicErrorComponent />
       );
     }
 
