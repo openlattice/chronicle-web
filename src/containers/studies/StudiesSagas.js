@@ -426,7 +426,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
       // If participant doesn't have metadata neighbor
       const datesLogged = metadata.getIn([participantEntityKeyId, DATE_LOGGED], List());
-      const count :number = (datesLogged.count() == 0 ? '---' : datesLogged.count());
+      const count :number = (datesLogged.count() === 0 ? '---' : datesLogged.count());
 
       return participant
         .set(STATUS, [enrollmentStatus.getIn([participantEntityKeyId, STATUS, 0], ENROLLED)])
