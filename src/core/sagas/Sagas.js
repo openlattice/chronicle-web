@@ -46,6 +46,7 @@ export default function* sagas() :Generator<*, *, *> {
     fork(StudiesSagas.createStudyWatcher),
     fork(StudiesSagas.deleteStudyParticipantWatcher),
     fork(StudiesSagas.getParticipantsEnrollmentStatusWatcher),
+    fork(StudiesSagas.getParticipantsMetadataWatcher),
     fork(StudiesSagas.getStudiesWatcher),
     fork(StudiesSagas.getStudyParticipantsWatcher),
     fork(StudiesSagas.updateStudyWatcher),
