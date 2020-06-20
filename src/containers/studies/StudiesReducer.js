@@ -19,7 +19,6 @@ import {
   DELETE_STUDY_PARTICIPANT,
   GET_GLOBAL_NOTIFICATIONS_EKID,
   GET_PARTICIPANTS_ENROLLMENT,
-  GET_PARTICIPANTS_METADATA,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
@@ -72,9 +71,6 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     requestState: RequestStates.STANDBY
   },
   [GET_PARTICIPANTS_ENROLLMENT]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_PARTICIPANTS_METADATA]: {
     requestState: RequestStates.STANDBY
   },
   [GET_STUDIES]: {
@@ -266,20 +262,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .setIn(['associationKeyIds', participantsEntitySetName], associationKeyIds)
             .setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.SUCCESS);
-        }
-      });
-    }
-
-    case getParticipantsMetadata.case(action.type): {
-      const seqAction :SequenceAction = action;
-      return getParticipantsMetadata.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_PARTICIPANTS_METADATA, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_PARTICIPANTS_METADATA, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => {
-          const { neighborKeyIds, participantsEntitySetName } = seqAction.value;
-          return state
-            .setIn(['neighborKeyIds', participantsEntitySetName], neighborKeyIds)
-            .setIn([GET_PARTICIPANTS_METADATA, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }
