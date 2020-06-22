@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -11,18 +11,36 @@ import {
   Colors,
   PlusButton,
   Select,
+  Spinner,
   StyleUtils,
   Table
 } from 'lattice-ui-kit';
+import { useDispatch, useSelector } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import CreateQuestionnaireForm from './components/CreateQuestionnaireForm';
 import TableHeaderRow from './table/TableHeaderRow';
 import TableRow from './table/TableRow';
 import { STATUS_SELECT_OPTIONS } from './constants/constants';
+
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import {
+  GET_STUDY_QUESTIONNAIRES,
+  getStudyQuestionnaires
+} from '../questionnaire/QuestionnaireActions';
 
 const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
+
+const {
+  ANSWER_QUESTION_ID_MAP,
+  QUESTION_ANSWERS_MAP,
+  QUESTIONNAIRE_QUESTIONS,
+  QUESTIONNAIRE_RESPONSES,
+  STUDY_QUESTIONNAIRES
+} = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const { NEUTRALS } = Colors;
 const { getStyleVariation } = StyleUtils;
@@ -33,35 +51,11 @@ const tableHeaders = ['title', 'status', 'actions'].map((header) => ({
   sortable: false
 }));
 
-const data = [
-  {
-    [NAME_FQN.toString()]: ['Ecological Momentary Assessment: Mood Rating'],
-    [DESCRIPTION_FQN.toString()]: ['Questionnaire to assess mood adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5155083/'],
-    [ACTIVE_FQN.toString()]: [true],
-    id: 12
-  },
-  {
-    [NAME_FQN.toString()]: ['Questionnaire 1'],
-    [DESCRIPTION_FQN.toString()]:
-      ['Questionnaire to end all questionnaires. Lord of the rings. On my way to Mordor. Once I get to Mordor, I will meet up with the greatest man that ever lived'],
-    id: 32
-  }
-];
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 24px;
   flex-wrap: wrap;
-`;
-
-const CardHeader = styled.div`
-  background-color: ${NEUTRALS[6]};
-  padding: 20px 30px;
-`;
-
-const SearchWrapper = styled.div`
-  width: 100%;
 `;
 
 const SelectWrapper = styled.div`
@@ -89,23 +83,49 @@ const HeadCell = ({ width } :HeadCellProps) => (
 
 type Props = {
   study :Map;
-}
+};
 
 const QuestionnairesContainer = ({ study } :Props) => {
 
+  const dispatch = useDispatch();
+  // state
   const [selectedStatus, setSelectedStatus] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
 
-  const onSearchInputChange = (event :SytheticEvent<HTMLInputElement>) => {
+  const studyEKID = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
-  };
+  // selectors
+  const studyQuestionnaires = useSelector(
+    (state) => state.getIn(['questionnaire', STUDY_QUESTIONNAIRES, studyEKID], Map())
+  );
+
+  console.log(studyQuestionnaires);
+
+  const questionsByQuestionnaireId = useSelector(
+    (state) => state.getIn(['questionnaire', QUESTIONNAIRE_QUESTIONS], Map())
+  );
+
+  const getStudyQuestionnairesRS :RequestState = useSelector(
+    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
+  );
+
+  useEffect(() => {
+    if (studyQuestionnaires.isEmpty()) {
+      dispatch((getStudyQuestionnaires(studyEKID)));
+    }
+  }, [studyQuestionnaires, studyEKID, dispatch]);
 
   const onSelectStatus = (selectedOptions :Object[]) => {
     setSelectedStatus(selectedOptions);
   };
 
+  if (getStudyQuestionnairesRS === RequestStates.PENDING) {
+    return <Spinner size="2x" />;
+  }
+
   return (
     <>
+
       <HeaderRow>
         <SelectWrapper>
           <Select
@@ -131,11 +151,19 @@ const QuestionnairesContainer = ({ study } :Props) => {
                 studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
           ) : (
             <>
-              <CardSegment padding="0">
-                <Table
-                    components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}
-                    data={data}
-                    headers={tableHeaders} />
+              <CardSegment padding="0px">
+                {
+                  studyQuestionnaires.isEmpty() ? (
+                    <div style={{ textAlign: 'center', padding: '30px' }}>
+                      No questionnaires found.
+                    </div>
+                  ) : (
+                    <Table
+                        components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}
+                        data={studyQuestionnaires.valueSeq().toJS()}
+                        headers={tableHeaders} />
+                  )
+                }
               </CardSegment>
             </>
           )

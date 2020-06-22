@@ -180,9 +180,10 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
     const studyQuestionnaires = Map().withMutations((mutator) => {
       fromJS(response.data).get(studyEKID, List()).forEach((neighbor) => {
         const neighborId = neighbor.get('neighborId');
-        const details = neighbor.get('neighborDetails');
+        const details = neighbor.get('neighborDetails').asMutable();
+        details.set('id', neighborId); // needed by LUK table
 
-        mutator.set(neighborId, details);
+        mutator.set(neighborId, details.asImmutable());
       });
     });
 

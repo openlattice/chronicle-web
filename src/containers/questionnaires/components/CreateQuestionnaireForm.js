@@ -176,7 +176,7 @@ const CreateQuestionnaireForm = (props :Props) => {
                       mode="primary"
                       onClick={handleNext}>
                     {
-                      pageName === CONFIRMATION_PAGE ? 'Save' : 'Next'
+                      pageName === CONFIRMATION_PAGE ? 'Save Questionnaire' : 'Next'
                     }
                   </Button>
                 </ActionRow>
