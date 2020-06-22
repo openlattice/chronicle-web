@@ -53,6 +53,7 @@ const PROPERTY_TYPE_FQNS = {
   DATE_TIME_FQN: new FullyQualifiedName('ol.datetime'),
   TITLE_FQN: new FullyQualifiedName('ol.title'),
   RRULE_FQN: new FullyQualifiedName('ol.rrule'),
+  ACTIVE_FQN: new FullyQualifiedName('ol.active'),
   COMPLETED_DATE_TIME_FQN: new FullyQualifiedName('date.completeddatetime')
 };
 

@@ -7,13 +7,18 @@ import {
   Colors,
   Tag
 } from 'lattice-ui-kit';
+import { getIn } from 'immutable';
+import { faToggleOn } from '@fortawesome/pro-regular-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import StyledRow from './StyledRow';
 import { TABLE_ROW_ACTIONS } from '../constants/constants';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
-const { NEUTRALS } = Colors;
+const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
+
+const { NEUTRALS, PURPLES } = Colors;
 
 const StyledCell = styled.td`
   padding-left: 30px;
@@ -54,27 +59,33 @@ type Props = {
   data :Object
 }
 const TableRow = ({ data } :Props) => {
-  const { title, description, status } = data;
+
+  const active = getIn(data, [ACTIVE_FQN, 0], false);
+  const activeStatus = active ? 'Active' : 'Inactive';
+
   return (
     <StyledRow>
       <Description>
         <h3>
-          { title }
+          { getIn(data, [NAME_FQN, 0]) }
         </h3>
         <p>
-          { description }
+          { getIn(data, [DESCRIPTION_FQN, 0]) }
         </p>
       </Description>
       <StyledCell>
-        <Tag mode={status === 'active' ? 'primary' : 'default'}>
-          { status }
+        <Tag mode={active ? 'primary' : ''}>
+          { activeStatus }
         </Tag>
       </StyledCell>
       <StyledCell>
         <IconGrid>
           {
             TABLE_ROW_ACTIONS.map((action) => (
-              <FontAwesomeIcon key={action.action} color={NEUTRALS[1]} icon={action.icon} />
+              <FontAwesomeIcon
+                  key={action.action}
+                  color={action.action === 'TOGGLE_STATUS' && active ? PURPLES[0] : NEUTRALS[1]}
+                  icon={action.action === 'TOGGLE_STATUS' && active ? faToggleOn : action.icon} />
             ))
           }
         </IconGrid>

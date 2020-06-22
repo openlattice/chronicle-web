@@ -7,7 +7,6 @@ import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { DAYS_OF_WEEK } from '../constants/constants';
 
 const {
-  ANSWERS_ES_NAME,
   QUESTIONNAIRE_ES_NAME,
   QUESTIONS_ES_NAME
 } = ENTITY_SET_NAMES;
@@ -17,7 +16,6 @@ const {
   TITLE_FQN,
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
-
 
 const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
 
@@ -63,7 +61,7 @@ const questionsSchema = {
   type: 'object',
   title: '',
   properties: {
-    [getPageSectionKey(1, 2)]: {
+    [getPageSectionKey(2, 1)]: {
       type: 'array',
       title: 'Questions',
       items: {
@@ -73,7 +71,7 @@ const questionsSchema = {
             title: 'Question',
             type: 'string'
           },
-          [getEntityAddressKey(0, ANSWERS_ES_NAME, VALUES_FQN)]: {
+          [getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN)]: {
             title: '',
             type: 'array',
             items: {
@@ -87,8 +85,7 @@ const questionsSchema = {
               },
               required: ['choice']
             },
-            uniqueItems: true,
-            minItems: 0 || 2
+            uniqueItems: true
           }
         },
         required: [
@@ -102,7 +99,7 @@ const questionsSchema = {
 };
 
 const questionsUiSchema = {
-  [getPageSectionKey(1, 2)]: {
+  [getPageSectionKey(2, 1)]: {
     classNames: 'column-span-12',
     'ui:options': {
       addButtonText: '+ Add Question'
@@ -112,7 +109,7 @@ const questionsUiSchema = {
       [getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)]: {
         classNames: 'column-span-6'
       },
-      [getEntityAddressKey(0, ANSWERS_ES_NAME, VALUES_FQN)]: {
+      [getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN)]: {
         classNames: 'column-span-6',
         'ui:options': {
           addButtonText: '+ Add Choice'
@@ -132,7 +129,7 @@ const schedulerSchema = {
   type: 'object',
   title: '',
   properties: {
-    [getPageSectionKey(1, 3)]: {
+    [getPageSectionKey(3, 1)]: {
       type: 'object',
       title: 'Notification trigger settings',
       properties: {
@@ -169,7 +166,7 @@ const schedulerSchema = {
 };
 
 const schedulerUiSchema = {
-  [getPageSectionKey(1, 3)]: {
+  [getPageSectionKey(3, 1)]: {
     classNames: 'column-span-12 grid-container',
     daysOfWeek: {
       classNames: 'column-span-12',
@@ -191,10 +188,8 @@ const schedulerUiSchema = {
           classNames: 'column-span-12',
           'ui:widget': 'TimeWidget',
           'ui:options': {
-            format: 'H:mm',
             showIndex: false,
             addButtonText: '+ Add Time',
-            mask: '__:__',
           },
         }
       }

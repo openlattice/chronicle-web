@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
+import { Map } from 'immutable';
+import { Constants } from 'lattice';
 import {
   Card,
   CardSegment,
   Colors,
   PlusButton,
-  SearchInput,
   Select,
   StyleUtils,
   Table
@@ -18,6 +19,10 @@ import CreateQuestionnaireForm from './components/CreateQuestionnaireForm';
 import TableHeaderRow from './table/TableHeaderRow';
 import TableRow from './table/TableRow';
 import { STATUS_SELECT_OPTIONS } from './constants/constants';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+
+const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const { NEUTRALS } = Colors;
 const { getStyleVariation } = StyleUtils;
@@ -30,15 +35,15 @@ const tableHeaders = ['title', 'status', 'actions'].map((header) => ({
 
 const data = [
   {
-    title: 'Ecological Momentary Assessment: Mood Rating',
-    description: 'Questionnaire to assess mood adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5155083/',
-    status: 'active',
+    [NAME_FQN.toString()]: ['Ecological Momentary Assessment: Mood Rating'],
+    [DESCRIPTION_FQN.toString()]: ['Questionnaire to assess mood adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5155083/'],
+    [ACTIVE_FQN.toString()]: [true],
     id: 12
   },
   {
-    title: 'Questionnaire 1',
-    description: 'Questionnaire to end all questionnaires. Lord of the rings.On my way to Mordor. Once I get to Mordor, I will meet up with the greatest man that ever lived',
-    status: 'Inactive',
+    [NAME_FQN.toString()]: ['Questionnaire 1'],
+    [DESCRIPTION_FQN.toString()]:
+      ['Questionnaire to end all questionnaires. Lord of the rings. On my way to Mordor. Once I get to Mordor, I will meet up with the greatest man that ever lived'],
     id: 32
   }
 ];
@@ -82,7 +87,12 @@ const HeadCell = ({ width } :HeadCellProps) => (
   <Cell width={width} />
 );
 
-const QuestionnairesContainer = () => {
+type Props = {
+  study :Map;
+}
+
+const QuestionnairesContainer = ({ study } :Props) => {
+
   const [selectedStatus, setSelectedStatus] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -94,13 +104,12 @@ const QuestionnairesContainer = () => {
     setSelectedStatus(selectedOptions);
   };
 
-  console.log(selectedStatus);
-
   return (
     <>
       <HeaderRow>
         <SelectWrapper>
           <Select
+              isDisabled={isEditing}
               isMulti
               onChange={onSelectStatus}
               options={STATUS_SELECT_OPTIONS}
@@ -108,6 +117,7 @@ const QuestionnairesContainer = () => {
               value={selectedStatus} />
         </SelectWrapper>
         <PlusButton
+            disabled={isEditing}
             mode="primary"
             onClick={() => setIsEditing(true)}>
           New Questionnaire
@@ -116,14 +126,11 @@ const QuestionnairesContainer = () => {
       <Card>
         {
           isEditing ? (
-            <CreateQuestionnaireForm onExitEditMode={() => setIsEditing(false)} />
+            <CreateQuestionnaireForm
+                onExitEditMode={() => setIsEditing(false)}
+                studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
           ) : (
             <>
-              <CardHeader>
-                <SearchWrapper>
-                  <SearchInput placeholder="Search" />
-                </SearchWrapper>
-              </CardHeader>
               <CardSegment padding="0">
                 <Table
                     components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}

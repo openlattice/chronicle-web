@@ -1,13 +1,23 @@
 // @flow
 
-import { get, getIn } from 'immutable';
+import {
+  get,
+  getIn,
+  List,
+  Map,
+  fromJS
+} from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { RRule, RRuleSet } from 'rrule';
+import { Constants } from 'lattice';
 import invert from 'lodash/invert';
+import { v4 as uuid } from 'uuid';
 
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_SUMMARY, DAYS_OF_WEEK } from '../constants/constants';
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   TITLE,
@@ -92,7 +102,34 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
   return rruleSet.toString();
 };
 
+const createPreviewQuestionEntities = (formData :Object) => {
+  console.log(formData);
+
+  const psk = getPageSectionKey(2, 1);
+  const questions :Object[] = get(formData, psk);
+
+  const valuesEAK = getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN);
+  const titleEAK = getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN);
+
+  const questionEntities = List().withMutations((list) => {
+    questions.forEach((question) => {
+      const questionEntity = fromJS({
+        [OPENLATTICE_ID_FQN]: [uuid()],
+        [TITLE_FQN.toString()]: [get(question, titleEAK)],
+        [VALUES_FQN.toString()]: get(question, valuesEAK, []).map((answer) => get(answer, 'choice'))
+      });
+
+      list.push(questionEntity);
+    });
+  });
+
+  console.log(questionEntities);
+
+  return questionEntities;
+};
+
 export {
+  createPreviewQuestionEntities,
   createRecurrenceRuleSetFromFormData,
-  getQuestionnaireSummaryFromForm,
+  getQuestionnaireSummaryFromForm
 };

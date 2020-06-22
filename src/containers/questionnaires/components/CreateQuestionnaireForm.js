@@ -1,9 +1,7 @@
 // @flow
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { faTimes } from '@fortawesome/pro-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Form,
   Paged
@@ -11,12 +9,15 @@ import {
 import {
   Button,
   CardSegment,
-  Colors,
-  IconButton
+  Modal
 } from 'lattice-ui-kit';
+import { useDispatch, useSelector } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
 
 import NewQuestionnaireConfirmation from './NewQuestionnaireConfirmation';
 
+import { resetRequestState } from '../../../core/redux/ReduxActions';
+import { CREATE_QUESTIONNAIRE, createQuestionnaire } from '../QuestionnairesActions';
 import { QUESTIONNAIRE_FORM_PAGES } from '../constants/constants';
 import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
 
@@ -28,7 +29,6 @@ const {
   QUESTIONS_PAGE,
   SCHEDULER_PAGE,
 } = QUESTIONNAIRE_FORM_PAGES;
-const { NEUTRALS } = Colors;
 
 const pages = [ABOUT_PAGE, QUESTIONS_PAGE, SCHEDULER_PAGE, CONFIRMATION_PAGE];
 
@@ -43,10 +43,6 @@ const pageSchemaMap = {
   [QUESTIONS_PAGE]: questionsSchema,
   [SCHEDULER_PAGE]: schedulerSchema
 };
-
-const CloseIcon = (
-  <FontAwesomeIcon icon={faTimes} color={NEUTRALS[1]} />
-);
 
 const Header = styled.div`
   display: flex;
@@ -70,14 +66,52 @@ const ActionRow = styled.div`
 
 type Props = {
   onExitEditMode :() => void;
+  studyEKID :UUID;
 }
 const CreateQuestionnaireForm = (props :Props) => {
-  const { onExitEditMode } = props;
+  const { onExitEditMode, studyEKID } = props;
+
+  const dispatch = useDispatch();
+
+  const [submitStatusModalTitle, setSubmitStatusModalTitle] = useState('');
+  const [submitStatusModalMessage, setSubmitStatusModalMessage] = useState('');
+  const [submitStatusModalVisible, setSubmitStatusModalVisible] = useState(false);
+
+  const requestStates = useSelector((state) => ({
+    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaires', CREATE_QUESTIONNAIRE, 'requestState'])
+  }));
+
+  useEffect(() => {
+    const submitSuccessful = requestStates[CREATE_QUESTIONNAIRE] === RequestStates.SUCCESS;
+    const submitFailure = requestStates[CREATE_QUESTIONNAIRE] === RequestStates.FAILURE;
+    if (submitSuccessful) {
+      setSubmitStatusModalTitle('Success');
+      setSubmitStatusModalMessage('Questionnaire was successfully created.');
+    }
+
+    if (submitFailure) {
+      setSubmitStatusModalTitle('Error');
+      setSubmitStatusModalMessage(
+        'An error occurred while creating questionnaire. Please try again or contact support.'
+      );
+    }
+
+    setSubmitStatusModalVisible(submitFailure || submitSuccessful);
+  }, [requestStates]);
+
+  const handleCloseModal = () => {
+    setSubmitStatusModalVisible(false);
+    if (requestStates[CREATE_QUESTIONNAIRE] === RequestStates.SUCCESS) {
+      onExitEditMode();
+    }
+    dispatch(resetRequestState(CREATE_QUESTIONNAIRE));
+  };
+
   return (
     <CardSegment padding="20px">
       <Header>
         <h3> Create Questionnaire </h3>
-        <IconButton icon={CloseIcon} onClick={onExitEditMode}> Close </IconButton>
+        <Button onClick={onExitEditMode}> Cancel </Button>
       </Header>
       <Paged
           render={(pagedProps) => {
@@ -101,7 +135,10 @@ const CreateQuestionnaireForm = (props :Props) => {
 
             const handleNext = () => {
               if (pageName === CONFIRMATION_PAGE) {
-                alert('ready to send this');
+                dispatch(createQuestionnaire({
+                  formData: pagedData,
+                  studyEKID
+                }));
               }
               else {
                 validateAndSubmit();
@@ -135,16 +172,26 @@ const CreateQuestionnaireForm = (props :Props) => {
                   </Button>
                   <span>{`${page + 1} of ${totalPages}`}</span>
                   <Button
+                      isLoading={requestStates[CREATE_QUESTIONNAIRE] === RequestStates.PENDING}
                       mode="primary"
                       onClick={handleNext}>
                     {
-                      pageName === CONFIRMATION_PAGE ? 'Save Questionnaire' : 'Next'
+                      pageName === CONFIRMATION_PAGE ? 'Save' : 'Next'
                     }
                   </Button>
                 </ActionRow>
               </>
             );
           }} />
+      <Modal
+          isVisible={submitStatusModalVisible}
+          onClose={handleCloseModal}
+          textSecondary="Cancel"
+          textTitle={submitStatusModalTitle}>
+        <p>
+          { submitStatusModalMessage}
+        </p>
+      </Modal>
     </CardSegment>
   );
 };

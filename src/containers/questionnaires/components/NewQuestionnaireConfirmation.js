@@ -1,12 +1,13 @@
 // @flow
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { Button, Badge, Colors } from 'lattice-ui-kit';
 import { get } from 'immutable';
 import { QUESTIONNAIRE_SUMMARY } from '../constants/constants';
-import { getQuestionnaireSummaryFromForm } from '../utils/utils';
+import { getQuestionnaireSummaryFromForm } from '../utils';
+import QuestionnairePreview from './QuestionnairePreview';
 
 const { NEUTRALS } = Colors;
 
@@ -20,11 +21,11 @@ const {
 const StyledButton = styled(Button)`
   margin-top: 20px;
   align-self: flex-start;
-  width: 200px;
 `;
 
 const LeadText = styled.span`
   font-weight: 500;
+  font-size: 15px;
 `;
 
 const Description = styled.span`
@@ -51,6 +52,7 @@ type Props = {
 const NewQuestionnaireConfirmation = ({
   formData
 } :Props) => {
+  const [previewVisible, setPreviewVisible] = useState(false);
   const summary = getQuestionnaireSummaryFromForm(formData);
 
   return (
@@ -84,9 +86,16 @@ const NewQuestionnaireConfirmation = ({
         </Label>
       </Wrapper>
 
-      <StyledButton mode="secondary">
+      <StyledButton mode="secondary" onClick={() => setPreviewVisible(true)}>
         Preview
       </StyledButton>
+
+      <QuestionnairePreview
+          description={get(summary, DESCRIPTION)}
+          isVisible={previewVisible}
+          formData={formData}
+          onClose={() => setPreviewVisible(false)}
+          title={get(summary, TITLE)} />
     </>
   );
 };

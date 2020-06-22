@@ -1,6 +1,6 @@
 // @flow
 
-import { faTrashAlt, faEdit } from '@fortawesome/pro-regular-svg-icons';
+import { faToggleOff, faTrashAlt } from '@fortawesome/pro-regular-svg-icons';
 
 import QuestionnaireStatuses from './questionnaireStatus';
 
@@ -12,11 +12,11 @@ const STATUS_SELECT_OPTIONS = [
 ];
 
 const DELETE = 'DELETE';
-const EDIT = 'EDIT';
+const TOGGLE_STATUS = 'TOGGLE_STATUS';
 
 const TABLE_ROW_ACTIONS = [
   { action: DELETE, icon: faTrashAlt },
-  { action: EDIT, icon: faEdit }
+  { action: TOGGLE_STATUS, icon: faToggleOff }
 ];
 
 // questionnaire buidler pages

@@ -6,7 +6,7 @@ import {
   select,
   takeEvery,
 } from '@redux-saga/core/effects';
-import { deleteIn, setIn, set } from 'immutable';
+import { setIn, set } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -14,7 +14,7 @@ import {
   CREATE_QUESTIONNAIRE,
   createQuestionnaire
 } from './QuestionnairesActions';
-import { createRecurrenceRuleSetFromFormData } from './utils/utils';
+import { createRecurrenceRuleSetFromFormData } from './utils';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 
@@ -34,11 +34,10 @@ const {
   processEntityData
 } = DataProcessingUtils;
 
-
 const LOG = new Logger('QuestionnairesSagas');
 
 const { QUESTIONNAIRE_ES_NAME } = ENTITY_SET_NAMES;
-const { RRULE_FQN } = PROPERTY_TYPE_FQNS;
+const { ACTIVE_FQN, RRULE_FQN } = PROPERTY_TYPE_FQNS;
 
 function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
   try {
@@ -55,8 +54,12 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
 
     // update formdata with rrule
     let psk = getPageSectionKey(1, 1);
-    const eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
+    let eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
     formData = setIn(formData, [psk, eak], rruleSet);
+
+    // set ol.active to true
+    eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN);
+    formData = setIn(formData, [psk, eak], true);
 
     // remove scheduler from from form data
     psk = getPageSectionKey(3, 1);
@@ -75,8 +78,6 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
 
     // associations
     const associations = createQuestionnaireAssociations(formData, studyEKID);
-    console.log(studyEKID);
-    console.log(associations);
     const associationEntityData = processAssociationEntityData(
       associations,
       entitySetIds,
