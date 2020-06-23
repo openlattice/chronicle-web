@@ -18,9 +18,11 @@ import {
   set,
   setIn,
 } from 'immutable';
-import { Constants } from 'lattice';
+import { Constants, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
+  DataApiActions,
+  DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
   SearchApiActions,
@@ -32,12 +34,14 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   CREATE_QUESTIONNAIRE,
+  DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
   createQuestionnaire,
+  deleteQuestionnaire,
   downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
@@ -65,6 +69,10 @@ const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
+const { deleteEntitiesAndNeighborsWorker } = DataApiSagas;
+const { deleteEntitiesAndNeighbors } = DataApiActions;
+
+const { DeleteTypes } = Types;
 
 const {
   getPageSectionKey,
@@ -103,6 +111,53 @@ const {
 
 const LOG = new Logger('QuestionnaireSagas');
 
+/*
+ *
+ * QuestionnaireActions.deteQuestionnaire()
+ *
+ */
+
+function* deleteQuestionnaireWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(deleteQuestionnaire.request(action.id));
+
+    const { studyEKID, questionnaireEKID } = action.value;
+
+    const questionnaireESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+    const questionsESID = yield select(selectEntitySetId(QUESTIONS_ES_NAME));
+
+    const neighborFilter = {
+      entityKeyIds: [questionnaireEKID],
+      destinationEntitySetIds: [],
+      sourceEntitySetIds: [questionsESID]
+    };
+
+    const response = yield call(deleteEntitiesAndNeighborsWorker, deleteEntitiesAndNeighbors({
+      entitySetId: questionnaireESID,
+      filter: neighborFilter,
+      deleteType: DeleteTypes.HARD
+    }));
+
+    if (response.error) throw response.error;
+
+    yield put(deleteQuestionnaire.success(action.id, {
+      studyEKID,
+      questionnaireEKID
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteQuestionnaire.failure(action.id));
+  }
+  finally {
+    yield put(deleteQuestionnaire.finally(action.id));
+  }
+}
+
+function* deleteQuestionnaireWatcher() :Saga<*> {
+  yield takeEvery(DELETE_QUESTIONNAIRE, deleteQuestionnaireWorker);
+}
+
 function constructEntitiesFromFormData(formData, questionsData, entityKeyIds, entitySetIds, propertyTypeIds :Map) {
   const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
   const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
@@ -139,7 +194,13 @@ function constructEntitiesFromFormData(formData, questionsData, entityKeyIds, en
   return { questionEntities, questionnaireEntity };
 }
 
-function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
+/*
+ *
+ * QuestionnaireActions.createQuestionnaire()
+ *
+ */
+
+function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(createQuestionnaire.request(action.id));
 
@@ -190,7 +251,6 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
 
     // reconstruct entity
     const { entityKeyIds } = response.data;
-    console.log(questionsData);
     const {
       questionEntities,
       questionnaireEntity
@@ -212,7 +272,7 @@ function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> 
   }
 }
 
-function* createQuestionnaireWatcher() :Generator<*, *, *> {
+function* createQuestionnaireWatcher() :Saga<*> {
   yield takeEvery(CREATE_QUESTIONNAIRE, createQuestionnaireWorker);
 }
 
@@ -553,6 +613,7 @@ function* downloadQuestionnaireResponsesWatcher() :Saga<*> {
 
 export {
   createQuestionnaireWatcher,
+  deleteQuestionnaireWatcher,
   downloadQuestionnaireResponsesWatcher,
   getQuestionnaireResponsesWatcher,
   getQuestionnaireWatcher,

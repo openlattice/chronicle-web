@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -97,6 +97,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   const dispatch = useDispatch();
   // state
   const [selectedStatus, setSelectedStatus] = useState([]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [tableData, setTableData] = useState([]);
 
@@ -145,6 +146,14 @@ const QuestionnairesContainer = ({ study } :Props) => {
     setSelectedStatus(selectedOptions);
   };
 
+  // const RowComponent = ({ data: RowData } :any) => (
+  //   <TableRow data={RowData} studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
+  // );
+
+  const RowComponent = useMemo(() => ({ data: RowData }) => (
+    <TableRow data={RowData} studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
+  ), [study]);
+
   if (getStudyQuestionnairesRS === RequestStates.PENDING) {
     return <Spinner size="2x" />;
   }
@@ -184,7 +193,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
                     </div>
                   ) : (
                     <Table
-                        components={{ HeadCell, Header: TableHeaderRow, Row: TableRow }}
+                        components={{ HeadCell, Header: TableHeaderRow, Row: RowComponent }}
                         data={studyQuestionnaires.valueSeq().toJS()}
                         headers={tableHeaders} />
                   )

@@ -1,24 +1,28 @@
 // @flow
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
+import { faToggleOn } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getIn } from 'immutable';
+import { Constants } from 'lattice';
 import {
   Colors,
   Tag
 } from 'lattice-ui-kit';
-import { getIn } from 'immutable';
-import { faToggleOn } from '@fortawesome/pro-regular-svg-icons';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import StyledRow from './StyledRow';
-import { TABLE_ROW_ACTIONS } from '../constants/constants';
+
+import DeleteQuestionnaireModal from '../components/DeleteQuestionnaireModal';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { TABLE_ROW_ACTIONS } from '../constants/constants';
 
 const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
-
+const { OPENLATTICE_ID_FQN } = Constants;
 const { NEUTRALS, PURPLES } = Colors;
+
+const [DELETE, TOGGLE_STATUS] = TABLE_ROW_ACTIONS.map((action) => action.action);
 
 const StyledCell = styled.td`
   padding-left: 30px;
@@ -56,12 +60,26 @@ const IconGrid = styled.div`
 `;
 
 type Props = {
-  data :Object
-}
-const TableRow = ({ data } :Props) => {
+  data :Object;
+  studyEKID :UUID;
+};
+
+const TableRow = ({ data, studyEKID } :Props) => {
+
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const active = getIn(data, [ACTIVE_FQN, 0], false);
   const activeStatus = active ? 'Active' : 'Inactive';
+
+  const handleOnClick = (event :SyntheticMouseEvent<HTMLElement>) => {
+    const { currentTarget } = event;
+    const { dataset } = currentTarget;
+    const { actionId } = dataset;
+
+    if (actionId === DELETE) {
+      setDeleteModalVisible(true);
+    }
+  };
 
   return (
     <StyledRow>
@@ -83,13 +101,20 @@ const TableRow = ({ data } :Props) => {
           {
             TABLE_ROW_ACTIONS.map((action) => (
               <FontAwesomeIcon
-                  key={action.action}
+                  data-action-id={action.action}
+                  onClick={handleOnClick}
                   color={action.action === 'TOGGLE_STATUS' && active ? PURPLES[0] : NEUTRALS[1]}
-                  icon={action.action === 'TOGGLE_STATUS' && active ? faToggleOn : action.icon} />
+                  icon={action.action === 'TOGGLE_STATUS' && active ? faToggleOn : action.icon}
+                  key={action.action} />
             ))
           }
         </IconGrid>
       </StyledCell>
+      <DeleteQuestionnaireModal
+          isVisible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          studyEKID={studyEKID}
+          questionnaireEKID={getIn(data, [OPENLATTICE_ID_FQN, 0])} />
     </StyledRow>
   );
 };

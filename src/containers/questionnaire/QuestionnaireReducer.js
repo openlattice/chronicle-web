@@ -11,12 +11,14 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import {
   CREATE_QUESTIONNAIRE,
+  DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
   createQuestionnaire,
+  deleteQuestionnaire,
   downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
@@ -40,6 +42,9 @@ const {
 
 const INITIAL_STATE = fromJS({
   [CREATE_QUESTIONNAIRE]: {
+    requestState: RequestStates.STANDBY
+  },
+  [DELETE_QUESTIONNAIRE]: {
     requestState: RequestStates.STANDBY
   },
   [DOWNLOAD_QUESTIONNAIRE_RESPONSES]: {
@@ -156,14 +161,25 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
 
           const questionnaireEKID = getIn(questionnaireEntity, [OPENLATTICE_ID_FQN, 0]);
 
-          // console.log(questionEntities);
-          // console.log(questionnaireEntity);
-          // console.log(studyEKID);
-
           return state
             .setIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID], fromJS(questionEntities))
             .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID], fromJS(questionnaireEntity))
             .setIn([CREATE_QUESTIONNAIRE, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case deleteQuestionnaire.case(action.type): {
+      return deleteQuestionnaire.reducer(state, action, {
+        REQUEST: () => state.setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { studyEKID, questionnaireEKID } = action.value;
+
+          return state
+            .deleteIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID])
+            .deleteIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID])
+            .setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.SUCCESS);
         }
       });
     }
