@@ -51,6 +51,13 @@ const tableHeaders = ['title', 'status', 'actions'].map((header) => ({
   sortable: false
 }));
 
+const [ACTIVE, NOT_ACTIVE] = STATUS_SELECT_OPTIONS.map((status) => status.value);
+
+const getActiveStatus = (entity :Map) => {
+  const active = entity.getIn([ACTIVE_FQN, 0], false);
+  return active ? ACTIVE : NOT_ACTIVE;
+};
+
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -91,6 +98,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   // state
   const [selectedStatus, setSelectedStatus] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [tableData, setTableData] = useState([]);
 
   const studyEKID = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
@@ -99,11 +107,12 @@ const QuestionnairesContainer = ({ study } :Props) => {
     (state) => state.getIn(['questionnaire', STUDY_QUESTIONNAIRES, studyEKID], Map())
   );
 
-  console.log(studyQuestionnaires);
-
   const questionsByQuestionnaireId = useSelector(
     (state) => state.getIn(['questionnaire', QUESTIONNAIRE_QUESTIONS], Map())
   );
+
+  console.log(questionsByQuestionnaireId);
+  console.log(studyQuestionnaires);
 
   const getStudyQuestionnairesRS :RequestState = useSelector(
     (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
@@ -114,6 +123,23 @@ const QuestionnairesContainer = ({ study } :Props) => {
       dispatch((getStudyQuestionnaires(studyEKID)));
     }
   }, [studyQuestionnaires, studyEKID, dispatch]);
+
+  useEffect(() => {
+    setTableData((studyQuestionnaires.valueSeq().toJS()));
+  }, [studyQuestionnaires]);
+
+  useEffect(() => {
+    let filtered = studyQuestionnaires;
+
+    if (selectedStatus) {
+      const filters = selectedStatus.map((selected) => selected.value);
+      if (filters.length !== 0) {
+        filtered = studyQuestionnaires.filter((entity) => filters.includes(getActiveStatus(entity)));
+      }
+    }
+
+    setTableData((filtered.valueSeq().toJS()));
+  }, [selectedStatus, studyQuestionnaires]);
 
   const onSelectStatus = (selectedOptions :Object[]) => {
     setSelectedStatus(selectedOptions);
@@ -153,7 +179,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
             <>
               <CardSegment padding="0px">
                 {
-                  studyQuestionnaires.isEmpty() ? (
+                  tableData.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '30px' }}>
                       No questionnaires found.
                     </div>
