@@ -48,11 +48,12 @@ const aboutUiSchema = {
   [getPageSectionKey(1, 1)]: {
     classNames: 'column-span-12 grid-container',
     [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, NAME_FQN)]: {
-      classNames: 'column-span-12'
+      classNames: 'column-span-12',
+      'ui:autofocus': true
     },
     [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN)]: {
       classNames: 'column-span-12',
-      'ui:widget': 'textarea'
+      'ui:widget': 'textarea',
     }
   }
 };
@@ -107,7 +108,8 @@ const questionsUiSchema = {
     items: {
       classNames: 'grid-container',
       [getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)]: {
-        classNames: 'column-span-6'
+        classNames: 'column-span-6',
+        'ui:autofocus': true
       },
       [getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN)]: {
         classNames: 'column-span-6',
@@ -117,8 +119,9 @@ const questionsUiSchema = {
         items: {
           classNames: 'grid-container',
           choice: {
-            classNames: 'column-span-12'
-          }
+            classNames: 'column-span-12',
+            'ui:autofocus': true
+          },
         }
       }
     },
@@ -191,6 +194,7 @@ const schedulerUiSchema = {
             showIndex: false,
             addButtonText: '+ Add Time',
           },
+          'ui:autofocus': true,
         }
       }
     }
