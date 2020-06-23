@@ -12,7 +12,7 @@ import permissionsReducer from '../permissions/PermissionsReducer';
 import studiesReducer from '../../containers/studies/StudiesReducer';
 import surveyReducer from '../../containers/survey/SurveyReducer';
 import questionnareReducer from '../../containers/questionnaire/QuestionnaireReducer';
-import questionnairesReducer from '../../containers/questionnaires/QuestionnairesReducer';
+// import questionnairesReducer from '../../containers/questionnaires/QuestionnairesReducer';
 
 export default function reduxReducer(routerHistory :any) {
 
@@ -23,7 +23,7 @@ export default function reduxReducer(routerHistory :any) {
     edm: edmReducer,
     permissions: permissionsReducer,
     questionnaire: questionnareReducer,
-    questionnaires: questionnairesReducer,
+    // questionnaires: questionnairesReducer,
     router: connectRouter(routerHistory),
     studies: studiesReducer,
   });

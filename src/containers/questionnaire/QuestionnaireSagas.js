@@ -12,9 +12,14 @@ import {
   List,
   Map,
   Set,
-  fromJS
+  fromJS,
+  get,
+  getIn,
+  set,
+  setIn,
 } from 'immutable';
 import { Constants } from 'lattice';
+import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   EntitySetsApiActions,
   EntitySetsApiSagas,
@@ -26,11 +31,13 @@ import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CREATE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  createQuestionnaire,
   downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
@@ -44,13 +51,27 @@ import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { submitDataGraph } from '../../core/sagas/data/DataActions';
+import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { createRecurrenceRuleSetFromFormData } from '../questionnaires/utils';
+import {
+  createQuestionEntitiesFromFormData,
+  createQuestionnaireAssociations,
+} from '../questionnaires/utils/dataUtils';
 
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
+
+const {
+  getPageSectionKey,
+  getEntityAddressKey,
+  processAssociationEntityData,
+  processEntityData
+} = DataProcessingUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const {
@@ -60,7 +81,9 @@ const {
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const {
+  ACTIVE_FQN,
   DATE_TIME_FQN,
+  RRULE_FQN,
   TITLE_FQN,
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
@@ -79,6 +102,119 @@ const {
 } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const LOG = new Logger('QuestionnaireSagas');
+
+function constructEntitiesFromFormData(formData, questionsData, entityKeyIds, entitySetIds, propertyTypeIds :Map) {
+  const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
+  const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
+
+  const questionnaireEKID = getIn(entityKeyIds, [questionnaireESID, 0]);
+  const questionEKIDS = get(entityKeyIds, questionsESID);
+
+  // update questionnaire
+  let updatedFormData = setIn(
+    formData,
+    [getPageSectionKey(1, 1), getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, OPENLATTICE_ID_FQN)],
+    questionnaireEKID
+  );
+
+  updatedFormData = set(updatedFormData, getPageSectionKey(2, 1), questionsData);
+
+  let result = processEntityData(
+    updatedFormData,
+    entitySetIds,
+    propertyTypeIds.map((id, fqn) => fqn)
+  );
+
+  // set id property on questionnaire entity (required by LUK table)
+  result = setIn(result, [questionnaireESID, 0, 'id'], questionnaireEKID);
+
+  // set question EKIDS
+  questionEKIDS.forEach((questionEKID, index) => {
+    result = setIn(result, [questionsESID, index, OPENLATTICE_ID_FQN], [questionEKID]);
+  });
+
+  const questionEntities = get(result, questionsESID);
+  const questionnaireEntity = getIn(result, [questionnaireESID, 0]);
+
+  return { questionEntities, questionnaireEntity };
+}
+
+function* createQuestionnaireWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(createQuestionnaire.request(action.id));
+
+    const { studyEKID } = action.value;
+    let { formData } = action.value;
+
+    const entitySetIds = yield select((state) => state.getIn(['edm', 'entitySetIds']));
+    const propertyTypeIds = yield select((state) => state.getIn(['edm', 'propertyTypeIds']));
+
+    // generate rrule from form data
+    const rruleSet = createRecurrenceRuleSetFromFormData(formData);
+
+    // update formdata with rrule
+    let psk = getPageSectionKey(1, 1);
+    let eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
+    formData = setIn(formData, [psk, eak], rruleSet);
+
+    // set ol.active to true
+    eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN);
+    formData = setIn(formData, [psk, eak], true);
+
+    // remove scheduler from from form data
+    psk = getPageSectionKey(3, 1);
+    delete formData[psk];
+
+    // transform form data
+    const questionsData = createQuestionEntitiesFromFormData(formData);
+
+    psk = getPageSectionKey(2, 1);
+    formData = set(formData, psk, questionsData);
+
+    const entityData = processEntityData(
+      formData,
+      entitySetIds,
+      propertyTypeIds
+    );
+
+    // associations
+    const associations = createQuestionnaireAssociations(formData, studyEKID);
+    const associationEntityData = processAssociationEntityData(
+      associations,
+      entitySetIds,
+      propertyTypeIds
+    );
+
+    const response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
+
+    // reconstruct entity
+    const { entityKeyIds } = response.data;
+    console.log(questionsData);
+    const {
+      questionEntities,
+      questionnaireEntity
+    } = constructEntitiesFromFormData(formData, questionsData, entityKeyIds, entitySetIds, propertyTypeIds);
+
+    yield put(createQuestionnaire.success(action.id, {
+      questionEntities,
+      questionnaireEntity,
+      studyEKID
+    }));
+
+  }
+  catch (error) {
+    yield put(createQuestionnaire.failure(action.id));
+    LOG.error(action.type, error);
+  }
+  finally {
+    yield put(createQuestionnaire.finally(action.id));
+  }
+}
+
+function* createQuestionnaireWatcher() :Generator<*, *, *> {
+  yield takeEvery(CREATE_QUESTIONNAIRE, createQuestionnaireWorker);
+}
 
 /*
  *
@@ -416,9 +552,10 @@ function* downloadQuestionnaireResponsesWatcher() :Saga<*> {
 }
 
 export {
+  createQuestionnaireWatcher,
   downloadQuestionnaireResponsesWatcher,
   getQuestionnaireResponsesWatcher,
   getQuestionnaireWatcher,
   getStudyQuestionnairesWatcher,
-  submitQuestionnaireWatcher
+  submitQuestionnaireWatcher,
 };

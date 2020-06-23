@@ -17,7 +17,7 @@ import { RequestStates } from 'redux-reqseq';
 import NewQuestionnaireConfirmation from './NewQuestionnaireConfirmation';
 
 import { resetRequestState } from '../../../core/redux/ReduxActions';
-import { CREATE_QUESTIONNAIRE, createQuestionnaire } from '../QuestionnairesActions';
+import { CREATE_QUESTIONNAIRE, createQuestionnaire } from '../../questionnaire/QuestionnaireActions';
 import { QUESTIONNAIRE_FORM_PAGES } from '../constants/constants';
 import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
 
@@ -78,7 +78,7 @@ const CreateQuestionnaireForm = (props :Props) => {
   const [submitStatusModalVisible, setSubmitStatusModalVisible] = useState(false);
 
   const requestStates = useSelector((state) => ({
-    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaires', CREATE_QUESTIONNAIRE, 'requestState'])
+    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaire', CREATE_QUESTIONNAIRE, 'requestState'])
   }));
 
   useEffect(() => {

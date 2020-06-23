@@ -12,7 +12,7 @@ import * as EDMSagas from '../edm/EDMSagas';
 import * as RoutingSagas from '../router/RoutingSagas';
 import * as StudiesSagas from '../../containers/studies/StudiesSagas';
 import * as SurveySagas from '../../containers/survey/SurveySagas';
-import * as QuestionnairesSagas from '../../containers/questionnaires/QuestionnairesSagas';
+// import * as QuestionnairesSagas from '../../containers/questionnaires/QuestionnairesSagas';
 import * as QuestionnaireSagas from '../../containers/questionnaire/QuestionnaireSagas';
 
 export default function* sagas() :Generator<*, *, *> {
@@ -56,14 +56,15 @@ export default function* sagas() :Generator<*, *, *> {
     fork(SurveySagas.getChronicleUserAppsWatcher),
     fork(SurveySagas.submitSurveyWatcher),
 
-    // questionnaires
-    fork(QuestionnairesSagas.createQuestionnaireWatcher),
+    // // questionnaires
+    // fork(QuestionnairesSagas.createQuestionnaireWatcher),
 
     // questionnaire
+    fork(QuestionnaireSagas.createQuestionnaireWatcher),
     fork(QuestionnaireSagas.downloadQuestionnaireResponsesWatcher),
     fork(QuestionnaireSagas.getQuestionnaireResponsesWatcher),
     fork(QuestionnaireSagas.getQuestionnaireWatcher),
     fork(QuestionnaireSagas.getStudyQuestionnairesWatcher),
-    fork(QuestionnaireSagas.submitQuestionnaireWatcher),
+    fork(QuestionnaireSagas.submitQuestionnaireWatcher)
   ]);
 }

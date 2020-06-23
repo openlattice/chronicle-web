@@ -103,7 +103,6 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 };
 
 const createPreviewQuestionEntities = (formData :Object) => {
-  console.log(formData);
 
   const psk = getPageSectionKey(2, 1);
   const questions :Object[] = get(formData, psk);
@@ -122,8 +121,6 @@ const createPreviewQuestionEntities = (formData :Object) => {
       list.push(questionEntity);
     });
   });
-
-  console.log(questionEntities);
 
   return questionEntities;
 };

@@ -151,7 +151,6 @@ const QuestionnairesContainer = ({ study } :Props) => {
 
   return (
     <>
-
       <HeaderRow>
         <SelectWrapper>
           <Select
@@ -194,7 +193,6 @@ const QuestionnairesContainer = ({ study } :Props) => {
             </>
           )
         }
-
       </Card>
     </>
   );
