@@ -33,6 +33,7 @@ import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CHANGE_ACTIVE_STATUS,
   CREATE_QUESTIONNAIRE,
   DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
@@ -40,6 +41,7 @@ import {
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  changeActiveStatus,
   createQuestionnaire,
   deleteQuestionnaire,
   downloadQuestionnaireResponses,
@@ -52,7 +54,7 @@ import { getCsvFileName, getQuestionAnswerMapping } from './utils';
 
 import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
-import { selectEntitySetId } from '../../core/edm/EDMUtils';
+import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
@@ -69,10 +71,10 @@ const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
-const { deleteEntitiesAndNeighborsWorker } = DataApiSagas;
-const { deleteEntitiesAndNeighbors } = DataApiActions;
+const { deleteEntitiesAndNeighborsWorker, updateEntityDataWorker } = DataApiSagas;
+const { deleteEntitiesAndNeighbors, updateEntityData } = DataApiActions;
 
-const { DeleteTypes } = Types;
+const { DeleteTypes, UpdateTypes } = Types;
 
 const {
   getPageSectionKey,
@@ -113,7 +115,49 @@ const LOG = new Logger('QuestionnaireSagas');
 
 /*
  *
- * QuestionnaireActions.deteQuestionnaire()
+ * QuestionnaireActions.changeActiveStatus()
+ *
+ */
+function* changeActiveStatusWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(changeActiveStatus.request(action.id));
+
+    const { activeStatus, studyEKID, questionnaireEKID } = action.value;
+
+    const questionnaireESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+    const activePTID = yield select(selectPropertyTypeId(ACTIVE_FQN));
+
+    const response = yield call(updateEntityDataWorker, updateEntityData({
+      entitySetId: questionnaireESID,
+      entities: {
+        [questionnaireEKID]: {
+          [activePTID]: [!activeStatus]
+        }
+      },
+      updateType: UpdateTypes.PARTIAL_REPLACE
+    }));
+    if (response.error) throw response.error;
+
+    yield put(changeActiveStatus.success(action.id, {
+      activeStatus, studyEKID, questionnaireEKID
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(changeActiveStatus.failure(action.id));
+  }
+  finally {
+    yield put(changeActiveStatus.finally(action.id));
+  }
+}
+
+function* changeActiveStatusWatcher() :Saga<*> {
+  yield takeEvery(CHANGE_ACTIVE_STATUS, changeActiveStatusWorker);
+}
+
+/*
+ *
+ * QuestionnaireActions.deleteQuestionnaire()
  *
  */
 
@@ -612,6 +656,7 @@ function* downloadQuestionnaireResponsesWatcher() :Saga<*> {
 }
 
 export {
+  changeActiveStatusWatcher,
   createQuestionnaireWatcher,
   deleteQuestionnaireWatcher,
   downloadQuestionnaireResponsesWatcher,

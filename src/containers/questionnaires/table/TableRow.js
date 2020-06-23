@@ -11,11 +11,15 @@ import {
   Colors,
   Tag
 } from 'lattice-ui-kit';
+import { useDispatch } from 'react-redux';
 
 import StyledRow from './StyledRow';
 
+import ChangeActiveStatusModal from '../components/ChangeActiveStatusModal';
 import DeleteQuestionnaireModal from '../components/DeleteQuestionnaireModal';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { resetRequestState } from '../../../core/redux/ReduxActions';
+import { CHANGE_ACTIVE_STATUS } from '../../questionnaire/QuestionnaireActions';
 import { TABLE_ROW_ACTIONS } from '../constants/constants';
 
 const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
@@ -66,7 +70,10 @@ type Props = {
 
 const TableRow = ({ data, studyEKID } :Props) => {
 
+  const dispatch = useDispatch();
+
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [changeActiveStatusModalVisible, setChangeActiveStatusModalVisible] = useState(false);
 
   const active = getIn(data, [ACTIVE_FQN, 0], false);
   const activeStatus = active ? 'Active' : 'Inactive';
@@ -78,6 +85,11 @@ const TableRow = ({ data, studyEKID } :Props) => {
 
     if (actionId === DELETE) {
       setDeleteModalVisible(true);
+    }
+
+    if (actionId === TOGGLE_STATUS) {
+      dispatch((resetRequestState(CHANGE_ACTIVE_STATUS)));
+      setChangeActiveStatusModalVisible(true);
     }
   };
 
@@ -103,8 +115,8 @@ const TableRow = ({ data, studyEKID } :Props) => {
               <FontAwesomeIcon
                   data-action-id={action.action}
                   onClick={handleOnClick}
-                  color={action.action === 'TOGGLE_STATUS' && active ? PURPLES[0] : NEUTRALS[1]}
-                  icon={action.action === 'TOGGLE_STATUS' && active ? faToggleOn : action.icon}
+                  color={action.action === TOGGLE_STATUS && active ? PURPLES[0] : NEUTRALS[1]}
+                  icon={action.action === TOGGLE_STATUS && active ? faToggleOn : action.icon}
                   key={action.action} />
             ))
           }
@@ -113,6 +125,12 @@ const TableRow = ({ data, studyEKID } :Props) => {
       <DeleteQuestionnaireModal
           isVisible={deleteModalVisible}
           onClose={() => setDeleteModalVisible(false)}
+          studyEKID={studyEKID}
+          questionnaireEKID={getIn(data, [OPENLATTICE_ID_FQN, 0])} />
+      <ChangeActiveStatusModal
+          activeStatus={active}
+          onCloseModal={() => setChangeActiveStatusModalVisible(false)}
+          isModalVisible={changeActiveStatusModalVisible}
           studyEKID={studyEKID}
           questionnaireEKID={getIn(data, [OPENLATTICE_ID_FQN, 0])} />
     </StyledRow>

@@ -10,6 +10,7 @@ import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CHANGE_ACTIVE_STATUS,
   CREATE_QUESTIONNAIRE,
   DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
@@ -17,6 +18,7 @@ import {
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  changeActiveStatus,
   createQuestionnaire,
   deleteQuestionnaire,
   downloadQuestionnaireResponses,
@@ -26,10 +28,12 @@ import {
   submitQuestionnaire
 } from './QuestionnaireActions';
 
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const { ACTIVE_FQN } = PROPERTY_TYPE_FQNS;
 
 const {
   ANSWER_QUESTION_ID_MAP,
@@ -41,6 +45,9 @@ const {
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const INITIAL_STATE = fromJS({
+  [CHANGE_ACTIVE_STATUS]: {
+    requestState: RequestStates.STANDBY
+  },
   [CREATE_QUESTIONNAIRE]: {
     requestState: RequestStates.STANDBY
   },
@@ -183,6 +190,21 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
         }
       });
     }
+
+    case changeActiveStatus.case(action.type): {
+      return changeActiveStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { activeStatus, studyEKID, questionnaireEKID } = action.value;
+
+          return state
+            .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID, ACTIVE_FQN], [!activeStatus])
+            .setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.SUCCESS);
+        }
+      });
+    }
+
     default:
       return state;
   }
