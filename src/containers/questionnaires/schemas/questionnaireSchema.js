@@ -68,29 +68,51 @@ const questionsSchema = {
       items: {
         type: 'object',
         properties: {
-          [getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)]: {
+          [getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN)]: {
             title: 'Question',
             type: 'string'
           },
-          [getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN)]: {
-            title: '',
-            type: 'array',
-            items: {
-              type: 'object',
-              title: '',
-              properties: {
-                choice: {
-                  type: 'string',
-                  title: 'Answer choice'
-                },
+          questionType: {
+            type: 'string',
+            title: 'Question Type',
+            enum: ['Text entry', 'Multiple choice'],
+            default: 'Text entry'
+          }
+        },
+        dependencies: {
+          questionType: {
+            oneOf: [
+              {
+                properties: {
+                  questionType: {
+                    enum: ['Text entry']
+                  }
+                }
               },
-              required: ['choice']
-            },
-            uniqueItems: true
+              {
+                properties: {
+                  questionType: {
+                    enum: ['Multiple choice']
+                  },
+                  [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]: {
+                    type: 'array',
+                    title: 'Answer choices',
+                    items: {
+                      type: 'string',
+                      enum: ['']
+                    },
+                    uniqueItems: true,
+                    minItems: 2
+                  },
+                },
+                required: [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]
+              }
+            ]
           }
         },
         required: [
-          getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)
+          getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN),
+          'questionType'
         ]
       },
       minItems: 1,
@@ -107,22 +129,22 @@ const questionsUiSchema = {
     },
     items: {
       classNames: 'grid-container',
-      [getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN)]: {
-        classNames: 'column-span-6',
+      [getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN)]: {
+        classNames: 'column-span-12',
         'ui:autofocus': true
       },
-      [getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN)]: {
-        classNames: 'column-span-6',
+      questionType: {
+        classNames: 'column-span-12',
+        'ui:widget': 'RadioWidget',
+      },
+      [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]: {
+        classNames: 'column-span-12',
         'ui:options': {
-          addButtonText: '+ Add Choice'
+          creatable: true,
+          multiple: true,
+          noOptionsMessage: 'Type to create',
         },
-        items: {
-          classNames: 'grid-container',
-          choice: {
-            classNames: 'column-span-12',
-            'ui:autofocus': true
-          },
-        }
+        'ui:autofocus': true
       }
     },
   }
