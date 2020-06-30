@@ -38,7 +38,7 @@
     "file-saver": "~2.0.0",
     "history": "~4.10.0",
     "immutable": "4.0.0-rc.9",
-    "lattice": "0.73.0",
+    "lattice": "0.77.1",
     "lattice-auth": "0.20.0",
     "lattice-fabricate": "0.13.3",
     "lattice-sagas": "0.47.3",
