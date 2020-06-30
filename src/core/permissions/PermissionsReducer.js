@@ -4,8 +4,8 @@ import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 
 import {
-  UPDATE_ES_PERMISSIONS,
   GET_STUDY_AUTHORIZATIONS,
+  UPDATE_ES_PERMISSIONS,
   getStudyAuthorizations,
   updateEntitySetPermissions
 } from './PermissionsActions';

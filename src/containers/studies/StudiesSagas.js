@@ -75,20 +75,10 @@ import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sa
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const {
-  getEntitySetDataWorker,
-  updateEntityDataWorker,
-  createAssociationsWorker,
-} = DataApiSagas;
-
-const {
-  getEntitySetData,
-  updateEntityData,
-  createAssociations
-} = DataApiActions;
-
-const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
+const { createAssociations, getEntitySetData, updateEntityData } = DataApiActions;
+const { createAssociationsWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
@@ -96,9 +86,9 @@ const {
   findEntityAddressKeyFromMap,
   getEntityAddressKey,
   getPageSectionKey,
+  processAssociationEntityData,
   processEntityData,
   processEntityDataForPartialReplace,
-  processAssociationEntityData,
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 

@@ -19,7 +19,7 @@ import {
   EntitySetsApiActions,
   EntitySetsApiSagas,
   SearchApiActions,
-  SearchApiSagas
+  SearchApiSagas,
 } from 'lattice-sagas';
 import { DateTime } from 'luxon';
 import type { Saga } from '@redux-saga/core';

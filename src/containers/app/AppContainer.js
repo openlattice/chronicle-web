@@ -11,8 +11,8 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   AppNavigationWrapper,
+  Sizes,
   Spinner,
-  Sizes
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import {
@@ -25,12 +25,13 @@ import { NavLink } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
-import BasicErrorComponent from '../shared/BasicErrorComponent';
 
+import * as AppActions from './AppActions';
+
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
-import * as AppActions from './AppActions';
 import * as Routes from '../../core/router/Routes';
 import { isNonEmptyString } from '../../utils/LangUtils';
 

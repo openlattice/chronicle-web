@@ -6,11 +6,12 @@ import { Map, fromJS } from 'immutable';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
-import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import {
   INITIALIZE_APPLICATION,
   initializeApplication,
 } from './AppActions';
+
+import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [INITIALIZE_APPLICATION]: {

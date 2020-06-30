@@ -21,8 +21,8 @@ import {
   getAllEntitySetIdsWorker,
   getEntityDataModelTypesWorker,
 } from '../../core/edm/EDMSagas';
-import { getStudies, getGlobalNotificationsEKID } from '../studies/StudiesActions';
-import { getStudiesWorker, getGlobalNotificationsEKIDWorker } from '../studies/StudiesSagas';
+import { getGlobalNotificationsEKID, getStudies } from '../studies/StudiesActions';
+import { getGlobalNotificationsEKIDWorker, getStudiesWorker } from '../studies/StudiesSagas';
 
 const LOG = new Logger('AppSagas');
 
