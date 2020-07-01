@@ -14,6 +14,7 @@ import {
   Sizes,
   Spinner,
 } from 'lattice-ui-kit';
+import { LangUtils } from 'lattice-utils';
 import { connect } from 'react-redux';
 import {
   Redirect,
@@ -33,7 +34,8 @@ import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as Routes from '../../core/router/Routes';
-import { isNonEmptyString } from '../../utils/LangUtils';
+
+const { isNonEmptyString } = LangUtils;
 
 const { INITIALIZE_APPLICATION } = AppActions;
 const { APP_CONTENT_WIDTH } = Sizes;

@@ -22,6 +22,7 @@ import {
   PermissionsApiActions,
   PermissionsApiSagas,
 } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -32,7 +33,6 @@ import {
   updateEntitySetPermissions
 } from './PermissionsActions';
 
-import Logger from '../../utils/Logger';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { selectEntityType } from '../edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../edm/constants/FullyQualifiedNames';

@@ -8,20 +8,25 @@ import {
   faLink,
   faToggleOff,
   faToggleOn,
-  // faTrashAlt
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
+import { DateTimeUtils } from 'lattice-utils';
+import { DateTime } from 'luxon';
 
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
+
+const { formatDateTime } = DateTimeUtils;
 
 const {
-  PERSON_ID, STATUS, DATE_FIRST_PUSHED,
-  DATE_LAST_PUSHED, EVENT_COUNT
+  DATE_FIRST_PUSHED,
+  DATE_LAST_PUSHED,
+  EVENT_COUNT,
+  PERSON_ID,
+  STATUS,
 } = PROPERTY_TYPE_FQNS;
 const { NEUTRALS, PURPLES } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
@@ -124,8 +129,8 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
-  const firstDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_FIRST_PUSHED, 0]));
-  const lastDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_LAST_PUSHED, 0]));
+  const firstDataDate = formatDateTime(getIn(data, [DATE_FIRST_PUSHED, 0]), DateTime.DATETIME_SHORT);
+  const lastDataDate = formatDateTime(getIn(data, [DATE_LAST_PUSHED, 0]), DateTime.DATETIME_SHORT);
   const numDays = getIn(data, [EVENT_COUNT, 0]);
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;

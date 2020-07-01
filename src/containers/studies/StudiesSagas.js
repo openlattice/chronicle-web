@@ -27,6 +27,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -54,7 +55,6 @@ import {
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
-import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectEntityTypeId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';

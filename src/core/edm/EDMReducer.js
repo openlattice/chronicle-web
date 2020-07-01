@@ -4,6 +4,7 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
+import { Logger } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { EntityTypeObject, PropertyTypeObject } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
@@ -15,9 +16,7 @@ import {
   getEntityDataModelTypes,
 } from './EDMActions';
 
-import Logger from '../../utils/Logger';
-
-const LOG :Logger = new Logger('EDMReducer');
+const LOG = new Logger('EDMReducer');
 
 const {
   EntityTypeBuilder,

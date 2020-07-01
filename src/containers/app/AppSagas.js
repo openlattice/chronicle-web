@@ -8,11 +8,11 @@ import {
   put,
   takeEvery,
 } from '@redux-saga/core/effects';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import { INITIALIZE_APPLICATION, initializeApplication } from './AppActions';
 
-import Logger from '../../utils/Logger';
 import {
   getAllEntitySetIds,
   getEntityDataModelTypes,
