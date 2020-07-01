@@ -1,4 +1,15 @@
+import { takeEvery } from '@redux-saga/core/effects';
 import { OrderedMap } from 'immutable';
+
+const GENERATOR_FUNCTION_TAG = '[object GeneratorFunction]';
+const GENERATOR_TAG = '[object Generator]';
+
+function testShouldBeGeneratorFunction(functionToTest) {
+
+  test('should be a generator function', () => {
+    expect(Object.prototype.toString.call(functionToTest)).toEqual(GENERATOR_FUNCTION_TAG);
+  });
+}
 
 function testShouldBeRequestSequenceFunction(functionToTest, baseType) {
 
@@ -55,8 +66,20 @@ function testShouldExportRequestSequences(Actions, expectedActionTypes, expected
   });
 }
 
+function testWatcherSagaShouldTakeEvery(watcherSagaToTest, expectedWorkerSaga, expectedAction) {
+
+  test('should invoke takeEvery()', () => {
+    const iterator = watcherSagaToTest();
+    expect(Object.prototype.toString.call(iterator)).toEqual(GENERATOR_TAG);
+    expect(iterator.next().value).toEqual(takeEvery(expectedAction, expectedWorkerSaga));
+    expect(iterator.next().done).toEqual(true);
+  });
+}
+
 export {
+  testShouldBeGeneratorFunction,
   testShouldBeRequestSequenceFunction,
   testShouldExportActionTypes,
   testShouldExportRequestSequences,
+  testWatcherSagaShouldTakeEvery,
 };

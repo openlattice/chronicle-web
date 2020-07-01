@@ -1,4 +1,5 @@
 // @flow
+
 import {
   INITIALIZE_APPLICATION,
 } from './AppActions';
@@ -25,7 +26,7 @@ describe('AppSagas', () => {
     testWatcherSagaShouldTakeEvery(
       initializeApplicationWatcher,
       initializeApplicationWorker,
-      INITIALIZE_APPLICATION
+      INITIALIZE_APPLICATION,
     );
   });
 
