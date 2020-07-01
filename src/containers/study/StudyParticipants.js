@@ -13,6 +13,7 @@ import {
   SearchInput,
   Spinner,
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 
@@ -23,6 +24,7 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 import { resetRequestState } from '../../core/redux/ReduxActions';
 import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
+const { REQUEST_STATE } = ReduxConstants;
 const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const AddParticipantsButton = styled(PlusButton)`
@@ -67,7 +69,7 @@ const StudyParticipants = ({ study } :Props) => {
   }, [participants]);
 
   const requestStates = {
-    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
+    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, REQUEST_STATE])),
   };
 
   const openAddParticipantModal = () => {

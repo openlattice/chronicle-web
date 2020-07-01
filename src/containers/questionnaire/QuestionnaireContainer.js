@@ -11,6 +11,7 @@ import {
   AppHeaderWrapper,
   Spinner,
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
@@ -28,6 +29,7 @@ import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
+const { REQUEST_STATE } = ReduxConstants;
 const { NAME_FQN, DESCRIPTION_FQN } = PROPERTY_TYPE_FQNS;
 const { QUESTIONNAIRE_DATA } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
@@ -51,8 +53,8 @@ const QuestionnaireContainer = () => {
 
   const questionnaire = useSelector((state) => state.getIn(['questionnaire', QUESTIONNAIRE_DATA], Map()));
   const requestStates = useSelector((state) => ({
-    [GET_QUESTIONNAIRE]: state.getIn(['questionnaire', GET_QUESTIONNAIRE, 'requestState']),
-    [SUBMIT_QUESTIONNAIRE]: state.getIn(['questionnaire', SUBMIT_QUESTIONNAIRE, 'requestState'])
+    [GET_QUESTIONNAIRE]: state.getIn(['questionnaire', GET_QUESTIONNAIRE, REQUEST_STATE]),
+    [SUBMIT_QUESTIONNAIRE]: state.getIn(['questionnaire', SUBMIT_QUESTIONNAIRE, REQUEST_STATE])
   }));
 
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });

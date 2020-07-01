@@ -5,6 +5,7 @@ import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -12,6 +13,8 @@ import type { RequestState } from 'redux-reqseq';
 import AddParticipantForm from './AddParticipantForm';
 
 import { ADD_PARTICIPANT } from '../../studies/StudiesActions';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 type Props = {
   isVisible :boolean;
@@ -79,7 +82,7 @@ const AddParticipantModal = (props :Props) => {
 
 const mapStateToProps = (state) => ({
   requestStates: {
-    [ADD_PARTICIPANT]: state.getIn(['studies', ADD_PARTICIPANT, 'requestState'])
+    [ADD_PARTICIPANT]: state.getIn(['studies', ADD_PARTICIPANT, REQUEST_STATE])
   }
 });
 

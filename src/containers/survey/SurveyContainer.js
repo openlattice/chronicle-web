@@ -11,6 +11,7 @@ import {
   AppHeaderWrapper,
   Spinner,
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
@@ -22,6 +23,8 @@ import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 const SpinnerWrapper = styled.div`
   margin-top: 60px;
@@ -61,8 +64,8 @@ const SurveyContainer = () => {
   const { appsData, requestStates } = useSelector((state) => ({
     appsData: state.getIn(['appsData', 'appsData'], Map()),
     requestStates: {
-      [GET_CHRONICLE_APPS_DATA]: state.getIn(['appsData', GET_CHRONICLE_APPS_DATA, 'requestState']),
-      [SUBMIT_SURVEY]: state.getIn(['appsData', SUBMIT_SURVEY, 'requestState'])
+      [GET_CHRONICLE_APPS_DATA]: state.getIn(['appsData', GET_CHRONICLE_APPS_DATA, REQUEST_STATE]),
+      [SUBMIT_SURVEY]: state.getIn(['appsData', SUBMIT_SURVEY, REQUEST_STATE])
     }
   }));
 

@@ -11,9 +11,10 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   AppNavigationWrapper,
+  Sizes,
   Spinner,
-  Sizes
 } from 'lattice-ui-kit';
+import { LangUtils, ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
 import {
   Redirect,
@@ -25,14 +26,17 @@ import { NavLink } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestSequence, RequestState } from 'redux-reqseq';
-import BasicErrorComponent from '../shared/BasicErrorComponent';
 
+import * as AppActions from './AppActions';
+
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
-import * as AppActions from './AppActions';
 import * as Routes from '../../core/router/Routes';
-import { isNonEmptyString } from '../../utils/LangUtils';
+
+const { isNonEmptyString } = LangUtils;
+const { REQUEST_STATE } = ReduxConstants;
 
 const { INITIALIZE_APPLICATION } = AppActions;
 const { APP_CONTENT_WIDTH } = Sizes;
@@ -120,7 +124,7 @@ class AppContainer extends Component<Props> {
 
 const mapStateToProps = (state :Map<*, *>) => ({
   requestStates: {
-    [INITIALIZE_APPLICATION]: state.getIn(['app', INITIALIZE_APPLICATION, 'requestState']),
+    [INITIALIZE_APPLICATION]: state.getIn(['app', INITIALIZE_APPLICATION, REQUEST_STATE]),
   }
 });
 

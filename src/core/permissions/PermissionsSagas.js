@@ -1,4 +1,5 @@
 // @flow
+
 import {
   all,
   call,
@@ -7,10 +8,10 @@ import {
   takeEvery
 } from '@redux-saga/core/effects';
 import {
+  Map,
   Set,
   fromJS,
-  getIn,
-  Map
+  getIn
 } from 'immutable';
 import { Models, Types } from 'lattice';
 import {
@@ -19,8 +20,9 @@ import {
   EntitySetsApiActions,
   EntitySetsApiSagas,
   PermissionsApiActions,
-  PermissionsApiSagas
+  PermissionsApiSagas,
 } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -31,7 +33,6 @@ import {
   updateEntitySetPermissions
 } from './PermissionsActions';
 
-import Logger from '../../utils/Logger';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { selectEntityType } from '../edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../edm/constants/FullyQualifiedNames';
@@ -44,26 +45,24 @@ const {
   PrincipalTypes,
 } = Types;
 
+const { getAuthorizations } = AuthorizationsApiActions;
+const { getAuthorizationsWorker } = AuthorizationsApiSagas;
+const { getEntitySetId } = EntitySetsApiActions;
+const { getEntitySetIdWorker } = EntitySetsApiSagas;
 const { updateAcls } = PermissionsApiActions;
 const { updateAclsWorker } = PermissionsApiSagas;
 
-const { getEntitySetIdWorker } = EntitySetsApiSagas;
-const { getEntitySetId } = EntitySetsApiActions;
-
-const { getAuthorizationsWorker } = AuthorizationsApiSagas;
-const { getAuthorizations } = AuthorizationsApiActions;
-
 const {
+  AccessCheck,
+  AccessCheckBuilder,
   Ace,
   AceBuilder,
   Acl,
   AclBuilder,
-  AccessCheck,
   AclData,
   AclDataBuilder,
   Principal,
   PrincipalBuilder,
-  AccessCheckBuilder
 } = Models;
 
 const LOG = new Logger('PermissionsSagas');

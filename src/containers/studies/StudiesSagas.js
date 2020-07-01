@@ -27,6 +27,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -54,7 +55,6 @@ import {
 } from './StudiesActions';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
-import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectEntityTypeId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
@@ -75,20 +75,10 @@ import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sa
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const {
-  getEntitySetDataWorker,
-  updateEntityDataWorker,
-  createAssociationsWorker,
-} = DataApiSagas;
-
-const {
-  getEntitySetData,
-  updateEntityData,
-  createAssociations
-} = DataApiActions;
-
-const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
+const { createAssociations, getEntitySetData, updateEntityData } = DataApiActions;
+const { createAssociationsWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
 const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
+const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
@@ -96,9 +86,9 @@ const {
   findEntityAddressKeyFromMap,
   getEntityAddressKey,
   getPageSectionKey,
+  processAssociationEntityData,
   processEntityData,
   processEntityDataForPartialReplace,
-  processAssociationEntityData,
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 

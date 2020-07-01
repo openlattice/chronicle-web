@@ -14,6 +14,7 @@ import {
   EntitySetsApiActions,
   EntitySetsApiSagas
 } from 'lattice-sagas';
+import { LangUtils, Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -24,10 +25,10 @@ import {
 } from './EDMActions';
 import { ENTITY_SET_NAMES_LIST } from './constants/EntitySetNames';
 
-import Logger from '../../utils/Logger';
-import { isDefined } from '../../utils/LangUtils';
-
 const LOG = new Logger('EDMSagas');
+
+const { isDefined } = LangUtils;
+
 const { getEntitySetIds } = EntitySetsApiActions;
 const { getEntitySetIdsWorker } = EntitySetsApiSagas;
 const { getAllEntityTypes, getAllPropertyTypes } = EntityDataModelApiActions;

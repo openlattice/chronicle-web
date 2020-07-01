@@ -3,6 +3,7 @@
 import { call, put, takeEvery } from '@redux-saga/core/effects';
 import { Map, fromJS } from 'immutable';
 import { Constants } from 'lattice';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -13,7 +14,6 @@ import {
 } from './SurveyActions';
 import { getAppNameFromUserAppsEntity } from './utils/Utils';
 
-import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 
 const { OPENLATTICE_ID_FQN } = Constants;

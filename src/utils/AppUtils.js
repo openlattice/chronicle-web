@@ -3,13 +3,11 @@
  */
 
 import { AuthUtils } from 'lattice-auth';
+import { LangUtils, Logger, ValidationUtils } from 'lattice-utils';
 
 import ENV_URLS from './constants/EnvUrls';
 import EnvTypes from './constants/EnvTypes';
-import Logger from './Logger';
 import ParticipantDataTypes from './constants/ParticipantDataTypes';
-import { isNonEmptyString } from './LangUtils';
-import { isValidUUID } from './ValidationUtils';
 import {
   AUTHENTICATED,
   CHRONICLE,
@@ -18,11 +16,15 @@ import {
   FILE_TYPE,
   PARTICIPANT,
   QUESTIONNAIRE,
-  STUDY
+  STUDY,
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
-const LOG = new Logger('AppApi');
+const LOG = new Logger('AppUtils');
+
+const { isNonEmptyString } = LangUtils;
+const { isValidUUID } = ValidationUtils;
+
 const { LOCAL, PRODUCTION, STAGING } = EnvTypes;
 const { PREPROCESSED, APP_USAGE } = ParticipantDataTypes;
 
