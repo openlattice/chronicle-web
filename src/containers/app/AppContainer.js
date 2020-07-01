@@ -14,7 +14,7 @@ import {
   Sizes,
   Spinner,
 } from 'lattice-ui-kit';
-import { LangUtils } from 'lattice-utils';
+import { LangUtils, ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
 import {
   Redirect,
@@ -36,6 +36,7 @@ import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as Routes from '../../core/router/Routes';
 
 const { isNonEmptyString } = LangUtils;
+const { REQUEST_STATE } = ReduxConstants;
 
 const { INITIALIZE_APPLICATION } = AppActions;
 const { APP_CONTENT_WIDTH } = Sizes;
@@ -123,7 +124,7 @@ class AppContainer extends Component<Props> {
 
 const mapStateToProps = (state :Map<*, *>) => ({
   requestStates: {
-    [INITIALIZE_APPLICATION]: state.getIn(['app', INITIALIZE_APPLICATION, 'requestState']),
+    [INITIALIZE_APPLICATION]: state.getIn(['app', INITIALIZE_APPLICATION, REQUEST_STATE]),
   }
 });
 

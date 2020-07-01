@@ -6,6 +6,7 @@ import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -13,6 +14,8 @@ import type { RequestState } from 'redux-reqseq';
 import CreateStudyForm from './CreateStudyForm';
 
 import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 type Props = {
   handleOnCloseModal :() => void;
@@ -93,8 +96,8 @@ const StudyDetailsModal = (props :Props) => {
 
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
-    [UPDATE_STUDY]: state.getIn(['studies', UPDATE_STUDY, 'requestState'])
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, REQUEST_STATE]),
+    [UPDATE_STUDY]: state.getIn(['studies', UPDATE_STUDY, REQUEST_STATE])
   },
 });
 

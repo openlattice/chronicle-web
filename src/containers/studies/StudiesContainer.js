@@ -12,6 +12,7 @@ import {
   Card,
   Spinner
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { RequestStates } from 'redux-reqseq';
@@ -26,6 +27,7 @@ import * as RoutingActions from '../../core/router/RoutingActions';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const { REQUEST_STATE } = ReduxConstants;
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -143,8 +145,8 @@ class StudiesContainer extends Component<Props, State> {
 }
 const mapStateToProps = (state :Map) => ({
   requestStates: {
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, 'requestState']),
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
+    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, REQUEST_STATE]),
+    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, REQUEST_STATE]),
   },
   studies: state.getIn(['studies', 'studies'])
 });

@@ -3,6 +3,7 @@
  */
 
 import { Map, fromJS } from 'immutable';
+import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -13,10 +14,10 @@ import {
 
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 
+const { REQUEST_STATE } = ReduxConstants;
+
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [INITIALIZE_APPLICATION]: {
-    requestState: RequestStates.STANDBY,
-  },
+  [INITIALIZE_APPLICATION]: { [REQUEST_STATE]: RequestStates.STANDBY },
 });
 
 export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
@@ -26,7 +27,7 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
     case RESET_REQUEST_STATE: {
       const { actionType } = action;
       if (actionType && state.has(actionType)) {
-        return state.setIn([actionType, 'requestState'], RequestStates.STANDBY);
+        return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
     }
@@ -34,9 +35,9 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
     case initializeApplication.case(action.type): {
       const seqAction :SequenceAction = action;
       return initializeApplication.reducer(state, seqAction, {
-        REQUEST: () => state.setIn([INITIALIZE_APPLICATION, 'requestState'], RequestStates.PENDING),
-        SUCCESS: () => state.setIn([INITIALIZE_APPLICATION, 'requestState'], RequestStates.SUCCESS),
-        FAILURE: () => state.setIn([INITIALIZE_APPLICATION, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([INITIALIZE_APPLICATION, REQUEST_STATE], RequestStates.PENDING),
+        SUCCESS: () => state.setIn([INITIALIZE_APPLICATION, REQUEST_STATE], RequestStates.SUCCESS),
+        FAILURE: () => state.setIn([INITIALIZE_APPLICATION, REQUEST_STATE], RequestStates.FAILURE),
       });
     }
 
