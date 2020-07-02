@@ -262,7 +262,7 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
     eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN);
     formData = setIn(formData, [psk, eak], true);
 
-    // remove scheduler from form data
+    // remove notification schedule from form data
     psk = getPageSectionKey(3, 1);
     delete formData[psk];
 
