@@ -3,18 +3,16 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { ActionModal, Colors } from 'lattice-ui-kit';
+import { Modal, ModalFooter, Spinner } from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-const { NEUTRALS } = Colors;
-
-const ModalWrapper = styled.div`
+const ModalBodyWrapper = styled.div`
   width: 500px;
-  font-weight: 300;
 `;
 
 type Props = {
+  deleteTimeout :boolean;
   handleOnClose :() => void;
   handleOnDeleteParticipant :() => void;
   isVisible :boolean;
@@ -22,6 +20,7 @@ type Props = {
   requestState :RequestState;
 }
 const DeleteParticipantModal = ({
+  deleteTimeout,
   handleOnClose,
   handleOnDeleteParticipant,
   isVisible,
@@ -29,37 +28,81 @@ const DeleteParticipantModal = ({
   requestState
 } :Props) => {
 
+  const textPrimary = 'Delete';
+  const textSecondary = 'Cancel';
+
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
-      <ModalWrapper>
-        <span> Are you sure you want to delete </span>
-        <span style={{ color: NEUTRALS[0], fontWeight: 500 }}>
-          { participantId }
-        </span>
-        <span>?</span>
-      </ModalWrapper>
+      <span>
+        {`Are you sure you want to delete ${participantId}'s data? This action is permanent and cannot be undone.`}
+      </span>
+    ),
+    [RequestStates.PENDING]: (
+      <div style={{ textAlign: 'center' }}>
+        <Spinner size="2x" />
+        <p>Deleting participant&apos;s data. Please wait.</p>
+      </div>
     ),
     [RequestStates.FAILURE]: (
-      <span> Failed to delete participant. Please try again. </span>
+      <span>Failed to delete participant. Please try again or contact support@openlattice.com.</span>
     ),
     [RequestStates.SUCCESS]: (
-      <ModalWrapper>
-        <span> Successfully deleted participant. </span>
-      </ModalWrapper>
+      <span>
+        {
+          deleteTimeout
+            ? "We are still processing your request to delete participant's data. You may close this window."
+            : "Successfully deleted participant's data."
+        }
+      </span>
     )
   };
+
+  const renderFooter = () => {
+    if (requestState === RequestStates.PENDING) {
+      return (
+        <ModalFooter
+            isPendingPrimary
+            isDisabledSecondary={!deleteTimeout}
+            onClickSecondary={handleOnClose}
+            textPrimary={textPrimary}
+            textSecondary={textSecondary}
+            withFooter />
+      );
+    }
+    if (requestState === RequestStates.SUCCESS || requestState === RequestStates.FAILURE) {
+      return (
+        <ModalFooter
+            onClickPrimary={handleOnClose}
+            textPrimary="Close"
+            textSecondary="" />
+      );
+    }
+    return (
+      <ModalFooter
+          onClickPrimary={handleOnDeleteParticipant}
+          onClickSecondary={handleOnClose}
+          textPrimary={textPrimary}
+          textSecondary={textSecondary} />
+    );
+  };
+
   return (
-    <ActionModal
+    <Modal
         isVisible={isVisible}
-        onClickPrimary={handleOnDeleteParticipant}
         onClose={handleOnClose}
         requestState={requestState}
-        requestStateComponents={requestStateComponents}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
-        textPrimary="Yes"
-        textSecondary="No"
-        textTitle="Delete Participant" />
+        textPrimary={textPrimary}
+        textSecondary={textSecondary}
+        textTitle="Delete Participant's Data"
+        withFooter={renderFooter}>
+      <ModalBodyWrapper>
+        {
+          requestStateComponents[requestState]
+        }
+      </ModalBodyWrapper>
+    </Modal>
   );
 };
 export default DeleteParticipantModal;
