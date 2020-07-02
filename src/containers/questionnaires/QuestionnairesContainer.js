@@ -172,7 +172,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
               <CardSegment padding="0px">
                 {
                   tableData.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '30px' }}>
+                    <div style={{ textAlign: 'center', padding: '60px' }}>
                       No questionnaires found.
                     </div>
                   ) : (
