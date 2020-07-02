@@ -139,8 +139,8 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
 
     case createQuestionnaire.case(action.type): {
       return createQuestionnaire.reducer(state, action, {
-        REQUEST: () => state.setIn([CREATE_QUESTIONNAIRE, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CREATE_QUESTIONNAIRE, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
             questionEntities,
@@ -153,36 +153,36 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
           return state
             .setIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID], fromJS(questionEntities))
             .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID], fromJS(questionnaireEntity))
-            .setIn([CREATE_QUESTIONNAIRE, 'requestState'], RequestStates.SUCCESS);
+            .setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
 
     case deleteQuestionnaire.case(action.type): {
       return deleteQuestionnaire.reducer(state, action, {
-        REQUEST: () => state.setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { studyEKID, questionnaireEKID } = action.value;
 
           return state
             .deleteIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID])
             .deleteIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID])
-            .setIn([DELETE_QUESTIONNAIRE, 'requestState'], RequestStates.SUCCESS);
+            .setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
 
     case changeActiveStatus.case(action.type): {
       return changeActiveStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { activeStatus, studyEKID, questionnaireEKID } = action.value;
 
           return state
             .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID, ACTIVE_FQN], [!activeStatus])
-            .setIn([CHANGE_ACTIVE_STATUS, 'requestState'], RequestStates.SUCCESS);
+            .setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }

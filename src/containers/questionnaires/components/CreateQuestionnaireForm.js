@@ -11,6 +11,7 @@ import {
   CardSegment,
   Modal
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 
@@ -23,6 +24,8 @@ import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
 
 const { aboutSchema, questionsSchema, schedulerSchema } = SCHEMAS;
 const { aboutUiSchema, questionsUiSchema, schedulerUiSchema } = UI_SCHEMAS;
+const { REQUEST_STATE } = ReduxConstants;
+
 const {
   ABOUT_PAGE,
   CONFIRMATION_PAGE,
@@ -78,7 +81,7 @@ const CreateQuestionnaireForm = (props :Props) => {
   const [submitStatusModalVisible, setSubmitStatusModalVisible] = useState(false);
 
   const requestStates = useSelector((state) => ({
-    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaire', CREATE_QUESTIONNAIRE, 'requestState'])
+    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaire', CREATE_QUESTIONNAIRE, REQUEST_STATE])
   }));
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import {
   StyleUtils,
   Table
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -28,6 +29,7 @@ import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConsta
 import { GET_STUDY_QUESTIONNAIRES, getStudyQuestionnaires } from '../questionnaire/QuestionnaireActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const { REQUEST_STATE } = ReduxConstants;
 const { getStyleVariation } = StyleUtils;
 
 const { STUDY_QUESTIONNAIRES } = QUESTIONNAIRE_REDUX_CONSTANTS;
@@ -98,7 +100,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   );
 
   const getStudyQuestionnairesRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
+    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, REQUEST_STATE])
   );
 
   useEffect(() => {

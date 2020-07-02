@@ -4,11 +4,14 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { ActionModal } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import { CHANGE_ACTIVE_STATUS, changeActiveStatus } from '../../questionnaire/QuestionnaireActions';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 const Wrapper = styled.div`
   max-width: 500px;
@@ -18,21 +21,21 @@ type Props = {
   activeStatus :boolean;
   isModalVisible :boolean;
   onCloseModal :() => void;
-  studyEKID :UUID;
   questionnaireEKID :UUID;
+  studyEKID :UUID;
 }
 
 const ChangeActiveStatusModal = ({
   activeStatus,
   isModalVisible,
   onCloseModal,
+  questionnaireEKID,
   studyEKID,
-  questionnaireEKID
 } :Props) => {
   const dispatch = useDispatch();
 
   const changeActiveStatusRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', CHANGE_ACTIVE_STATUS, 'requestState'])
+    (state) => state.getIn(['questionnaire', CHANGE_ACTIVE_STATUS, REQUEST_STATE])
   );
 
   const onChangeStatus = () => {

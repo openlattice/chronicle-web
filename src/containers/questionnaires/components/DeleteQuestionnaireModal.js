@@ -4,12 +4,15 @@ import React, { useEffect } from 'react';
 
 import styled from 'styled-components';
 import { ActionModal } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { DELETE_QUESTIONNAIRE, deleteQuestionnaire } from '../../questionnaire/QuestionnaireActions';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 const Wrapper = styled.div`
   max-width: 500px;
@@ -31,7 +34,7 @@ const DeleteQuestionnaireModal = ({
   const dispatch = useDispatch();
 
   const deleteQuestionnaireRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', DELETE_QUESTIONNAIRE, 'requestState'])
+    (state) => state.getIn(['questionnaire', DELETE_QUESTIONNAIRE, REQUEST_STATE])
   );
 
   // reset delete requestState on dismount
