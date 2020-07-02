@@ -17,14 +17,21 @@ import StyledRow from './StyledRow';
 
 import ChangeActiveStatusModal from '../components/ChangeActiveStatusModal';
 import DeleteQuestionnaireModal from '../components/DeleteQuestionnaireModal';
+import QuestionnaireDetailsModal from '../components/QuestionnaireDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { CHANGE_ACTIVE_STATUS } from '../../questionnaire/QuestionnaireActions';
 import { TABLE_ROW_ACTIONS } from '../constants/constants';
 
-const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
 const { NEUTRALS, PURPLES } = Colors;
+
+const {
+  ACTIVE_FQN,
+  DESCRIPTION_FQN,
+  NAME_FQN,
+  RRULE_FQN
+} = PROPERTY_TYPE_FQNS;
 
 const [DELETE, TOGGLE_STATUS] = TABLE_ROW_ACTIONS.map((action) => action.action);
 
@@ -58,9 +65,13 @@ const Description = styled(StyledCell)`
 
 const IconGrid = styled.div`
   display: grid;
-  grid-gap: 20px;
+  grid-gap: 25px;
   grid-template-columns: repeat(auto-fit, 10px);
   height: 100%;
+`;
+
+const StyledFontAwesome = styled(FontAwesomeIcon)`
+  font-size: 16px;
 `;
 
 type Props = {
@@ -74,6 +85,7 @@ const TableRow = ({ data, studyEKID } :Props) => {
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [changeActiveStatusModalVisible, setChangeActiveStatusModalVisible] = useState(false);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
   const active = getIn(data, [ACTIVE_FQN, 0], false);
   const activeStatus = active ? 'Active' : 'Inactive';
@@ -95,7 +107,7 @@ const TableRow = ({ data, studyEKID } :Props) => {
 
   return (
     <StyledRow>
-      <Description>
+      <Description onClick={() => setDetailsModalVisible(true)}>
         <h3>
           { getIn(data, [NAME_FQN, 0]) }
         </h3>
@@ -112,7 +124,7 @@ const TableRow = ({ data, studyEKID } :Props) => {
         <IconGrid>
           {
             TABLE_ROW_ACTIONS.map((action) => (
-              <FontAwesomeIcon
+              <StyledFontAwesome
                   data-action-id={action.action}
                   onClick={handleOnClick}
                   color={action.action === TOGGLE_STATUS && active ? PURPLES[0] : NEUTRALS[1]}
@@ -133,6 +145,17 @@ const TableRow = ({ data, studyEKID } :Props) => {
           isModalVisible={changeActiveStatusModalVisible}
           studyEKID={studyEKID}
           questionnaireEKID={getIn(data, [OPENLATTICE_ID_FQN, 0])} />
+      {
+        detailsModalVisible && (
+          <QuestionnaireDetailsModal
+              description={getIn(data, [DESCRIPTION_FQN, 0])}
+              isModalVisible={detailsModalVisible}
+              onCloseModal={() => setDetailsModalVisible(false)}
+              questionnaireEKID={getIn(data, [OPENLATTICE_ID_FQN, 0])}
+              rruleSet={getIn(data, [RRULE_FQN, 0])}
+              title={getIn(data, [NAME_FQN, 0])} />
+        )
+      }
     </StyledRow>
   );
 };

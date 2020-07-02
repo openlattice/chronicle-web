@@ -31,13 +31,13 @@ const QUESTIONNAIRE_FORM_PAGES = {
 
 // days of week
 const DAYS_OF_WEEK = {
-  SU: 'Sunday',
   MO: 'Monday',
   TU: 'Tuesday',
   WE: 'Wednesday',
   TH: 'Thursday',
   FR: 'Friday',
-  SA: 'Saturday'
+  SA: 'Saturday',
+  SU: 'Sunday',
 };
 
 // questionnaire summary

@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -8,7 +8,6 @@ import { Constants } from 'lattice';
 import {
   Card,
   CardSegment,
-  Colors,
   PlusButton,
   Select,
   Spinner,
@@ -26,24 +25,14 @@ import { STATUS_SELECT_OPTIONS } from './constants/constants';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
-import {
-  GET_STUDY_QUESTIONNAIRES,
-  getStudyQuestionnaires
-} from '../questionnaire/QuestionnaireActions';
+import { GET_STUDY_QUESTIONNAIRES, getStudyQuestionnaires } from '../questionnaire/QuestionnaireActions';
 
-const { ACTIVE_FQN, DESCRIPTION_FQN, NAME_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
-
-const {
-  ANSWER_QUESTION_ID_MAP,
-  QUESTION_ANSWERS_MAP,
-  QUESTIONNAIRE_QUESTIONS,
-  QUESTIONNAIRE_RESPONSES,
-  STUDY_QUESTIONNAIRES
-} = QUESTIONNAIRE_REDUX_CONSTANTS;
-
-const { NEUTRALS } = Colors;
 const { getStyleVariation } = StyleUtils;
+
+const { STUDY_QUESTIONNAIRES } = QUESTIONNAIRE_REDUX_CONSTANTS;
+
+const { ACTIVE_FQN } = PROPERTY_TYPE_FQNS;
 
 const tableHeaders = ['title', 'status', 'actions'].map((header) => ({
   key: header,
@@ -73,7 +62,7 @@ const getWidthVariation = getStyleVariation('width', {
   default: 'auto',
   title: 'auto',
   status: '100px',
-  actions: '100px'
+  actions: '110px'
 });
 
 const Cell = styled.td`
@@ -107,13 +96,6 @@ const QuestionnairesContainer = ({ study } :Props) => {
   const studyQuestionnaires = useSelector(
     (state) => state.getIn(['questionnaire', STUDY_QUESTIONNAIRES, studyEKID], Map())
   );
-
-  const questionsByQuestionnaireId = useSelector(
-    (state) => state.getIn(['questionnaire', QUESTIONNAIRE_QUESTIONS], Map())
-  );
-
-  console.log(questionsByQuestionnaireId);
-  console.log(studyQuestionnaires);
 
   const getStudyQuestionnairesRS :RequestState = useSelector(
     (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
@@ -155,7 +137,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   ), [study]);
 
   if (getStudyQuestionnairesRS === RequestStates.PENDING) {
-    return <Spinner size="2x" />;
+    return <Spinner size="1x" />;
   }
 
   return (
@@ -194,7 +176,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
                   ) : (
                     <Table
                         components={{ HeadCell, Header: TableHeaderRow, Row: RowComponent }}
-                        data={studyQuestionnaires.valueSeq().toJS()}
+                        data={tableData}
                         headers={tableHeaders} />
                   )
                 }

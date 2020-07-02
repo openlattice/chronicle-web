@@ -11,7 +11,7 @@ import type { RequestState } from 'redux-reqseq';
 import { CHANGE_ACTIVE_STATUS, changeActiveStatus } from '../../questionnaire/QuestionnaireActions';
 
 const Wrapper = styled.div`
-  max-width: 500px
+  max-width: 500px;
 `;
 
 type Props = {

@@ -15,7 +15,6 @@ import {
   fromJS,
   get,
   getIn,
-  set,
   setIn,
 } from 'immutable';
 import { Constants, Types } from 'lattice';
@@ -61,11 +60,7 @@ import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
-import { createRecurrenceRuleSetFromFormData } from '../questionnaires/utils';
-import {
-  createQuestionEntitiesFromFormData,
-  createQuestionnaireAssociations,
-} from '../questionnaires/utils/dataUtils';
+import { createQuestionnaireAssociations, createRecurrenceRuleSetFromFormData } from '../questionnaires/utils';
 
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
@@ -202,21 +197,27 @@ function* deleteQuestionnaireWatcher() :Saga<*> {
   yield takeEvery(DELETE_QUESTIONNAIRE, deleteQuestionnaireWorker);
 }
 
-function constructEntitiesFromFormData(formData, questionsData, entityKeyIds, entitySetIds, propertyTypeIds :Map) {
+function constructEntitiesFromFormData(formData, entityKeyIds, entitySetIds, propertyTypeIds :Map) {
   const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
   const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
 
   const questionnaireEKID = getIn(entityKeyIds, [questionnaireESID, 0]);
   const questionEKIDS = get(entityKeyIds, questionsESID);
 
-  // update questionnaire
+  // update form data
   let updatedFormData = setIn(
     formData,
     [getPageSectionKey(1, 1), getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, OPENLATTICE_ID_FQN)],
     questionnaireEKID
   );
 
-  updatedFormData = set(updatedFormData, getPageSectionKey(2, 1), questionsData);
+  questionEKIDS.forEach((questionEKID, index) => {
+    updatedFormData = setIn(
+      updatedFormData,
+      [getPageSectionKey(2, 1), index, getEntityAddressKey(-1, QUESTIONS_ES_NAME, OPENLATTICE_ID_FQN)],
+      questionEKID
+    );
+  });
 
   let result = processEntityData(
     updatedFormData,
@@ -226,11 +227,6 @@ function constructEntitiesFromFormData(formData, questionsData, entityKeyIds, en
 
   // set id property on questionnaire entity (required by LUK table)
   result = setIn(result, [questionnaireESID, 0, 'id'], questionnaireEKID);
-
-  // set question EKIDS
-  questionEKIDS.forEach((questionEKID, index) => {
-    result = setIn(result, [questionsESID, index, OPENLATTICE_ID_FQN], [questionEKID]);
-  });
 
   const questionEntities = get(result, questionsESID);
   const questionnaireEntity = getIn(result, [questionnaireESID, 0]);
@@ -266,15 +262,16 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
     eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN);
     formData = setIn(formData, [psk, eak], true);
 
-    // remove scheduler from from form data
+    // remove scheduler from form data
     psk = getPageSectionKey(3, 1);
     delete formData[psk];
 
-    // transform form data
-    const questionsData = createQuestionEntitiesFromFormData(formData);
-
+    // remove questionType key from form data
     psk = getPageSectionKey(2, 1);
-    formData = set(formData, psk, questionsData);
+    formData[psk].forEach((item) => {
+      /* eslint-disable-next-line no-param-reassign */
+      delete item.questionType;
+    });
 
     const entityData = processEntityData(
       formData,
@@ -298,7 +295,7 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
     const {
       questionEntities,
       questionnaireEntity
-    } = constructEntitiesFromFormData(formData, questionsData, entityKeyIds, entitySetIds, propertyTypeIds);
+    } = constructEntitiesFromFormData(formData, entityKeyIds, entitySetIds, propertyTypeIds);
 
     yield put(createQuestionnaire.success(action.id, {
       questionEntities,

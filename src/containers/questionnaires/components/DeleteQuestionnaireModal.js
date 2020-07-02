@@ -12,7 +12,7 @@ import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { DELETE_QUESTIONNAIRE, deleteQuestionnaire } from '../../questionnaire/QuestionnaireActions';
 
 const Wrapper = styled.div`
-  max-width: 500px
+  max-width: 500px;
 `;
 
 type Props = {

@@ -3,7 +3,6 @@
 import styled from 'styled-components';
 import { Colors, StyleUtils } from 'lattice-ui-kit';
 
-
 const { WHITE, NEUTRALS } = Colors;
 const { getStickyPosition } = StyleUtils;
 

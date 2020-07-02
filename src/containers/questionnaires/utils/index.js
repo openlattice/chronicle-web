@@ -1,46 +1,52 @@
 // @flow
 
-import {
-  get,
-  getIn,
-  List,
-  Map,
-  fromJS
-} from 'immutable';
-import { DataProcessingUtils } from 'lattice-fabricate';
-import { RRule, RRuleSet } from 'rrule';
-import { Constants } from 'lattice';
 import invert from 'lodash/invert';
+import {
+  List,
+  fromJS,
+  get,
+  getIn
+} from 'immutable';
+import { Constants } from 'lattice';
+import { DataProcessingUtils } from 'lattice-fabricate';
+import { LangUtils } from 'lattice-utils';
+import { DateTime } from 'luxon';
+import { RRule, RRuleSet } from 'rrule';
 import { v4 as uuid } from 'uuid';
 
-import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import QuestionTypes from '../constants/questionTypes';
+import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { QUESTIONNAIRE_SUMMARY, DAYS_OF_WEEK } from '../constants/constants';
+import { DAYS_OF_WEEK, QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 
+const { isNonEmptyString } = LangUtils;
+const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
+
+const { TEXT_ENTRY } = QuestionTypes;
 const { OPENLATTICE_ID_FQN } = Constants;
+const { PART_OF_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const {
-  TITLE,
   DESCRIPTION,
   NUM_MULTIPLE_CHOICE,
-  NUM_SINGLE_ANSWER
+  NUM_SINGLE_ANSWER,
+  TITLE
 } = QUESTIONNAIRE_SUMMARY;
 
 const {
-  ANSWERS_ES_NAME,
+  CHRONICLE_STUDIES,
   QUESTIONNAIRE_ES_NAME,
   QUESTIONS_ES_NAME
 } = ENTITY_SET_NAMES;
 
 const {
+  COMPLETED_DATE_TIME_FQN,
   DESCRIPTION_FQN,
+  ID_FQN,
   NAME_FQN,
   TITLE_FQN,
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
-
-const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
-
 
 // return an Object with title, description, numMultipleChoice and numSingleAnswer questions
 const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
@@ -55,7 +61,7 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
 
   psk = getPageSectionKey(2, 1);
   const questions :Object[] = get(formData, psk);
-  const singleAnswerQuestions = questions.filter((question) => Object.keys(question).length === 1);
+  const singleAnswerQuestions = questions.filter((question) => question.questionType === TEXT_ENTRY);
 
   result[NUM_SINGLE_ANSWER] = singleAnswerQuestions.length;
   result[NUM_MULTIPLE_CHOICE] = questions.length - singleAnswerQuestions.length;
@@ -102,20 +108,43 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
   return rruleSet.toString();
 };
 
+// parse a rruleSet string and get days of week + times
+const getWeekDaysAndTimesFromRruleSet = (rruleSet :string) => {
+  const rrules :string[] = rruleSet.split('RRULE:').filter((token) => isNonEmptyString(token));
+
+  // get week days
+  // the days of the week are the same in all the individual rules in the rrruleSet,
+  // so we only need to read the values from the first rrule
+  const weekdayPairs = Object.entries(DAYS_OF_WEEK);
+  const weekDays = RRule.parseString(rrules[0]).byweekday
+    .map((day) => day.weekday)
+    .sort()
+    .map((index) => weekdayPairs[index][1]);
+
+  // $FlowFixMe
+  const times = rrules
+    .map((rrule) => RRule.parseString(rrule))
+    .map((options) => DateTime.fromObject({ hour: options.byhour, minute: options.byminute }))
+    .map((date) => date.toLocaleString(DateTime.TIME_SIMPLE))
+    .sort();
+
+  return [weekDays, times];
+};
+
 const createPreviewQuestionEntities = (formData :Object) => {
 
   const psk = getPageSectionKey(2, 1);
   const questions :Object[] = get(formData, psk);
 
-  const valuesEAK = getEntityAddressKey(0, QUESTIONS_ES_NAME, VALUES_FQN);
-  const titleEAK = getEntityAddressKey(0, QUESTIONS_ES_NAME, TITLE_FQN);
+  const valuesEAK = getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN);
+  const titleEAK = getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN);
 
   const questionEntities = List().withMutations((list) => {
     questions.forEach((question) => {
       const questionEntity = fromJS({
         [OPENLATTICE_ID_FQN]: [uuid()],
         [TITLE_FQN.toString()]: [get(question, titleEAK)],
-        [VALUES_FQN.toString()]: get(question, valuesEAK, []).map((answer) => get(answer, 'choice'))
+        [VALUES_FQN.toString()]: get(question, valuesEAK, [])
       });
 
       list.push(questionEntity);
@@ -125,8 +154,31 @@ const createPreviewQuestionEntities = (formData :Object) => {
   return questionEntities;
 };
 
+// return a array of:
+// 1) question -> partof -> questionnaire associations
+// 2) questionnaire -> partof -> study association
+const createQuestionnaireAssociations = (formData :Object[], studyEKID :UUID) => {
+  const psk = getPageSectionKey(2, 1);
+  const questions :Object[] = get(formData, psk);
+
+  const associations = questions.map((question :Object, index :number) => [
+    PART_OF_ES_NAME, index, QUESTIONS_ES_NAME, 0, QUESTIONNAIRE_ES_NAME, {
+      [ID_FQN.toString()]: [uuid()]
+    }
+  ]);
+
+  // $FlowFixMe
+  return associations.concat(
+    [[PART_OF_ES_NAME, 0, QUESTIONNAIRE_ES_NAME, studyEKID, CHRONICLE_STUDIES, {
+      [COMPLETED_DATE_TIME_FQN.toString()]: [new Date()]
+    }]]
+  );
+};
+
 export {
   createPreviewQuestionEntities,
+  createQuestionnaireAssociations,
   createRecurrenceRuleSetFromFormData,
-  getQuestionnaireSummaryFromForm
+  getQuestionnaireSummaryFromForm,
+  getWeekDaysAndTimesFromRruleSet,
 };

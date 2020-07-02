@@ -2,9 +2,12 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import QuestionTypes from '../constants/questionTypes';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { DAYS_OF_WEEK } from '../constants/constants';
+
+const { TEXT_ENTRY, MULTIPLE_CHOICE } = QuestionTypes;
 
 const {
   QUESTIONNAIRE_ES_NAME,
@@ -75,8 +78,8 @@ const questionsSchema = {
           questionType: {
             type: 'string',
             title: 'Question Type',
-            enum: ['Text entry', 'Multiple choice'],
-            default: 'Text entry'
+            enum: [TEXT_ENTRY, MULTIPLE_CHOICE],
+            default: TEXT_ENTRY
           }
         },
         dependencies: {
@@ -85,14 +88,14 @@ const questionsSchema = {
               {
                 properties: {
                   questionType: {
-                    enum: ['Text entry']
+                    enum: [TEXT_ENTRY]
                   }
                 }
               },
               {
                 properties: {
                   questionType: {
-                    enum: ['Multiple choice']
+                    enum: [MULTIPLE_CHOICE]
                   },
                   [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]: {
                     type: 'array',
@@ -212,10 +215,6 @@ const schedulerUiSchema = {
         time: {
           classNames: 'column-span-12',
           'ui:widget': 'TimeWidget',
-          'ui:options': {
-            showIndex: false,
-            addButtonText: '+ Add Time',
-          },
           'ui:autofocus': true,
         }
       }

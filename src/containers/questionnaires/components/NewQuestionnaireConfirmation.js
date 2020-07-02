@@ -43,7 +43,7 @@ const Title = styled.h4`
 
 const Label = styled.span`
   font-size: 14px;
-  color: ${NEUTRALS[1]}
+  color: ${NEUTRALS[1]};
 `;
 
 type Props = {
