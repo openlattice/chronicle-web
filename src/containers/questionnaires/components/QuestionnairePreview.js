@@ -4,7 +4,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { Form } from 'lattice-fabricate';
-import { Modal, Button } from 'lattice-ui-kit';
+import { Button, Modal } from 'lattice-ui-kit';
 
 import { createSchema, getSchemaProperties, getUiSchemaOptions } from '../../questionnaire/utils';
 import { createPreviewQuestionEntities } from '../utils';
@@ -24,11 +24,11 @@ const Description = styled.h6`
 `;
 
 type Props = {
+  description :string;
   formData :Object;
   isVisible :boolean;
   onClose :() => void;
   title :string;
-  description :string;
 };
 
 const QuestionnairePreview = ({

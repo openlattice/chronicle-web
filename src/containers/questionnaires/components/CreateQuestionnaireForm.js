@@ -120,10 +120,10 @@ const CreateQuestionnaireForm = (props :Props) => {
           render={(pagedProps) => {
             const {
               formRef,
-              pagedData,
-              page,
               onBack,
               onNext,
+              page,
+              pagedData,
               validateAndSubmit
             } = pagedProps;
             /*

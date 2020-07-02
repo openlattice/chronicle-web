@@ -21,15 +21,15 @@ const Wrapper = styled.div`
 type Props = {
   isVisible :boolean;
   onClose :() => void;
-  studyEKID :UUID;
   questionnaireEKID :UUID;
+  studyEKID :UUID;
 };
 
 const DeleteQuestionnaireModal = ({
   isVisible,
   onClose,
+  questionnaireEKID,
   studyEKID,
-  questionnaireEKID
 } :Props) => {
   const dispatch = useDispatch();
 

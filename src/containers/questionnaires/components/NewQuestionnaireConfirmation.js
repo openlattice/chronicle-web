@@ -3,19 +3,21 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { Button, Badge, Colors } from 'lattice-ui-kit';
 import { get } from 'immutable';
+import { Badge, Button, Colors } from 'lattice-ui-kit';
+
+import QuestionnairePreview from './QuestionnairePreview';
+
 import { QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 import { getQuestionnaireSummaryFromForm } from '../utils';
-import QuestionnairePreview from './QuestionnairePreview';
 
 const { NEUTRALS } = Colors;
 
 const {
-  TITLE,
   DESCRIPTION,
   NUM_MULTIPLE_CHOICE,
-  NUM_SINGLE_ANSWER
+  NUM_SINGLE_ANSWER,
+  TITLE,
 } = QUESTIONNAIRE_SUMMARY;
 
 const StyledButton = styled(Button)`
