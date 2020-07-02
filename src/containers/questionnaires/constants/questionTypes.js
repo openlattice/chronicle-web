@@ -1,6 +1,6 @@
 // @flow
 
-// study enrollment status
+// questionnaire question types
 type QuestionTypeEnum = {|
   TEXT_ENTRY:'Text entry';
   MULTIPLE_CHOICE:'Multiple choice';

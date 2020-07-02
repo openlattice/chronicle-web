@@ -1,6 +1,6 @@
 // @flow
 
-// study enrollment status
+// questionnaire status
 type QuestionnaireStatusEnum = {|
   ACTIVE:'ACTIVE';
   NOT_ACTIVE:'NOT_ACTIVE';
