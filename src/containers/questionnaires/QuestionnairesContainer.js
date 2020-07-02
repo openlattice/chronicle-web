@@ -103,6 +103,11 @@ const QuestionnairesContainer = ({ study } :Props) => {
     (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, REQUEST_STATE])
   );
 
+  // initially display all questionnaires
+  useEffect(() => {
+    setSelectedStatus(STATUS_SELECT_OPTIONS);
+  }, []);
+
   useEffect(() => {
     if (studyQuestionnaires.isEmpty()) {
       dispatch((getStudyQuestionnaires(studyEKID)));
@@ -129,10 +134,6 @@ const QuestionnairesContainer = ({ study } :Props) => {
   const onSelectStatus = (selectedOptions :Object[]) => {
     setSelectedStatus(selectedOptions);
   };
-
-  // const RowComponent = ({ data: RowData } :any) => (
-  //   <TableRow data={RowData} studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
-  // );
 
   const RowComponent = useMemo(() => ({ data: RowData }) => (
     <TableRow data={RowData} studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
