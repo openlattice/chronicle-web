@@ -10,6 +10,7 @@ import {
 } from '@redux-saga/core/effects';
 import { Models, Types } from 'lattice';
 import { DataApiActions, DataApiSagas } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -19,7 +20,6 @@ import {
   submitPartialReplace
 } from './DataActions';
 
-import Logger from '../../../utils/Logger';
 import { ERR_ACTION_VALUE_NOT_DEFINED } from '../../../utils/Errors';
 
 const LOG = new Logger('DataSagas');

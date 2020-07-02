@@ -4,6 +4,7 @@
 
 import { List, Map, fromJS } from 'immutable';
 import { Models } from 'lattice';
+import { Logger, ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { EntityTypeObject, PropertyTypeObject } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
@@ -15,9 +16,9 @@ import {
   getEntityDataModelTypes,
 } from './EDMActions';
 
-import Logger from '../../utils/Logger';
+const LOG = new Logger('EDMReducer');
 
-const LOG :Logger = new Logger('EDMReducer');
+const { REQUEST_STATE } = ReduxConstants;
 
 const {
   EntityTypeBuilder,
@@ -25,9 +26,7 @@ const {
 } = Models;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [GET_EDM_TYPES]: {
-    requestState: RequestStates.STANDBY,
-  },
+  [GET_EDM_TYPES]: { [REQUEST_STATE]: RequestStates.STANDBY },
   entitySetIds: Map(),
   entityTypes: List(),
   entityTypesIndexMap: Map(),
@@ -36,7 +35,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   propertyTypesIndexMap: Map(),
 });
 
-export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
+export default function reducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
 
   switch (action.type) {
 
@@ -44,7 +43,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
       const seqAction :SequenceAction = action;
       return getEntityDataModelTypes.reducer(state, action, {
         REQUEST: () => state
-          .setIn([GET_EDM_TYPES, 'requestState'], RequestStates.PENDING)
+          .setIn([GET_EDM_TYPES, REQUEST_STATE], RequestStates.PENDING)
           .setIn([GET_EDM_TYPES, seqAction.id], seqAction),
         SUCCESS: () => {
 
@@ -54,19 +53,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
 
           rawEntityTypes.forEach((et :EntityTypeObject, index :number) => {
             try {
-              const entityType = new EntityTypeBuilder()
-                .setBaseType(et.baseType)
-                .setCategory(et.category)
-                .setDescription(et.description)
-                .setId(et.id)
-                .setKey(et.key)
-                .setPropertyTags(et.propertyTags)
-                .setPropertyTypes(et.properties)
-                .setSchemas(et.schemas)
-                .setShards(et.shards)
-                .setTitle(et.title)
-                .setType(et.type)
-                .build();
+              const entityType = (new EntityTypeBuilder(et)).build();
               entityTypes.push(entityType.toImmutable());
               entityTypesIndexMap.set(entityType.id, index);
               entityTypesIndexMap.set(entityType.type, index);
@@ -84,19 +71,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
 
           rawPropertyTypes.forEach((pt :PropertyTypeObject, index :number) => {
             try {
-              const propertyType = new PropertyTypeBuilder()
-                .setAnalyzer(pt.analyzer)
-                .setDataType(pt.datatype)
-                .setDescription(pt.description)
-                .setEnumValues(pt.enumValues)
-                .setId(pt.id)
-                .setIndexType(pt.indexType)
-                .setMultiValued(pt.multiValued)
-                .setPii(pt.pii)
-                .setSchemas(pt.schemas)
-                .setTitle(pt.title)
-                .setType(pt.type)
-                .build();
+              const propertyType = (new PropertyTypeBuilder(pt)).build();
               propertyTypes.push(propertyType.toImmutable());
               propertyTypesIndexMap.set(propertyType.id, index);
               propertyTypesIndexMap.set(propertyType.type, index);
@@ -114,7 +89,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
             .set('propertyTypeIds', propertyTypeIds.asImmutable())
             .set('propertyTypes', propertyTypes.asImmutable())
             .set('propertyTypesIndexMap', propertyTypesIndexMap.asImmutable())
-            .setIn([GET_EDM_TYPES, 'requestState'], RequestStates.SUCCESS);
+            .setIn([GET_EDM_TYPES, REQUEST_STATE], RequestStates.SUCCESS);
         },
         FAILURE: () => state
           .set('entityTypes', List())
@@ -122,7 +97,7 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
           .set('propertyTypeIds', Map())
           .set('propertyTypes', List())
           .set('propertyTypesIndexMap', Map())
-          .setIn([GET_EDM_TYPES, 'requestState'], RequestStates.FAILURE),
+          .setIn([GET_EDM_TYPES, REQUEST_STATE], RequestStates.FAILURE),
         FINALLY: () => state
           .deleteIn([GET_EDM_TYPES, seqAction.id]),
       });
@@ -131,11 +106,11 @@ export default function edmReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
     case getAllEntitySetIds.case(action.type): {
       const seqAction :SequenceAction = action;
       return getAllEntitySetIds.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state
           .set('entitySetIds', fromJS(seqAction.value))
-          .setIn([GET_ALL_ENTITY_SET_IDS, 'requestState'], RequestStates.SUCCESS)
+          .setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.SUCCESS)
       });
     }
 

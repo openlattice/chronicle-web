@@ -25,8 +25,9 @@ import {
   EntitySetsApiActions,
   EntitySetsApiSagas,
   SearchApiActions,
-  SearchApiSagas
+  SearchApiSagas,
 } from 'lattice-sagas';
+import { Logger } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
@@ -51,7 +52,6 @@ import {
 } from './QuestionnaireActions';
 import { getCsvFileName, getQuestionAnswerMapping } from './utils';
 
-import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
@@ -66,8 +66,8 @@ const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
-const { deleteEntitiesAndNeighborsWorker, updateEntityDataWorker } = DataApiSagas;
-const { deleteEntitiesAndNeighbors, updateEntityData } = DataApiActions;
+const { deleteEntityAndNeighborDataWorker, updateEntityDataWorker } = DataApiSagas;
+const { deleteEntityAndNeighborData, updateEntityData } = DataApiActions;
 
 const { DeleteTypes, UpdateTypes } = Types;
 
@@ -171,7 +171,7 @@ function* deleteQuestionnaireWorker(action :SequenceAction) :Saga<*> {
       sourceEntitySetIds: [questionsESID]
     };
 
-    const response = yield call(deleteEntitiesAndNeighborsWorker, deleteEntitiesAndNeighbors({
+    const response = yield call(deleteEntityAndNeighborDataWorker, deleteEntityAndNeighborData({
       entitySetId: questionnaireESID,
       filter: neighborFilter,
       deleteType: DeleteTypes.HARD

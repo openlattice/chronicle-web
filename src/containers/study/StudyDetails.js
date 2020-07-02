@@ -14,13 +14,15 @@ import {
   Colors,
   EditButton,
 } from 'lattice-ui-kit';
+import { LangUtils } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { isNonEmptyString } from '../../utils/LangUtils';
 import { UPDATE_STUDY } from '../studies/StudiesActions';
+
+const { isNonEmptyString } = LangUtils;
 
 const {
   STUDY_DESCRIPTION,

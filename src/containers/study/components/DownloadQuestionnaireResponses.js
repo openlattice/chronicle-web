@@ -21,6 +21,7 @@ import {
   Sizes,
   Spinner
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -39,6 +40,8 @@ import {
   getStudyQuestionnaires
 } from '../../questionnaire/QuestionnaireActions';
 import { createInitialFormData } from '../../questionnaire/utils';
+
+const { REQUEST_STATE } = ReduxConstants;
 
 const {
   ANSWER_QUESTION_ID_MAP,
@@ -179,14 +182,14 @@ const DownloadQuestionnaireResponses = (props :Props) => {
     (state) => state.getIn(['questionnaire', ANSWER_QUESTION_ID_MAP], Map())
   );
   const downloadRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'])
+    (state) => state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, REQUEST_STATE])
   );
   const getQuestionnaireResponsesRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, 'requestState'])
+    (state) => state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, REQUEST_STATE])
   );
 
   const getStudyQuestionnairesRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
+    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, REQUEST_STATE])
   );
 
   const submissionDateMap = selectSubmissionDateMap(

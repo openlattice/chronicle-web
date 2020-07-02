@@ -7,6 +7,7 @@ import {
   Set,
   fromJS,
 } from 'immutable';
+import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -41,6 +42,7 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
+const { REQUEST_STATE } = ReduxConstants;
 const { DATE_ENROLLED, STATUS } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -51,39 +53,17 @@ const {
 } = STUDIES_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
-  [ADD_PARTICIPANT]: {
-    requestState: RequestStates.STANDBY
-  },
-  [CREATE_NOTIFICATIONS_ENTITY_SETS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [CREATE_STUDY]: {
-    requestState: RequestStates.STANDBY
-  },
-  [CREATE_PARTICIPANTS_ENTITY_SET]: {
-    requestState: RequestStates.STANDBY
-  },
-  [DELETE_STUDY_PARTICIPANT]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_GLOBAL_NOTIFICATIONS_EKID]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_PARTICIPANTS_ENROLLMENT]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_STUDIES]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_STUDY_PARTICIPANTS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [GET_STUDY_NOTIFICATION_STATUS]: {
-    requestState: RequestStates.STANDBY
-  },
-  [UPDATE_STUDY]: {
-    requestState: RequestStates.STANDBY
-  },
+  [ADD_PARTICIPANT]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [CREATE_NOTIFICATIONS_ENTITY_SETS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [CREATE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [CREATE_PARTICIPANTS_ENTITY_SET]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [DELETE_STUDY_PARTICIPANT]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_GLOBAL_NOTIFICATIONS_EKID]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_PARTICIPANTS_ENROLLMENT]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_STUDIES]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_STUDY_PARTICIPANTS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_STUDY_NOTIFICATION_STATUS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [UPDATE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GLOBAL_NOTIFICATIONS_EKID]: undefined,
   [NOTIFICATIONS_ENABLED_STUDIES]: Set(),
   [PART_OF_ASSOCIATION_EKID_MAP]: Map(),
@@ -100,7 +80,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case RESET_REQUEST_STATE: {
       const { actionType } = action;
       if (actionType && state.has(actionType)) {
-        return state.setIn([actionType, 'requestState'], RequestStates.STANDBY);
+        return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
     }
@@ -108,13 +88,13 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case getStudies.case(action.type): {
       const seqAction :SequenceAction = action;
       return getStudies.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDIES, 'requestState'], RequestStates.PENDING),
+        REQUEST: () => state.setIn([GET_STUDIES, REQUEST_STATE], RequestStates.PENDING),
         SUCCESS: () => state
           .set('studies', fromJS(seqAction.value))
-          .setIn([GET_STUDIES, 'requestState'], RequestStates.SUCCESS),
+          .setIn([GET_STUDIES, REQUEST_STATE], RequestStates.SUCCESS),
         FAILURE: () => state
           .set('studies', Map())
-          .setIn([GET_STUDIES, 'requestState'], RequestStates.FAILURE),
+          .setIn([GET_STUDIES, REQUEST_STATE], RequestStates.FAILURE),
       });
     }
 
@@ -122,7 +102,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       const seqAction :SequenceAction = action;
       return createStudy.reducer(state, action, {
         REQUEST: () => state
-          .setIn([CREATE_STUDY, 'requestState'], RequestStates.PENDING)
+          .setIn([CREATE_STUDY, REQUEST_STATE], RequestStates.PENDING)
           .setIn([CREATE_STUDY, seqAction.id], seqAction),
         SUCCESS: () => {
           if (state.hasIn([CREATE_STUDY, seqAction.id])) {
@@ -140,11 +120,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
                 notificationsEnabled ? notificationEnabledStudies.add(studyId) : notificationEnabledStudies)
               .setIn([STUDIES, studyId], fromJS(studyEntityData))
               .setIn([PART_OF_ASSOCIATION_EKID_MAP, studyId], partOfEntityKeyId)
-              .setIn([CREATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+              .setIn([CREATE_STUDY, REQUEST_STATE], RequestStates.SUCCESS);
           }
           return state;
         },
-        FAILURE: () => state.setIn([CREATE_STUDY, 'requestState'], RequestStates.FAILURE),
+        FAILURE: () => state.setIn([CREATE_STUDY, REQUEST_STATE], RequestStates.FAILURE),
         FINALLY: () => state.deleteIn([CREATE_STUDY, seqAction.id]),
       });
     }
@@ -152,7 +132,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case updateStudy.case(action.type): {
       const seqAction :SequenceAction = action;
       return updateStudy.reducer(state, action, {
-        REQUEST: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.PENDING),
+        REQUEST: () => state.setIn([UPDATE_STUDY, REQUEST_STATE], RequestStates.PENDING),
         SUCCESS: () => {
           const {
             notificationsEnabled,
@@ -174,17 +154,17 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             .set(NOTIFICATIONS_ENABLED_STUDIES, notificationEnabledStudies.asImmutable())
             .setIn([STUDIES, studyId], fromJS(studyEntityData))
             .setIn([PART_OF_ASSOCIATION_EKID_MAP, studyId], partOfEntityKeyId)
-            .setIn([UPDATE_STUDY, 'requestState'], RequestStates.SUCCESS);
+            .setIn([UPDATE_STUDY, REQUEST_STATE], RequestStates.SUCCESS);
         },
-        FAILURE: () => state.setIn([UPDATE_STUDY, 'requestState'], RequestStates.FAILURE)
+        FAILURE: () => state.setIn([UPDATE_STUDY, REQUEST_STATE], RequestStates.FAILURE)
       });
     }
 
     case addStudyParticipant.case(action.type): {
       const seqAction :SequenceAction = action;
       return addStudyParticipant.reducer(state, action, {
-        REQUEST: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
             participantEntityData,
@@ -195,7 +175,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           } = seqAction.value;
 
           return state
-            .setIn([ADD_PARTICIPANT, 'requestState'], RequestStates.SUCCESS)
+            .setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.SUCCESS)
             .setIn(['participants', studyId, participantEntityKeyId], participantEntityData)
             .setIn(['associationKeyIds', participantsEntitySetName, participantEntityKeyId], participatedInEntityKeyId);
         }
@@ -205,13 +185,13 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case createParticipantsEntitySet.case(action.type): {
       const seqAction :SequenceAction = action;
       return createParticipantsEntitySet.reducer(state, action, {
-        REQUEST: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_PARTICIPANTS_ENTITY_SET, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { entitySetName, entitySetId } = seqAction.value;
           const updatedMap = state.get('participantEntitySetIds').set(entitySetName, entitySetId);
           return state
-            .setIn([CREATE_PARTICIPANTS_ENTITY_SET, 'requestState'], RequestStates.SUCCESS)
+            .setIn([CREATE_PARTICIPANTS_ENTITY_SET, REQUEST_STATE], RequestStates.SUCCESS)
             .set('participantEntitySetIds', updatedMap);
         }
       });
@@ -220,8 +200,8 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case getStudyParticipants.case(action.type): {
       const seqAction :SequenceAction = action;
       return getStudyParticipants.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([GET_STUDY_PARTICIPANTS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_PARTICIPANTS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
             participants,
@@ -232,7 +212,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .setIn(['participants', studyId], participants)
             .setIn(['participantEntitySetIds', participantsEntitySetName], participantsEntitySetId)
-            .setIn([GET_STUDY_PARTICIPANTS, 'requestState'], RequestStates.SUCCESS);
+            .setIn([GET_STUDY_PARTICIPANTS, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
@@ -240,13 +220,13 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case deleteStudyParticipant.case(action.type): {
       const seqAction :SequenceAction = action;
       return deleteStudyParticipant.reducer(state, action, {
-        REQUEST: () => state.setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { participantEntityKeyId, studyId } = seqAction.value;
           return state
             .deleteIn(['participants', studyId, participantEntityKeyId])
-            .setIn([DELETE_STUDY_PARTICIPANT, 'requestState'], RequestStates.SUCCESS);
+            .setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
@@ -254,13 +234,13 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case getParticipantsEnrollmentStatus.case(action.type): {
       const seqAction :SequenceAction = action;
       return getParticipantsEnrollmentStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { associationKeyIds, participantsEntitySetName } = seqAction.value;
           return state
             .setIn(['associationKeyIds', participantsEntitySetName], associationKeyIds)
-            .setIn([GET_PARTICIPANTS_ENROLLMENT, 'requestState'], RequestStates.SUCCESS);
+            .setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
@@ -268,8 +248,8 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case changeEnrollmentStatus.case(action.type): {
       const seqAction :SequenceAction = action;
       return changeEnrollmentStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([CHANGE_ENROLLMENT_STATUS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CHANGE_ENROLLMENT_STATUS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
             enrollmentDate,
@@ -280,30 +260,30 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           return state
             .setIn(['participants', studyId, participantEntityKeyId, STATUS], [newEnrollmentStatus])
             .setIn(['participants', studyId, participantEntityKeyId, DATE_ENROLLED], [enrollmentDate])
-            .setIn([CHANGE_ENROLLMENT_STATUS, 'requestState'], RequestStates.SUCCESS);
+            .setIn([CHANGE_ENROLLMENT_STATUS, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
 
     case createNotificationsEntitySets.case(action.type): {
       return createNotificationsEntitySets.reducer(state, action, {
-        REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, 'requestState'], RequestStates.SUCCESS)
+        REQUEST: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([CREATE_NOTIFICATIONS_ENTITY_SETS, REQUEST_STATE], RequestStates.SUCCESS)
       });
     }
 
     case getStudyNotificationStatus.case(action.type): {
       const seqAction :SequenceAction = action;
       return getStudyNotificationStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_STUDY_NOTIFICATION_STATUS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const { studiesWithNotifications, associationEKIDMap } = seqAction.value;
           return state
             .set(NOTIFICATIONS_ENABLED_STUDIES, studiesWithNotifications)
             .set(PART_OF_ASSOCIATION_EKID_MAP, associationEKIDMap)
-            .setIn([GET_STUDY_NOTIFICATION_STATUS, 'requestState'], RequestStates.SUCCESS);
+            .setIn([GET_STUDY_NOTIFICATION_STATUS, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }
@@ -311,10 +291,10 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case getGlobalNotificationsEKID.case(action.type): {
       const seqAction :SequenceAction = action;
       return getGlobalNotificationsEKID.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.FAILURE),
+        REQUEST: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_GLOBAL_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state
-          .setIn([GET_GLOBAL_NOTIFICATIONS_EKID, 'requestState'], RequestStates.SUCCESS)
+          .setIn([GET_GLOBAL_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.SUCCESS)
           .set(GLOBAL_NOTIFICATIONS_EKID, seqAction.value)
       });
     }

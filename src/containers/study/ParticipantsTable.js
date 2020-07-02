@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
-import { Table } from 'lattice-ui-kit';
 import { Constants } from 'lattice';
-import { v4 as uuid } from 'uuid';
-
+import { Table } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
+import { v4 as uuid } from 'uuid';
 
 import ChangeEnrollment from './components/ChangeEnrollment';
 import DeleteParticipantModal from './components/DeleteParticipantModal';
@@ -28,6 +28,7 @@ import {
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
+const { REQUEST_STATE } = ReduxConstants;
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 const {
@@ -62,9 +63,9 @@ const ParticipantsTable = (props :Props) => {
 
   const requestStates = {
     [DELETE_STUDY_PARTICIPANT]:
-      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, 'requestState'])),
+      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, REQUEST_STATE])),
     [CHANGE_ENROLLMENT_STATUS]:
-      useSelector((state) => state.getIn(['studies', CHANGE_ENROLLMENT_STATUS, 'requestState']))
+      useSelector((state) => state.getIn(['studies', CHANGE_ENROLLMENT_STATUS, REQUEST_STATE]))
   };
 
   const handleOnDeleteParticipant = () => {
