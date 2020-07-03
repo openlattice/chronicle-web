@@ -166,7 +166,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
         {
           isEditing ? (
             <CreateQuestionnaireForm
-                onExitEditMode={() => setIsEditing(false)}
+                onClose={() => setIsEditing(false)}
                 studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
           ) : (
             <>

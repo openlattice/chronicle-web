@@ -68,11 +68,11 @@ const ActionRow = styled.div`
 `;
 
 type Props = {
-  onExitEditMode :() => void;
+  onClose :() => void;
   studyEKID :UUID;
 }
 const CreateQuestionnaireForm = (props :Props) => {
-  const { onExitEditMode, studyEKID } = props;
+  const { onClose, studyEKID } = props;
 
   const dispatch = useDispatch();
 
@@ -105,7 +105,7 @@ const CreateQuestionnaireForm = (props :Props) => {
   const handleCloseModal = () => {
     setSubmitStatusModalVisible(false);
     if (requestStates[CREATE_QUESTIONNAIRE] === RequestStates.SUCCESS) {
-      onExitEditMode();
+      onClose();
     }
     dispatch(resetRequestState(CREATE_QUESTIONNAIRE));
   };
@@ -114,7 +114,7 @@ const CreateQuestionnaireForm = (props :Props) => {
     <CardSegment padding="20px">
       <Header>
         <h3> Create Questionnaire </h3>
-        <Button onClick={onExitEditMode}> Cancel </Button>
+        <Button onClick={onClose}> Cancel </Button>
       </Header>
       <Paged
           render={(pagedProps) => {
