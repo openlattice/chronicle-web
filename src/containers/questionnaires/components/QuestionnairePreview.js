@@ -23,6 +23,14 @@ const Description = styled.h6`
   margin: 5px 0 20px 0;
 `;
 
+const StyledButton = styled(Button)`
+  margin-top: 20px
+`;
+
+const ModalBodyWrapper = styled.div`
+  padding-bottom: 20px;
+`;
+
 type Props = {
   description :string;
   formData :Object;
@@ -45,7 +53,7 @@ const QuestionnairePreview = ({
   const { schema, uiSchema } = createSchema(schemaProperties, uiSchemaOptions);
   return (
     <Modal isVisible={isVisible} onClose={onClose} textTitle="Questionnaire Preview">
-      <div style={{ paddingBottom: '20px' }}>
+      <ModalBodyWrapper>
         <Title>
           { title }
         </Title>
@@ -57,12 +65,10 @@ const QuestionnairePreview = ({
             noPadding
             schema={schema}
             uiSchema={uiSchema} />
-        <div style={{ marginTop: '20px' }}>
-          <Button disabled>
-            Submit
-          </Button>
-        </div>
-      </div>
+        <StyledButton disabled>
+          Submit
+        </StyledButton>
+      </ModalBodyWrapper>
     </Modal>
   );
 };
