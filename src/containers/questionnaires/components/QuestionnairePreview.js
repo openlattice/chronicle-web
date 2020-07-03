@@ -24,7 +24,7 @@ const Description = styled.h6`
 `;
 
 const StyledButton = styled(Button)`
-  margin-top: 20px
+  margin-top: 20px;
 `;
 
 const ModalBodyWrapper = styled.div`
