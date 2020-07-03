@@ -69,13 +69,6 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
   return result;
 };
 
-// return [hour, minute] from a 24 hour formated time string
-// input example: '21:00', '09:00'
-const parseTimeStr = (time :string) => {
-  const tokens = time.split(':');
-  return tokens.map((token) => parseInt(token, 10));
-};
-
 // return an array of RRule.MO, RRule.TU etc from ['Monday', 'Tuesday'] etc
 const getRRuleWeekDayConstants = (daysOfWeek :string[]) => {
   const mapper = invert(DAYS_OF_WEEK); // {'Monday': 'MO', 'Tuesday': 'TU'}
@@ -96,13 +89,13 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 
   // add rules to rruleset
   selectedTimes.forEach((time) => {
-    const [hour, minute] = parseTimeStr(time);
+    const dateTime = DateTime.fromISO(time);
 
     rruleSet.rrule(new RRule({
       freq: RRule.WEEKLY,
       byweekday: daysOfWeekConsts,
-      byhour: hour,
-      byminute: minute
+      byhour: dateTime.hour,
+      byminute: dateTime.minute
     }));
   });
   return rruleSet.toString();
