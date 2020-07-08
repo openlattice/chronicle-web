@@ -55,11 +55,12 @@ const { NAME_FQN, DATE_TIME_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const { APP_CONTENT_WIDTH } = Sizes;
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 
 const ModalWrapper = styled.div`
   width: ${APP_CONTENT_WIDTH}px;
   min-height: 400px;
+  position: relative;
 `;
 
 const HeaderWrapper = styled.div`
@@ -67,21 +68,16 @@ const HeaderWrapper = styled.div`
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 30px;
   align-items: flex-end;
-  border-bottom: 1px solid ${NEUTRALS[4]};
   padding-bottom: 30px;
-  position: sticky;
-  top: 0;
   background: #fff;
-  z-index: 10;
 `;
 
 const SelectWrapper = styled.div`
   width: 300px;
 
   > h5 {
-    color: ${NEUTRALS[0]};
+    color: ${NEUTRAL.N700};
     font-size: 15px;
-    font-weight: normal;
     margin-bottom: 5px;
     padding: 0;
   }
