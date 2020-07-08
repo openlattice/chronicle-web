@@ -5,18 +5,17 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
+  Button,
   Card,
   CardSegment,
-  Button,
   SearchInput,
   Spinner,
 } from 'lattice-ui-kit';
 import { ReduxConstants } from 'lattice-utils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 

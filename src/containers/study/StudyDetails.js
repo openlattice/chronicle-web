@@ -9,10 +9,10 @@ import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-ico
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
+  Button,
   Card,
   CardSegment,
-  Colors,
-  Button
+  Colors
 } from 'lattice-ui-kit';
 import { LangUtils } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
