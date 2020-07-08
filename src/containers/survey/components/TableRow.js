@@ -30,7 +30,7 @@ const CellContent = styled.div`
   overflow: hidden;
   padding: 0 5px;
   font-size: 14px;
-  color: ${NEUTRAL.N800}
+  color: ${NEUTRAL.N800};
 `;
 /* stylelint-enable */
 

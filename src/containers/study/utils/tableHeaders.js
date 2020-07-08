@@ -1,10 +1,6 @@
 // @flow
 
-import { Colors } from 'lattice-ui-kit';
-
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-
-const { NEUTRAL } = Colors;
 
 const {
   DATE_FIRST_PUSHED,
