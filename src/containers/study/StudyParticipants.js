@@ -9,11 +9,14 @@ import { Map } from 'immutable';
 import {
   Card,
   CardSegment,
-  PlusButton,
+  Button,
   SearchInput,
   Spinner,
 } from 'lattice-ui-kit';
 import { ReduxConstants } from 'lattice-utils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 
@@ -27,7 +30,7 @@ import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '.
 const { REQUEST_STATE } = ReduxConstants;
 const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
-const AddParticipantsButton = styled(PlusButton)`
+const AddParticipantsButton = styled(Button)`
   align-self: flex-start;
   margin-bottom: 5px;
 `;
@@ -99,7 +102,8 @@ const StudyParticipants = ({ study } :Props) => {
           <SearchInput placeholder="Filter..." onChange={handleOnChange} width="250px" />
           <AddParticipantsButton
               onClick={openAddParticipantModal}
-              mode="primary">
+              color="primary"
+              startIcon={<FontAwesomeIcon icon={faPlus} />}>
             Add Participant
           </AddParticipantsButton>
         </CardHeader>

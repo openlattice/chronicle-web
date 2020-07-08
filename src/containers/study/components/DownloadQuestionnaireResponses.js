@@ -315,7 +315,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                   <Button
                       disabled={fetchingData || selectDateOptions.length === 0}
                       isLoading={downloadRS === RequestStates.PENDING}
-                      mode="primary"
+                      color="primary"
                       onClick={onDownloadData}>
                     Download All
                   </Button>

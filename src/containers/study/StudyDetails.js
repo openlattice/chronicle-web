@@ -5,14 +5,14 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
   Card,
   CardSegment,
   Colors,
-  EditButton,
+  Button
 } from 'lattice-ui-kit';
 import { LangUtils } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
@@ -198,9 +198,12 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
 
   const renderEditButton = () => (
     <DetailsHeaderWrapper>
-      <EditButton mode="primary" onClick={openEditModal}>
+      <Button
+          color="primary"
+          onClick={openEditModal}
+          startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
         Edit Details
-      </EditButton>
+      </Button>
 
       <NotificationIconWrapper>
         <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN_2 : NEUTRALS[3]} />

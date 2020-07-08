@@ -95,19 +95,19 @@ const DownloadParticipantDataModal = (props :Props) => {
         What kind of data do you want to download?
       </p>
       <ButtonGrid>
-        <Button mode="secondary" name={RAW} onClick={handleOnClick}>
+        <Button color="secondary" name={RAW} onClick={handleOnClick}>
           Raw Data
         </Button>
 
-        <Button mode="secondary" name={PREPROCESSED} onClick={handleOnClick}>
+        <Button color="secondary" name={PREPROCESSED} onClick={handleOnClick}>
           Preprocessed Data
         </Button>
 
-        <Button mode="secondary" name={APP_USAGE} onClick={handleOnClick}>
+        <Button color="secondary" name={APP_USAGE} onClick={handleOnClick}>
           App Usage
         </Button>
 
-        <Button mode="secondary" name={QUESTIONNAIRE_RESPONSES} onClick={handleOnClick}>
+        <Button color="secondary" name={QUESTIONNAIRE_RESPONSES} onClick={handleOnClick}>
           Questionnaire Responses
         </Button>
       </ButtonGrid>
