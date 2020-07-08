@@ -32,7 +32,7 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
-const { NEUTRAL, GREEN_2 } = Colors;
+const { NEUTRAL, GREEN } = Colors;
 
 const DetailsWrapper = styled.div`
   align-items: flex-start;
@@ -206,7 +206,7 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
       </Button>
 
       <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN_2 : NEUTRAL.N300} />
+        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
         <h3> Daily Notifications </h3>
       </NotificationIconWrapper>
     </DetailsHeaderWrapper>

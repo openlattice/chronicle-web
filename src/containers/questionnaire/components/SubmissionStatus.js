@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { SUBMIT_QUESTIONNAIRE } from '../QuestionnaireActions';
 
-const { GREEN_2, NEUTRAL } = Colors;
+const { GREEN, NEUTRAL } = Colors;
 
 const Wrapper = styled.div`
   display: flex;
@@ -53,7 +53,7 @@ const SubmissionStatus = (props :Props) => {
   if (success) {
     return (
       <Wrapper>
-        <FontAwesomeIcon color={GREEN_2} icon={faCheckCircle} size="3x" />
+        <FontAwesomeIcon color={GREEN.G300} icon={faCheckCircle} size="3x" />
         <h3>Submission Successful!</h3>
         <p>Your responses were successfully submitted.</p>
       </Wrapper>
