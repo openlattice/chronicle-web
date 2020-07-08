@@ -8,14 +8,15 @@ import {
   Colors,
 } from 'lattice-ui-kit';
 
-const { NEUTRALS, GREEN_2 } = Colors;
+const { NEUTRAL, GREEN_2 } = Colors;
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
   padding: 30px 0;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRAL.N900};
 
   > h3 {
     margin: 5px 0;

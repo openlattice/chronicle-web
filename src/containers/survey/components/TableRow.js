@@ -11,18 +11,14 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { updateAppUserType } from '../SurveyActions';
 
 const { USER_FQN, TITLE_FQN } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 const { CHILD, PARENT, PARENT_AND_CHILD } = AppUserTypes;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
-  border-bottom: 1px solid ${NEUTRALS[6]};
+  border-bottom: 1px solid ${NEUTRAL.N100};
 
   :focus {
     outline: none;
-  }
-
-  :hover {
-    background-color: ${NEUTRALS[10]};
   }
 `;
 
@@ -34,6 +30,7 @@ const CellContent = styled.div`
   overflow: hidden;
   padding: 0 5px;
   font-size: 14px;
+  color: ${NEUTRAL.N800}
 `;
 /* stylelint-enable */
 
