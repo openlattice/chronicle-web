@@ -29,6 +29,7 @@ const Wrapper = styled.div`
     margin: 0;
     padding: 0;
     font-weight: 400;
+    color: ${NEUTRAL.N800};
     font-size: 15px;
   }
 `;

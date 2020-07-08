@@ -1,6 +1,10 @@
 // @flow
 
+import { Colors } from 'lattice-ui-kit';
+
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+
+const { NEUTRAL } = Colors;
 
 const {
   DATE_FIRST_PUSHED,
@@ -13,21 +17,24 @@ const TABLE_HEADERS = [
     key: PERSON_ID,
     label: 'Participant ID',
     cellStyle: {
-      width: '18%',
+      width: '20%',
+      fontWeight: 600
     }
   },
   {
     key: DATE_FIRST_PUSHED,
     label: 'First Data Received',
     cellStyle: {
-      width: '22%',
+      width: '24%',
+      fontWeight: 600
     }
   },
   {
     key: DATE_LAST_PUSHED,
     label: 'Last Data Received',
     cellStyle: {
-      width: '22%'
+      width: '24%',
+      fontWeight: 600
     }
   },
   {
@@ -36,6 +43,7 @@ const TABLE_HEADERS = [
     cellStyle: {
       width: '18%',
       textAlign: 'center',
+      fontWeight: 600
     }
   },
   {
@@ -44,6 +52,7 @@ const TABLE_HEADERS = [
     sortable: false,
     cellStyle: {
       textAlign: 'center',
+      fontWeight: 600
     }
   },
 ];
