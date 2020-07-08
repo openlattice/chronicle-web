@@ -7,18 +7,24 @@ import ReactDOM from 'react-dom';
 
 import LatticeAuth from 'lattice-auth';
 import { ConnectedRouter } from 'connected-react-router/immutable';
-import { Colors } from 'lattice-ui-kit';
+import {
+  Colors,
+  LatticeLuxonUtils,
+  MuiPickersUtilsProvider,
+  StylesProvider,
+  ThemeProvider,
+  lightTheme,
+} from 'lattice-ui-kit';
 import { normalize } from 'polished';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { createGlobalStyle } from 'styled-components';
 
 import AppContainer from './containers/app/AppContainer';
-import SurveyContainer from './containers/survey/SurveyContainer';
 import QuestionnaireContainer from './containers/questionnaire/QuestionnaireContainer';
+import SurveyContainer from './containers/survey/SurveyContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
-
 import * as Routes from './core/router/Routes';
 
 // injected by Webpack.DefinePlugin
@@ -89,17 +95,23 @@ const APP_ROOT_NODE = document.getElementById('app');
 if (APP_ROOT_NODE) {
   ReactDOM.render(
     <Provider store={reduxStore}>
-      <>
-        <ConnectedRouter history={routerHistory}>
-          <Switch>
-            <Route path={Routes.SURVEY} component={SurveyContainer} />
-            <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
-            <AuthRoute path={Routes.ROOT} component={AppContainer} />
-          </Switch>
-        </ConnectedRouter>
-        <NormalizeCSS />
-        <GlobalStyle />
-      </>
+      <ThemeProvider theme={lightTheme}>
+        <MuiPickersUtilsProvider utils={LatticeLuxonUtils}>
+          <StylesProvider injectFirst>
+            <>
+              <ConnectedRouter history={routerHistory}>
+                <Switch>
+                  <Route path={Routes.SURVEY} component={SurveyContainer} />
+                  <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
+                  <AuthRoute path={Routes.ROOT} component={AppContainer} />
+                </Switch>
+              </ConnectedRouter>
+              <NormalizeCSS />
+              <GlobalStyle />
+            </>
+          </StylesProvider>
+        </MuiPickersUtilsProvider>
+      </ThemeProvider>
     </Provider>,
     APP_ROOT_NODE
   );

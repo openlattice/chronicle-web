@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { SUBMIT_QUESTIONNAIRE } from '../QuestionnaireActions';
 
-const { GREEN_2, NEUTRALS } = Colors;
+const { GREEN_2, NEUTRAL } = Colors;
 
 const Wrapper = styled.div`
   display: flex;
@@ -19,7 +19,7 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   padding: 30px 0;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRAL.N900};
 
   > h3 {
     margin: 5px 0;
