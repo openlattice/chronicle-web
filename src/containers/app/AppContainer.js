@@ -11,8 +11,13 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   AppNavigationWrapper,
+  LatticeLuxonUtils,
+  MuiPickersUtilsProvider,
   Sizes,
   Spinner,
+  StylesProvider,
+  ThemeProvider,
+  lightTheme
 } from 'lattice-ui-kit';
 import { LangUtils, ReduxConstants } from 'lattice-utils';
 import { connect } from 'react-redux';
@@ -107,17 +112,23 @@ class AppContainer extends Component<Props> {
     }
 
     return (
-      <AppContainerWrapper>
-        <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" logout={this.logout} user={user}>
-          <AppNavigationWrapper>
-            <NavLink to={Routes.STUDIES} />
-            <NavLink to={Routes.STUDIES}> Studies </NavLink>
-          </AppNavigationWrapper>
-        </AppHeaderWrapper>
-        <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
-          { this.renderAppContent() }
-        </AppContentWrapper>
-      </AppContainerWrapper>
+      <ThemeProvider theme={lightTheme}>
+        <MuiPickersUtilsProvider utils={LatticeLuxonUtils}>
+          <StylesProvider injectFirst>
+            <AppContainerWrapper>
+              <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" logout={this.logout} user={user}>
+                <AppNavigationWrapper>
+                  <NavLink to={Routes.STUDIES} />
+                  <NavLink to={Routes.STUDIES}> Studies </NavLink>
+                </AppNavigationWrapper>
+              </AppHeaderWrapper>
+              <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+                { this.renderAppContent() }
+              </AppContentWrapper>
+            </AppContainerWrapper>
+          </StylesProvider>
+        </MuiPickersUtilsProvider>
+      </ThemeProvider>
     );
   }
 }
