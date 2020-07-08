@@ -20,7 +20,7 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { goToRoute } from '../../../core/router/RoutingActions';
 
 const { STUDY_DESCRIPTION, STUDY_NAME, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 
 const StudyName = styled.h2`
   font-size: 20px;
@@ -36,10 +36,9 @@ const StudyName = styled.h2`
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRAL.N600};
   display: -webkit-box;
   font-size: 16px;
-  font-weight: 300;
   line-height: 1.5;
   margin: 0;
   overflow-wrap: break-word;

@@ -117,7 +117,7 @@ class StudiesContainer extends Component<Props, State> {
       <>
         <ContainerHeader>
           <h1> Studies </h1>
-          <Button mode="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
+          <Button color="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
         </ContainerHeader>
         {
           studies.isEmpty()

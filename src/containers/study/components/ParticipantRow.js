@@ -28,7 +28,7 @@ const {
   PERSON_ID,
   STATUS,
 } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS, PURPLES } = Colors;
+const { NEUTRAL, PURPLE } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
 const {
   // DELETE,
@@ -38,49 +38,37 @@ const {
 } = ParticipantActionTypes;
 
 const StyledCell = styled.td`
-  padding: 5px 5px;
+  padding: 10px 5px;
   word-wrap: break-word;
 `;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
-  border-bottom: 1px solid ${NEUTRALS[4]};
+  border-bottom: 1px solid ${NEUTRAL.N100};
 
   :focus {
     outline: none;
   }
-
-  :hover {
-    background-color: ${NEUTRALS[8]};
-  }
 `;
 
-/* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
   display: flex;
   font-size: 15px;
-  font-weight: 300;
   overflow: hidden;
   padding: 0 5px;
+  color: ${NEUTRAL.N800};
   justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')};
 `;
 
-/* stylelint-enable */
-
-const IconCircleWrapper = styled.span`
-  align-items: center;
-  background-color: transparent;
-  border-radius: 50%;
-  display: flex;
-  height: 40px;
-  justify-content: center;
-  margin: 0;
-  transition: all 300ms ease;
-  width: 40px;
-
+const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   :hover {
-    background-color: ${NEUTRALS[4]};
     cursor: pointer;
   }
+`;
+
+const ActionIconsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 type IconProps = {
@@ -100,21 +88,19 @@ const ActionIcon = (props :IconProps) => {
     participantEKId,
   } = props;
 
-  let iconColor = NEUTRALS[0];
+  let iconColor = NEUTRAL.N800;
   if (icon === faToggleOn && enrollmentStatus === ENROLLED) {
     // eslint-disable-next-line prefer-destructuring
-    iconColor = PURPLES[2];
+    iconColor = PURPLE.P300;
   }
 
   return (
-    <IconCircleWrapper
+    <StyledFontAwesomeIcon
         data-action-id={action}
         data-key-id={participantEKId}
-        onClick={onClickIcon}>
-      <FontAwesomeIcon
-          color={iconColor}
-          icon={icon} />
-    </IconCircleWrapper>
+        onClick={onClickIcon}
+        color={iconColor}
+        icon={icon} />
   );
 };
 
@@ -169,7 +155,7 @@ const ParticipantRow = (props :Props) => {
         </StyledCell>
 
         <StyledCell>
-          <CellContent>
+          <ActionIconsWrapper>
             {
               actionsData.map((actionItem) => (
                 <ActionIcon
@@ -181,7 +167,7 @@ const ParticipantRow = (props :Props) => {
                     participantEKId={participantEKId} />
               ))
             }
-          </CellContent>
+          </ActionIconsWrapper>
         </StyledCell>
       </RowWrapper>
     </>
