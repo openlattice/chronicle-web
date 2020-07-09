@@ -39,8 +39,6 @@ const IconGrid = styled.div`
   grid-gap: 25px;
   justify-content: space-between;
   align-items: center;
-  /* grid-template-columns: repeat(auto-fit, 10px);
-  height: 100%; */
 `;
 
 const ListItemWrapper = styled.div`
