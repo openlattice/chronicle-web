@@ -19,7 +19,7 @@ import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import SubmissionSuccessful from './components/SubmissionSuccessful';
-import SurveyTable from './SurveyTable';
+import SurveyForm from './components/SurveyForm';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
@@ -53,7 +53,7 @@ const SurveyContainer = () => {
   const { date, participantId, studyId } :{ date :string, participantId :string, studyId :UUID } = queryParams;
 
   // selectors
-  const userApps = useSelector((state) => state.getIn(['appsData', 'appsData'], Map()));
+  const userAppsData = useSelector((state) => state.getIn(['appsData', 'appsData'], Map()));
   const getUserAppsRS :?RequestState = useRequestState(['appsData', GET_CHRONICLE_APPS_DATA]);
   const submitSurveyRS :?RequestState = useRequestState(['appsData', SUBMIT_SURVEY]);
 
@@ -96,11 +96,11 @@ const SurveyContainer = () => {
                       <SurveyDate>
                         { surveyDate.toLocaleString(DateTime.DATE_FULL) }
                       </SurveyDate>
-                      <SurveyTable
-                          submitRequestState={submitSurveyRS}
-                          data={userApps}
+                      <SurveyForm
                           participantId={participantId}
-                          studyId={studyId} />
+                          studyId={studyId}
+                          submitSurveyRS={submitSurveyRS}
+                          userAppsData={userAppsData} />
                     </>
                   )
               }
