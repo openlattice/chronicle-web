@@ -21,7 +21,6 @@ const getAppNameFromUserAppsEntity = (entity :Map) => {
 };
 
 const createSurveyFormSchema = (userApps :Map) => {
-
   const schemaProperties :Object = userApps.map((app) => ({
     title: app.getIn(['entityDetails', TITLE_FQN, 0]),
     description: 'Select all that apply',
@@ -63,10 +62,14 @@ const createSurveyFormSchema = (userApps :Map) => {
   };
 
   return {
-    uiSchema,
-    schema
+    schema,
+    uiSchema
   };
 };
+
+const createInitialFormData = (userApps :Map) => userApps
+  .map((app) => app.getIn(['associationDetails', USER_FQN], List()))
+  .toJS();
 
 const createSubmissionData = (formData :Object, userApps :Map) => {
   const entities = Object.entries(formData).map(([entityKeyId, selectedUsers]) => ({
@@ -86,6 +89,7 @@ const createSubmissionData = (formData :Object, userApps :Map) => {
 };
 
 export {
+  createInitialFormData,
   createSubmissionData,
   createSurveyFormSchema,
   getAppNameFromUserAppsEntity

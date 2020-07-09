@@ -23,7 +23,7 @@ import SubmissionFailureModal from './SubmissionFailureModal';
 import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { SUBMIT_SURVEY, submitSurvey } from '../SurveyActions';
 import { SURVEY_INSTRUCTION_TEXT } from '../constants';
-import { createSurveyFormSchema } from '../utils';
+import { createInitialFormData, createSurveyFormSchema } from '../utils';
 
 const { media } = StyleUtils;
 const { NEUTRAL } = Colors;
@@ -53,10 +53,10 @@ const InstructionText = styled.span`
 `;
 
 type Props = {
-  userAppsData :Map;
   participantId :string;
   studyId :UUID;
   submitSurveyRS :?RequestState;
+  userAppsData :Map;
 };
 
 const SurveyTable = ({
@@ -66,18 +66,19 @@ const SurveyTable = ({
   submitSurveyRS
 } :Props) => {
 
-  const rootDispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const { uiSchema, schema } = createSurveyFormSchema(userAppsData);
+  const initialFormData = createInitialFormData(userAppsData);
 
   useEffect(() => {
     setErrorModalVisible(submitSurveyRS === RequestStates.FAILURE);
   }, [errorModalVisible, setErrorModalVisible, submitSurveyRS]);
 
   const handleOnSubmit = ({ formData } :Object) => {
-    rootDispatch(submitSurvey({
+    dispatch(submitSurvey({
       participantId,
       studyId,
       formData,
@@ -87,7 +88,7 @@ const SurveyTable = ({
 
   const hideErrorModal = () => {
     setErrorModalVisible(false);
-    rootDispatch(resetRequestState(SUBMIT_SURVEY));
+    dispatch(resetRequestState(SUBMIT_SURVEY));
   };
 
   return (
@@ -107,10 +108,11 @@ const SurveyTable = ({
                   {SURVEY_INSTRUCTION_TEXT}
                 </InstructionText>
                 <Form
-                    schema={schema}
+                    formData={initialFormData}
                     isSubmitting={submitSurveyRS === RequestStates.PENDING}
-                    uiSchema={uiSchema}
-                    onSubmit={handleOnSubmit} />
+                    onSubmit={handleOnSubmit}
+                    schema={schema}
+                    uiSchema={uiSchema} />
               </StyledCardSegment>
             </>
           )
