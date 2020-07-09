@@ -1,6 +1,6 @@
 // @flow
 
-const SURVEY_INSTRUCTION_TEXT = 'Thank you for completing this Chronicle app survey! Below, you will'
+const SURVEY_INSTRUCTION_TEXT = 'Thank you for taking the time to complete this survey! Below, you will'
 + ' find a list of apps that were used on this device today. Under each app, there will be a series of'
 + ' buttons you can click (you can click more than one) describing who in your family used that app today.'
 + ' Please answer these prompts to the best of your ability.'
