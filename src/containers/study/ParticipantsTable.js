@@ -27,6 +27,7 @@ import {
   DELETE_STUDY_PARTICIPANT,
   changeEnrollmentStatus,
   deleteStudyParticipant,
+  resetDeleteParticipantTimeout
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -101,6 +102,11 @@ const ParticipantsTable = (props :Props) => {
     }));
   };
 
+  const onCloseDeleteParticipantModal = () => {
+    setDeleteModalOpen(false);
+    dispatch(resetDeleteParticipantTimeout());
+  };
+
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
     const { currentTarget } = event;
     const { dataset } = currentTarget;
@@ -147,7 +153,7 @@ const ParticipantsTable = (props :Props) => {
 
       <DeleteParticipantModal
           deleteTimeout={deleteTimeout}
-          handleOnClose={() => setDeleteModalOpen(false)}
+          handleOnClose={onCloseDeleteParticipantModal}
           handleOnDeleteParticipant={handleOnDeleteParticipant}
           isVisible={deleteModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
