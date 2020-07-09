@@ -17,7 +17,7 @@ const Description = styled.div`
     padding: 0;
     margin: 0 0 5px 0;
     font-weight: 500;
-    color: ${NEUTRAL.N800}
+    color: ${NEUTRAL.N800};
   }
 
   p {
