@@ -10,20 +10,21 @@ import { Colors, Tag } from 'lattice-ui-kit';
 import { LIST_ITEM_ACTIONS, LIST_ITEM_ICONS } from '../constants/constants';
 
 const { SHOW_DETAILS, TOGGLE_STATUS } = LIST_ITEM_ACTIONS;
-const { NEUTRALS, PURPLES } = Colors;
+const { NEUTRAL, PURPLE } = Colors;
 
 const Description = styled.div`
   h3 {
     padding: 0;
     margin: 0 0 5px 0;
     font-weight: 500;
+    color: ${NEUTRAL.N800}
   }
 
   p {
     padding: 0;
     margin: 0;
-    font-size: 14px;
-    color: ${NEUTRALS[1]};
+    font-size: 15px;
+    color: ${NEUTRAL.N600};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -98,7 +99,7 @@ const QuestionnaireListItem = ({
               data-action-id={icon.action}
               data-questionnaire-id={questionnaireEKID}
               onClick={handleOnClick}
-              color={icon.action === TOGGLE_STATUS && active ? PURPLES[0] : NEUTRALS[1]}
+              color={icon.action === TOGGLE_STATUS && active ? PURPLE.P300 : NEUTRAL.N600}
               icon={icon.action === TOGGLE_STATUS && active ? faToggleOn : icon.icon}
               key={icon.action} />
         ))

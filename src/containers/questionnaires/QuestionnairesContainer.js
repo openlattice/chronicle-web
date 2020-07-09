@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
   Card,
   CardSegment,
-  PlusButton,
   Select,
+  Button,
   Spinner,
 } from 'lattice-ui-kit';
 import { ReduxConstants } from 'lattice-utils';
@@ -120,12 +122,13 @@ const QuestionnairesContainer = ({ study } :Props) => {
               placeholder="Filter by status"
               value={selectedStatus} />
         </SelectWrapper>
-        <PlusButton
+        <Button
             disabled={isEditing}
-            mode="primary"
+            color="primary"
+            startIcon={<FontAwesomeIcon icon={faPlus} />}
             onClick={() => setIsEditing(true)}>
           New Questionnaire
-        </PlusButton>
+        </Button>
       </HeaderRow>
       <Card>
         {

@@ -130,6 +130,7 @@ const QuestionnaireDetailsModal = (props :Props) => {
 
         <SectionPane>
           <h2> Questions </h2>
+          <br />
           <Form
               disabled
               hideSubmit
