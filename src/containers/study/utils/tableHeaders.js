@@ -21,7 +21,7 @@ const TABLE_HEADERS = [
     key: DATE_FIRST_PUSHED,
     label: 'First Data Received',
     cellStyle: {
-      width: '24%',
+      width: '22%',
       fontWeight: 600
     }
   },
@@ -29,7 +29,7 @@ const TABLE_HEADERS = [
     key: DATE_LAST_PUSHED,
     label: 'Last Data Received',
     cellStyle: {
-      width: '24%',
+      width: '22%',
       fontWeight: 600
     }
   },
