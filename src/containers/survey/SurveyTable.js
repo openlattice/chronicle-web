@@ -142,7 +142,7 @@ const SurveyTable = ({
                 <SubmitButtonWrapper>
                   <Button
                       isLoading={submitRequestState === RequestStates.PENDING}
-                      mode="primary"
+                      color="primary"
                       onClick={handleOnSubmit}>
                     Submit Survey
                   </Button>

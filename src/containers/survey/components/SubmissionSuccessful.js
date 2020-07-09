@@ -8,14 +8,15 @@ import {
   Colors,
 } from 'lattice-ui-kit';
 
-const { NEUTRALS, GREEN_2 } = Colors;
+const { NEUTRAL, GREEN } = Colors;
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
   padding: 30px 0;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRAL.N900};
 
   > h3 {
     margin: 5px 0;
@@ -28,12 +29,13 @@ const Wrapper = styled.div`
     margin: 0;
     padding: 0;
     font-weight: 400;
+    color: ${NEUTRAL.N800};
     font-size: 15px;
   }
 `;
 const SubmissionSuccessful = () => (
   <Wrapper>
-    <FontAwesomeIcon color={GREEN_2} icon={faCheckCircle} size="3x" />
+    <FontAwesomeIcon color={GREEN.G300} icon={faCheckCircle} size="3x" />
     <h3> Submission Successful! </h3>
     <p> Thank you for participating in chronicle user awareness survey </p>
   </Wrapper>
