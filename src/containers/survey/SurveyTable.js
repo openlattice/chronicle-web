@@ -82,7 +82,7 @@ type Props = {
   data :Map;
   participantId :string;
   studyId :UUID;
-  submitRequestState :RequestState;
+  submitRequestState :?RequestState;
 };
 
 const SurveyTable = ({
