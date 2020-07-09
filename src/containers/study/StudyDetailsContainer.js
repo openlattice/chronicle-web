@@ -26,7 +26,7 @@ const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
 
 const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
 
-const { NEUTRALS, PURPLES } = Colors;
+const { NEUTRAL, PURPLE } = Colors;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -48,7 +48,7 @@ const Tabs = styled.div`
 
 const TabLink = styled(NavLink)`
   border-bottom: 2px solid transparent;
-  color: ${NEUTRALS[1]};
+  color: ${NEUTRAL.N600};
   font-size: 18px;
   font-weight: 500;
   line-height: 70px;
@@ -61,13 +61,13 @@ const TabLink = styled(NavLink)`
   }
 
   :hover {
-    color: ${NEUTRALS[0]};
-    cursor: ponter;
+    color: ${NEUTRAL.N800};
+    cursor: pointer;
   }
 
   &.active {
-    border-bottom: 2px solid ${PURPLES[1]};
-    color: ${PURPLES[1]};
+    border-bottom: 2px solid ${PURPLE.P300};
+    color: ${PURPLE.P300};
   }
 `;
 

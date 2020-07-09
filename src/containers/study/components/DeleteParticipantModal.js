@@ -7,11 +7,10 @@ import { ActionModal, Colors } from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 
 const ModalWrapper = styled.div`
   width: 500px;
-  font-weight: 300;
 `;
 
 type Props = {
@@ -33,7 +32,7 @@ const DeleteParticipantModal = ({
     [RequestStates.STANDBY]: (
       <ModalWrapper>
         <span> Are you sure you want to delete </span>
-        <span style={{ color: NEUTRALS[0], fontWeight: 500 }}>
+        <span style={{ color: NEUTRAL.N900, fontWeight: 500 }}>
           { participantId }
         </span>
         <span>?</span>
