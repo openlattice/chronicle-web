@@ -3,9 +3,11 @@
 import invert from 'lodash/invert';
 import {
   List,
+  Map,
   fromJS,
   get,
-  getIn
+  getIn,
+  setIn
 } from 'immutable';
 import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
@@ -20,7 +22,7 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { DAYS_OF_WEEK, QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 
 const { isNonEmptyString } = LangUtils;
-const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;
+const { getEntityAddressKey, getPageSectionKey, processEntityData } = DataProcessingUtils;
 
 const { TEXT_ENTRY } = QuestionTypes;
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -168,7 +170,47 @@ const createQuestionnaireAssociations = (formData :Object[], studyEKID :UUID) =>
   );
 };
 
+const constructEntitiesFromFormData = (
+  formData :Object, entityKeyIds :Object, entitySetIds :Map, propertyTypeIds :Map
+) => {
+  const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
+  const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
+
+  const questionnaireEKID = getIn(entityKeyIds, [questionnaireESID, 0]);
+  const questionEKIDS = get(entityKeyIds, questionsESID);
+
+  // update form data
+  let updatedFormData = setIn(
+    formData,
+    [getPageSectionKey(1, 1), getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, OPENLATTICE_ID_FQN)],
+    questionnaireEKID
+  );
+
+  questionEKIDS.forEach((questionEKID, index) => {
+    updatedFormData = setIn(
+      updatedFormData,
+      [getPageSectionKey(2, 1), index, getEntityAddressKey(-1, QUESTIONS_ES_NAME, OPENLATTICE_ID_FQN)],
+      questionEKID
+    );
+  });
+
+  let result = processEntityData(
+    updatedFormData,
+    entitySetIds,
+    propertyTypeIds.map((id, fqn) => fqn)
+  );
+
+  // set id property on questionnaire entity (required by LUK table)
+  result = setIn(result, [questionnaireESID, 0, 'id'], questionnaireEKID);
+
+  const questionEntities = get(result, questionsESID);
+  const questionnaireEntity = getIn(result, [questionnaireESID, 0]);
+
+  return { questionEntities, questionnaireEntity };
+};
+
 export {
+  constructEntitiesFromFormData,
   createPreviewQuestionEntities,
   createQuestionnaireAssociations,
   createRecurrenceRuleSetFromFormData,

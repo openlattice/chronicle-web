@@ -13,8 +13,6 @@ import {
   Map,
   Set,
   fromJS,
-  get,
-  getIn,
   setIn,
 } from 'immutable';
 import { Constants, Types } from 'lattice';
@@ -60,7 +58,11 @@ import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
-import { createQuestionnaireAssociations, createRecurrenceRuleSetFromFormData } from '../questionnaires/utils';
+import {
+  constructEntitiesFromFormData,
+  createQuestionnaireAssociations,
+  createRecurrenceRuleSetFromFormData
+} from '../questionnaires/utils';
 
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
@@ -195,43 +197,6 @@ function* deleteQuestionnaireWorker(action :SequenceAction) :Saga<*> {
 
 function* deleteQuestionnaireWatcher() :Saga<*> {
   yield takeEvery(DELETE_QUESTIONNAIRE, deleteQuestionnaireWorker);
-}
-
-function constructEntitiesFromFormData(formData, entityKeyIds, entitySetIds, propertyTypeIds :Map) {
-  const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
-  const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
-
-  const questionnaireEKID = getIn(entityKeyIds, [questionnaireESID, 0]);
-  const questionEKIDS = get(entityKeyIds, questionsESID);
-
-  // update form data
-  let updatedFormData = setIn(
-    formData,
-    [getPageSectionKey(1, 1), getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, OPENLATTICE_ID_FQN)],
-    questionnaireEKID
-  );
-
-  questionEKIDS.forEach((questionEKID, index) => {
-    updatedFormData = setIn(
-      updatedFormData,
-      [getPageSectionKey(2, 1), index, getEntityAddressKey(-1, QUESTIONS_ES_NAME, OPENLATTICE_ID_FQN)],
-      questionEKID
-    );
-  });
-
-  let result = processEntityData(
-    updatedFormData,
-    entitySetIds,
-    propertyTypeIds.map((id, fqn) => fqn)
-  );
-
-  // set id property on questionnaire entity (required by LUK table)
-  result = setIn(result, [questionnaireESID, 0, 'id'], questionnaireEKID);
-
-  const questionEntities = get(result, questionsESID);
-  const questionnaireEntity = getIn(result, [questionnaireESID, 0]);
-
-  return { questionEntities, questionnaireEntity };
 }
 
 /*
