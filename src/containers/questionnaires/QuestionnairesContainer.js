@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -11,8 +11,6 @@ import {
   PlusButton,
   Select,
   Spinner,
-  StyleUtils,
-  Table
 } from 'lattice-ui-kit';
 import { ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,8 +18,7 @@ import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import CreateQuestionnaireForm from './components/CreateQuestionnaireForm';
-import TableHeaderRow from './table/TableHeaderRow';
-import TableRow from './table/TableRow';
+import QuestionnairesList from './QuestionnairesList';
 import { STATUS_SELECT_OPTIONS } from './constants/constants';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -30,17 +27,8 @@ import { GET_STUDY_QUESTIONNAIRES, getStudyQuestionnaires } from '../questionnai
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const { REQUEST_STATE } = ReduxConstants;
-const { getStyleVariation } = StyleUtils;
-
 const { STUDY_QUESTIONNAIRES } = QUESTIONNAIRE_REDUX_CONSTANTS;
-
 const { ACTIVE_FQN } = PROPERTY_TYPE_FQNS;
-
-const tableHeaders = ['title', 'status', 'actions'].map((header) => ({
-  key: header,
-  label: '',
-  sortable: false
-}));
 
 const [ACTIVE, NOT_ACTIVE] = STATUS_SELECT_OPTIONS.map((status) => status.value);
 
@@ -60,25 +48,6 @@ const SelectWrapper = styled.div`
   min-width: 200px;
 `;
 
-const getWidthVariation = getStyleVariation('width', {
-  default: 'auto',
-  title: 'auto',
-  status: '100px',
-  actions: '110px'
-});
-
-const Cell = styled.td`
-  width: ${getWidthVariation};
-`;
-
-type HeadCellProps = {
-  width :string;
-};
-
-const HeadCell = ({ width } :HeadCellProps) => (
-  <Cell width={width} />
-);
-
 type Props = {
   study :Map;
 };
@@ -90,7 +59,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   const [selectedStatus, setSelectedStatus] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [tableData, setTableData] = useState([]);
+  const [filteredListData, setFilteredListData] = useState(Map());
 
   const studyEKID = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
@@ -115,7 +84,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   }, [studyQuestionnaires, studyEKID, dispatch]);
 
   useEffect(() => {
-    setTableData((studyQuestionnaires.valueSeq().toJS()));
+    setFilteredListData(studyQuestionnaires);
   }, [studyQuestionnaires]);
 
   useEffect(() => {
@@ -128,16 +97,12 @@ const QuestionnairesContainer = ({ study } :Props) => {
       }
     }
 
-    setTableData((filtered.valueSeq().toJS()));
+    setFilteredListData(filtered);
   }, [selectedStatus, studyQuestionnaires]);
 
   const onSelectStatus = (selectedOptions :Object[]) => {
     setSelectedStatus(selectedOptions);
   };
-
-  const RowComponent = useMemo(() => ({ data: RowData }) => (
-    <TableRow data={RowData} studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
-  ), [study]);
 
   if (getStudyQuestionnairesRS === RequestStates.PENDING) {
     return <Spinner size="1x" />;
@@ -172,15 +137,14 @@ const QuestionnairesContainer = ({ study } :Props) => {
             <>
               <CardSegment padding="0px">
                 {
-                  tableData.length === 0 ? (
+                  filteredListData.isEmpty() ? (
                     <div style={{ textAlign: 'center', padding: '60px' }}>
                       No questionnaires found.
                     </div>
                   ) : (
-                    <Table
-                        components={{ HeadCell, Header: TableHeaderRow, Row: RowComponent }}
-                        data={tableData}
-                        headers={tableHeaders} />
+                    <QuestionnairesList
+                        questionnaires={filteredListData}
+                        studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
                   )
                 }
               </CardSegment>

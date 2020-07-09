@@ -111,7 +111,7 @@ const CreateQuestionnaireForm = (props :Props) => {
   };
 
   return (
-    <CardSegment padding="20px">
+    <CardSegment>
       <Header>
         <h3> Create Questionnaire </h3>
         <Button onClick={onClose}> Cancel </Button>
