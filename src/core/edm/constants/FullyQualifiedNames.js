@@ -47,14 +47,14 @@ const PROPERTY_TYPE_FQNS = {
   NOTIFICATION_ENABLED: FQN.of('ol.status'),
 
   // survey
-  NAME_FQN: FQN.of('ol.name'),
-  DESCRIPTION_FQN: FQN.of('ol.description'),
-  VALUES_FQN: FQN.of('ol.values'),
-  DATE_TIME_FQN: FQN.of('ol.datetime'),
-  TITLE_FQN: FQN.of('ol.title'),
-  RRULE_FQN: FQN.of('ol.rrule'),
   ACTIVE_FQN: FQN.of('ol.active'),
-  COMPLETED_DATE_TIME_FQN: FQN.of('date.completeddatetime')
+  COMPLETED_DATE_TIME_FQN: FQN.of('date.completeddatetime'),
+  DATE_TIME_FQN: FQN.of('ol.datetime'),
+  DESCRIPTION_FQN: FQN.of('ol.description'),
+  NAME_FQN: FQN.of('ol.name'),
+  RRULE_FQN: FQN.of('ol.rrule'),
+  TITLE_FQN: FQN.of('ol.title'),
+  VALUES_FQN: FQN.of('ol.values'),
 };
 
 export {

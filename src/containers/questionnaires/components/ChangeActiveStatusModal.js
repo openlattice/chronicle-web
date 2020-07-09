@@ -40,7 +40,7 @@ const ChangeActiveStatusModal = ({
 
   const onChangeStatus = () => {
     dispatch(changeActiveStatus({
-      activeStatus,
+      activeStatus: !activeStatus,
       questionnaireEKID,
       studyEKID
     }));

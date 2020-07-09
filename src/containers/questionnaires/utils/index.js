@@ -1,6 +1,5 @@
 // @flow
 
-import invert from 'lodash/invert';
 import {
   List,
   Map,
@@ -12,14 +11,14 @@ import {
 import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { LangUtils } from 'lattice-utils';
-import { DateTime } from 'luxon';
+import { DateTime, Info } from 'luxon';
 import { RRule, RRuleSet } from 'rrule';
 import { v4 as uuid } from 'uuid';
 
 import QuestionTypes from '../constants/questionTypes';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { DAYS_OF_WEEK, QUESTIONNAIRE_SUMMARY } from '../constants/constants';
+import { QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 
 const { isNonEmptyString } = LangUtils;
 const { getEntityAddressKey, getPageSectionKey, processEntityData } = DataProcessingUtils;
@@ -71,19 +70,11 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
   return result;
 };
 
-// return an array of RRule.MO, RRule.TU etc from ['Monday', 'Tuesday'] etc
-const getRRuleWeekDayConstants = (daysOfWeek :string[]) => {
-  const mapper = invert(DAYS_OF_WEEK); // {'Monday': 'MO', 'Tuesday': 'TU'}
-  return daysOfWeek.map((day) => RRule[get(mapper, day)]);
-};
-
 // generate recurrence rules as defined in https://tools.ietf.org/html/rfc5545
 const createRecurrenceRuleSetFromFormData = (formData :Object) => {
   const psk = getPageSectionKey(3, 1);
 
   const daysOfWeek :string[] = getIn(formData, [psk, 'daysOfWeek']);
-  const daysOfWeekConsts = getRRuleWeekDayConstants(daysOfWeek);
-
   const selectedTimes :string[] = getIn(formData, [psk, 'time'])
     .map((time :Object) => get(time, 'time')); // TODO time const
 
@@ -95,7 +86,7 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 
     rruleSet.rrule(new RRule({
       freq: RRule.WEEKLY,
-      byweekday: daysOfWeekConsts,
+      byweekday: daysOfWeek,
       byhour: dateTime.hour,
       byminute: dateTime.minute
     }));
@@ -106,15 +97,15 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 // parse a rruleSet string and get days of week + times
 const getWeekDaysAndTimesFromRruleSet = (rruleSet :string) => {
   const rrules :string[] = rruleSet.split('RRULE:').filter((token) => isNonEmptyString(token));
-
   // get week days
   // the days of the week are the same in all the individual rules in the rrruleSet,
   // so we only need to read the values from the first rrule
-  const weekdayPairs = Object.entries(DAYS_OF_WEEK);
+  // $FlowFixMe
+  const weekdays = Info.weekdays();
   const weekDays = RRule.parseString(rrules[0]).byweekday
     .map((day) => day.weekday)
     .sort()
-    .map((index) => weekdayPairs[index][1]);
+    .map((index) => weekdays[index]);
 
   // $FlowFixMe
   const times = rrules

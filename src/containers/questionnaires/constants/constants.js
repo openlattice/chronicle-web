@@ -36,17 +36,6 @@ const QUESTIONNAIRE_FORM_PAGES = {
   ABOUT_PAGE, QUESTIONS_PAGE, SCHEDULER_PAGE, CONFIRMATION_PAGE
 };
 
-// days of week
-const DAYS_OF_WEEK = {
-  MO: 'Monday',
-  TU: 'Tuesday',
-  WE: 'Wednesday',
-  TH: 'Thursday',
-  FR: 'Friday',
-  SA: 'Saturday',
-  SU: 'Sunday',
-};
-
 // questionnaire summary
 const QUESTIONNAIRE_SUMMARY = {
   TITLE: 'title',
@@ -56,7 +45,6 @@ const QUESTIONNAIRE_SUMMARY = {
 };
 
 export {
-  DAYS_OF_WEEK,
   LIST_ITEM_ACTIONS,
   LIST_ITEM_ICONS,
   QUESTIONNAIRE_FORM_PAGES,

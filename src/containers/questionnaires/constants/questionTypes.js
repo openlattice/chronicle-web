@@ -2,15 +2,15 @@
 
 // questionnaire question types
 type QuestionTypeEnum = {|
-  TEXT_ENTRY:'Text entry';
-  MULTIPLE_CHOICE:'Multiple choice';
+  MULTIPLE_CHOICE :'Multiple choice';
+  TEXT_ENTRY :'Text entry';
 |};
 
 type QuestionType = $Values<QuestionTypeEnum>;
 
 const QuestionTypes :{|...QuestionTypeEnum |} = Object.freeze({
-  TEXT_ENTRY: 'Text entry',
-  MULTIPLE_CHOICE: 'Multiple choice'
+  MULTIPLE_CHOICE: 'Multiple choice',
+  TEXT_ENTRY: 'Text entry'
 });
 
 export type { QuestionType };

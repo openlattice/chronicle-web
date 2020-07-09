@@ -2,8 +2,8 @@
 
 // questionnaire status
 type QuestionnaireStatusEnum = {|
-  ACTIVE:'ACTIVE';
-  NOT_ACTIVE:'NOT_ACTIVE';
+  ACTIVE :'ACTIVE';
+  NOT_ACTIVE :'NOT_ACTIVE';
 |};
 
 type QuestionnaireStatus = $Values<QuestionnaireStatusEnum>;

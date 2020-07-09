@@ -181,7 +181,7 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
           const { activeStatus, studyEKID, questionnaireEKID } = action.value;
 
           return state
-            .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID, ACTIVE_FQN], [!activeStatus])
+            .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID, ACTIVE_FQN], [activeStatus])
             .setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });

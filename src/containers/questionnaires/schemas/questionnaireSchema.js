@@ -1,11 +1,12 @@
 // @flow
 
 import { DataProcessingUtils } from 'lattice-fabricate';
+import { Info } from 'luxon';
+import { RRule } from 'rrule';
 
 import QuestionTypes from '../constants/questionTypes';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { DAYS_OF_WEEK } from '../constants/constants';
 
 const { TEXT_ENTRY, MULTIPLE_CHOICE } = QuestionTypes;
 
@@ -14,6 +15,7 @@ const {
   QUESTIONS_ES_NAME
 } = ENTITY_SET_NAMES;
 const {
+  ACTIVE_FQN,
   DESCRIPTION_FQN,
   NAME_FQN,
   TITLE_FQN,
@@ -37,6 +39,10 @@ const aboutSchema = {
         [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN)]: {
           type: 'string',
           title: 'Description'
+        },
+        [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN)]: {
+          type: 'boolean',
+          default: true
         }
       },
       required: [
@@ -57,6 +63,9 @@ const aboutUiSchema = {
     [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN)]: {
       classNames: 'column-span-12',
       'ui:widget': 'textarea',
+    },
+    [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN)]: {
+      classNames: 'hidden'
     }
   }
 };
@@ -165,8 +174,10 @@ const schedulerSchema = {
           title: 'Days of week to send notification',
           type: 'array',
           items: {
-            type: 'string',
-            enum: Object.values(DAYS_OF_WEEK)
+            enum: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU],
+            // $FlowFixMe
+            enumNames: Info.weekdays(),
+            type: 'object'
           },
           minItems: 1,
           uniqueItems: true

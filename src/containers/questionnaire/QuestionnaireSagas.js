@@ -128,7 +128,7 @@ function* changeActiveStatusWorker(action :SequenceAction) :Saga<*> {
       entitySetId: questionnaireESID,
       entities: {
         [questionnaireEKID]: {
-          [activePTID]: [!activeStatus]
+          [activePTID]: [activeStatus]
         }
       },
       updateType: UpdateTypes.PARTIAL_REPLACE
@@ -220,12 +220,8 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
 
     // update formdata with rrule
     let psk = getPageSectionKey(1, 1);
-    let eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
+    const eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
     formData = setIn(formData, [psk, eak], rruleSet);
-
-    // set ol.active to true
-    eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN);
-    formData = setIn(formData, [psk, eak], true);
 
     // remove notification schedule from form data
     psk = getPageSectionKey(3, 1);
@@ -270,8 +266,8 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
 
   }
   catch (error) {
-    yield put(createQuestionnaire.failure(action.id));
     LOG.error(action.type, error);
+    yield put(createQuestionnaire.failure(action.id));
   }
   finally {
     yield put(createQuestionnaire.finally(action.id));
@@ -382,10 +378,9 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
     const studyQuestionnaires = Map().withMutations((mutator) => {
       fromJS(response.data).get(studyEKID, List()).forEach((neighbor) => {
         const neighborId = neighbor.get('neighborId');
-        const details = neighbor.get('neighborDetails').asMutable();
-        details.set('id', neighborId); // needed by LUK table
+        const details = neighbor.get('neighborDetails');
 
-        mutator.set(neighborId, details.asImmutable());
+        mutator.set(neighborId, details);
       });
     });
 

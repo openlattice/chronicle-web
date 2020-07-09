@@ -75,4 +75,4 @@ const DeleteQuestionnaireModal = ({
   );
 };
 
-export default React.memo<Props>(DeleteQuestionnaireModal);
+export default DeleteQuestionnaireModal;

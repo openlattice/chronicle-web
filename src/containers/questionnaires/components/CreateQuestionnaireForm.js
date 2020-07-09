@@ -11,9 +11,10 @@ import {
   CardSegment,
   Modal
 } from 'lattice-ui-kit';
-import { ReduxConstants } from 'lattice-utils';
-import { useDispatch, useSelector } from 'react-redux';
+import { useRequestState } from 'lattice-utils';
+import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import NewQuestionnaireConfirmation from './NewQuestionnaireConfirmation';
 
@@ -24,7 +25,6 @@ import { SCHEMAS, UI_SCHEMAS } from '../schemas/questionnaireSchema';
 
 const { aboutSchema, questionsSchema, schedulerSchema } = SCHEMAS;
 const { aboutUiSchema, questionsUiSchema, schedulerUiSchema } = UI_SCHEMAS;
-const { REQUEST_STATE } = ReduxConstants;
 
 const {
   ABOUT_PAGE,
@@ -80,13 +80,11 @@ const CreateQuestionnaireForm = (props :Props) => {
   const [submitStatusModalMessage, setSubmitStatusModalMessage] = useState('');
   const [submitStatusModalVisible, setSubmitStatusModalVisible] = useState(false);
 
-  const requestStates = useSelector((state) => ({
-    [CREATE_QUESTIONNAIRE]: state.getIn(['questionnaire', CREATE_QUESTIONNAIRE, REQUEST_STATE])
-  }));
+  const createQuestionnaireRS :?RequestState = useRequestState(['questionnaire', CREATE_QUESTIONNAIRE]);
 
   useEffect(() => {
-    const submitSuccessful = requestStates[CREATE_QUESTIONNAIRE] === RequestStates.SUCCESS;
-    const submitFailure = requestStates[CREATE_QUESTIONNAIRE] === RequestStates.FAILURE;
+    const submitSuccessful = createQuestionnaireRS === RequestStates.SUCCESS;
+    const submitFailure = createQuestionnaireRS === RequestStates.FAILURE;
     if (submitSuccessful) {
       setSubmitStatusModalTitle('Success');
       setSubmitStatusModalMessage('Questionnaire was successfully created.');
@@ -100,11 +98,11 @@ const CreateQuestionnaireForm = (props :Props) => {
     }
 
     setSubmitStatusModalVisible(submitFailure || submitSuccessful);
-  }, [requestStates]);
+  }, [createQuestionnaireRS]);
 
   const handleCloseModal = () => {
     setSubmitStatusModalVisible(false);
-    if (requestStates[CREATE_QUESTIONNAIRE] === RequestStates.SUCCESS) {
+    if (createQuestionnaireRS === RequestStates.SUCCESS) {
       onClose();
     }
     dispatch(resetRequestState(CREATE_QUESTIONNAIRE));
@@ -175,7 +173,7 @@ const CreateQuestionnaireForm = (props :Props) => {
                   </Button>
                   <span>{`${page + 1} of ${totalPages}`}</span>
                   <Button
-                      isLoading={requestStates[CREATE_QUESTIONNAIRE] === RequestStates.PENDING}
+                      isLoading={createQuestionnaireRS === RequestStates.PENDING}
                       mode="primary"
                       onClick={handleNext}>
                     {
