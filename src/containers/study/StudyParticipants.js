@@ -84,7 +84,7 @@ const StudyParticipants = ({ study } :Props) => {
     const { value } = currentTarget;
 
     const matchingResults = participants
-      .filter((participant) => participant.getIn([PERSON_ID, 0]).includes(value));
+      .filter((participant) => participant.getIn([PERSON_ID, 0]).toLowerCase().includes(value.toLowerCase()));
     setFilteredParticipants(matchingResults);
   };
 
