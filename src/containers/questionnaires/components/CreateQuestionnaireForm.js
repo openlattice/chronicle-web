@@ -174,7 +174,7 @@ const CreateQuestionnaireForm = (props :Props) => {
                   <span>{`${page + 1} of ${totalPages}`}</span>
                   <Button
                       isLoading={createQuestionnaireRS === RequestStates.PENDING}
-                      mode="primary"
+                      color="primary"
                       onClick={handleNext}>
                     {
                       pageName === CONFIRMATION_PAGE ? 'Save Questionnaire' : 'Next'
