@@ -2,32 +2,28 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
   Button,
   Card,
   Spinner
 } from 'lattice-ui-kit';
-import { ReduxConstants } from 'lattice-utils';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { useRequestState } from 'lattice-utils';
+import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
-import type { RequestSequence, RequestState } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import StudyCard from './components/StudyCard';
 import StudyDetailsModal from './components/StudyDetailsModal';
-import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
+import { CREATE_STUDY, GET_STUDIES } from './StudiesActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
-import * as RoutingActions from '../../core/router/RoutingActions';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const { REQUEST_STATE } = ReduxConstants;
 
 const ContainerHeader = styled.section`
   display: flex;
@@ -57,107 +53,61 @@ const CenterText = styled.div`
   text-align: center;
 `;
 
-type Props = {
-  actions :{
-    getStudies :RequestSequence;
-    resetRequestState :RequestSequence;
-  };
-  requestStates:{
-    CREATE_STUDY :RequestState;
-    GET_STUDIES :RequestState;
-  };
-  studies :Map;
-};
+const StudiesContainer = () => {
 
-type State = {
-  isCreateStudyModalVisible :boolean;
-};
+  const dispatch = useDispatch();
+  const [createStudyModalVisible, setCreateStudyModalVisible] = useState(false);
 
-class StudiesContainer extends Component<Props, State> {
-  constructor(props :Props) {
-    super(props);
-    this.state = {
-      isCreateStudyModalVisible: false
-    };
-  }
+  const studies = useSelector((state) => state.getIn(['studies', 'studies']));
 
-  openCreateStudyModal = () => {
-    const { actions } = this.props;
+  const getStudiesRS :?RequestState = useRequestState(['studies', GET_STUDIES]);
+
+  const openCreateStudyModal = () => {
     // necessary after a successful or failed CREATE_STUDY action
-    actions.resetRequestState(CREATE_STUDY);
+    dispatch(resetRequestState(CREATE_STUDY));
+    setCreateStudyModalVisible(true);
+  };
 
-    this.setState({
-      isCreateStudyModalVisible: true
-    });
-  }
-
-  handleOnCloseModal = () => {
-    this.setState({
-      isCreateStudyModalVisible: false
-    });
-  }
-
-  render() {
-    const { studies, requestStates } = this.props;
-    const { isCreateStudyModalVisible } = this.state;
-
-    if (requestStates[GET_STUDIES] === RequestStates.PENDING) {
-      return (
-        <Spinner size="2x" />
-      );
-    }
-
-    if (requestStates[GET_STUDIES] === RequestStates.FAILURE) {
-      return (
-        <BasicErrorComponent />
-      );
-    }
-
+  if (getStudiesRS === RequestStates.PENDING) {
     return (
-      <>
-        <ContainerHeader>
-          <h1> Studies </h1>
-          <Button color="primary" onClick={this.openCreateStudyModal}> Create Study </Button>
-        </ContainerHeader>
-        {
-          studies.isEmpty()
-            ? (
-              <CenterText>
-                Sorry, no studies were found. Please try refreshing the page, or contact support.
-              </CenterText>
-            )
-            : (
-              <CardGrid>
-                {
-                  studies.valueSeq().map((study) => (
-                    <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
-                  ))
-                }
-              </CardGrid>
-            )
-        }
-        <StudyDetailsModal
-            handleOnCloseModal={this.handleOnCloseModal}
-            isVisible={isCreateStudyModalVisible} />
-      </>
+      <Spinner size="2x" />
     );
   }
-}
-const mapStateToProps = (state :Map) => ({
-  requestStates: {
-    [GET_STUDIES]: state.getIn(['studies', GET_STUDIES, REQUEST_STATE]),
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, REQUEST_STATE]),
-  },
-  studies: state.getIn(['studies', 'studies'])
-});
 
-const mapDispatchToProps = (dispatch :Function) => ({
-  actions: bindActionCreators({
-    goToRoute: RoutingActions.goToRoute,
-    getStudies,
-    resetRequestState,
-  }, dispatch)
-});
+  if (getStudiesRS === RequestStates.FAILURE) {
+    return (
+      <BasicErrorComponent />
+    );
+  }
 
-// $FlowFixMe
-export default connect(mapStateToProps, mapDispatchToProps)(StudiesContainer);
+  return (
+    <>
+      <ContainerHeader>
+        <h1> Studies </h1>
+        <Button color="primary" onClick={openCreateStudyModal}> Create Study </Button>
+      </ContainerHeader>
+      {
+        studies.isEmpty()
+          ? (
+            <CenterText>
+              Sorry, no studies were found. Please try refreshing the page, or contact support.
+            </CenterText>
+          )
+          : (
+            <CardGrid>
+              {
+                studies.valueSeq().map((study) => (
+                  <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
+                ))
+              }
+            </CardGrid>
+          )
+      }
+      <StudyDetailsModal
+          handleOnCloseModal={() => setCreateStudyModalVisible(false)}
+          isVisible={createStudyModalVisible} />
+    </>
+  );
+};
+
+export default StudiesContainer;
