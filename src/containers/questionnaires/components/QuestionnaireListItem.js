@@ -44,7 +44,7 @@ const IconGrid = styled.div`
 
 const ListItemWrapper = styled.div`
   align-items: center;
-  border-bottom: 1px solid ${NEUTRAL.N500};
+  border-bottom: 1px solid ${NEUTRAL.N100};
   display: grid;
   grid-gap: 40px;
   grid-template-columns: 1fr auto 60px;
