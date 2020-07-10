@@ -21,7 +21,7 @@ import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
 const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
 
@@ -92,7 +92,7 @@ const StudyDetailsContainer = (props :Props) => {
   return (
     <>
       <StudyNameWrapper>
-        { study.getIn([STUDY_NAME, 0]) }
+        { study.getIn([FULL_NAME_FQN, 0]) }
       </StudyNameWrapper>
       <Tabs>
         <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>

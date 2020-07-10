@@ -116,7 +116,7 @@ const {
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
-  STUDY_NAME,
+  FULL_NAME_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -885,7 +885,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       email: getIn(formData,
         [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]),
       studyName: getIn(formData,
-        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)])
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, FULL_NAME_FQN)])
     }));
     if (response.error) throw response.error;
 

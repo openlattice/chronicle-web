@@ -15,7 +15,7 @@ const {
   STUDY_EMAIL,
   STUDY_GROUP,
   STUDY_ID,
-  STUDY_NAME,
+  FULL_NAME_FQN,
   STUDY_VERSION,
   NOTIFICATION_ENABLED
 } = PROPERTY_TYPE_FQNS;
@@ -25,7 +25,7 @@ const dataSchema = {
   properties: {
     [getPageSectionKey(1, 1)]: {
       properties: {
-        [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]: {
+        [getEntityAddressKey(0, CHRONICLE_STUDIES, FULL_NAME_FQN)]: {
           title: 'Study Name',
           type: 'string'
         },
@@ -60,7 +60,7 @@ const dataSchema = {
         },
       },
       required: [
-        getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME),
+        getEntityAddressKey(0, CHRONICLE_STUDIES, FULL_NAME_FQN),
         getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)
       ],
       type: 'object',
@@ -74,7 +74,7 @@ const dataSchema = {
 const uiSchema = {
   [getPageSectionKey(1, 1)]: {
     classNames: 'column-span-12 grid-container',
-    [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)]: {
+    [getEntityAddressKey(0, CHRONICLE_STUDIES, FULL_NAME_FQN)]: {
       classNames: 'column-span-12'
     },
     [getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_DESCRIPTION)]: {
