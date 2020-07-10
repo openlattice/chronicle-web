@@ -707,7 +707,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     let participantEntityData = fromJS(getIn(entityData, [participantsEntitySetId, 0]));
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
-      .set(DATE_ENROLLED, [dateEnrolled])
+      .set(EVENT_COUNT, ['---'])
       .set('id', [participantEntityKeyId]);
 
     yield put(addStudyParticipant.success(action.id, {
