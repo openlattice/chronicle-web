@@ -19,19 +19,19 @@ const HorizontalList = styled.ul`
   padding: 0;
 
   > li {
-    display: inline;
-    padding: 12px 20px;
-    font-size: 14px;
     background-color: ${NEUTRALS[5]};
     color: ${NEUTRALS[0]};
+    display: inline;
+    font-size: 14px;
     margin-right: 10px;
+    padding: 12px 20px;
   }
 `;
 
 const SectionPane = styled.div`
   border-bottom: 1px solid ${NEUTRALS[4]};
-  padding-bottom: 30px;
   margin-bottom: 30px;
+  padding-bottom: 30px;
 
   :last-of-type {
     border-bottom: 0;
@@ -60,12 +60,12 @@ const Wrapper = styled.div`
 `;
 
 type Props = {
+  description :string;
   isModalVisible :boolean;
   onCloseModal :() => void;
-  title :string;
-  description :string;
-  rruleSet :string;
   questionnaireEKID :UUID;
+  rruleSet :string;
+  title :string;
 };
 
 const QuestionnaireDetailsModal = (props :Props) => {

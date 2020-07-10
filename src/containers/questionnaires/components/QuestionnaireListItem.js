@@ -14,20 +14,20 @@ const { NEUTRAL, PURPLE } = Colors;
 
 const Description = styled.div`
   h3 {
-    padding: 0;
-    margin: 0 0 5px 0;
-    font-weight: 500;
     color: ${NEUTRAL.N800};
+    font-weight: 500;
+    margin: 0 0 5px 0;
+    padding: 0;
   }
 
   p {
-    padding: 0;
-    margin: 0;
-    font-size: 15px;
     color: ${NEUTRAL.N600};
-    white-space: nowrap;
+    font-size: 15px;
+    margin: 0;
     overflow: hidden;
+    padding: 0;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   :hover {
@@ -36,18 +36,18 @@ const Description = styled.div`
 `;
 
 const IconGrid = styled.div`
+  align-items: center;
   display: flex;
   grid-gap: 25px;
   justify-content: space-between;
-  align-items: center;
 `;
 
 const ListItemWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 60px;
-  grid-gap: 40px;
-  border-bottom: 1px solid #eee;
   align-items: center;
+  border-bottom: 1px solid ${NEUTRAL.N500};
+  display: grid;
+  grid-gap: 40px;
+  grid-template-columns: 1fr auto 60px;
   padding: 20px 30px;
 
   :last-of-type {

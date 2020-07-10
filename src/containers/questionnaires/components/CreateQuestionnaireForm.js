@@ -48,9 +48,9 @@ const pageSchemaMap = {
 };
 
 const Header = styled.div`
+  align-items: center;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
 
   h3 {
@@ -61,9 +61,9 @@ const Header = styled.div`
 `;
 
 const ActionRow = styled.div`
+  align-items: center;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-top: 20px;
 `;
 

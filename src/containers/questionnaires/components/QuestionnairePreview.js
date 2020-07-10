@@ -19,8 +19,8 @@ const Title = styled.h4`
 const Description = styled.h6`
   font-size: 16px;
   font-weight: 400;
-  padding: 0;
   margin: 5px 0 20px 0;
+  padding: 0;
 `;
 
 const StyledButton = styled(Button)`

@@ -21,8 +21,8 @@ const {
 } = QUESTIONNAIRE_SUMMARY;
 
 const StyledButton = styled(Button)`
-  margin-top: 20px;
   align-self: flex-start;
+  margin-top: 20px;
 `;
 
 const LeadText = styled.span`
