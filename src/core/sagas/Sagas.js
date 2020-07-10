@@ -12,7 +12,6 @@ import * as EDMSagas from '../edm/EDMSagas';
 import * as RoutingSagas from '../router/RoutingSagas';
 import * as StudiesSagas from '../../containers/studies/StudiesSagas';
 import * as SurveySagas from '../../containers/survey/SurveySagas';
-// import * as QuestionnairesSagas from '../../containers/questionnaires/QuestionnairesSagas';
 import * as QuestionnaireSagas from '../../containers/questionnaire/QuestionnaireSagas';
 
 export default function* sagas() :Generator<*, *, *> {
