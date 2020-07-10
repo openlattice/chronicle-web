@@ -29,7 +29,7 @@ const createSurveyFormSchema = (userApps :Map) => {
     minItems: 1,
     items: {
       type: 'string',
-      enum: ['Parent alone', 'Child alone', 'Parent and child together', 'Other family member', "I don't know"]
+      enum: ['Parent alone', 'Child alone', 'Parent and child together', 'Other family member']
     }
   })).toJS();
 
@@ -40,8 +40,9 @@ const createSurveyFormSchema = (userApps :Map) => {
       'ui:widget': 'checkboxes',
       'ui:options': {
         mode: 'button',
+        noneText: "I don't know",
         row: true,
-        withNone: false
+        withNone: true,
       }
     };
     return result;
