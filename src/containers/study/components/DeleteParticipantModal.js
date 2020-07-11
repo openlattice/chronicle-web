@@ -18,7 +18,7 @@ type Props = {
   handleOnDeleteParticipant :() => void;
   isVisible :boolean;
   participantId :UUID;
-  requestState :RequestState;
+  requestState :?RequestState;
 }
 const DeleteParticipantModal = ({
   handleOnClose,

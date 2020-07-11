@@ -6,9 +6,10 @@ import styled from 'styled-components';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import { Table } from 'lattice-ui-kit';
-import { ReduxConstants } from 'lattice-utils';
-import { useDispatch, useSelector } from 'react-redux';
+import { useRequestState } from 'lattice-utils';
+import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
+import type { RequestState } from 'redux-reqseq';
 
 import ChangeEnrollment from './components/ChangeEnrollment';
 import DeleteParticipantModal from './components/DeleteParticipantModal';
@@ -28,8 +29,6 @@ import {
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const { REQUEST_STATE } = ReduxConstants;
-
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 const {
   DELETE,
@@ -56,17 +55,12 @@ const ParticipantsTable = (props :Props) => {
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
-
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(uuid());
 
-  const studyId = study.getIn([STUDY_ID, 0]);
+  const deleteParticipantRS :?RequestState = useRequestState(['studies', DELETE_STUDY_PARTICIPANT]);
+  const changeEnrollmentStatusRS :?RequestState = useRequestState(['studies', CHANGE_ENROLLMENT_STATUS]);
 
-  const requestStates = {
-    [DELETE_STUDY_PARTICIPANT]:
-      useSelector((state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, REQUEST_STATE])),
-    [CHANGE_ENROLLMENT_STATUS]:
-      useSelector((state) => state.getIn(['studies', CHANGE_ENROLLMENT_STATUS, REQUEST_STATE]))
-  };
+  const studyId = study.getIn([STUDY_ID, 0]);
 
   const handleOnDeleteParticipant = () => {
     dispatch(deleteStudyParticipant({
@@ -132,6 +126,7 @@ const ParticipantsTable = (props :Props) => {
             paginated
             rowsPerPageOptions={[5, 20, 50]} />
       </TableWrapper>
+
       <ParticipantInfoModal
           handleOnClose={() => setInfoModalOpen(false)}
           isVisible={infoModalOpen}
@@ -143,7 +138,7 @@ const ParticipantsTable = (props :Props) => {
           handleOnDeleteParticipant={handleOnDeleteParticipant}
           isVisible={deleteModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
-          requestState={requestStates[DELETE_STUDY_PARTICIPANT]} />
+          requestState={deleteParticipantRS} />
 
       <ChangeEnrollment
           enrollmentStatus={participants.getIn([participantEntityKeyId, STATUS, 0])}
@@ -151,7 +146,7 @@ const ParticipantsTable = (props :Props) => {
           handleOnClose={() => setEnrollmentModalOpen(false)}
           isVisible={enrollmentModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
-          requestState={requestStates[CHANGE_ENROLLMENT_STATUS]} />
+          requestState={changeEnrollmentStatusRS} />
 
       <DownloadParticipantDataModal
           handleOnClose={() => setDownloadModalOpen(false)}
