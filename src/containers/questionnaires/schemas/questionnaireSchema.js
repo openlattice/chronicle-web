@@ -2,7 +2,6 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
-import { RRule } from 'rrule';
 
 import QuestionTypes from '../constants/questionTypes';
 import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
@@ -174,10 +173,9 @@ const schedulerSchema = {
           title: 'Days of week to send notification',
           type: 'array',
           items: {
-            enum: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU],
             // $FlowFixMe
-            enumNames: Info.weekdays(),
-            type: 'object'
+            enum: Info.weekdays(),
+            type: 'string'
           },
           minItems: 1,
           uniqueItems: true

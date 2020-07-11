@@ -74,7 +74,16 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
 const createRecurrenceRuleSetFromFormData = (formData :Object) => {
   const psk = getPageSectionKey(3, 1);
 
+  const rruleWeekDayConsts = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU];
+  // $FlowFixMe
+  const mapper = Info.weekdays().reduce((result, day, index) => ({
+    ...result,
+    [day]: rruleWeekDayConsts[index]
+  }), {});
+
   const daysOfWeek :string[] = getIn(formData, [psk, 'daysOfWeek']);
+  const rruleWeekDays = daysOfWeek.map((day) => mapper[day]);
+
   const selectedTimes :string[] = getIn(formData, [psk, 'time'])
     .map((time :Object) => get(time, 'time')); // TODO time const
 
@@ -86,7 +95,7 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 
     rruleSet.rrule(new RRule({
       freq: RRule.WEEKLY,
-      byweekday: daysOfWeek,
+      byweekday: rruleWeekDays,
       byhour: dateTime.hour,
       byminute: dateTime.minute
     }));
