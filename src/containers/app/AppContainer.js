@@ -10,7 +10,6 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   AppNavigationWrapper,
-  Sizes,
   Spinner,
 } from 'lattice-ui-kit';
 import { LangUtils, useRequestState } from 'lattice-utils';
@@ -37,7 +36,6 @@ import * as Routes from '../../core/router/Routes';
 const { isNonEmptyString } = LangUtils;
 
 const { INITIALIZE_APPLICATION } = AppActions;
-const { APP_CONTENT_WIDTH } = Sizes;
 
 const AppContainer = () => {
   const dispatch = useDispatch();
@@ -96,7 +94,7 @@ const AppContainer = () => {
           <NavLink to={Routes.STUDIES}> Studies </NavLink>
         </AppNavigationWrapper>
       </AppHeaderWrapper>
-      <AppContentWrapper contentWidth={APP_CONTENT_WIDTH}>
+      <AppContentWrapper>
         { renderAppContent() }
       </AppContentWrapper>
     </AppContainerWrapper>
