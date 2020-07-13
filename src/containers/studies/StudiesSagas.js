@@ -119,7 +119,7 @@ const {
   STATUS,
   STUDY_EMAIL,
   STUDY_ID,
-  STUDY_NAME,
+  FULL_NAME_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -714,7 +714,7 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     let participantEntityData = fromJS(getIn(entityData, [participantsEntitySetId, 0]));
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
-      .set(DATE_ENROLLED, [dateEnrolled])
+      .set(EVENT_COUNT, ['---'])
       .set('id', [participantEntityKeyId]);
 
     yield put(addStudyParticipant.success(action.id, {
@@ -892,7 +892,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       email: getIn(formData,
         [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_EMAIL)]),
       studyName: getIn(formData,
-        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, STUDY_NAME)])
+        [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, FULL_NAME_FQN)])
     }));
     if (response.error) throw response.error;
 

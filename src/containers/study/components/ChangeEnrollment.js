@@ -22,7 +22,7 @@ type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
   participantId :UUID;
-  requestState :RequestState;
+  requestState :?RequestState;
 }
 
 const ChangeEnrollment = ({

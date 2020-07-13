@@ -15,9 +15,10 @@ import {
   SearchInput,
   Spinner,
 } from 'lattice-ui-kit';
-import { ReduxConstants } from 'lattice-utils';
+import { useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './ParticipantsTable';
@@ -26,7 +27,6 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 import { resetRequestState } from '../../core/redux/ReduxActions';
 import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
-const { REQUEST_STATE } = ReduxConstants;
 const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const AddParticipantsButton = styled(Button)`
@@ -58,6 +58,8 @@ const StudyParticipants = ({ study } :Props) => {
   const studyId :UUID = study.getIn([STUDY_ID, 0]);
   const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
 
+  const getParticipantsRS :?RequestState = useRequestState(['studies', GET_STUDY_PARTICIPANTS]);
+
   useEffect(() => {
     // This is useful for avoiding a network request if
     // a cached value is already available.
@@ -70,10 +72,6 @@ const StudyParticipants = ({ study } :Props) => {
     setFilteredParticipants(participants);
   }, [participants]);
 
-  const requestStates = {
-    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, REQUEST_STATE])),
-  };
-
   const openAddParticipantModal = () => {
     dispatch(resetRequestState(ADD_PARTICIPANT));
     setModalOpen(true);
@@ -84,11 +82,11 @@ const StudyParticipants = ({ study } :Props) => {
     const { value } = currentTarget;
 
     const matchingResults = participants
-      .filter((participant) => participant.getIn([PERSON_ID, 0]).includes(value));
+      .filter((participant) => participant.getIn([PERSON_ID, 0]).toLowerCase().includes(value.toLowerCase()));
     setFilteredParticipants(matchingResults);
   };
 
-  if (requestStates[GET_STUDY_PARTICIPANTS] === RequestStates.PENDING) {
+  if (getParticipantsRS === RequestStates.PENDING) {
     return (
       <Spinner size="2x" />
     );
@@ -129,5 +127,4 @@ const StudyParticipants = ({ study } :Props) => {
   );
 };
 
-// need to get all the participants
 export default StudyParticipants;

@@ -17,7 +17,7 @@ type Props = {
   handleOnDeleteParticipant :() => void;
   isVisible :boolean;
   participantId :UUID;
-  requestState :RequestState;
+  requestState :?RequestState;
 }
 const DeleteParticipantModal = ({
   deleteTimeout,
@@ -99,10 +99,11 @@ const DeleteParticipantModal = ({
         withFooter={renderFooter}>
       <ModalBodyWrapper>
         {
-          requestStateComponents[requestState]
+          requestStateComponents[requestState || RequestStates.STANDBY]
         }
       </ModalBodyWrapper>
     </Modal>
   );
 };
+
 export default DeleteParticipantModal;

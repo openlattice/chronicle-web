@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import { Table } from 'lattice-ui-kit';
-import { ReduxConstants } from 'lattice-utils';
+import { useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { RequestState } from 'redux-reqseq';
@@ -31,7 +31,6 @@ import {
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const { REQUEST_STATE } = ReduxConstants;
 
 const { TIMEOUT } = STUDIES_REDUX_CONSTANTS;
 
@@ -64,12 +63,9 @@ const ParticipantsTable = (props :Props) => {
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [participantEntityKeyId, setParticipantEntityKeyId] = useState(uuid());
 
-  const deleteParticipantRS :RequestState = useSelector(
-    (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, REQUEST_STATE])
-  );
-  const changeEnrollmentRS :RequestState = useSelector(
-    (state) => state.getIn(['studies', CHANGE_ENROLLMENT_STATUS, REQUEST_STATE])
-  );
+  const deleteParticipantRS :?RequestState = useRequestState(['studies', DELETE_STUDY_PARTICIPANT]);
+  const changeEnrollmentStatusRS :?RequestState = useRequestState(['studies', CHANGE_ENROLLMENT_STATUS]);
+
   const deleteTimeout :boolean = useSelector(
     (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)
   );
@@ -145,6 +141,7 @@ const ParticipantsTable = (props :Props) => {
             paginated
             rowsPerPageOptions={[5, 20, 50]} />
       </TableWrapper>
+
       <ParticipantInfoModal
           handleOnClose={() => setInfoModalOpen(false)}
           isVisible={infoModalOpen}
@@ -165,7 +162,7 @@ const ParticipantsTable = (props :Props) => {
           handleOnClose={() => setEnrollmentModalOpen(false)}
           isVisible={enrollmentModalOpen}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
-          requestState={changeEnrollmentRS} />
+          requestState={changeEnrollmentStatusRS} />
 
       <DownloadParticipantDataModal
           handleOnClose={() => setDownloadModalOpen(false)}

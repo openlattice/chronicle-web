@@ -21,11 +21,11 @@ const ENTITY_TYPE_FQNS = {
 
 const PROPERTY_TYPE_FQNS = {
   // study
+  FULL_NAME_FQN: FQN.of('general.fullname'),
   STUDY_DESCRIPTION: FQN.of('diagnosis.Description'),
   STUDY_EMAIL: FQN.of('contact.Email'),
   STUDY_GROUP: FQN.of('sharing.name'),
   STUDY_ID: FQN.of('general.stringid'),
-  STUDY_NAME: FQN.of('general.fullname'),
   STUDY_VERSION: FQN.of('ol.version'),
 
   // study participants:
