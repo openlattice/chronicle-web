@@ -4,7 +4,8 @@ const STUDIES_REDUX_CONSTANTS = {
   GLOBAL_NOTIFICATIONS_EKID: 'globalNotificationsEKID',
   NOTIFICATIONS_ENABLED_STUDIES: 'notificationsEnabledStudies',
   PART_OF_ASSOCIATION_EKID_MAP: 'partOfAssociationEKIDMap',
-  STUDIES: 'studies'
+  STUDIES: 'studies',
+  TIMEOUT: 'timeout'
 };
 
 const QUESTIONNAIRE_REDUX_CONSTANTS = {

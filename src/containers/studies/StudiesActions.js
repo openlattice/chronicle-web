@@ -41,6 +41,11 @@ const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTI
 const GET_STUDY_NOTIFICATION_STATUS :'GET_STUDY_NOTIFICATION_STATUS' = 'GET_STUDY_NOTIFICATION_STATUS';
 const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY_NOTIFICATION_STATUS);
 
+const RESET_DELETE_PARTICIPANT_TIMEOUT :'RESET_DELETE_PARTICIPANT_TIMEOUT' = 'RESET_DELETE_PARTICIPANT_TIMEOUT';
+const resetDeleteParticipantTimeout = () => ({
+  type: RESET_DELETE_PARTICIPANT_TIMEOUT
+});
+
 const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
 const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 
@@ -57,6 +62,7 @@ export {
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
+  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -70,5 +76,6 @@ export {
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
+  resetDeleteParticipantTimeout,
   updateStudy
 };

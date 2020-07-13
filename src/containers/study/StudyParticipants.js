@@ -18,6 +18,7 @@ import {
 import { useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './ParticipantsTable';

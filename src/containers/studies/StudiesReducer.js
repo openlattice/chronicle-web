@@ -23,6 +23,7 @@ import {
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
+  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -49,7 +50,8 @@ const {
   GLOBAL_NOTIFICATIONS_EKID,
   NOTIFICATIONS_ENABLED_STUDIES,
   PART_OF_ASSOCIATION_EKID_MAP,
-  STUDIES
+  STUDIES,
+  TIMEOUT
 } = STUDIES_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
@@ -57,7 +59,10 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [CREATE_NOTIFICATIONS_ENTITY_SETS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [CREATE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [CREATE_PARTICIPANTS_ENTITY_SET]: { [REQUEST_STATE]: RequestStates.STANDBY },
-  [DELETE_STUDY_PARTICIPANT]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [DELETE_STUDY_PARTICIPANT]: {
+    [REQUEST_STATE]: RequestStates.STANDBY,
+    [TIMEOUT]: false
+  },
   [GET_GLOBAL_NOTIFICATIONS_EKID]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_PARTICIPANTS_ENROLLMENT]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDIES]: { [REQUEST_STATE]: RequestStates.STANDBY },
@@ -83,6 +88,10 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
+    }
+
+    case RESET_DELETE_PARTICIPANT_TIMEOUT: {
+      return state.setIn([DELETE_STUDY_PARTICIPANT, TIMEOUT], false);
     }
 
     case getStudies.case(action.type): {
@@ -223,9 +232,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.PENDING),
         FAILURE: () => state.setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
-          const { participantEntityKeyId, studyId } = seqAction.value;
+          const { participantEntityKeyId, studyId, timeout } = seqAction.value;
+
           return state
             .deleteIn(['participants', studyId, participantEntityKeyId])
+            .setIn([DELETE_STUDY_PARTICIPANT, TIMEOUT], timeout)
             .setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });

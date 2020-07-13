@@ -4,9 +4,11 @@
 
 import {
   call,
+  delay,
   put,
+  race,
   select,
-  takeEvery
+  takeEvery,
 } from '@redux-saga/core/effects';
 import {
   List,
@@ -27,7 +29,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { Logger } from 'lattice-utils';
+import { LangUtils, Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -94,6 +96,7 @@ const {
 
 const { EntitySetBuilder } = Models;
 const { PermissionTypes, UpdateTypes } = Types;
+const { isDefined } = LangUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -210,12 +213,16 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
 
     const { studyId, participantEntityKeyId, participantId } = action.value;
 
-    const response = yield call(ChronicleApi.deleteStudyParticipant, participantId, studyId);
-    if (response.error) throw response.error;
+    const { response, timeout } = yield race({
+      response: call(ChronicleApi.deleteStudyParticipant, participantId, studyId),
+      timeout: delay(1000 * 10) // 10 seconds
+    });
+    if (response && response.error) throw response.error;
 
     yield put(deleteStudyParticipant.success(action.id, {
       participantEntityKeyId,
-      studyId
+      studyId,
+      timeout: isDefined(timeout)
     }));
   }
   catch (error) {
