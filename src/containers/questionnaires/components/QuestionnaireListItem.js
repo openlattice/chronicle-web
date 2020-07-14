@@ -14,7 +14,7 @@ const { NEUTRAL, PURPLE } = Colors;
 
 const Description = styled.div`
   overflow: hidden;
-  
+
   h3 {
     color: ${NEUTRAL.N800};
     font-weight: 500;
