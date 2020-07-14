@@ -110,14 +110,20 @@ const getWeekDaysAndTimesFromRruleSet = (rruleSet :string) => {
   const rrules :string[] = rruleSet.split('RRULE:').filter((token) => isNonEmptyString(token));
   // get week days
   // the days of the week are the same in all the individual rules in the rrruleSet,
-  // so we only need to read the values from the first rrule
+  // so we only need to parse the the first rrule
+  const rruleOptions = RRule.parseString(rrules[0]);
+  let weekdayOptions :?Object[] = rruleOptions.byweekday;
+  if (!weekdayOptions && rruleOptions.freq === RRule.DAILY) {
+    weekdayOptions = rruleWeekDayConsts;
+  }
+
   // $FlowFixMe
-  const weekdays = Info.weekdays();
-  const selectedWeekdays = RRule.parseString(rrules[0]).byweekday || rruleWeekDayConsts;
-  const weekDays = selectedWeekdays
+  const allWeekdays = Info.weekdays();
+  // $FlowFixMe
+  const weekdays = (weekdayOptions || [])
     .map((day) => day.weekday)
     .sort()
-    .map((index) => weekdays[index]);
+    .map((index) => allWeekdays[index]);
 
   // $FlowFixMe
   const times = rrules
@@ -126,7 +132,7 @@ const getWeekDaysAndTimesFromRruleSet = (rruleSet :string) => {
     .map((date) => date.toLocaleString(DateTime.TIME_SIMPLE))
     .sort();
 
-  return [weekDays, times];
+  return [weekdays, times];
 };
 
 const createPreviewQuestionEntities = (formData :Object) => {
