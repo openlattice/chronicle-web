@@ -2,11 +2,13 @@
 
 import React from 'react';
 
+import styled from 'styled-components';
 import { List } from 'immutable';
 import { Form } from 'lattice-fabricate';
 import {
   Card,
-  CardSegment
+  CardSegment,
+  StyleUtils
 } from 'lattice-ui-kit';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -14,6 +16,20 @@ import type { RequestState } from 'redux-reqseq';
 
 import { submitQuestionnaire } from '../QuestionnaireActions';
 import { createSchema, getSchemaProperties, getUiSchemaOptions } from '../utils';
+
+const { media } = StyleUtils;
+
+const StyledCard = styled(Card)`
+  ${media.phone`
+    padding: 10px;
+  `}
+`;
+
+const StyledCardSegment = styled(CardSegment)`
+  ${media.phone`
+    margin: 0 10px 0 10px;
+  `}
+`;
 
 const transformErrors = (errors) => errors.map((error) => {
   if (error.name === 'required') {
@@ -56,8 +72,8 @@ const QuestionnaireForm = (props :Props) => {
   };
 
   return (
-    <Card>
-      <CardSegment noBleed>
+    <StyledCard>
+      <StyledCardSegment noBleed>
         <Form
             disabled={!editable}
             formData={initialFormData}
@@ -67,8 +83,8 @@ const QuestionnaireForm = (props :Props) => {
             schema={schema}
             transformErrors={transformErrors}
             uiSchema={uiSchema} />
-      </CardSegment>
-    </Card>
+      </StyledCardSegment>
+    </StyledCard>
   );
 };
 

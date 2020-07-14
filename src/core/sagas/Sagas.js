@@ -56,10 +56,13 @@ export default function* sagas() :Generator<*, *, *> {
     fork(SurveySagas.submitSurveyWatcher),
 
     // questionnaire
+    fork(QuestionnaireSagas.changeActiveStatusWatcher),
+    fork(QuestionnaireSagas.createQuestionnaireWatcher),
+    fork(QuestionnaireSagas.deleteQuestionnaireWatcher),
     fork(QuestionnaireSagas.downloadQuestionnaireResponsesWatcher),
     fork(QuestionnaireSagas.getQuestionnaireResponsesWatcher),
     fork(QuestionnaireSagas.getQuestionnaireWatcher),
     fork(QuestionnaireSagas.getStudyQuestionnairesWatcher),
-    fork(QuestionnaireSagas.submitQuestionnaireWatcher),
+    fork(QuestionnaireSagas.submitQuestionnaireWatcher)
   ]);
 }

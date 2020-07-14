@@ -59,6 +59,7 @@
     "redux-immutable": "4.0.0",
     "redux-reqseq": "0.5.0",
     "reselect": "~4.0.0",
+    "rrule": "~2.6.0",
     "styled-components": "~4.4.0",
     "uuid": "~8.2.0"
   },

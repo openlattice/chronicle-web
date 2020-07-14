@@ -12,10 +12,14 @@ import {
   List,
   Map,
   Set,
-  fromJS
+  fromJS,
+  setIn,
 } from 'immutable';
-import { Constants } from 'lattice';
+import { Constants, Types } from 'lattice';
+import { DataProcessingUtils } from 'lattice-fabricate';
 import {
+  DataApiActions,
+  DataApiSagas,
   EntitySetsApiActions,
   EntitySetsApiSagas,
   SearchApiActions,
@@ -27,11 +31,17 @@ import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CHANGE_ACTIVE_STATUS,
+  CREATE_QUESTIONNAIRE,
+  DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  changeActiveStatus,
+  createQuestionnaire,
+  deleteQuestionnaire,
   downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
@@ -41,16 +51,34 @@ import {
 import { getCsvFileName, getQuestionAnswerMapping } from './utils';
 
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
-import { selectEntitySetId } from '../../core/edm/EDMUtils';
+import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import { submitDataGraph } from '../../core/sagas/data/DataActions';
+import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import {
+  constructEntitiesFromFormData,
+  createQuestionnaireAssociations,
+  createRecurrenceRuleSetFromFormData
+} from '../questionnaires/utils';
 
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
+const { deleteEntityAndNeighborDataWorker, updateEntityDataWorker } = DataApiSagas;
+const { deleteEntityAndNeighborData, updateEntityData } = DataApiActions;
+
+const { DeleteTypes, UpdateTypes } = Types;
+
+const {
+  getPageSectionKey,
+  getEntityAddressKey,
+  processAssociationEntityData,
+  processEntityData
+} = DataProcessingUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const {
@@ -60,7 +88,9 @@ const {
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const {
+  ACTIVE_FQN,
   DATE_TIME_FQN,
+  RRULE_FQN,
   TITLE_FQN,
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
@@ -79,6 +109,174 @@ const {
 } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const LOG = new Logger('QuestionnaireSagas');
+
+/*
+ *
+ * QuestionnaireActions.changeActiveStatus()
+ *
+ */
+function* changeActiveStatusWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(changeActiveStatus.request(action.id));
+
+    const { activeStatus, studyEKID, questionnaireEKID } = action.value;
+
+    const questionnaireESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+    const activePTID = yield select(selectPropertyTypeId(ACTIVE_FQN));
+
+    const response = yield call(updateEntityDataWorker, updateEntityData({
+      entitySetId: questionnaireESID,
+      entities: {
+        [questionnaireEKID]: {
+          [activePTID]: [activeStatus]
+        }
+      },
+      updateType: UpdateTypes.PARTIAL_REPLACE
+    }));
+    if (response.error) throw response.error;
+
+    yield put(changeActiveStatus.success(action.id, {
+      activeStatus, studyEKID, questionnaireEKID
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(changeActiveStatus.failure(action.id));
+  }
+  finally {
+    yield put(changeActiveStatus.finally(action.id));
+  }
+}
+
+function* changeActiveStatusWatcher() :Saga<*> {
+  yield takeEvery(CHANGE_ACTIVE_STATUS, changeActiveStatusWorker);
+}
+
+/*
+ *
+ * QuestionnaireActions.deleteQuestionnaire()
+ *
+ */
+
+function* deleteQuestionnaireWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(deleteQuestionnaire.request(action.id));
+
+    const { studyEKID, questionnaireEKID } = action.value;
+
+    const questionnaireESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+    const questionsESID = yield select(selectEntitySetId(QUESTIONS_ES_NAME));
+
+    const neighborFilter = {
+      entityKeyIds: [questionnaireEKID],
+      destinationEntitySetIds: [],
+      sourceEntitySetIds: [questionsESID]
+    };
+
+    const response = yield call(deleteEntityAndNeighborDataWorker, deleteEntityAndNeighborData({
+      entitySetId: questionnaireESID,
+      filter: neighborFilter,
+      deleteType: DeleteTypes.HARD
+    }));
+
+    if (response.error) throw response.error;
+
+    yield put(deleteQuestionnaire.success(action.id, {
+      studyEKID,
+      questionnaireEKID
+    }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteQuestionnaire.failure(action.id));
+  }
+  finally {
+    yield put(deleteQuestionnaire.finally(action.id));
+  }
+}
+
+function* deleteQuestionnaireWatcher() :Saga<*> {
+  yield takeEvery(DELETE_QUESTIONNAIRE, deleteQuestionnaireWorker);
+}
+
+/*
+ *
+ * QuestionnaireActions.createQuestionnaire()
+ *
+ */
+
+function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(createQuestionnaire.request(action.id));
+
+    const { studyEKID } = action.value;
+    let { formData } = action.value;
+
+    const entitySetIds = yield select((state) => state.getIn(['edm', 'entitySetIds']));
+    const propertyTypeIds = yield select((state) => state.getIn(['edm', 'propertyTypeIds']));
+
+    // generate rrule from form data
+    const rruleSet = createRecurrenceRuleSetFromFormData(formData);
+
+    // update formdata with rrule
+    let psk = getPageSectionKey(1, 1);
+    const eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, RRULE_FQN);
+    formData = setIn(formData, [psk, eak], rruleSet);
+
+    // remove notification schedule from form data
+    psk = getPageSectionKey(3, 1);
+    delete formData[psk];
+
+    // remove questionType key from form data
+    psk = getPageSectionKey(2, 1);
+    formData[psk].forEach((item) => {
+      /* eslint-disable-next-line no-param-reassign */
+      delete item.questionType;
+    });
+
+    const entityData = processEntityData(
+      formData,
+      entitySetIds,
+      propertyTypeIds
+    );
+
+    // associations
+    const associations = createQuestionnaireAssociations(formData, studyEKID);
+    const associationEntityData = processAssociationEntityData(
+      associations,
+      entitySetIds,
+      propertyTypeIds
+    );
+
+    const response = yield call(submitDataGraphWorker, submitDataGraph({ associationEntityData, entityData }));
+    if (response.error) throw response.error;
+
+    // reconstruct entity
+    const { entityKeyIds } = response.data;
+    const {
+      questionEntities,
+      questionnaireEntity
+    } = constructEntitiesFromFormData(formData, entityKeyIds, entitySetIds, propertyTypeIds);
+
+    yield put(createQuestionnaire.success(action.id, {
+      questionEntities,
+      questionnaireEntity,
+      studyEKID
+    }));
+
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(createQuestionnaire.failure(action.id));
+  }
+  finally {
+    yield put(createQuestionnaire.finally(action.id));
+  }
+}
+
+function* createQuestionnaireWatcher() :Saga<*> {
+  yield takeEvery(CREATE_QUESTIONNAIRE, createQuestionnaireWorker);
+}
 
 /*
  *
@@ -415,9 +613,12 @@ function* downloadQuestionnaireResponsesWatcher() :Saga<*> {
 }
 
 export {
+  changeActiveStatusWatcher,
+  createQuestionnaireWatcher,
+  deleteQuestionnaireWatcher,
   downloadQuestionnaireResponsesWatcher,
   getQuestionnaireResponsesWatcher,
   getQuestionnaireWatcher,
   getStudyQuestionnairesWatcher,
-  submitQuestionnaireWatcher
+  submitQuestionnaireWatcher,
 };

@@ -1,26 +1,36 @@
 // @flow
 
-import { Map, fromJS } from 'immutable';
+import { Map, fromJS, getIn } from 'immutable';
+import { Constants } from 'lattice';
 import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  CHANGE_ACTIVE_STATUS,
+  CREATE_QUESTIONNAIRE,
+  DELETE_QUESTIONNAIRE,
   DOWNLOAD_QUESTIONNAIRE_RESPONSES,
   GET_QUESTIONNAIRE,
   GET_QUESTIONNAIRE_RESPONSES,
   GET_STUDY_QUESTIONNAIRES,
   SUBMIT_QUESTIONNAIRE,
+  changeActiveStatus,
+  createQuestionnaire,
+  deleteQuestionnaire,
   downloadQuestionnaireResponses,
   getQuestionnaire,
   getQuestionnaireResponses,
   getStudyQuestionnaires,
-  submitQuestionnaire,
+  submitQuestionnaire
 } from './QuestionnaireActions';
 
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { QUESTIONNAIRE_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
+const { OPENLATTICE_ID_FQN } = Constants;
+const { ACTIVE_FQN } = PROPERTY_TYPE_FQNS;
 const { REQUEST_STATE } = ReduxConstants;
 
 const {
@@ -33,6 +43,9 @@ const {
 } = QUESTIONNAIRE_REDUX_CONSTANTS;
 
 const INITIAL_STATE = fromJS({
+  [CHANGE_ACTIVE_STATUS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [CREATE_QUESTIONNAIRE]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [DELETE_QUESTIONNAIRE]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [DOWNLOAD_QUESTIONNAIRE_RESPONSES]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_QUESTIONNAIRE]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_QUESTIONNAIRE_RESPONSES]: { [REQUEST_STATE]: RequestStates.STANDBY },
@@ -123,6 +136,57 @@ export default function questionnareReducer(state :Map = INITIAL_STATE, action :
         SUCCESS: () => state.setIn([SUBMIT_QUESTIONNAIRE, REQUEST_STATE], RequestStates.SUCCESS)
       });
     }
+
+    case createQuestionnaire.case(action.type): {
+      return createQuestionnaire.reducer(state, action, {
+        REQUEST: () => state.setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const {
+            questionEntities,
+            questionnaireEntity,
+            studyEKID
+          } = action.value;
+
+          const questionnaireEKID = getIn(questionnaireEntity, [OPENLATTICE_ID_FQN, 0]);
+
+          return state
+            .setIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID], fromJS(questionEntities))
+            .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID], fromJS(questionnaireEntity))
+            .setIn([CREATE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case deleteQuestionnaire.case(action.type): {
+      return deleteQuestionnaire.reducer(state, action, {
+        REQUEST: () => state.setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { studyEKID, questionnaireEKID } = action.value;
+
+          return state
+            .deleteIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID])
+            .deleteIn([QUESTIONNAIRE_QUESTIONS, questionnaireEKID])
+            .setIn([DELETE_QUESTIONNAIRE, REQUEST_STATE], RequestStates.SUCCESS);
+        }
+      });
+    }
+
+    case changeActiveStatus.case(action.type): {
+      return changeActiveStatus.reducer(state, action, {
+        REQUEST: () => state.setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => {
+          const { activeStatus, studyEKID, questionnaireEKID } = action.value;
+
+          return state
+            .setIn([STUDY_QUESTIONNAIRES, studyEKID, questionnaireEKID, ACTIVE_FQN], [activeStatus])
+            .setIn([CHANGE_ACTIVE_STATUS, REQUEST_STATE], RequestStates.SUCCESS);
+        }
+      });
+    }
+
     default:
       return state;
   }
