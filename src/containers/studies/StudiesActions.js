@@ -26,9 +26,6 @@ const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_
 const GET_GLOBAL_NOTIFICATIONS_EKID :'GET_GLOBAL_NOTIFICATIONS_EKID' = 'GET_GLOBAL_NOTIFICATIONS_EKID';
 const getGlobalNotificationsEKID = newRequestSequence(GET_GLOBAL_NOTIFICATIONS_EKID);
 
-const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
-const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
-
 const GET_PARTICIPANTS_METADATA :'GET_PARTICIPANTS_METADATA' = 'GET_PARTICIPANTS_METADATA';
 const getParticipantsMetadata :RequestSequence = newRequestSequence(GET_PARTICIPANTS_METADATA);
 
@@ -57,7 +54,6 @@ export {
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_GLOBAL_NOTIFICATIONS_EKID,
-  GET_PARTICIPANTS_ENROLLMENT,
   GET_PARTICIPANTS_METADATA,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
@@ -71,7 +67,6 @@ export {
   createStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
-  getParticipantsEnrollmentStatus,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,

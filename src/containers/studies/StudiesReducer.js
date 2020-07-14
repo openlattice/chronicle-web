@@ -19,7 +19,6 @@ import {
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_GLOBAL_NOTIFICATIONS_EKID,
-  GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
@@ -32,7 +31,6 @@ import {
   createStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
-  getParticipantsEnrollmentStatus,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
@@ -64,7 +62,6 @@ const INITIAL_STATE :Map<*, *> = fromJS({
     [TIMEOUT]: false
   },
   [GET_GLOBAL_NOTIFICATIONS_EKID]: { [REQUEST_STATE]: RequestStates.STANDBY },
-  [GET_PARTICIPANTS_ENROLLMENT]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDIES]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDY_PARTICIPANTS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDY_NOTIFICATION_STATUS]: { [REQUEST_STATE]: RequestStates.STANDBY },
@@ -73,7 +70,6 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [NOTIFICATIONS_ENABLED_STUDIES]: Set(),
   [PART_OF_ASSOCIATION_EKID_MAP]: Map(),
   [STUDIES]: Map(),
-  associationKeyIds: Map(),
   participantEntitySetIds: Map(),
   participants: Map(),
 });
@@ -175,18 +171,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         REQUEST: () => state.setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.PENDING),
         FAILURE: () => state.setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
-          const {
-            participantEntityData,
-            participantEntityKeyId,
-            participantsEntitySetName,
-            participatedInEntityKeyId,
-            studyId
-          } = seqAction.value;
+          const { participantEntityData, participantEntityKeyId, studyId } = seqAction.value;
 
           return state
             .setIn([ADD_PARTICIPANT, REQUEST_STATE], RequestStates.SUCCESS)
-            .setIn(['participants', studyId, participantEntityKeyId], participantEntityData)
-            .setIn(['associationKeyIds', participantsEntitySetName, participantEntityKeyId], participatedInEntityKeyId);
+            .setIn(['participants', studyId, participantEntityKeyId], participantEntityData);
         }
       });
     }
@@ -238,20 +227,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
             .deleteIn(['participants', studyId, participantEntityKeyId])
             .setIn([DELETE_STUDY_PARTICIPANT, TIMEOUT], timeout)
             .setIn([DELETE_STUDY_PARTICIPANT, REQUEST_STATE], RequestStates.SUCCESS);
-        }
-      });
-    }
-
-    case getParticipantsEnrollmentStatus.case(action.type): {
-      const seqAction :SequenceAction = action;
-      return getParticipantsEnrollmentStatus.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.FAILURE),
-        SUCCESS: () => {
-          const { associationKeyIds, participantsEntitySetName } = seqAction.value;
-          return state
-            .setIn(['associationKeyIds', participantsEntitySetName], associationKeyIds)
-            .setIn([GET_PARTICIPANTS_ENROLLMENT, REQUEST_STATE], RequestStates.SUCCESS);
         }
       });
     }

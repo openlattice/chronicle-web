@@ -39,7 +39,6 @@ import {
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
-  GET_PARTICIPANTS_ENROLLMENT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
   UPDATE_STUDY,
@@ -49,7 +48,6 @@ import {
   createStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
-  getParticipantsEnrollmentStatus,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
@@ -241,74 +239,6 @@ function* deleteStudyParticipantWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.getParticipantsEnrollmentStatus()
- *
- */
-
-function* getParticipantsEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(getParticipantsEnrollmentStatus.request(action.id));
-
-    const { value } = action;
-    const { participantEKIDs, participantsEntitySetId, participantsEntitySetName } = value;
-
-    if (participantEKIDs.length) {
-      const participatedInEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN])
-      );
-      const studiesEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_STUDIES])
-      );
-
-      const searchFilter = {
-        destinationEntitySetIds: [studiesEntitySetId],
-        edgeEntitySetIds: [participatedInEntitySetId],
-        entityKeyIds: participantEKIDs,
-        sourceEntitySetIds: [participantsEntitySetId]
-      };
-
-      const response = yield call(
-        searchEntityNeighborsWithFilterWorker,
-        searchEntityNeighborsWithFilter({
-          entitySetId: participantsEntitySetId,
-          filter: searchFilter,
-        })
-      );
-      if (response.error) throw response.error;
-
-      // mapping from participantEntityKeyId -> enrollment status
-      const enrollmentStatus :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().get('associationDetails'));
-      workerResponse.data = enrollmentStatus;
-
-      // mapping from participantEntityKeyId -> association EKID
-      const associationKeyIds :Map = fromJS(response.data)
-        .map((associations :List) => associations.first().getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]));
-
-      yield put(getParticipantsEnrollmentStatus.success(action.id, { associationKeyIds, participantsEntitySetName }));
-    }
-    else {
-      yield put(getParticipantsEnrollmentStatus.success(action.id));
-    }
-  }
-  catch (error) {
-    LOG.error(action.type, error);
-    workerResponse.error = error;
-    yield put(getParticipantsEnrollmentStatus.failure(action.id));
-  }
-  finally {
-    yield put(getParticipantsEnrollmentStatus.finally(action.id));
-  }
-  return workerResponse;
-}
-
-function* getParticipantsEnrollmentStatusWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_PARTICIPANTS_ENROLLMENT, getParticipantsEnrollmentStatusWorker);
-}
-
-/*
- *
  * StudiesActions.getParticipantsMetadata()
  *
  */
@@ -369,10 +299,6 @@ function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *,
     yield put(getParticipantsMetadata.finally(action.id));
   }
   return workerResponse;
-}
-
-function* getParticipantsMetadataWatcher() :Generator<*, *, *> {
-  yield takeEvery(GET_PARTICIPANTS_ENROLLMENT, getParticipantsMetadataWorker);
 }
 
 /*
@@ -735,8 +661,6 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     yield put(addStudyParticipant.success(action.id, {
       participantEntityData,
       participantEntityKeyId,
-      participantsEntitySetName,
-      participatedInEntityKeyId,
       studyId
     }));
   }
@@ -1027,9 +951,6 @@ export {
   createParticipantsEntitySetWorker,
   createStudyWatcher,
   deleteStudyParticipantWatcher,
-  getParticipantsEnrollmentStatusWatcher,
-  getParticipantsEnrollmentStatusWorker,
-  getParticipantsMetadataWatcher,
   getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
