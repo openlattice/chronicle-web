@@ -15,15 +15,16 @@ import { getWeekDaysAndTimesFromRruleSet } from '../utils';
 const { QUESTIONNAIRE_QUESTIONS } = QUESTIONNAIRE_REDUX_CONSTANTS;
 const { NEUTRALS } = Colors;
 
-const HorizontalList = styled.ul`
-  padding: 0;
+const HorizontalList = styled.div`
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fill, 110px);
 
-  > li {
+  > span {
     background-color: ${NEUTRALS[5]};
     color: ${NEUTRALS[0]};
-    display: inline;
+    text-align: center;
     font-size: 14px;
-    margin-right: 10px;
     padding: 12px 20px;
   }
 `;
@@ -110,9 +111,9 @@ const QuestionnaireDetailsModal = (props :Props) => {
           <HorizontalList>
             {
               weekDays.map((day) => (
-                <li key={day}>
+                <span key={day}>
                   {day}
-                </li>
+                </span>
               ))
             }
           </HorizontalList>
@@ -120,9 +121,9 @@ const QuestionnaireDetailsModal = (props :Props) => {
           <HorizontalList>
             {
               times.map((time) => (
-                <li key={time}>
+                <span key={time}>
                   {time}
-                </li>
+                </span>
               ))
             }
           </HorizontalList>
