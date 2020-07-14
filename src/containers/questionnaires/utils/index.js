@@ -49,6 +49,8 @@ const {
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
 
+const rruleWeekDayConsts = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU];
+
 // return an Object with title, description, numMultipleChoice and numSingleAnswer questions
 const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
   const result = {};
@@ -74,7 +76,6 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
 const createRecurrenceRuleSetFromFormData = (formData :Object) => {
   const psk = getPageSectionKey(3, 1);
 
-  const rruleWeekDayConsts = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU];
   // $FlowFixMe
   const mapper = Info.weekdays().reduce((result, day, index) => ({
     ...result,
@@ -105,13 +106,15 @@ const createRecurrenceRuleSetFromFormData = (formData :Object) => {
 
 // parse a rruleSet string and get days of week + times
 const getWeekDaysAndTimesFromRruleSet = (rruleSet :string) => {
+
   const rrules :string[] = rruleSet.split('RRULE:').filter((token) => isNonEmptyString(token));
   // get week days
   // the days of the week are the same in all the individual rules in the rrruleSet,
   // so we only need to read the values from the first rrule
   // $FlowFixMe
   const weekdays = Info.weekdays();
-  const weekDays = RRule.parseString(rrules[0]).byweekday
+  const selectedWeekdays = RRule.parseString(rrules[0]).byweekday || rruleWeekDayConsts;
+  const weekDays = selectedWeekdays
     .map((day) => day.weekday)
     .sort()
     .map((index) => weekdays[index]);
