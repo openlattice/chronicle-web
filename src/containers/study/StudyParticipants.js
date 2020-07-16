@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
+import { Constants } from 'lattice';
 import {
   Button,
   Card,
@@ -28,6 +29,7 @@ import { resetRequestState } from '../../core/redux/ReduxActions';
 import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
 const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const AddParticipantsButton = styled(Button)`
   align-self: flex-start;
@@ -64,9 +66,12 @@ const StudyParticipants = ({ study } :Props) => {
     // This is useful for avoiding a network request if
     // a cached value is already available.
     if (participants.isEmpty()) {
-      dispatch(getStudyParticipants(studyId));
+      dispatch(getStudyParticipants({
+        studyEKID: study.getIn([OPENLATTICE_ID_FQN, 0]),
+        studyId: study.getIn([STUDY_ID, 0])
+      }));
     }
-  }, [dispatch, participants, studyId]);
+  }, [dispatch, participants, study]);
 
   useEffect(() => {
     setFilteredParticipants(participants);
