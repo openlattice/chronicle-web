@@ -340,6 +340,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
         filter: searchFilter,
       })
     );
+    if (response.error) throw response.error;
 
     const studyNeighbors :Object[] = get(response.data, studyEKID, []);
     const participantEKIDs = studyNeighbors.map((neighbor) => get(neighbor, 'neighborId'));
