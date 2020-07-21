@@ -11,13 +11,15 @@ import {
   AppHeaderWrapper,
   Spinner,
 } from 'lattice-ui-kit';
+import { useRequestState } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import SubmissionSuccessful from './components/SubmissionSuccessful';
-import SurveyTable from './SurveyTable';
+import SurveyForm from './components/SurveyForm';
 import { GET_CHRONICLE_APPS_DATA, SUBMIT_SURVEY, getChronicleAppsData } from './SurveyActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
@@ -50,6 +52,11 @@ const SurveyContainer = () => {
   // $FlowFixMe
   const { date, participantId, studyId } :{ date :string, participantId :string, studyId :UUID } = queryParams;
 
+  // selectors
+  const userAppsData = useSelector((state) => state.getIn(['appsData', 'appsData'], Map()));
+  const getUserAppsRS :?RequestState = useRequestState(['appsData', GET_CHRONICLE_APPS_DATA]);
+  const submitSurveyRS :?RequestState = useRequestState(['appsData', SUBMIT_SURVEY]);
+
   useEffect(() => {
     dispatch(getChronicleAppsData({
       date: date || DateTime.local().toISODate(),
@@ -58,17 +65,9 @@ const SurveyContainer = () => {
     }));
   }, [dispatch, participantId, studyId, date]);
 
-  const { appsData, requestStates } = useSelector((state) => ({
-    appsData: state.getIn(['appsData', 'appsData'], Map()),
-    requestStates: {
-      [GET_CHRONICLE_APPS_DATA]: state.getIn(['appsData', GET_CHRONICLE_APPS_DATA, 'requestState']),
-      [SUBMIT_SURVEY]: state.getIn(['appsData', SUBMIT_SURVEY, 'requestState'])
-    }
-  }));
-
   const surveyDate = date ? DateTime.fromISO(date) : DateTime.local();
 
-  if (requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.PENDING) {
+  if (getUserAppsRS === RequestStates.PENDING) {
     return (
       <SpinnerWrapper>
         <Spinner size="2x" />
@@ -81,13 +80,13 @@ const SurveyContainer = () => {
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
       <AppContentWrapper>
         {
-          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.FAILURE && <BasicErrorComponent />
+          getUserAppsRS === RequestStates.FAILURE && <BasicErrorComponent />
         }
         {
-          requestStates[GET_CHRONICLE_APPS_DATA] === RequestStates.SUCCESS && (
+          getUserAppsRS === RequestStates.SUCCESS && (
             <>
               {
-                requestStates[SUBMIT_SURVEY] === RequestStates.SUCCESS
+                submitSurveyRS === RequestStates.SUCCESS
                   ? <SubmissionSuccessful />
                   : (
                     <>
@@ -97,11 +96,11 @@ const SurveyContainer = () => {
                       <SurveyDate>
                         { surveyDate.toLocaleString(DateTime.DATE_FULL) }
                       </SurveyDate>
-                      <SurveyTable
-                          submitRequestState={requestStates[SUBMIT_SURVEY]}
-                          data={appsData}
+                      <SurveyForm
                           participantId={participantId}
-                          studyId={studyId} />
+                          studyId={studyId}
+                          submitSurveyRS={submitSurveyRS}
+                          userAppsData={userAppsData} />
                     </>
                   )
               }

@@ -21,6 +21,7 @@ import {
   Sizes,
   Spinner
 } from 'lattice-ui-kit';
+import { ReduxConstants } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -40,6 +41,8 @@ import {
 } from '../../questionnaire/QuestionnaireActions';
 import { createInitialFormData } from '../../questionnaire/utils';
 
+const { REQUEST_STATE } = ReduxConstants;
+
 const {
   ANSWER_QUESTION_ID_MAP,
   QUESTION_ANSWERS_MAP,
@@ -52,11 +55,12 @@ const { NAME_FQN, DATE_TIME_FQN } = PROPERTY_TYPE_FQNS;
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const { APP_CONTENT_WIDTH } = Sizes;
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 
 const ModalWrapper = styled.div`
   width: ${APP_CONTENT_WIDTH}px;
   min-height: 400px;
+  position: relative;
 `;
 
 const HeaderWrapper = styled.div`
@@ -64,21 +68,16 @@ const HeaderWrapper = styled.div`
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 30px;
   align-items: flex-end;
-  border-bottom: 1px solid ${NEUTRALS[4]};
   padding-bottom: 30px;
-  position: sticky;
-  top: 0;
   background: #fff;
-  z-index: 10;
 `;
 
 const SelectWrapper = styled.div`
   width: 300px;
 
   > h5 {
-    color: ${NEUTRALS[0]};
+    color: ${NEUTRAL.N700};
     font-size: 15px;
-    font-weight: normal;
     margin-bottom: 5px;
     padding: 0;
   }
@@ -179,14 +178,14 @@ const DownloadQuestionnaireResponses = (props :Props) => {
     (state) => state.getIn(['questionnaire', ANSWER_QUESTION_ID_MAP], Map())
   );
   const downloadRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, 'requestState'])
+    (state) => state.getIn(['questionnaire', DOWNLOAD_QUESTIONNAIRE_RESPONSES, REQUEST_STATE])
   );
   const getQuestionnaireResponsesRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, 'requestState'])
+    (state) => state.getIn(['questionnaire', GET_QUESTIONNAIRE_RESPONSES, REQUEST_STATE])
   );
 
   const getStudyQuestionnairesRS :RequestState = useSelector(
-    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, 'requestState'])
+    (state) => state.getIn(['questionnaire', GET_STUDY_QUESTIONNAIRES, REQUEST_STATE])
   );
 
   const submissionDateMap = selectSubmissionDateMap(
@@ -312,7 +311,7 @@ const DownloadQuestionnaireResponses = (props :Props) => {
                   <Button
                       disabled={fetchingData || selectDateOptions.length === 0}
                       isLoading={downloadRS === RequestStates.PENDING}
-                      mode="primary"
+                      color="primary"
                       onClick={onDownloadData}>
                     Download All
                   </Button>

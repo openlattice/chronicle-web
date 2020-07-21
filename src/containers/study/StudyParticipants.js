@@ -5,16 +5,21 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
+import { Constants } from 'lattice';
 import {
+  Button,
   Card,
   CardSegment,
-  PlusButton,
   SearchInput,
   Spinner,
 } from 'lattice-ui-kit';
+import { useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './ParticipantsTable';
@@ -24,8 +29,9 @@ import { resetRequestState } from '../../core/redux/ReduxActions';
 import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
 
 const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { OPENLATTICE_ID_FQN } = Constants;
 
-const AddParticipantsButton = styled(PlusButton)`
+const AddParticipantsButton = styled(Button)`
   align-self: flex-start;
   margin-bottom: 5px;
 `;
@@ -54,21 +60,22 @@ const StudyParticipants = ({ study } :Props) => {
   const studyId :UUID = study.getIn([STUDY_ID, 0]);
   const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
 
+  const getParticipantsRS :?RequestState = useRequestState(['studies', GET_STUDY_PARTICIPANTS]);
+
   useEffect(() => {
     // This is useful for avoiding a network request if
     // a cached value is already available.
     if (participants.isEmpty()) {
-      dispatch(getStudyParticipants(studyId));
+      dispatch(getStudyParticipants({
+        studyEKID: study.getIn([OPENLATTICE_ID_FQN, 0]),
+        studyId: study.getIn([STUDY_ID, 0])
+      }));
     }
-  }, [dispatch, participants, studyId]);
+  }, [dispatch, participants, study]);
 
   useEffect(() => {
     setFilteredParticipants(participants);
   }, [participants]);
-
-  const requestStates = {
-    [GET_STUDY_PARTICIPANTS]: useSelector((state) => state.getIn(['studies', GET_STUDY_PARTICIPANTS, 'requestState'])),
-  };
 
   const openAddParticipantModal = () => {
     dispatch(resetRequestState(ADD_PARTICIPANT));
@@ -80,11 +87,11 @@ const StudyParticipants = ({ study } :Props) => {
     const { value } = currentTarget;
 
     const matchingResults = participants
-      .filter((participant) => participant.getIn([PERSON_ID, 0]).includes(value));
+      .filter((participant) => participant.getIn([PERSON_ID, 0]).toLowerCase().includes(value.toLowerCase()));
     setFilteredParticipants(matchingResults);
   };
 
-  if (requestStates[GET_STUDY_PARTICIPANTS] === RequestStates.PENDING) {
+  if (getParticipantsRS === RequestStates.PENDING) {
     return (
       <Spinner size="2x" />
     );
@@ -97,7 +104,8 @@ const StudyParticipants = ({ study } :Props) => {
           <SearchInput placeholder="Filter..." onChange={handleOnChange} width="250px" />
           <AddParticipantsButton
               onClick={openAddParticipantModal}
-              mode="primary">
+              color="primary"
+              startIcon={<FontAwesomeIcon icon={faPlus} />}>
             Add Participant
           </AddParticipantsButton>
         </CardHeader>
@@ -124,5 +132,4 @@ const StudyParticipants = ({ study } :Props) => {
   );
 };
 
-// need to get all the participants
 export default StudyParticipants;

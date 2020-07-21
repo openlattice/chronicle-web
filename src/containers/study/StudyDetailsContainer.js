@@ -15,17 +15,18 @@ import type { Match } from 'react-router';
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
+import QuestionnairesContainer from '../questionnaires/QuestionnairesContainer';
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
-const { STUDY_NAME } = PROPERTY_TYPE_FQNS;
+const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
 const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
 
-const { NEUTRALS, PURPLES } = Colors;
+const { NEUTRAL, PURPLE } = Colors;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -47,7 +48,7 @@ const Tabs = styled.div`
 
 const TabLink = styled(NavLink)`
   border-bottom: 2px solid transparent;
-  color: ${NEUTRALS[1]};
+  color: ${NEUTRAL.N600};
   font-size: 18px;
   font-weight: 500;
   line-height: 70px;
@@ -60,13 +61,13 @@ const TabLink = styled(NavLink)`
   }
 
   :hover {
-    color: ${NEUTRALS[0]};
-    cursor: ponter;
+    color: ${NEUTRAL.N800};
+    cursor: pointer;
   }
 
   &.active {
-    border-bottom: 2px solid ${PURPLES[1]};
-    color: ${PURPLES[1]};
+    border-bottom: 2px solid ${PURPLE.P300};
+    color: ${PURPLE.P300};
   }
 `;
 
@@ -92,7 +93,7 @@ const StudyDetailsContainer = (props :Props) => {
   return (
     <>
       <StudyNameWrapper>
-        { study.getIn([STUDY_NAME, 0]) }
+        { study.getIn([FULL_NAME_FQN, 0]) }
       </StudyNameWrapper>
       <Tabs>
         <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
@@ -101,11 +102,17 @@ const StudyDetailsContainer = (props :Props) => {
         <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
           Participants
         </TabLink>
+        <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyUUID)}>
+          Questionnaires
+        </TabLink>
       </Tabs>
       <Switch>
         <Route
             path={Routes.PARTICIPANTS}
             render={() => <StudyParticipants study={study} />} />
+        <Route
+            path={Routes.QUESTIONNAIRES}
+            render={() => <QuestionnairesContainer study={study} />} />
         <Route
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />

@@ -8,74 +8,68 @@ import {
   faLink,
   faToggleOff,
   faToggleOn,
-  // faTrashAlt
+  faTrashAlt
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
+import { DateTimeUtils } from 'lattice-utils';
+import { DateTime } from 'luxon';
 
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 import ParticipantActionTypes from '../../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
-import { getDateTimeFromIsoDate } from '../../../utils/DateUtils';
+
+const { formatDateTime } = DateTimeUtils;
 
 const {
-  PERSON_ID, STATUS, DATE_FIRST_PUSHED,
-  DATE_LAST_PUSHED, EVENT_COUNT
+  DATE_FIRST_PUSHED,
+  DATE_LAST_PUSHED,
+  EVENT_COUNT,
+  PERSON_ID,
+  STATUS,
 } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS, PURPLES } = Colors;
+const { NEUTRAL, PURPLE } = Colors;
 const { ENROLLED } = EnrollmentStatuses;
 const {
-  // DELETE,
+  DELETE,
   DOWNLOAD,
   LINK,
   TOGGLE_ENROLLMENT
 } = ParticipantActionTypes;
 
 const StyledCell = styled.td`
-  padding: 5px 5px;
+  padding: 10px 5px;
   word-wrap: break-word;
 `;
 
 const RowWrapper = styled.tr.attrs(() => ({ tabIndex: '1' }))`
-  border-bottom: 1px solid ${NEUTRALS[4]};
+  border-bottom: 1px solid ${NEUTRAL.N100};
 
   :focus {
     outline: none;
   }
-
-  :hover {
-    background-color: ${NEUTRALS[8]};
-  }
 `;
 
-/* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
 const CellContent = styled.div`
   display: flex;
   font-size: 15px;
-  font-weight: 300;
   overflow: hidden;
   padding: 0 5px;
+  color: ${NEUTRAL.N800};
   justify-content: ${(props) => (props.centerContent ? 'center' : 'flex-start')};
 `;
 
-/* stylelint-enable */
-
-const IconCircleWrapper = styled.span`
-  align-items: center;
-  background-color: transparent;
-  border-radius: 50%;
-  display: flex;
-  height: 40px;
-  justify-content: center;
-  margin: 0;
-  transition: all 300ms ease;
-  width: 40px;
-
+const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   :hover {
-    background-color: ${NEUTRALS[4]};
     cursor: pointer;
   }
+`;
+
+const ActionIconsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 type IconProps = {
@@ -95,21 +89,19 @@ const ActionIcon = (props :IconProps) => {
     participantEKId,
   } = props;
 
-  let iconColor = NEUTRALS[0];
+  let iconColor = NEUTRAL.N800;
   if (icon === faToggleOn && enrollmentStatus === ENROLLED) {
     // eslint-disable-next-line prefer-destructuring
-    iconColor = PURPLES[2];
+    iconColor = PURPLE.P300;
   }
 
   return (
-    <IconCircleWrapper
+    <StyledFontAwesomeIcon
         data-action-id={action}
         data-key-id={participantEKId}
-        onClick={onClickIcon}>
-      <FontAwesomeIcon
-          color={iconColor}
-          icon={icon} />
-    </IconCircleWrapper>
+        onClick={onClickIcon}
+        color={iconColor}
+        icon={icon} />
   );
 };
 
@@ -124,15 +116,15 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
-  const firstDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_FIRST_PUSHED, 0]));
-  const lastDataDate = getDateTimeFromIsoDate(getIn(data, [DATE_LAST_PUSHED, 0]));
+  const firstDataDate = formatDateTime(getIn(data, [DATE_FIRST_PUSHED, 0]), DateTime.DATETIME_SHORT);
+  const lastDataDate = formatDateTime(getIn(data, [DATE_LAST_PUSHED, 0]), DateTime.DATETIME_SHORT);
   const numDays = getIn(data, [EVENT_COUNT, 0]);
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
   const actionsData = [
     { action: LINK, icon: faLink },
     { action: DOWNLOAD, icon: faCloudDownload },
-    // { action: DELETE, icon: faTrashAlt }, 06-19-2020: temporary remove delete participant
+    { action: DELETE, icon: faTrashAlt },
     { action: TOGGLE_ENROLLMENT, icon: toggleIcon },
   ];
 
@@ -164,7 +156,7 @@ const ParticipantRow = (props :Props) => {
         </StyledCell>
 
         <StyledCell>
-          <CellContent>
+          <ActionIconsWrapper>
             {
               actionsData.map((actionItem) => (
                 <ActionIcon
@@ -176,7 +168,7 @@ const ParticipantRow = (props :Props) => {
                     participantEKId={participantEKId} />
               ))
             }
-          </CellContent>
+          </ActionIconsWrapper>
         </StyledCell>
       </RowWrapper>
     </>

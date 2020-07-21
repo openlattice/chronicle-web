@@ -5,7 +5,7 @@ import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
-import { connect } from 'react-redux';
+import { useRequestState } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
@@ -17,9 +17,6 @@ type Props = {
   isVisible :boolean;
   onCloseModal :() => void;
   participants :Map;
-  requestStates:{
-    ADD_PARTICIPANT :RequestState;
-  };
   study :Map;
 };
 
@@ -30,13 +27,14 @@ const ModalBodyWrapper = styled.div`
 const AddParticipantModal = (props :Props) => {
   const {
     isVisible,
-    study,
     onCloseModal,
     participants,
-    requestStates
+    study,
   } = props;
 
   const formRef = useRef();
+
+  const addParticipantRS :?RequestState = useRequestState(['studies', ADD_PARTICIPANT]);
 
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
@@ -67,7 +65,7 @@ const AddParticipantModal = (props :Props) => {
         isVisible={isVisible}
         onClickPrimary={handleOnSubmit}
         onClose={onCloseModal}
-        requestState={requestStates[ADD_PARTICIPANT]}
+        requestState={addParticipantRS}
         requestStateComponents={requestStateComponents}
         shouldCloseOnEscape={false}
         shouldCloseOnOutsideClick={false}
@@ -77,11 +75,4 @@ const AddParticipantModal = (props :Props) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  requestStates: {
-    [ADD_PARTICIPANT]: state.getIn(['studies', ADD_PARTICIPANT, 'requestState'])
-  }
-});
-
-// $FlowFixMe
-export default connect(mapStateToProps)(AddParticipantModal);
+export default AddParticipantModal;

@@ -10,11 +10,10 @@ import type { RequestState } from 'redux-reqseq';
 import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 
 const { ENROLLED } = EnrollmentStatuses;
-const { NEUTRALS } = Colors;
+const { NEUTRAL } = Colors;
 
 const ModalWrapper = styled.div`
   width: 500px;
-  font-weight: 300;
 `;
 
 type Props = {
@@ -23,7 +22,7 @@ type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
   participantId :UUID;
-  requestState :RequestState;
+  requestState :?RequestState;
 }
 
 const ChangeEnrollment = ({
@@ -44,7 +43,7 @@ const ChangeEnrollment = ({
         <span> Are you sure you want to </span>
         { action }
         <span> collecting data on </span>
-        <span style={{ color: NEUTRALS[0], fontWeight: 500 }}>
+        <span style={{ color: NEUTRAL.N900, fontWeight: 500 }}>
           { participantId }
         </span>
         <span>?</span>

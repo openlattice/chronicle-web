@@ -6,7 +6,7 @@ import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
-import { connect } from 'react-redux';
+import { useRequestState } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
@@ -14,29 +14,27 @@ import CreateStudyForm from './CreateStudyForm';
 
 import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
 
-type Props = {
-  handleOnCloseModal :() => void;
-  isVisible :boolean;
-  notificationsEnabled :boolean;
-  requestStates :{
-    CREATE_STUDY :RequestState,
-    UPDATE_STUDY :RequestState
-  };
-  study :Map;
-};
-
 const ModalBodyWrapper = styled.div`
   min-width: 500px;
 `;
 
+type Props = {
+  handleOnCloseModal :() => void;
+  isVisible :boolean;
+  notificationsEnabled :boolean;
+  study ?:Map;
+};
+
 const StudyDetailsModal = (props :Props) => {
   const formRef = useRef();
+
+  const createStudyRS :?RequestState = useRequestState(['studies', CREATE_STUDY]);
+  const updateStudyRS :?RequestState = useRequestState(['studies', UPDATE_STUDY]);
 
   const {
     handleOnCloseModal,
     isVisible,
     notificationsEnabled,
-    requestStates,
     study
   } = props;
 
@@ -74,7 +72,7 @@ const StudyDetailsModal = (props :Props) => {
 
   const textTitle = study ? 'Edit Study ' : 'Create Study';
   const textPrimary = study ? 'Save Changes' : 'Submit';
-  const requestState = study ? requestStates[UPDATE_STUDY] : requestStates[CREATE_STUDY];
+  const requestState = study ? updateStudyRS : createStudyRS;
 
   return (
     <ActionModal
@@ -91,12 +89,9 @@ const StudyDetailsModal = (props :Props) => {
   );
 };
 
-const mapStateToProps = (state :Map) => ({
-  requestStates: {
-    [CREATE_STUDY]: state.getIn(['studies', CREATE_STUDY, 'requestState']),
-    [UPDATE_STUDY]: state.getIn(['studies', UPDATE_STUDY, 'requestState'])
-  },
-});
+StudyDetailsModal.defaultProps = {
+  notificationsEnabled: false,
+  study: undefined
+};
 
-// $FlowFixMe
-export default connect(mapStateToProps)(StudyDetailsModal);
+export default StudyDetailsModal;

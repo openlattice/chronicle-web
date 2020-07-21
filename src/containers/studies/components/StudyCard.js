@@ -19,8 +19,8 @@ import * as Routes from '../../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { goToRoute } from '../../../core/router/RoutingActions';
 
-const { STUDY_DESCRIPTION, STUDY_NAME, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { NEUTRALS } = Colors;
+const { STUDY_DESCRIPTION, FULL_NAME_FQN, STUDY_ID } = PROPERTY_TYPE_FQNS;
+const { NEUTRAL } = Colors;
 
 const StudyName = styled.h2`
   font-size: 20px;
@@ -36,10 +36,9 @@ const StudyName = styled.h2`
 const StudyDescription = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  color: ${NEUTRALS[0]};
+  color: ${NEUTRAL.N600};
   display: -webkit-box;
   font-size: 16px;
-  font-weight: 300;
   line-height: 1.5;
   margin: 0;
   overflow-wrap: break-word;
@@ -72,7 +71,7 @@ class StudyCard extends Component<Props> {
       <Card onClick={this.handleCardClick} data-study-id={study.getIn([STUDY_ID, 0])}>
         <CardSegment vertical>
           <StudyName>
-            {study.getIn([STUDY_NAME, 0])}
+            {study.getIn([FULL_NAME_FQN, 0])}
           </StudyName>
           <StudyDescription>
             {study.getIn([STUDY_DESCRIPTION, 0])}

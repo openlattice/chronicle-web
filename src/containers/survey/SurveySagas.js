@@ -1,8 +1,9 @@
 // @flow
 
 import { call, put, takeEvery } from '@redux-saga/core/effects';
-import { Map, fromJS } from 'immutable';
+import { fromJS } from 'immutable';
 import { Constants } from 'lattice';
+import { Logger } from 'lattice-utils';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -11,9 +12,8 @@ import {
   getChronicleAppsData,
   submitSurvey,
 } from './SurveyActions';
-import { getAppNameFromUserAppsEntity } from './utils/Utils';
+import { createSubmissionData, getAppNameFromUserAppsEntity } from './utils';
 
-import Logger from '../../utils/Logger';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -29,16 +29,17 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
     yield put(submitSurvey.request(action.id));
 
     const { value } = action;
-    const { participantId, studyId, appsData } = value;
+    const {
+      participantId,
+      studyId,
+      formData,
+      userAppsData
+    } = value;
 
-    const associationData :Map = Map().withMutations((map) => {
-      appsData.forEach((entry, key) => {
-        map.set(key, entry.get('associationDetails').delete(OPENLATTICE_ID_FQN));
-      });
-    });
+    const submissionData = createSubmissionData(formData, userAppsData);
 
     const response = yield call(
-      ChronicleApi.updateAppsUsageAssociationData, participantId, studyId, associationData.toJS()
+      ChronicleApi.updateAppsUsageAssociationData, participantId, studyId, submissionData
     );
     if (response.error) throw response.error;
 

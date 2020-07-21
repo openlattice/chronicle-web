@@ -26,9 +26,6 @@ const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_
 const GET_GLOBAL_NOTIFICATIONS_EKID :'GET_GLOBAL_NOTIFICATIONS_EKID' = 'GET_GLOBAL_NOTIFICATIONS_EKID';
 const getGlobalNotificationsEKID = newRequestSequence(GET_GLOBAL_NOTIFICATIONS_EKID);
 
-const GET_PARTICIPANTS_ENROLLMENT :'GET_PARTICIPANTS_ENROLLMENT' = 'GET_PARTICIPANTS_ENROLLMENT';
-const getParticipantsEnrollmentStatus :RequestSequence = newRequestSequence(GET_PARTICIPANTS_ENROLLMENT);
-
 const GET_PARTICIPANTS_METADATA :'GET_PARTICIPANTS_METADATA' = 'GET_PARTICIPANTS_METADATA';
 const getParticipantsMetadata :RequestSequence = newRequestSequence(GET_PARTICIPANTS_METADATA);
 
@@ -41,6 +38,11 @@ const getStudyParticipants :RequestSequence = newRequestSequence(GET_STUDY_PARTI
 const GET_STUDY_NOTIFICATION_STATUS :'GET_STUDY_NOTIFICATION_STATUS' = 'GET_STUDY_NOTIFICATION_STATUS';
 const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY_NOTIFICATION_STATUS);
 
+const RESET_DELETE_PARTICIPANT_TIMEOUT :'RESET_DELETE_PARTICIPANT_TIMEOUT' = 'RESET_DELETE_PARTICIPANT_TIMEOUT';
+const resetDeleteParticipantTimeout = () => ({
+  type: RESET_DELETE_PARTICIPANT_TIMEOUT
+});
+
 const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
 const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 
@@ -52,11 +54,11 @@ export {
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_GLOBAL_NOTIFICATIONS_EKID,
-  GET_PARTICIPANTS_ENROLLMENT,
   GET_PARTICIPANTS_METADATA,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
+  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -65,10 +67,10 @@ export {
   createStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
-  getParticipantsEnrollmentStatus,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
+  resetDeleteParticipantTimeout,
   updateStudy
 };

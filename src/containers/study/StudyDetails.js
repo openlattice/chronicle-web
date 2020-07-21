@@ -5,22 +5,24 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
+  Button,
   Card,
   CardSegment,
-  Colors,
-  EditButton,
+  Colors
 } from 'lattice-ui-kit';
+import { LangUtils } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { isNonEmptyString } from '../../utils/LangUtils';
 import { UPDATE_STUDY } from '../studies/StudiesActions';
+
+const { isNonEmptyString } = LangUtils;
 
 const {
   STUDY_DESCRIPTION,
@@ -30,7 +32,7 @@ const {
   STUDY_VERSION
 } = PROPERTY_TYPE_FQNS;
 
-const { NEUTRALS, GREEN_2 } = Colors;
+const { NEUTRAL, GREEN } = Colors;
 
 const DetailsWrapper = styled.div`
   align-items: flex-start;
@@ -44,7 +46,7 @@ const DetailsWrapper = styled.div`
   }
 
   > h4 {
-    color: ${NEUTRALS[0]};
+    color: ${NEUTRAL.N800};
     font-size: 16px;
     font-weight: 500;
     margin: 0 0 3px 0;
@@ -52,10 +54,10 @@ const DetailsWrapper = styled.div`
   }
 
   > p {
-    color: ${(props) => (props.missingValue ? NEUTRALS[1] : NEUTRALS[0])};
+    color: ${(props) => (props.missingValue ? NEUTRAL.N600 : NEUTRAL.N700)};
     font-size: 15px;
     font-style: ${(props) => (props.missingValue ? 'italic' : 'normal')};
-    font-weight: 300;
+    font-weight: 400;
     margin: 0;
     padding: 0;
     word-break: break-word;
@@ -196,12 +198,15 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
 
   const renderEditButton = () => (
     <DetailsHeaderWrapper>
-      <EditButton mode="primary" onClick={openEditModal}>
+      <Button
+          color="primary"
+          onClick={openEditModal}
+          startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
         Edit Details
-      </EditButton>
+      </Button>
 
       <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN_2 : NEUTRALS[3]} />
+        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
         <h3> Daily Notifications </h3>
       </NotificationIconWrapper>
     </DetailsHeaderWrapper>
