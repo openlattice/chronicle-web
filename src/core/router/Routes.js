@@ -10,6 +10,7 @@ const PARTICIPANTS :string = `${STUDIES}/${ID_PARAM}/participants`;
 const QUESTIONNAIRES :string = `${STUDIES}/${ID_PARAM}/questionnaires`;
 const SURVEY :string = '/survey';
 const QUESTIONNAIRE :string = '/questionnaire';
+const TUD :string = '/time_use_diary';
 
 export {
   ID_PARAM,
@@ -21,4 +22,5 @@ export {
   STUDIES,
   STUDY,
   SURVEY,
+  TUD,
 };
