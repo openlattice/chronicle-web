@@ -153,6 +153,7 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
     if (currentEndTime <= currentStartTime) {
       errors[psk][endTimeKey].addError(errorMsg);
     }
+    // the last activity of the day should end at the time the child went to bed
     // $FlowFixMe invalid-compare
     if (currentEndTime > dayEndTime) {
       errors[psk][endTimeKey].addError(`The last activity of the
