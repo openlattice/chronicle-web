@@ -10,16 +10,21 @@ import {
   CardSegment,
 } from 'lattice-ui-kit';
 
+import TimeUseSummary from './TimeUseSummary';
+import { SCHEMA_CONSTANTS } from '../constants';
+
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import {
   applyCustomValidation,
   createFormSchema,
   createUiSchema,
+  selectTimeByPageAndKey,
   selectPrimaryActivityByPage
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
+const { ACTIVITY_END_TIME, DAY_END_TIME } = SCHEMA_CONSTANTS;
 
 const ButtonRow = styled.div`
   display: flex;
@@ -88,18 +93,30 @@ const QuestionnaireForm = () => (
               applyCustomValidation(formData, errors, page)
             );
 
+            const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
+            const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
+
+            const lastPage = prevEndTime.isValid && dayEndTime.isValid
+              && prevEndTime.equals(dayEndTime);
+
             return (
               <>
-                <Form
-                    formData={pagedData}
-                    ref={formRef}
-                    hideSubmit
-                    onChange={onChange}
-                    onSubmit={onNext}
-                    noPadding
-                    schema={schema}
-                    uiSchema={uiSchema}
-                    validate={validate} />
+                {
+                  lastPage ? (
+                    <TimeUseSummary formData={pagedData} />
+                  ) : (
+                    <Form
+                        formData={pagedData}
+                        ref={formRef}
+                        hideSubmit
+                        onChange={onChange}
+                        onSubmit={onNext}
+                        noPadding
+                        schema={schema}
+                        uiSchema={uiSchema}
+                        validate={validate} />
+                  )
+                }
 
                 <ButtonRow>
                   <Button
@@ -110,7 +127,9 @@ const QuestionnaireForm = () => (
                   <Button
                       color="primary"
                       onClick={handleNext}>
-                    Next
+                    {
+                      lastPage ? 'Submit' : 'Next'
+                    }
                   </Button>
                 </ButtonRow>
               </>

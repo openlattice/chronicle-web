@@ -1,6 +1,6 @@
 // @flow
 
-import { getIn } from 'immutable';
+import { getIn, get } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
@@ -16,16 +16,10 @@ const {
 
 const { getPageSectionKey } = DataProcessingUtils;
 
-const selectDayStartTime = (formData :Object) => {
-  const psk = getPageSectionKey(1, 0);
-  return getIn(formData, [psk, DAY_START_TIME]);
-};
-
-const selectActivityEndTimeByPage = (pageNum :number, formData :Object) => {
-  if (pageNum < 0) return undefined;
-
+const selectTimeByPageAndKey = (pageNum :number, key :string, formData :Object) => {
   const psk = getPageSectionKey(pageNum, 0);
-  return getIn(formData, [psk, ACTIVITY_END_TIME]);
+  const result = getIn(formData, [psk, key]);
+  return DateTime.fromISO(result);
 };
 
 const selectPrimaryActivityByPage = (pageNum :number, formData :Object) => {
@@ -40,8 +34,10 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) => {
 const createFormSchema = (pageNum :number, formData :Object) => {
 
   const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
-  const prevEndTime = pageNum === 2 ? selectDayStartTime(formData) : selectActivityEndTimeByPage(pageNum - 1, formData);
-  const formattedTime = DateTime.fromISO(prevEndTime || '').toLocaleString(DateTime.TIME_SIMPLE);
+  const prevEndTime = pageNum === 2
+    ? selectTimeByPageAndKey(1, DAY_START_TIME, formData)
+    : selectTimeByPageAndKey(pageNum - 1, ACTIVITY_END_TIME, formData);
+  const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
 
@@ -62,7 +58,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
           [ACTIVITY_START_TIME]: {
             type: 'string',
             title: '',
-            default: prevEndTime
+            default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
           },
           [ACTIVITY_END_TIME]: {
             id: 'end_time',
@@ -88,21 +84,66 @@ const createUiSchema = (pageNum :number) => ({
     [ACTIVITY_START_TIME]: {
       classNames: (pageNum === 1 ? 'column-span-12' : 'hidden'),
       'ui:widget': 'TimeWidget',
-      'ui:options': {
-        placeholder: 'HH:MM',
-        mask: '_:_'
-      }
     },
     [ACTIVITY_END_TIME]: {
       classNames: 'column-span-12',
-      'ui:widget': 'TimeWidget',
-      'ui:options': {
-        placeholder: 'HH:MM',
-        mask: '_:_'
-      },
+      'ui:widget': 'TimeWidget'
     },
   }
 });
+
+const createTimeUseSummary = (formData :Object) => {
+
+  let summary = [];
+
+  // remove page 0;
+  const page0 = getPageSectionKey(0, 0);
+  // eslint-disable-next-line
+  delete formData[page0];
+
+  // get day duration (start and end)
+  const dayStartTime = selectTimeByPageAndKey(1, DAY_START_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+
+  /* eslint-enable */
+
+  // add day start time
+  summary.push({
+    time: dayStartTime.toLocaleString(DateTime.TIME_SIMPLE),
+    description: 'Child woke up',
+    pageNum: 0
+  });
+
+  // remove page 0 and 1
+  /* eslint-disable no-param-reassign */
+  delete formData[getPageSectionKey(0, 0)];
+  delete formData[getPageSectionKey(1, 0)];
+
+  const activities = Object.values(formData).map((activity, index) => {
+    const pageNum = index + 2; // account for page 0 & 1
+    const startTime = selectTimeByPageAndKey(pageNum, ACTIVITY_START_TIME, formData);
+    const endTime = selectTimeByPageAndKey(pageNum, ACTIVITY_END_TIME, formData);
+    const primaryActivity = selectPrimaryActivityByPage(pageNum, formData);
+
+    return {
+      time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
+      description: get(primaryActivity, 'name'),
+      pageNum
+    };
+  });
+
+  // $FlowFixMe
+  summary = summary.concat(activities);
+
+  // add end of day
+  summary.push({
+    time: dayEndTime.toLocaleString(DateTime.TIME_SIMPLE),
+    description: 'Child went to bed',
+    pageNum: 0
+  });
+
+  return summary;
+};
 
 const applyCustomValidation = (formData :Object, errors :Object, pageNum :number) => {
   const psk = getPageSectionKey(pageNum, 0);
@@ -131,7 +172,8 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
     // $FlowFixMe invalid-compare
     if (endTimeISO > dayEndTimeISO) {
       errors[psk][endTimeKey].addError(`The last activity of the
-          day should end at ${dayEndTimeISO.toLocaleString(DateTime.TIME_SIMPLE)}`);
+          day should end at ${dayEndTimeISO.toLocaleString(DateTime.TIME_SIMPLE)}
+          since you indicated the child went to bed then.`);
     }
   }
 
@@ -141,6 +183,8 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
 export {
   applyCustomValidation,
   createFormSchema,
+  createTimeUseSummary,
   createUiSchema,
-  selectPrimaryActivityByPage
+  selectPrimaryActivityByPage,
+  selectTimeByPageAndKey
 };

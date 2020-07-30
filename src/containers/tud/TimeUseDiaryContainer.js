@@ -1,7 +1,6 @@
 // @flow
 
 import React from 'react';
-
 import {
   AppContainerWrapper,
   AppContentWrapper,
@@ -20,5 +19,4 @@ const TimeUseDiaryContainer = () => (
     </AppContentWrapper>
   </AppContainerWrapper>
 );
-
 export default TimeUseDiaryContainer;

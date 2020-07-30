@@ -33,19 +33,11 @@ const uiSchema = {
     classNames: 'column-span-12',
     [DAY_START_TIME]: {
       classNames: 'column-span-12',
-      'ui:widget': 'TimeWidget',
-      'ui:options': {
-        placeholder: 'HH:MM',
-        mask: '_:_'
-      }
+      'ui:widget': 'TimeWidget'
     },
     [DAY_END_TIME]: {
       classNames: 'column-span-12',
       'ui:widget': 'TimeWidget',
-      'ui:options': {
-        placeholder: 'HH:MM',
-        mask: '_:_'
-      }
     }
   }
 };
