@@ -11,24 +11,24 @@ import {
 } from 'lattice-ui-kit';
 
 import TimeUseSummary from './TimeUseSummary';
-import { SCHEMA_CONSTANTS } from '../constants';
 
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as PreSurveySchema from '../schemas/PreSurveySchema';
+import { SCHEMA_CONSTANTS } from '../constants';
 import {
   applyCustomValidation,
   createFormSchema,
   createUiSchema,
-  selectTimeByPageAndKey,
-  selectPrimaryActivityByPage
+  selectPrimaryActivityByPage,
+  selectTimeByPageAndKey
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
 const { ACTIVITY_END_TIME, DAY_END_TIME } = SCHEMA_CONSTANTS;
 
 const ButtonRow = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
   justify-content: space-between;
   margin-top: 30px;
 `;
@@ -44,6 +44,7 @@ const QuestionnaireForm = () => (
               onNext,
               page,
               pagedData,
+              setPage,
               validateAndSubmit
             } = pagedProps;
 
@@ -103,15 +104,17 @@ const QuestionnaireForm = () => (
               <>
                 {
                   lastPage ? (
-                    <TimeUseSummary formData={pagedData} />
+                    <TimeUseSummary
+                        formData={pagedData}
+                        goToPage={setPage} />
                   ) : (
                     <Form
                         formData={pagedData}
-                        ref={formRef}
                         hideSubmit
+                        noPadding
                         onChange={onChange}
                         onSubmit={onNext}
-                        noPadding
+                        ref={formRef}
                         schema={schema}
                         uiSchema={uiSchema}
                         validate={validate} />

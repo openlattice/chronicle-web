@@ -3,10 +3,8 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Colors } from 'lattice-ui-kit';
 
 import { createTimeUseSummary } from '../utils';
@@ -14,18 +12,18 @@ import { createTimeUseSummary } from '../utils';
 const { NEUTRAL } = Colors;
 
 const Heading = styled.h6`
+  color: ${NEUTRAL.N900};
   font-size: 16px;
   font-weight: normal;
   margin-bottom: 20px;
-  color: ${NEUTRAL.N900}
 `;
 
 const ItemSummary = styled.div`
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  grid-gap: 20px;
   align-items: center;
+  display: grid;
   font-size: 15px;
+  grid-gap: 20px;
+  grid-template-columns: 100px 1fr;
 `;
 
 const Description = styled.p`
@@ -35,20 +33,21 @@ const Description = styled.p`
 `;
 
 const StyledButton = styled(Button)`
-  width: 100%;
   margin-top: 10px;
+  width: 100%;
 `;
 
 const Wrapper = styled.div`
   border-bottom: 1px solid ${NEUTRAL.N100};
-  padding: 15px 0;
+  padding: 20px 0;
 `;
 
 type Props = {
   formData :Object;
+  goToPage :(pageNum :number) => void;
 };
 
-const TimeUseSummary = ({ formData } :Props) => {
+const TimeUseSummary = ({ formData, goToPage } :Props) => {
   const summary = createTimeUseSummary(formData);
 
   return (
@@ -59,8 +58,8 @@ const TimeUseSummary = ({ formData } :Props) => {
       </Heading>
       {
         summary.map((item) => (
-          <Wrapper>
-            <ItemSummary key={item.time}>
+          <Wrapper key={item.time}>
+            <ItemSummary>
               <Description>
                 {item.time}
               </Description>
@@ -70,6 +69,7 @@ const TimeUseSummary = ({ formData } :Props) => {
               </Description>
             </ItemSummary>
             <StyledButton
+                onClick={() => goToPage(item.pageNum)}
                 startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
               Edit
             </StyledButton>

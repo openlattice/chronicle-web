@@ -24,9 +24,9 @@ const ACTIVITIES = [
   { name: 'Eating/Drinking', description: 'eating/drinking' },
   { name: 'Bathroom/Grooming', description: 'grooming' },
   { name: 'Media Use (Tv, Books, Apps, etc)', description: 'using media' },
-  { name: 'Play/ Recreation Inside', description: 'indoor recreation' },
-  { name: 'Play/ Recreation Outside', description: 'outdoor recreation' },
-  { name: 'Childcare/ School', description: 'child care' },
+  { name: 'Play/Recreation Inside', description: 'indoor recreation' },
+  { name: 'Play/Recreation Outside', description: 'outdoor recreation' },
+  { name: 'Childcare/School', description: 'child care' },
   { name: 'Out of the House (Travelling/Errands)', description: 'travelling/running errands' },
   { name: 'In House (Chores, etc)', description: 'chores' },
   { name: 'Other/don\'t know', description: '' }
@@ -34,6 +34,6 @@ const ACTIVITIES = [
 
 export {
   ACTIVITIES,
-  SCHEMA_CONSTANTS,
-  NON_TYPICAL_DAY_REASONS
+  NON_TYPICAL_DAY_REASONS,
+  SCHEMA_CONSTANTS
 };

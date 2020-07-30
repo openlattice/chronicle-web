@@ -1,14 +1,14 @@
 // @flow
 
-import { getIn, get } from 'immutable';
+import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import { ACTIVITIES, SCHEMA_CONSTANTS } from '../constants';
 
 const {
-  ACTIVITY_NAME,
   ACTIVITY_END_TIME,
+  ACTIVITY_NAME,
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME
@@ -94,52 +94,40 @@ const createUiSchema = (pageNum :number) => ({
 
 const createTimeUseSummary = (formData :Object) => {
 
-  let summary = [];
-
-  // remove page 0;
-  const page0 = getPageSectionKey(0, 0);
-  // eslint-disable-next-line
-  delete formData[page0];
+  const summary = [];
 
   // get day duration (start and end)
   const dayStartTime = selectTimeByPageAndKey(1, DAY_START_TIME, formData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
 
-  /* eslint-enable */
-
   // add day start time
   summary.push({
     time: dayStartTime.toLocaleString(DateTime.TIME_SIMPLE),
     description: 'Child woke up',
-    pageNum: 0
+    pageNum: 1
   });
 
-  // remove page 0 and 1
-  /* eslint-disable no-param-reassign */
-  delete formData[getPageSectionKey(0, 0)];
-  delete formData[getPageSectionKey(1, 0)];
+  Object.keys(formData).forEach((key, index) => {
+    if (index !== 0 && index !== 1) { // skip page 0 and 1
+      const startTime = selectTimeByPageAndKey(index, ACTIVITY_START_TIME, formData);
+      const endTime = selectTimeByPageAndKey(index, ACTIVITY_END_TIME, formData);
+      const primaryActivity = selectPrimaryActivityByPage(index, formData);
 
-  const activities = Object.values(formData).map((activity, index) => {
-    const pageNum = index + 2; // account for page 0 & 1
-    const startTime = selectTimeByPageAndKey(pageNum, ACTIVITY_START_TIME, formData);
-    const endTime = selectTimeByPageAndKey(pageNum, ACTIVITY_END_TIME, formData);
-    const primaryActivity = selectPrimaryActivityByPage(pageNum, formData);
+      const entry = {
+        time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
+        description: get(primaryActivity, 'name'),
+        pageNum: index
+      };
 
-    return {
-      time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
-      description: get(primaryActivity, 'name'),
-      pageNum
-    };
+      summary.push(entry);
+    }
   });
-
-  // $FlowFixMe
-  summary = summary.concat(activities);
 
   // add end of day
   summary.push({
     time: dayEndTime.toLocaleString(DateTime.TIME_SIMPLE),
     description: 'Child went to bed',
-    pageNum: 0
+    pageNum: 1
   });
 
   return summary;
