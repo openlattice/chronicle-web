@@ -1,12 +1,13 @@
 // @flow
 
+import merge from 'lodash/merge';
 import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
-import merge from 'lodash/merge';
 
-import * as EatingSchema from '../schemas/followup/EatingSchema';
+import * as EatingIndoorRecSchema from '../schemas/followup/EatingIndoorRecSchema';
 import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
+import * as OutdoorRecSchema from '../schemas/followup/OutdoorRecSchema';
 import * as SleepingSchema from '../schemas/followup/SleepingSchema';
 import { SCHEMA_CONSTANTS } from '../constants';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
@@ -59,8 +60,9 @@ const createFormSchema = (pageNum :number, formData :Object) => {
 
   // follow up schemas
   const sleepingSchema = SleepingSchema.createSchema(pageNum);
-  const eatingSchema = EatingSchema.createSchema(pageNum);
+  const eatingIndoorRecSchema = EatingIndoorRecSchema.createSchema(pageNum);
   const mediaUseSchema = MediaUseSchema.createSchema(pageNum);
+  const outdoorRecSchema = OutdoorRecSchema.createSchema(pageNum);
   // TODO: add other follow up schemas
   // console.log(sleepingSchema);
 
@@ -104,9 +106,17 @@ const createFormSchema = (pageNum :number, formData :Object) => {
               {
                 properties: {
                   [ACTIVITY_NAME]: {
-                    enum: [EATING_DRINKING]
+                    enum: [EATING_DRINKING, RECREATION_INSIDE]
                   },
-                  ...eatingSchema
+                  ...eatingIndoorRecSchema
+                }
+              },
+              {
+                properties: {
+                  [ACTIVITY_NAME]: {
+                    enum: [RECREATION_OUTSIDE]
+                  },
+                  ...outdoorRecSchema
                 }
               },
               {
@@ -137,8 +147,9 @@ const createFormSchema = (pageNum :number, formData :Object) => {
 
 const createUiSchema = (pageNum :number) => {
   const sleepingUiSchema = SleepingSchema.createUiSchema(pageNum);
-  const eatingUiSchema = EatingSchema.createUiSchema(pageNum);
+  const eatingUiSchema = EatingIndoorRecSchema.createUiSchema(pageNum);
   const mediaUseUiSchema = MediaUseSchema.createUiSchema(pageNum);
+  const outdoorRecUiSchema = OutdoorRecSchema.createUiSchema(pageNum);
 
   return {
     [getPageSectionKey(pageNum, 0)]: {
@@ -154,7 +165,7 @@ const createUiSchema = (pageNum :number) => {
         classNames: 'column-span-12',
         'ui:widget': 'TimeWidget'
       },
-      ...merge(sleepingUiSchema, eatingUiSchema, mediaUseUiSchema)
+      ...merge(sleepingUiSchema, eatingUiSchema, mediaUseUiSchema, outdoorRecUiSchema)
     },
   };
 };

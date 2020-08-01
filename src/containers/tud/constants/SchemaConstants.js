@@ -1,34 +1,20 @@
 // @flow
 
-const SLEEPING_ACTIVITY_CONSTS = {
-  MEDIA: 'media',
-  BG_TV: 'tv',
-  BG_TV_AGE: 'age',
-  BG_AUDIO: 'audio',
-  BG_AUDIO_TYPE: 'audioType',
-  BG_MEDIA_PROPORTION: 'proportion'
-};
-
-const EATING_ACTIVITY_CONSTS = {
-  ADULT_MEDIA: 'adultMedia',
-  BG_AUDIO: 'audio',
-  BG_AUDIO_TYPE: 'audioType',
-  BG_TV: 'tv',
-  BG_TV_AGE: 'age',
-  CAREGIVER: 'careGiver',
-  LOCATION: 'location',
-  MEDIA: 'media',
-};
-
-const MEDIA_USE_CONSTS = {
+const PROPERTY_CONSTS = {
   ADULT_MEDIA: 'adultMedia',
   ADULT_MEDIA_PROPORTION: 'adultMediaProportion',
   ADULT_MEDIA_PURPOSE: 'adultMediaPurpose',
   BEHAVIOR_AFTER: 'behaviorAfter',
   BEHAVIOR_BEFORE: 'behaviorBefore',
+  BG_AUDIO: 'audio',
+  BG_AUDIO_TYPE: 'audioType',
+  BG_MEDIA_PROPORTION: 'proportion',
+  BG_TV: 'backgroundTv',
+  BG_TV_AGE: 'age',
   CAREGIVER: 'careGiver',
   DEVICE: 'device',
   LOCATION: 'location',
+  MEDIA: 'media',
   MEDIA_ACTIVITY: 'mediaActivity',
   MEDIA_NAME: 'mediaName',
   OTHER_MEDIA: 'otherMedia',
@@ -79,12 +65,21 @@ const CHILD_BEHAVIOR_CATEGORIES = [
   "Don't know"
 ];
 
+const LOCATION_CATEGORIES = [
+  'Room where child sleeps',
+  'In some other room in the house (e.g. kitchen, family room)',
+  'Outdoors (e.g. park or yard)',
+  'At school or daycare',
+  'While travelling (e.g. car, train, or school bus)',
+  'Restaurant, grocery store, or shopping center',
+  'Multiple locations', 'Other (e.g. another person\'s house, church)'
+];
+
 export {
   CAREGIVERS,
   CHILD_BEHAVIOR_CATEGORIES,
-  EATING_ACTIVITY_CONSTS,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
-  MEDIA_USE_CONSTS,
-  SLEEPING_ACTIVITY_CONSTS,
+  PROPERTY_CONSTS,
+  LOCATION_CATEGORIES
 };

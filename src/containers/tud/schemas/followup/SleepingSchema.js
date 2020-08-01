@@ -2,7 +2,7 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { SLEEPING_ACTIVITY_CONSTS } from '../../constants/SchemaConstants';
+import { PROPERTY_CONSTS } from '../../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -13,7 +13,7 @@ const {
   BG_AUDIO,
   BG_AUDIO_TYPE,
   BG_MEDIA_PROPORTION
-} = SLEEPING_ACTIVITY_CONSTS;
+} = PROPERTY_CONSTS;
 
 const bgAudioSchema = {
   [BG_AUDIO]: {

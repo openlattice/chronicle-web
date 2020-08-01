@@ -2,7 +2,7 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { EATING_ACTIVITY_CONSTS } from '../../constants/SchemaConstants';
+import { PROPERTY_CONSTS, LOCATION_CATEGORIES, CAREGIVERS } from '../../constants/SchemaConstants';
 
 const {
   ADULT_MEDIA,
@@ -13,7 +13,7 @@ const {
   CAREGIVER,
   LOCATION,
   MEDIA,
-} = EATING_ACTIVITY_CONSTS;
+} = PROPERTY_CONSTS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -79,8 +79,7 @@ const createSchema = (pageNum :number) => ({
         title: 'Who was with your child when he/she was doing this? Please choose all that apply.',
         items: {
           type: 'string',
-          enum: ['Mother/Mother figure', 'Father/Father figure',
-            'Grandparent', 'Sibling', 'Other relative', 'Childcare provider/nanny/babysitter', 'Other kids']
+          enum: CAREGIVERS
         },
         uniqueItems: true,
         minItems: 1
@@ -88,10 +87,7 @@ const createSchema = (pageNum :number) => ({
       [LOCATION]: {
         type: 'string',
         title: 'Where was your child when he/she was doing this activity?',
-        enum: ['Room where child sleeps', 'In some other room in the house (e.g. kitchen, family room)',
-          'Outdoors (e.g. park or yard)', 'At school or daycare', 'While travelling (e.g. car, train, or school bus)',
-          'Restaurant, grocery store, or shopping center',
-          'Multiple locations', 'Other (e.g. another person\'s house, church)']
+        enum: LOCATION_CATEGORIES
       },
       [MEDIA]: {
         type: 'string',

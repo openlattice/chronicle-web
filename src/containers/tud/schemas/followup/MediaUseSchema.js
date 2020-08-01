@@ -7,7 +7,8 @@ import {
   CHILD_BEHAVIOR_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
-  MEDIA_USE_CONSTS
+  PROPERTY_CONSTS,
+  LOCATION_CATEGORIES
 } from '../../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -25,10 +26,7 @@ const {
   MEDIA_NAME,
   OTHER_MEDIA,
   PROGRAM_AGE,
-} = MEDIA_USE_CONSTS;
-
-// console.log(MEDIA_ACTIVITY_TYPES.slice(0, 4));
-// console.log(MEDIA_ACTIVITY_TYPES.slice())
+} = PROPERTY_CONSTS;
 
 const otherMediaSchema = {
   [OTHER_MEDIA]: {
@@ -65,10 +63,7 @@ const subSchema = {
     [LOCATION]: {
       type: 'string',
       title: 'Where was your child when he/she was doing this activity?',
-      enum: ['Room where child sleeps', 'In some other room in the house (e.g. kitchen, family room)',
-        'Outdoors (e.g. park or yard)', 'At school or daycare', 'While travelling (e.g. car, train, or school bus)',
-        'Restaurant, grocery store, or shopping center',
-        'Multiple locations', 'Other (e.g. another person\'s house, church)']
+      enum: LOCATION_CATEGORIES
     },
     [ADULT_MEDIA]: {
       type: 'string',
