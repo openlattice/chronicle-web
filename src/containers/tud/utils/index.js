@@ -4,7 +4,22 @@ import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
-import { ACTIVITIES, SCHEMA_CONSTANTS } from '../constants';
+import * as SleepingSchema from '../schemas/followup/SleepingSchema';
+import { SCHEMA_CONSTANTS } from '../constants';
+import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
+
+const {
+  CHILDCARE,
+  EATING_DRINKING,
+  GROOMING,
+  INDOORS,
+  MEDIA,
+  OTHER,
+  RECREATION_INSIDE,
+  RECREATION_OUTSIDE,
+  SLEEPING,
+  TRAVELLING,
+} = ACTIVITY_NAMES;
 
 const {
   ACTIVITY_END_TIME,
@@ -23,12 +38,10 @@ const selectTimeByPageAndKey = (pageNum :number, key :string, formData :Object) 
 };
 
 const selectPrimaryActivityByPage = (pageNum :number, formData :Object) => {
-  if (pageNum < 0) return undefined;
-
   const psk = getPageSectionKey(pageNum, 0);
 
   const activityName = getIn(formData, [psk, ACTIVITY_NAME]);
-  return ACTIVITIES.find((activity) => activity.name === activityName);
+  return PRIMARY_ACTIVITIES.find((activity) => activity.name === activityName);
 };
 
 const createFormSchema = (pageNum :number, formData :Object) => {
@@ -40,6 +53,11 @@ const createFormSchema = (pageNum :number, formData :Object) => {
   const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
+
+  // follow up schemas
+  const sleepingSchema = SleepingSchema.createSchema(pageNum);
+  // TODO: add other follow up schemas
+  // console.log(sleepingSchema);
 
   return {
     type: 'object',
@@ -53,7 +71,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
               ? `What did your child start doing at ${formattedTime}?`
               : `What time did your child start doing at ${formattedTime} after they
                 finished ${(prevActivity || {}).description}?`),
-            enum: ACTIVITIES.map((activity) => activity.name)
+            enum: PRIMARY_ACTIVITIES.map((activity) => activity.name)
           },
           [ACTIVITY_START_TIME]: {
             type: 'string',
@@ -67,6 +85,27 @@ const createFormSchema = (pageNum :number, formData :Object) => {
               : 'When did the selected activity end?'
           }
         },
+        dependencies: {
+          [ACTIVITY_NAME]: {
+            oneOf: [
+              {
+                properties: {
+                  [ACTIVITY_NAME]: {
+                    enum: [SLEEPING]
+                  },
+                  ...sleepingSchema.properties,
+                }
+              },
+              {
+                properties: {
+                  [ACTIVITY_NAME]: {
+                    enum: PRIMARY_ACTIVITIES.filter((activity) => !activity.followup).map((activity) => activity.name)
+                  }
+                }
+              }
+            ]
+          }
+        },
         title: '',
         type: 'object',
         required: [ACTIVITY_NAME, ACTIVITY_END_TIME]
@@ -75,22 +114,27 @@ const createFormSchema = (pageNum :number, formData :Object) => {
   };
 };
 
-const createUiSchema = (pageNum :number) => ({
-  [getPageSectionKey(pageNum, 0)]: {
-    classNames: 'column-span-12',
-    [ACTIVITY_NAME]: {
-      classNames: (pageNum === 1 ? 'hidden' : 'column-span-12')
+const createUiSchema = (pageNum :number) => {
+  const sleepingUiSchema = SleepingSchema.createUiSchema(pageNum);
+
+  return {
+    [getPageSectionKey(pageNum, 0)]: {
+      classNames: 'column-span-12 grid-container',
+      [ACTIVITY_NAME]: {
+        classNames: (pageNum === 1 ? 'hidden' : 'column-span-12')
+      },
+      [ACTIVITY_START_TIME]: {
+        classNames: (pageNum === 1 ? 'column-span-12' : 'hidden'),
+        'ui:widget': 'TimeWidget',
+      },
+      [ACTIVITY_END_TIME]: {
+        classNames: 'column-span-12',
+        'ui:widget': 'TimeWidget'
+      },
+      ...sleepingUiSchema
     },
-    [ACTIVITY_START_TIME]: {
-      classNames: (pageNum === 1 ? 'column-span-12' : 'hidden'),
-      'ui:widget': 'TimeWidget',
-    },
-    [ACTIVITY_END_TIME]: {
-      classNames: 'column-span-12',
-      'ui:widget': 'TimeWidget'
-    },
-  }
-});
+  };
+};
 
 const createTimeUseSummary = (formData :Object) => {
 

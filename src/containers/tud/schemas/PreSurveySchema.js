@@ -69,7 +69,7 @@ const schema = {
 
 const uiSchema = {
   [getPageSectionKey(0, 0)]: {
-    classNames: 'column-span-12',
+    classNames: 'column-span-12 grid-container',
     [DAYS_OF_WEEK]: {
       classNames: 'column-span-12',
       'ui:widget': 'radio',

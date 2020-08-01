@@ -30,7 +30,7 @@ const schema = {
 
 const uiSchema = {
   [getPageSectionKey(1, 0)]: {
-    classNames: 'column-span-12',
+    classNames: 'column-span-12 grid-container',
     [DAY_START_TIME]: {
       classNames: 'column-span-12',
       'ui:widget': 'TimeWidget'

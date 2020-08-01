@@ -63,6 +63,11 @@ const QuestionnaireForm = () => (
               uiSchema = DaySpanSchema.uiSchema;
             }
 
+            if (page === 2) {
+              console.log(schema);
+              console.log(uiSchema);
+            }
+
             const handleNext = () => {
               //
               validateAndSubmit();
