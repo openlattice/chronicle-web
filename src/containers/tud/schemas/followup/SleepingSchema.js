@@ -12,8 +12,30 @@ const {
   BG_TV_AGE,
   BG_AUDIO,
   BG_AUDIO_TYPE,
-  BG_MEDIA_PROPORITION
+  BG_MEDIA_PROPORTION
 } = SLEEPING_ACTIVITY_CONSTS;
+
+const bgAudioSchema = {
+  [BG_AUDIO]: {
+    enum: ['Yes']
+  },
+  [BG_AUDIO_TYPE]: {
+    title: 'What kind of audio was in the background',
+    type: 'array',
+    items: {
+      type: 'string',
+      enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
+    },
+    uniqueItems: true
+  },
+  [BG_MEDIA_PROPORTION]: {
+    title: `Approximately what percentage of time that the child was
+    sleeping was the background media in use?
+    For example, if your child slept for 10 hours and the radio was on for 1,
+     enter 10; if on the full time, enter 100.`,
+    type: 'number',
+  }
+};
 
 const createSchema = (pageNum :number) => ({
   [getPageSectionKey(pageNum, 1)]: {
@@ -76,21 +98,7 @@ const createSchema = (pageNum :number) => ({
                           },
                           {
                             properties: {
-                              [BG_AUDIO]: {
-                                enum: ['Yes']
-                              },
-                              [BG_AUDIO_TYPE]: {
-                                title: 'What kind of audio was in the background',
-                                type: 'string',
-                                enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
-                              },
-                              [BG_MEDIA_PROPORITION]: {
-                                title: `Approximately what percentage of time that the child was
-                                sleeping was the background media in use?
-                                For example, if your child slept for 10 hours and the radio was on for 1,
-                                 enter 10; if on the full time, enter 100.`,
-                                type: 'number',
-                              }
+                              ...bgAudioSchema
                             }
                           }
                         ]
@@ -123,7 +131,7 @@ const createSchema = (pageNum :number) => ({
                               [BG_AUDIO]: {
                                 enum: ['No', "Don't Know"]
                               },
-                              [BG_MEDIA_PROPORITION]: {
+                              [BG_MEDIA_PROPORTION]: {
                                 title: `Approximately what percentage of time that the child was
                                 sleeping was the background media in use?
                                 For example, if your child slept for 10 hours and the radio was on for 1,
@@ -134,21 +142,7 @@ const createSchema = (pageNum :number) => ({
                           },
                           {
                             properties: {
-                              [BG_AUDIO]: {
-                                enum: ['Yes']
-                              },
-                              [BG_AUDIO_TYPE]: {
-                                title: 'What kind of audio was in the background',
-                                type: 'string',
-                                enum: ['Music', 'Talk Radio', 'Podcast']
-                              },
-                              [BG_MEDIA_PROPORITION]: {
-                                title: `Approximately what percentage of time that the child was
-                                sleeping was the background media in use?
-                                For example, if your child slept for 10 hours and the radio was on for 1,
-                                 enter 10; if on the full time, enter 100.`,
-                                type: 'number',
-                              }
+                              ...bgAudioSchema
                             }
                           }
                         ]
@@ -184,7 +178,7 @@ const createUiSchema = (pageNum :number) => ({
       classNames: 'column-span-12',
       'ui:widget': 'radio' // should be radiowith other
     },
-    [BG_MEDIA_PROPORITION]: {
+    [BG_MEDIA_PROPORTION]: {
       classNames: 'column-span-12',
     },
     [BG_AUDIO_TYPE]: {

@@ -3,8 +3,10 @@
 import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
+import merge from 'lodash/merge';
 
 import * as EatingSchema from '../schemas/followup/EatingSchema';
+import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
 import * as SleepingSchema from '../schemas/followup/SleepingSchema';
 import { SCHEMA_CONSTANTS } from '../constants';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
@@ -58,6 +60,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
   // follow up schemas
   const sleepingSchema = SleepingSchema.createSchema(pageNum);
   const eatingSchema = EatingSchema.createSchema(pageNum);
+  const mediaUseSchema = MediaUseSchema.createSchema(pageNum);
   // TODO: add other follow up schemas
   // console.log(sleepingSchema);
 
@@ -109,6 +112,14 @@ const createFormSchema = (pageNum :number, formData :Object) => {
               {
                 properties: {
                   [ACTIVITY_NAME]: {
+                    enum: [MEDIA]
+                  },
+                  ...mediaUseSchema
+                }
+              },
+              {
+                properties: {
+                  [ACTIVITY_NAME]: {
                     enum: PRIMARY_ACTIVITIES.filter((activity) => !activity.followup).map((activity) => activity.name)
                   }
                 }
@@ -127,6 +138,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
 const createUiSchema = (pageNum :number) => {
   const sleepingUiSchema = SleepingSchema.createUiSchema(pageNum);
   const eatingUiSchema = EatingSchema.createUiSchema(pageNum);
+  const mediaUseUiSchema = MediaUseSchema.createUiSchema(pageNum);
 
   return {
     [getPageSectionKey(pageNum, 0)]: {
@@ -142,8 +154,7 @@ const createUiSchema = (pageNum :number) => {
         classNames: 'column-span-12',
         'ui:widget': 'TimeWidget'
       },
-      ...sleepingUiSchema,
-      ...eatingUiSchema
+      ...merge(sleepingUiSchema, eatingUiSchema, mediaUseUiSchema)
     },
   };
 };

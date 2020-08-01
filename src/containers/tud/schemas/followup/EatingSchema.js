@@ -17,6 +17,58 @@ const {
 
 const { getPageSectionKey } = DataProcessingUtils;
 
+const bgAudioSchema = {
+  properties: {
+    [BG_AUDIO]: {
+      title: `Was there audio entertainment (e.g., music, talk radio)
+      on in the background while your child was doing this activity?`,
+      type: 'string',
+      enum: ['Yes', 'No', "Don't Know"]
+    }
+  },
+  dependencies: {
+    [BG_AUDIO]: {
+      oneOf: [
+        {
+          properties: {
+            [BG_AUDIO]: {
+              enum: ['No', "Don't Know"]
+            },
+            [ADULT_MEDIA]: {
+              type: 'string',
+              title: `Was an adult using a tablet, laptop, cell phone/smart
+                phone at any point while your child did this activity?`,
+              enum: ['Yes', 'No', "Don't Know"]
+            }
+          }
+        },
+        {
+          properties: {
+            [BG_AUDIO]: {
+              enum: ['Yes']
+            },
+            [BG_AUDIO_TYPE]: {
+              title: 'What kind of audio was in the background',
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
+              },
+              uniqueItems: true
+            },
+            [ADULT_MEDIA]: {
+              type: 'string',
+              title: `Was an adult using a tablet, laptop, cell phone/smart
+                phone at any point while your child did this activity?`,
+              enum: ['Yes', 'No', "Don't Know"]
+            }
+          }
+        }
+      ]
+    }
+  }
+};
+
 const createSchema = (pageNum :number) => ({
   [getPageSectionKey(pageNum, 1)]: {
     type: 'object',
@@ -84,49 +136,10 @@ const createSchema = (pageNum :number) => ({
                       [BG_TV]: {
                         enum: ['No', "Don't Know"]
                       },
-                      [BG_AUDIO]: {
-                        title: `Was there audio entertainment (e.g., music, talk radio)
-                        on in the background while your child was doing this activity?`,
-                        type: 'string',
-                        enum: ['Yes', 'No', "Don't Know"]
-                      }
+                      ...bgAudioSchema.properties
                     },
                     dependencies: {
-                      [BG_AUDIO]: {
-                        oneOf: [
-                          {
-                            properties: {
-                              [BG_AUDIO]: {
-                                enum: ['No', "Don't Know"]
-                              },
-                              [ADULT_MEDIA]: {
-                                type: 'string',
-                                title: `Was an adult using a tablet, laptop, cell phone/smart
-                                  phone at any point while your child did this activity?`,
-                                enum: ['Yes', 'No', "Don't Know"]
-                              }
-                            }
-                          },
-                          {
-                            properties: {
-                              [BG_AUDIO]: {
-                                enum: ['Yes']
-                              },
-                              [BG_AUDIO_TYPE]: {
-                                title: 'What kind of audio was in the background',
-                                type: 'string',
-                                enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
-                              },
-                              [ADULT_MEDIA]: {
-                                type: 'string',
-                                title: `Was an adult using a tablet, laptop, cell phone/smart
-                                  phone at any point while your child did this activity?`,
-                                enum: ['Yes', 'No', "Don't Know"]
-                              }
-                            }
-                          }
-                        ]
-                      }
+                      ...bgAudioSchema.dependencies
                     }
                   },
                   {
@@ -141,49 +154,10 @@ const createSchema = (pageNum :number) => ({
                         type: 'string',
                         enum: ["Child's age", 'Older children', 'Younger children', 'Adults', "Don't know/other"],
                       },
-                      [BG_AUDIO]: {
-                        title: `Was there audio entertainment (e.g., music, talk radio)
-                        on in the background while your child was doing this activity?`,
-                        type: 'string',
-                        enum: ['Yes', 'No', "Don't Know"]
-                      }
+                      ...bgAudioSchema.properties
                     },
                     dependencies: {
-                      [BG_AUDIO]: {
-                        oneOf: [
-                          {
-                            properties: {
-                              [BG_AUDIO]: {
-                                enum: ['No', "Don't Know"]
-                              },
-                              [ADULT_MEDIA]: {
-                                type: 'string',
-                                title: `Was an adult using a tablet, laptop, cell phone/smart
-                                  phone at any point while your child did this activity?`,
-                                enum: ['Yes', 'No', "Don't Know"]
-                              }
-                            }
-                          },
-                          {
-                            properties: {
-                              [BG_AUDIO]: {
-                                enum: ['Yes']
-                              },
-                              [BG_AUDIO_TYPE]: {
-                                title: 'What kind of audio was in the background',
-                                type: 'string',
-                                enum: ['Music', 'Talk Radio', 'Podcast']
-                              },
-                              [ADULT_MEDIA]: {
-                                type: 'string',
-                                title: `Was an adult using a tablet, laptop, cell phone/smart
-                                  phone at any point while your child did this activity?`,
-                                enum: ['Yes', 'No', "Don't Know"]
-                              }
-                            }
-                          }
-                        ]
-                      }
+                      ...bgAudioSchema.dependencies
                     }
                   }
                 ]
