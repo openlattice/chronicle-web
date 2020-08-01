@@ -8,21 +8,18 @@ import { DateTime } from 'luxon';
 import * as EatingIndoorRecSchema from '../schemas/followup/EatingIndoorRecSchema';
 import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
 import * as OutdoorRecSchema from '../schemas/followup/OutdoorRecSchema';
+import * as OutdoorsSchema from '../schemas/followup/OutdoorsSchema';
 import * as SleepingSchema from '../schemas/followup/SleepingSchema';
 import { SCHEMA_CONSTANTS } from '../constants';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 
 const {
-  CHILDCARE,
   EATING_DRINKING,
-  GROOMING,
-  INDOORS,
   MEDIA,
-  OTHER,
   RECREATION_INSIDE,
   RECREATION_OUTSIDE,
   SLEEPING,
-  TRAVELLING,
+  OUTDOORS,
 } = ACTIVITY_NAMES;
 
 const {
@@ -63,8 +60,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
   const eatingIndoorRecSchema = EatingIndoorRecSchema.createSchema(pageNum);
   const mediaUseSchema = MediaUseSchema.createSchema(pageNum);
   const outdoorRecSchema = OutdoorRecSchema.createSchema(pageNum);
-  // TODO: add other follow up schemas
-  // console.log(sleepingSchema);
+  const outdoorsSchema = OutdoorsSchema.createSchema(pageNum);
 
   return {
     type: 'object',
@@ -130,6 +126,14 @@ const createFormSchema = (pageNum :number, formData :Object) => {
               {
                 properties: {
                   [ACTIVITY_NAME]: {
+                    enum: [OUTDOORS]
+                  },
+                  ...outdoorsSchema
+                }
+              },
+              {
+                properties: {
+                  [ACTIVITY_NAME]: {
                     enum: PRIMARY_ACTIVITIES.filter((activity) => !activity.followup).map((activity) => activity.name)
                   }
                 }
@@ -146,10 +150,14 @@ const createFormSchema = (pageNum :number, formData :Object) => {
 };
 
 const createUiSchema = (pageNum :number) => {
-  const sleepingUiSchema = SleepingSchema.createUiSchema(pageNum);
-  const eatingUiSchema = EatingIndoorRecSchema.createUiSchema(pageNum);
-  const mediaUseUiSchema = MediaUseSchema.createUiSchema(pageNum);
-  const outdoorRecUiSchema = OutdoorRecSchema.createUiSchema(pageNum);
+
+  const followUpUiSchema = merge(
+    SleepingSchema.createUiSchema(pageNum),
+    EatingIndoorRecSchema.createUiSchema(pageNum),
+    MediaUseSchema.createUiSchema(pageNum),
+    OutdoorRecSchema.createUiSchema(pageNum),
+    OutdoorsSchema.createUiSchema(pageNum)
+  );
 
   return {
     [getPageSectionKey(pageNum, 0)]: {
@@ -165,7 +173,7 @@ const createUiSchema = (pageNum :number) => {
         classNames: 'column-span-12',
         'ui:widget': 'TimeWidget'
       },
-      ...merge(sleepingUiSchema, eatingUiSchema, mediaUseUiSchema, outdoorRecUiSchema)
+      ...followUpUiSchema
     },
   };
 };

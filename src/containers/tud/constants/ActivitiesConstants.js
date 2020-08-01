@@ -7,7 +7,7 @@ const GROOMING = 'Bathroom/Grooming';
 const INDOORS = 'In House (Chores, etc)';
 const MEDIA = 'Media Use (Tv, Books, Apps, etc)';
 const OTHER = 'Other/don\'t know';
-const TRAVELLING = 'Out of the House (Travelling/Errands)';
+const OUTDOORS = 'Out of the House (Travelling/Errands)';
 const RECREATION_INSIDE = 'Play/Recreation Inside';
 const RECREATION_OUTSIDE = 'Play/Recreation Outside';
 const SLEEPING = 'Sleeping/Resting';
@@ -22,7 +22,7 @@ const ACTIVITY_NAMES = {
   RECREATION_INSIDE,
   RECREATION_OUTSIDE,
   SLEEPING,
-  TRAVELLING,
+  OUTDOORS,
 };
 
 const PRIMARY_ACTIVITIES = [
@@ -33,7 +33,7 @@ const PRIMARY_ACTIVITIES = [
   { name: RECREATION_INSIDE, description: 'indoor recreation', followup: true },
   { name: RECREATION_OUTSIDE, description: 'outdoor recreation', followup: true },
   { name: CHILDCARE, description: 'child care', followup: false },
-  { name: TRAVELLING, description: 'travelling/running errands', followup: true },
+  { name: OUTDOORS, description: 'travelling/running errands', followup: true },
   { name: INDOORS, description: 'chores', followup: false },
   { name: OTHER, description: '', followup: false }
 ];

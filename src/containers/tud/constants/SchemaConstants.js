@@ -16,9 +16,11 @@ const PROPERTY_CONSTS = {
   LOCATION: 'location',
   MEDIA: 'media',
   MEDIA_ACTIVITY: 'mediaActivity',
+  MEDIA_AGE: 'mediaAge',
   MEDIA_NAME: 'mediaName',
   OTHER_MEDIA: 'otherMedia',
   PROGRAM_AGE: 'programAge',
+  SECONDARY_LOCATION: 'secondaryLocation',
 };
 
 const MEDIA_DEVICE_TYPES = [
@@ -75,11 +77,18 @@ const LOCATION_CATEGORIES = [
   'Multiple locations', 'Other (e.g. another person\'s house, church)'
 ];
 
+const SECONDARY_LOCATIONS = [
+  'While travelling (e.g. car, train, or school bus)',
+  'Restaurant, grocery store, or shopping center',
+  'Other'
+];
+
 export {
   CAREGIVERS,
   CHILD_BEHAVIOR_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
   PROPERTY_CONSTS,
+  SECONDARY_LOCATIONS,
   LOCATION_CATEGORIES
 };
