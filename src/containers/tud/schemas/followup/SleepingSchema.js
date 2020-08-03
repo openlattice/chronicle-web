@@ -193,7 +193,10 @@ const createUiSchema = (pageNum :number) => ({
     },
     [BG_TV_AGE]: {
       classNames: 'column-span-12',
-      'ui:widget': 'OtherRadioWidget'
+      'ui:widget': 'OtherRadioWidget',
+      'ui:options': {
+        otherText: 'Don\'t know/other'
+      }
     },
     [BG_MEDIA_PROPORTION]: {
       classNames: 'column-span-12',
