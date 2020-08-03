@@ -29,23 +29,26 @@ const {
 } = PROPERTY_CONSTS;
 
 const otherMediaSchema = {
-  [OTHER_MEDIA]: {
-    type: 'string',
-    title: `Was any other media being used at the same time as this activity,
-    such as television, movies, video or computer games, books, magazines,
-    radio or CDs, cell phone/smart phone, laptop or a tablet? `,
-    enum: ['Yes', 'No', "Don't Know"]
+  properties: {
+    [OTHER_MEDIA]: {
+      type: 'string',
+      title: `Was any other media being used at the same time as this activity,
+      such as television, movies, video or computer games, books, magazines,
+      radio or CDs, cell phone/smart phone, laptop or a tablet? `,
+      enum: ['Yes', 'No', "Don't Know"]
+    },
+    [BEHAVIOR_BEFORE]: {
+      type: 'string',
+      title: 'How was your child behaving just before this activity began?',
+      enum: CHILD_BEHAVIOR_CATEGORIES
+    },
+    [BEHAVIOR_AFTER]: {
+      type: 'string',
+      title: 'How was your child behaving just after this activity ended?',
+      enum: CHILD_BEHAVIOR_CATEGORIES
+    }
   },
-  [BEHAVIOR_BEFORE]: {
-    type: 'string',
-    title: 'How was your child behaving just before this activity began?',
-    enum: CHILD_BEHAVIOR_CATEGORIES
-  },
-  [BEHAVIOR_AFTER]: {
-    type: 'string',
-    title: 'How was your child behaving just after this activity ended?',
-    enum: CHILD_BEHAVIOR_CATEGORIES
-  }
+  required: [OTHER_MEDIA, BEHAVIOR_BEFORE, BEHAVIOR_AFTER]
 };
 
 const subSchema = {
@@ -72,6 +75,7 @@ const subSchema = {
       enum: ['Yes', 'No', "Don't Know"]
     },
   },
+  required: [CAREGIVER, LOCATION, ADULT_MEDIA],
   dependencies: {
     [ADULT_MEDIA]: {
       oneOf: [
@@ -97,16 +101,18 @@ const subSchema = {
               For example, if your child was using media for 2 hours and you used your device for 1 hour,
                enter 50; if you used your device the entire time, enter 100.`,
             },
-            ...otherMediaSchema
-          }
+            ...otherMediaSchema.properties
+          },
+          required: [ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION, ...otherMediaSchema.required]
         },
         {
           properties: {
             [ADULT_MEDIA]: {
               enum: ['No', "Don't Know"]
             },
-            ...otherMediaSchema
-          }
+            ...otherMediaSchema.properties
+          },
+          required: otherMediaSchema.required
         }
       ]
     }
@@ -134,6 +140,7 @@ const createSchema = (pageNum :number) => ({
         enum: MEDIA_ACTIVITY_CATEGORIES,
       }
     },
+    required: [DEVICE, MEDIA_ACTIVITY],
     dependencies: {
       [MEDIA_ACTIVITY]: {
         oneOf: [
@@ -156,6 +163,7 @@ const createSchema = (pageNum :number) => ({
               },
               ...subSchema.properties
             },
+            required: [PROGRAM_AGE, ...subSchema.required],
             dependencies: {
               ...subSchema.dependencies
             }
@@ -169,7 +177,8 @@ const createSchema = (pageNum :number) => ({
             },
             dependencies: {
               ...subSchema.dependencies
-            }
+            },
+            required: subSchema.required
           }
         ]
       }
