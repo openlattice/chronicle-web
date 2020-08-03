@@ -26,6 +26,7 @@ const bgAudioSchema = {
       enum: ['Yes', 'No', "Don't Know"]
     }
   },
+  required: [BG_AUDIO],
   dependencies: {
     [BG_AUDIO]: {
       oneOf: [
@@ -40,7 +41,8 @@ const bgAudioSchema = {
                 phone at any point while your child did this activity?`,
               enum: ['Yes', 'No', "Don't Know"]
             }
-          }
+          },
+          required: [ADULT_MEDIA]
         },
         {
           properties: {
@@ -62,7 +64,8 @@ const bgAudioSchema = {
                 phone at any point while your child did this activity?`,
               enum: ['Yes', 'No', "Don't Know"]
             }
-          }
+          },
+          required: [ADULT_MEDIA, BG_AUDIO_TYPE]
         }
       ]
     }
@@ -97,6 +100,7 @@ const createSchema = (pageNum :number) => ({
         enum: ['Yes', 'No', "Don't Know"]
       }
     },
+    required: [CAREGIVER, LOCATION, MEDIA],
     dependencies: {
       [MEDIA]: {
         oneOf: [
@@ -111,7 +115,8 @@ const createSchema = (pageNum :number) => ({
                   phone at any point while your child did this activity?`,
                 enum: ['Yes', 'No', "Don't Know"]
               }
-            }
+            },
+            required: [ADULT_MEDIA]
           },
           {
             properties: {
@@ -124,6 +129,7 @@ const createSchema = (pageNum :number) => ({
                 enum: ['Yes', 'No', "Don't Know"]
               }
             },
+            required: [BG_TV],
             dependencies: {
               [BG_TV]: {
                 oneOf: [
@@ -134,6 +140,7 @@ const createSchema = (pageNum :number) => ({
                       },
                       ...bgAudioSchema.properties
                     },
+                    required: bgAudioSchema.required,
                     dependencies: {
                       ...bgAudioSchema.dependencies
                     }
@@ -156,6 +163,7 @@ const createSchema = (pageNum :number) => ({
                       },
                       ...bgAudioSchema.properties
                     },
+                    required: [BG_TV_AGE, ...bgAudioSchema.required],
                     dependencies: {
                       ...bgAudioSchema.dependencies
                     }
