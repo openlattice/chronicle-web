@@ -25,6 +25,7 @@ const adultMediaSchema = {
       enum: ['Yes', 'No', "Don't Know"]
     },
   },
+  required: [ADULT_MEDIA],
   dependencies: {
     [ADULT_MEDIA]: {
       oneOf: [
@@ -44,7 +45,8 @@ const adultMediaSchema = {
               uniqueItems: true,
               minItems: 1
             },
-          }
+          },
+          required: [ADULT_MEDIA_PURPOSE]
         },
         {
           properties: {
@@ -86,6 +88,7 @@ const createSchema = (pageNum :number) => ({
         enum: ['Yes', 'No', "Don't Know"]
       }
     },
+    required: [CAREGIVER, SECONDARY_LOCATION, MEDIA],
     dependencies: {
       [MEDIA]: {
         oneOf: [
@@ -112,6 +115,7 @@ const createSchema = (pageNum :number) => ({
               },
               ...adultMediaSchema.properties
             },
+            required: [MEDIA_AGE, BG_AUDIO, ...adultMediaSchema.required],
             dependencies: {
               ...adultMediaSchema.dependencies
             }
@@ -123,6 +127,7 @@ const createSchema = (pageNum :number) => ({
               },
               ...adultMediaSchema.properties
             },
+            required: adultMediaSchema.required,
             dependencies: {
               ...adultMediaSchema.dependencies
             }
