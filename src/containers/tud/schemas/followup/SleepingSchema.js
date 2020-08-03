@@ -16,25 +16,25 @@ const {
 } = PROPERTY_CONSTS;
 
 const bgAudioSchema = {
-  [BG_AUDIO]: {
-    enum: ['Yes']
-  },
-  [BG_AUDIO_TYPE]: {
-    title: 'What kind of audio was in the background',
-    type: 'array',
-    items: {
-      type: 'string',
-      enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
+  properties: {
+    [BG_AUDIO_TYPE]: {
+      title: 'What kind of audio was in the background',
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
+      },
+      uniqueItems: true
     },
-    uniqueItems: true
+    [BG_MEDIA_PROPORTION]: {
+      title: `Approximately what percentage of time that the child was
+      sleeping was the background media in use?
+      For example, if your child slept for 10 hours and the radio was on for 1,
+       enter 10; if on the full time, enter 100.`,
+      type: 'number',
+    },
   },
-  [BG_MEDIA_PROPORTION]: {
-    title: `Approximately what percentage of time that the child was
-    sleeping was the background media in use?
-    For example, if your child slept for 10 hours and the radio was on for 1,
-     enter 10; if on the full time, enter 100.`,
-    type: 'number',
-  }
+  required: [BG_AUDIO_TYPE, BG_MEDIA_PROPORTION]
 };
 
 const createSchema = (pageNum :number) => ({
@@ -48,8 +48,9 @@ const createSchema = (pageNum :number) => ({
           but does not include white noise machines. `,
         type: 'string',
         enum: ['Yes', 'No', "Don't Know"]
-      }
+      },
     },
+    required: [MEDIA],
     dependencies: {
       [MEDIA]: {
         oneOf: [
@@ -71,6 +72,7 @@ const createSchema = (pageNum :number) => ({
                 enum: ['Yes', 'No', "Don't Know"]
               }
             },
+            required: [BG_TV],
             dependencies: {
               [BG_TV]: {
                 oneOf: [
@@ -86,6 +88,7 @@ const createSchema = (pageNum :number) => ({
                         enum: ['Yes', 'No', "Don't Know"]
                       }
                     },
+                    required: [BG_AUDIO],
                     dependencies: {
                       [BG_AUDIO]: {
                         oneOf: [
@@ -98,8 +101,12 @@ const createSchema = (pageNum :number) => ({
                           },
                           {
                             properties: {
-                              ...bgAudioSchema
-                            }
+                              [BG_AUDIO]: {
+                                enum: ['Yes']
+                              },
+                              ...bgAudioSchema.properties
+                            },
+                            required: bgAudioSchema.required
                           }
                         ]
                       }
@@ -127,6 +134,7 @@ const createSchema = (pageNum :number) => ({
                         enum: ['Yes', 'No', "Don't Know"]
                       }
                     },
+                    required: [BG_AUDIO, BG_TV_AGE],
                     dependencies: {
                       [BG_AUDIO]: {
                         oneOf: [
@@ -142,12 +150,17 @@ const createSchema = (pageNum :number) => ({
                                  enter 10; if on the full time, enter 100.`,
                                 type: 'number',
                               }
-                            }
+                            },
+                            required: [BG_MEDIA_PROPORTION]
                           },
                           {
                             properties: {
-                              ...bgAudioSchema
-                            }
+                              [BG_AUDIO]: {
+                                enum: ['Yes']
+                              },
+                              ...bgAudioSchema.properties
+                            },
+                            required: bgAudioSchema.required
                           }
                         ]
                       }
