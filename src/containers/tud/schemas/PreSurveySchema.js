@@ -3,14 +3,14 @@
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
-import { NON_TYPICAL_DAY_REASONS, SCHEMA_CONSTANTS } from '../constants';
+import { NON_TYPICAL_DAY_REASONS, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 const {
   DAYS_OF_WEEK,
   NON_TYPICAL_DAY_REASON,
   TYPICAL_DAY_FLAG
-} = SCHEMA_CONSTANTS;
+} = PROPERTY_CONSTS;
 
 const schema = {
   type: 'object',

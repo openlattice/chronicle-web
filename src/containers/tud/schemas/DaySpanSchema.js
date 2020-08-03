@@ -1,9 +1,9 @@
 // @flow
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { SCHEMA_CONSTANTS } from '../constants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
-const { DAY_END_TIME, DAY_START_TIME } = SCHEMA_CONSTANTS;
+const { DAY_END_TIME, DAY_START_TIME } = PROPERTY_CONSTS;
 const { getPageSectionKey } = DataProcessingUtils;
 
 const schema = {

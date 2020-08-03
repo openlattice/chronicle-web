@@ -147,8 +147,12 @@ const createSchema = (pageNum :number) => ({
                       [BG_TV_AGE]: {
                         title: `Was the program for your child's age, for older children,
                         for younger children, or for adults?`,
-                        type: 'string',
-                        enum: ["Child's age", 'Older children', 'Younger children', 'Adults', "Don't know/other"],
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                          enum: ["Child's age", 'Older children', 'Younger children', 'Adults'],
+                        },
+                        uniqueItems: true
                       },
                       ...bgAudioSchema.properties
                     },
@@ -199,7 +203,7 @@ const createUiSchema = (pageNum :number) => ({
     },
     [BG_TV_AGE]: {
       classNames: 'column-span-12',
-      'ui:widget': 'radio', // otherText
+      'ui:widget': 'OtherRadioWidget'
     },
     [BG_TV]: {
       classNames: 'column-span-12',

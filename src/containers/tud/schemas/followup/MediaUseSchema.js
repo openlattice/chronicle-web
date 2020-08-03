@@ -131,12 +131,7 @@ const createSchema = (pageNum :number) => ({
       [MEDIA_ACTIVITY]: {
         type: 'string',
         title: 'Specifically, what primary media activity was your child engaged in?',
-        // items: {
-        //   type: 'string',
-        //
-        // },
         enum: MEDIA_ACTIVITY_CATEGORIES,
-        uniqueItems: true
       }
     },
     dependencies: {

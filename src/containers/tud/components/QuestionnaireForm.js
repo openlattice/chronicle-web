@@ -14,7 +14,7 @@ import TimeUseSummary from './TimeUseSummary';
 
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as PreSurveySchema from '../schemas/PreSurveySchema';
-import { SCHEMA_CONSTANTS } from '../constants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
   createFormSchema,
@@ -24,7 +24,7 @@ import {
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
-const { ACTIVITY_END_TIME, DAY_END_TIME } = SCHEMA_CONSTANTS;
+const { ACTIVITY_END_TIME, DAY_END_TIME } = PROPERTY_CONSTS;
 
 const ButtonRow = styled.div`
   align-items: center;
@@ -61,11 +61,6 @@ const QuestionnaireForm = () => (
             if (page === 1) {
               schema = DaySpanSchema.schema;
               uiSchema = DaySpanSchema.uiSchema;
-            }
-
-            if (page === 2) {
-              console.log(schema);
-              console.log(uiSchema);
             }
 
             const handleNext = () => {

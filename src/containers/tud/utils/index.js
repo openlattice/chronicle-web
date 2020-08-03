@@ -10,7 +10,7 @@ import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
 import * as OutdoorRecSchema from '../schemas/followup/OutdoorRecSchema';
 import * as OutdoorsSchema from '../schemas/followup/OutdoorsSchema';
 import * as SleepingSchema from '../schemas/followup/SleepingSchema';
-import { SCHEMA_CONSTANTS } from '../constants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 
 const {
@@ -28,7 +28,7 @@ const {
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME
-} = SCHEMA_CONSTANTS;
+} = PROPERTY_CONSTS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 

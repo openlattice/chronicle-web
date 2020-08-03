@@ -1,6 +1,9 @@
 // @flow
 
 const PROPERTY_CONSTS = {
+  ACTIVITY_END_TIME: 'endTime',
+  ACTIVITY_NAME: 'activity',
+  ACTIVITY_START_TIME: 'startTime',
   ADULT_MEDIA: 'adultMedia',
   ADULT_MEDIA_PROPORTION: 'adultMediaProportion',
   ADULT_MEDIA_PURPOSE: 'adultMediaPurpose',
@@ -10,17 +13,22 @@ const PROPERTY_CONSTS = {
   BG_AUDIO_TYPE: 'audioType',
   BG_MEDIA_PROPORTION: 'proportion',
   BG_TV: 'backgroundTv',
-  BG_TV_AGE: 'age',
+  BG_TV_AGE: 'bgTvAge',
   CAREGIVER: 'careGiver',
+  DAYS_OF_WEEK: 'daysOfWeek',
+  DAY_END_TIME: 'dayEndTime',
+  DAY_START_TIME: 'dayStartTime',
   DEVICE: 'device',
   LOCATION: 'location',
   MEDIA: 'media',
   MEDIA_ACTIVITY: 'mediaActivity',
   MEDIA_AGE: 'mediaAge',
   MEDIA_NAME: 'mediaName',
+  NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
   OTHER_MEDIA: 'otherMedia',
   PROGRAM_AGE: 'programAge',
   SECONDARY_LOCATION: 'secondaryLocation',
+  TYPICAL_DAY_FLAG: 'typicalDay',
 };
 
 const MEDIA_DEVICE_TYPES = [
@@ -83,12 +91,21 @@ const SECONDARY_LOCATIONS = [
   'Other'
 ];
 
+const NON_TYPICAL_DAY_REASONS = [
+  'Child was sick',
+  'School/childcare was closed',
+  'Snow day',
+  'Vacation',
+  'Family visit'
+];
+
 export {
   CAREGIVERS,
   CHILD_BEHAVIOR_CATEGORIES,
+  LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
+  NON_TYPICAL_DAY_REASONS,
   PROPERTY_CONSTS,
   SECONDARY_LOCATIONS,
-  LOCATION_CATEGORIES
 };
