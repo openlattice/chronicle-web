@@ -36,6 +36,7 @@ const createSchema = (pageNum :number) => ({
         enum: ['Yes', 'No', "Don't Know"]
       }
     },
+    required: [CAREGIVER, MEDIA],
     dependencies: {
       [MEDIA]: {
         oneOf: [
@@ -56,7 +57,8 @@ const createSchema = (pageNum :number) => ({
                   phone at any point while your child did this activity?`,
                 enum: ['Yes', 'No', "Don't Know"]
               }
-            }
+            },
+            required: [BG_AUDIO, ADULT_MEDIA]
           },
           {
             properties: {
@@ -69,7 +71,8 @@ const createSchema = (pageNum :number) => ({
                   phone at any point while your child did this activity?`,
                 enum: ['Yes', 'No', "Don't Know"]
               }
-            }
+            },
+            required: [ADULT_MEDIA]
           }
         ]
       }
