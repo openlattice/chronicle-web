@@ -32,9 +32,9 @@ const otherMediaSchema = {
   properties: {
     [OTHER_MEDIA]: {
       type: 'string',
-      title: `Was any other media being used at the same time as this activity,
-      such as television, movies, video or computer games, books, magazines,
-      radio or CDs, cell phone/smart phone, laptop or a tablet? `,
+      title: 'Was any other media being used at the same time as this activity, '
+          + 'such as television, movies, video or computer games, books, magazines, '
+          + 'radio or CDs, cell phone/smart phone, laptop or a tablet?',
       enum: ['Yes', 'No', "Don't Know"]
     },
     [BEHAVIOR_BEFORE]: {
@@ -70,8 +70,8 @@ const subSchema = {
     },
     [ADULT_MEDIA]: {
       type: 'string',
-      title: `Was an adult using a tablet, laptop, cell phone/smart phone
-        at any point while your child did this activity?`,
+      title: 'Was an adult using a tablet, laptop, cell phone/smart phone '
+          + 'at any point while your child did this activity?',
       enum: ['Yes', 'No', "Don't Know"]
     },
   },
@@ -97,9 +97,9 @@ const subSchema = {
             },
             [ADULT_MEDIA_PROPORTION]: {
               type: 'number',
-              title: `Approximately what percentage of the time for this activity were you using your device?
-              For example, if your child was using media for 2 hours and you used your device for 1 hour,
-               enter 50; if you used your device the entire time, enter 100.`,
+              title: 'Approximately what percentage of the time for this activity were you using your device? '
+                  + 'For example, if your child was using media for 2 hours and you used your device for 1 hour, '
+                  + 'enter 50; if you used your device the entire time, enter 100.',
             },
             ...otherMediaSchema.properties
           },
@@ -151,15 +151,15 @@ const createSchema = (pageNum :number) => ({
               },
               [PROGRAM_AGE]: {
                 type: 'string',
-                title: `Was the program (e.g., show, app, movie, book, etc.) for your child's age,
-                  for older children, for younger children, or for adults?`,
+                title: 'Was the program (e.g., show, app, movie, book, etc.) for your child\'s age, '
+                    + 'for older children, for younger children, or for adults?',
                 enum: ["Child's age", 'Older children', 'Younger children', 'Adults', "Don't know/other"]
               },
               [MEDIA_NAME]: {
                 type: 'string',
-                title: `What was the name of the media used? (e.g. name of show, book, movie).
-                 If you are unsure of exact name, either describe (e.g., a drawing app, a movie about unicorns)
-                 or leave blank`
+                title: 'What was the name of the media used? (e.g. name of show, book, movie). '
+                    + 'If you are unsure of exact name, either describe (e.g., a drawing app, a movie about unicorns) '
+                    + 'or leave blank'
               },
               ...subSchema.properties
             },

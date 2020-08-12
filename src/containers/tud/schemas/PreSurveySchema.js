@@ -21,16 +21,16 @@ const schema = {
       title: '',
       properties: {
         [DAYS_OF_WEEK]: {
-          title: `We would like you to think about your child's day and complete the time use diary for yesterday.
-            What day of the week was yesterday?`,
+          title: 'We would like you to think about your child\'s day and complete the time use diary for yesterday. '
+              + 'What day of the week was yesterday?',
           // $FlowFixMe
           enum: Info.weekdays(),
           type: 'string'
         },
         [TYPICAL_DAY_FLAG]: {
-          title: `An important part of this project is to find out how children spend their time
-          during the week. Was yesterday a typical weekday for you and your child?
-          A non-typical day would include a school closing, being on vacation, or being home sick.`,
+          title: 'An important part of this project is to find out how children spend their time '
+              + 'during the week. Was yesterday a typical weekday for you and your child? '
+              + 'A non-typical day would include a school closing, being on vacation, or being home sick.',
           type: 'boolean',
           enum: [true, false],
           enumNames: ['Yes', 'No']

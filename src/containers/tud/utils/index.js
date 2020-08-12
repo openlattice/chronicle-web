@@ -75,8 +75,8 @@ const createFormSchema = (pageNum :number, formData :Object) => {
             type: 'string',
             title: (pageNum === FIRST_ACTIVITY_PAGE
               ? `What did your child start doing at ${formattedTime}?`
-              : `What time did your child start doing at ${formattedTime} after they
-                finished ${(prevActivity || {}).description}?`),
+              : `What time did your child start doing at ${formattedTime} after they `
+                + `finished ${(prevActivity || {}).description}?`),
             enum: PRIMARY_ACTIVITIES.map((activity) => activity.name)
           },
           [ACTIVITY_START_TIME]: {
@@ -87,7 +87,8 @@ const createFormSchema = (pageNum :number, formData :Object) => {
           [ACTIVITY_END_TIME]: {
             id: 'end_time',
             type: 'string',
-            title: currentActivity ? `When did your child stop ${currentActivity.description}?`
+            title: currentActivity
+              ? `When did your child stop ${currentActivity.description}?`
               : 'When did the selected activity end?'
           }
         },
