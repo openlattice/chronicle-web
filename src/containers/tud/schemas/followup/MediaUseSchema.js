@@ -2,13 +2,14 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
+import SCHEMA_FIELDS_TITLES from '../../constants/SchemaFieldsTitles';
 import {
   CAREGIVERS,
   CHILD_BEHAVIOR_CATEGORIES,
+  LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
-  PROPERTY_CONSTS,
-  LOCATION_CATEGORIES
+  PROPERTY_CONSTS
 } from '../../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -32,19 +33,17 @@ const otherMediaSchema = {
   properties: {
     [OTHER_MEDIA]: {
       type: 'string',
-      title: 'Was any other media being used at the same time as this activity, '
-          + 'such as television, movies, video or computer games, books, magazines, '
-          + 'radio or CDs, cell phone/smart phone, laptop or a tablet?',
+      title: SCHEMA_FIELDS_TITLES[OTHER_MEDIA],
       enum: ['Yes', 'No', "Don't Know"]
     },
     [BEHAVIOR_BEFORE]: {
       type: 'string',
-      title: 'How was your child behaving just before this activity began?',
+      title: SCHEMA_FIELDS_TITLES[BEHAVIOR_BEFORE],
       enum: CHILD_BEHAVIOR_CATEGORIES
     },
     [BEHAVIOR_AFTER]: {
       type: 'string',
-      title: 'How was your child behaving just after this activity ended?',
+      title: SCHEMA_FIELDS_TITLES[BEHAVIOR_AFTER],
       enum: CHILD_BEHAVIOR_CATEGORIES
     }
   },
@@ -55,7 +54,7 @@ const subSchema = {
   properties: {
     [CAREGIVER]: {
       type: 'array',
-      title: 'Who was with your child when he/she was doing this? Please choose all that apply.',
+      title: SCHEMA_FIELDS_TITLES[CAREGIVER],
       items: {
         type: 'string',
         enum: CAREGIVERS
@@ -65,13 +64,12 @@ const subSchema = {
     },
     [LOCATION]: {
       type: 'string',
-      title: 'Where was your child when he/she was doing this activity?',
+      title: SCHEMA_FIELDS_TITLES[LOCATION],
       enum: LOCATION_CATEGORIES
     },
     [ADULT_MEDIA]: {
       type: 'string',
-      title: 'Was an adult using a tablet, laptop, cell phone/smart phone '
-          + 'at any point while your child did this activity?',
+      title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA],
       enum: ['Yes', 'No', "Don't Know"]
     },
   },
@@ -86,7 +84,7 @@ const subSchema = {
             },
             [ADULT_MEDIA_PURPOSE]: {
               type: 'array',
-              title: 'What was the tablet/laptop/cell phone/smart phone used for? Please choose all that apply',
+              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA_PURPOSE],
               items: {
                 type: 'string',
                 enum: ['Work call', 'Work email', 'Review of documents for work',
@@ -97,9 +95,7 @@ const subSchema = {
             },
             [ADULT_MEDIA_PROPORTION]: {
               type: 'number',
-              title: 'Approximately what percentage of the time for this activity were you using your device? '
-                  + 'For example, if your child was using media for 2 hours and you used your device for 1 hour, '
-                  + 'enter 50; if you used your device the entire time, enter 100.',
+              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA_PROPORTION],
             },
             ...otherMediaSchema.properties
           },
@@ -126,7 +122,7 @@ const createSchema = (pageNum :number) => ({
     properties: {
       [DEVICE]: {
         type: 'array',
-        title: 'Specifically, what device(s) was your child using? Select all applicable.',
+        title: SCHEMA_FIELDS_TITLES[DEVICE],
         items: {
           type: 'string',
           enum: MEDIA_DEVICE_TYPES
@@ -136,7 +132,7 @@ const createSchema = (pageNum :number) => ({
       },
       [MEDIA_ACTIVITY]: {
         type: 'string',
-        title: 'Specifically, what primary media activity was your child engaged in?',
+        title: SCHEMA_FIELDS_TITLES[MEDIA_ACTIVITY],
         enum: MEDIA_ACTIVITY_CATEGORIES,
       }
     },
@@ -151,15 +147,12 @@ const createSchema = (pageNum :number) => ({
               },
               [PROGRAM_AGE]: {
                 type: 'string',
-                title: 'Was the program (e.g., show, app, movie, book, etc.) for your child\'s age, '
-                    + 'for older children, for younger children, or for adults?',
+                title: SCHEMA_FIELDS_TITLES[PROGRAM_AGE],
                 enum: ["Child's age", 'Older children', 'Younger children', 'Adults', "Don't know/other"]
               },
               [MEDIA_NAME]: {
                 type: 'string',
-                title: 'What was the name of the media used? (e.g. name of show, book, movie). '
-                    + 'If you are unsure of exact name, either describe (e.g., a drawing app, a movie about unicorns) '
-                    + 'or leave blank'
+                title: SCHEMA_FIELDS_TITLES[MEDIA_NAME]
               },
               ...subSchema.properties
             },

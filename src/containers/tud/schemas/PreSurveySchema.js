@@ -3,11 +3,12 @@
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
+import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
 import { NON_TYPICAL_DAY_REASONS, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 const {
-  DAYS_OF_WEEK,
+  DAY_OF_WEEK,
   NON_TYPICAL_DAY_REASON,
   TYPICAL_DAY_FLAG
 } = PROPERTY_CONSTS;
@@ -20,17 +21,14 @@ const schema = {
       type: 'object',
       title: '',
       properties: {
-        [DAYS_OF_WEEK]: {
-          title: 'We would like you to think about your child\'s day and complete the time use diary for yesterday. '
-              + 'What day of the week was yesterday?',
+        [DAY_OF_WEEK]: {
+          title: SCHEMA_FIELDS_TITLES[DAY_OF_WEEK],
           // $FlowFixMe
           enum: Info.weekdays(),
           type: 'string'
         },
         [TYPICAL_DAY_FLAG]: {
-          title: 'An important part of this project is to find out how children spend their time '
-              + 'during the week. Was yesterday a typical weekday for you and your child? '
-              + 'A non-typical day would include a school closing, being on vacation, or being home sick.',
+          title: SCHEMA_FIELDS_TITLES[TYPICAL_DAY_FLAG],
           type: 'boolean',
           enum: [true, false],
           enumNames: ['Yes', 'No']
@@ -52,7 +50,7 @@ const schema = {
                   enum: [false]
                 },
                 [NON_TYPICAL_DAY_REASON]: {
-                  title: 'What made yesterday a non-typical day?',
+                  title: SCHEMA_FIELDS_TITLES[NON_TYPICAL_DAY_REASON],
                   type: 'string',
                   enum: NON_TYPICAL_DAY_REASONS
                 }
@@ -62,7 +60,7 @@ const schema = {
           ]
         }
       },
-      required: [DAYS_OF_WEEK, TYPICAL_DAY_FLAG]
+      required: [DAY_OF_WEEK, TYPICAL_DAY_FLAG]
     }
   }
 };
@@ -70,7 +68,7 @@ const schema = {
 const uiSchema = {
   [getPageSectionKey(0, 0)]: {
     classNames: 'column-span-12 grid-container',
-    [DAYS_OF_WEEK]: {
+    [DAY_OF_WEEK]: {
       classNames: 'column-span-12',
       'ui:widget': 'radio',
     },

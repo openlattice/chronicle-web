@@ -2,6 +2,7 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
+import SCHEMA_FIELDS_TITLES from '../../constants/SchemaFieldsTitles';
 import { PROPERTY_CONSTS } from '../../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -18,7 +19,7 @@ const {
 const bgAudioSchema = {
   properties: {
     [BG_AUDIO_TYPE]: {
-      title: 'What kind of audio was in the background',
+      title: SCHEMA_FIELDS_TITLES[BG_AUDIO_TYPE],
       type: 'array',
       items: {
         type: 'string',
@@ -27,10 +28,7 @@ const bgAudioSchema = {
       uniqueItems: true
     },
     [BG_MEDIA_PROPORTION]: {
-      title: 'Approximately what percentage of time that the child was '
-          + 'sleeping was the background media in use? '
-          + 'For example, if your child slept for 10 hours and the radio was on for 1, '
-          + 'enter 10; if on the full time, enter 100.',
+      title: SCHEMA_FIELDS_TITLES[BG_MEDIA_PROPORTION],
       type: 'number',
     },
   },
@@ -43,9 +41,7 @@ const createSchema = (pageNum :number) => ({
     title: '',
     properties: {
       [MEDIA]: {
-        title: 'Was media being used in the same room as the child while they were sleeping? '
-            + 'This could include television, movies, video or computer games, radio or CDs, '
-            + 'but does not include white noise machines.',
+        title: SCHEMA_FIELDS_TITLES[MEDIA],
         type: 'string',
         enum: ['Yes', 'No', "Don't Know"]
       },
@@ -67,7 +63,7 @@ const createSchema = (pageNum :number) => ({
                 enum: ['Yes']
               },
               [BG_TV]: {
-                title: 'Was there a TV on in the background while your child did this activity?',
+                title: SCHEMA_FIELDS_TITLES[BG_TV],
                 type: 'string',
                 enum: ['Yes', 'No', "Don't Know"]
               }
@@ -82,8 +78,7 @@ const createSchema = (pageNum :number) => ({
                         enum: ['No', "Don't Know"]
                       },
                       [BG_AUDIO]: {
-                        title: 'Was there audio entertainment (e.g., music, talk radio) '
-                            + 'on in the background while your child was doing this activity?',
+                        title: SCHEMA_FIELDS_TITLES[BG_AUDIO],
                         type: 'string',
                         enum: ['Yes', 'No', "Don't Know"]
                       }
@@ -118,8 +113,7 @@ const createSchema = (pageNum :number) => ({
                         enum: ['Yes']
                       },
                       [BG_TV_AGE]: {
-                        title: 'Was the program for your child\'s age, for older children, '
-                            + 'for younger children, or for adults?',
+                        title: SCHEMA_FIELDS_TITLES[BG_TV_AGE],
                         type: 'array',
                         items: {
                           type: 'string',
@@ -128,8 +122,7 @@ const createSchema = (pageNum :number) => ({
                         uniqueItems: true
                       },
                       [BG_AUDIO]: {
-                        title: 'Was there audio entertainment (e.g., music, talk radio) '
-                            + 'on in the background while your child was doing this activity?',
+                        title: SCHEMA_FIELDS_TITLES[BG_AUDIO],
                         type: 'string',
                         enum: ['Yes', 'No', "Don't Know"]
                       }
@@ -144,10 +137,7 @@ const createSchema = (pageNum :number) => ({
                                 enum: ['No', "Don't Know"]
                               },
                               [BG_MEDIA_PROPORTION]: {
-                                title: 'Approximately what percentage of time that the child was'
-                                    + 'sleeping was the background media in use? '
-                                    + 'For example, if your child slept for 10 hours and the radio was on for 1, '
-                                    + 'enter 10; if on the full time, enter 100.',
+                                title: SCHEMA_FIELDS_TITLES[BG_MEDIA_PROPORTION],
                                 type: 'number',
                               }
                             },

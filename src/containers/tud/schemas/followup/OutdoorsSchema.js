@@ -2,7 +2,8 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PROPERTY_CONSTS, CAREGIVERS, SECONDARY_LOCATIONS } from '../../constants/SchemaConstants';
+import SCHEMA_FIELDS_TITLES from '../../constants/SchemaFieldsTitles';
+import { CAREGIVERS, PROPERTY_CONSTS, SECONDARY_LOCATIONS } from '../../constants/SchemaConstants';
 
 const {
   SECONDARY_LOCATION,
@@ -20,8 +21,7 @@ const adultMediaSchema = {
   properties: {
     [ADULT_MEDIA]: {
       type: 'string',
-      title: `Was an adult using a tablet, laptop, cell phone/smart phone
-        at any point while your child did this activity?`,
+      title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA],
       enum: ['Yes', 'No', "Don't Know"]
     },
   },
@@ -36,7 +36,7 @@ const adultMediaSchema = {
             },
             [ADULT_MEDIA_PURPOSE]: {
               type: 'array',
-              title: 'What was the tablet/laptop/cell phone/smart phone used for? Please choose all that apply',
+              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA_PURPOSE],
               items: {
                 type: 'string',
                 enum: ['Work call', 'Work email', 'Review of documents for work',
@@ -67,7 +67,7 @@ const createSchema = (pageNum :number) => ({
     properties: {
       [CAREGIVER]: {
         type: 'array',
-        title: 'Who was with your child when he/she was doing this? Please choose all that apply.',
+        title: SCHEMA_FIELDS_TITLES[CAREGIVER],
         items: {
           type: 'string',
           enum: CAREGIVERS
@@ -77,14 +77,12 @@ const createSchema = (pageNum :number) => ({
       },
       [SECONDARY_LOCATION]: {
         type: 'string',
-        title: 'Where was your child when he/she was doing this activity?',
+        title: SCHEMA_FIELDS_TITLES[SECONDARY_LOCATION],
         enum: SECONDARY_LOCATIONS
       },
       [MEDIA]: {
         type: 'string',
-        title: 'Was media being used at the same time as this activity, such as '
-            + 'television, movies, video or computer games, '
-            + 'books, magazines, radio or CDs, cell phone/smart phone, laptop or a tablet?',
+        title: SCHEMA_FIELDS_TITLES[MEDIA],
         enum: ['Yes', 'No', "Don't Know"]
       }
     },
@@ -99,8 +97,7 @@ const createSchema = (pageNum :number) => ({
               },
               [MEDIA_AGE]: { // TODO: otherText radio
                 type: 'array',
-                title: 'Was the media content directed at your child\'s age, '
-                    + 'older children, younger children, or adults?',
+                title: SCHEMA_FIELDS_TITLES[MEDIA_AGE],
                 items: {
                   type: 'string',
                   enum: ["Child's age", 'Older children', 'Younger children', 'Adults']
@@ -108,8 +105,7 @@ const createSchema = (pageNum :number) => ({
                 uniqueItems: true
               },
               [BG_AUDIO]: {
-                title: 'Was there audio entertainment (e.g., music, talk radio) '
-                    + 'on in the background while your child was doing this activity? ',
+                title: SCHEMA_FIELDS_TITLES[BG_AUDIO],
                 type: 'string',
                 enum: ['Yes', 'No', "Don't Know"]
               },

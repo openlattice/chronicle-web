@@ -2,7 +2,8 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PROPERTY_CONSTS, LOCATION_CATEGORIES, CAREGIVERS } from '../../constants/SchemaConstants';
+import SCHEMA_FIELDS_TITLES from '../../constants/SchemaFieldsTitles';
+import { CAREGIVERS, LOCATION_CATEGORIES, PROPERTY_CONSTS } from '../../constants/SchemaConstants';
 
 const {
   ADULT_MEDIA,
@@ -20,8 +21,7 @@ const { getPageSectionKey } = DataProcessingUtils;
 const bgAudioSchema = {
   properties: {
     [BG_AUDIO]: {
-      title: 'Was there audio entertainment (e.g., music, talk radio) '
-          + 'on in the background while your child was doing this activity?',
+      title: SCHEMA_FIELDS_TITLES[BG_AUDIO],
       type: 'string',
       enum: ['Yes', 'No', "Don't Know"]
     }
@@ -37,8 +37,7 @@ const bgAudioSchema = {
             },
             [ADULT_MEDIA]: {
               type: 'string',
-              title: 'Was an adult using a tablet, laptop, cell phone/smart '
-                  + 'phone at any point while your child did this activity?',
+              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA],
               enum: ['Yes', 'No', "Don't Know"]
             }
           },
@@ -50,7 +49,7 @@ const bgAudioSchema = {
               enum: ['Yes']
             },
             [BG_AUDIO_TYPE]: {
-              title: 'What kind of audio was in the background',
+              title: SCHEMA_FIELDS_TITLES[BG_AUDIO_TYPE],
               type: 'array',
               items: {
                 type: 'string',
@@ -60,8 +59,7 @@ const bgAudioSchema = {
             },
             [ADULT_MEDIA]: {
               type: 'string',
-              title: 'Was an adult using a tablet, laptop, cell phone/smartphone '
-                  + 'at any point while your child did this activity?',
+              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA],
               enum: ['Yes', 'No', "Don't Know"]
             }
           },
@@ -79,7 +77,7 @@ const createSchema = (pageNum :number) => ({
     properties: {
       [CAREGIVER]: {
         type: 'array',
-        title: 'Who was with your child when he/she was doing this? Please choose all that apply.',
+        title: SCHEMA_FIELDS_TITLES[CAREGIVER],
         items: {
           type: 'string',
           enum: CAREGIVERS
@@ -89,14 +87,12 @@ const createSchema = (pageNum :number) => ({
       },
       [LOCATION]: {
         type: 'string',
-        title: 'Where was your child when he/she was doing this activity?',
+        title: SCHEMA_FIELDS_TITLES[LOCATION],
         enum: LOCATION_CATEGORIES
       },
       [MEDIA]: {
         type: 'string',
-        title: 'Was media being used at the same time as this activity, such as '
-            + 'television, movies, video or computer games,'
-            + 'books, magazines, radio or CDs, cell phone/smart phone, laptop or a tablet?',
+        title: SCHEMA_FIELDS_TITLES[MEDIA],
         enum: ['Yes', 'No', "Don't Know"]
       }
     },
@@ -111,8 +107,7 @@ const createSchema = (pageNum :number) => ({
               },
               [ADULT_MEDIA]: {
                 type: 'string',
-                title: 'Was an adult using a tablet, laptop, cell phone/smart '
-                    + 'phone at any point while your child did this activity?',
+                title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA],
                 enum: ['Yes', 'No', "Don't Know"]
               }
             },
@@ -125,7 +120,7 @@ const createSchema = (pageNum :number) => ({
               },
               [BG_TV]: {
                 type: 'string',
-                title: 'Was there a TV on in the background while your child did this activity?',
+                title: SCHEMA_FIELDS_TITLES[BG_TV],
                 enum: ['Yes', 'No', "Don't Know"]
               }
             },
@@ -152,8 +147,7 @@ const createSchema = (pageNum :number) => ({
                       },
                       // TODO: add otherText option to radio widget
                       [BG_TV_AGE]: {
-                        title: 'Was the program for your child\'s age, for older children, '
-                            + 'for younger children, or for adults?',
+                        title: SCHEMA_FIELDS_TITLES[BG_TV_AGE],
                         type: 'array',
                         items: {
                           type: 'string',
