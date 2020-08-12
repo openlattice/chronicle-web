@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
@@ -52,12 +53,12 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
   let uiSchema;
 
   if (page === PRE_SURVEY_PAGE) {
-    schema = PreSurveySchema.schema;
-    uiSchema = PreSurveySchema.uiSchema;
+    schema = cloneDeep(PreSurveySchema.schema);
+    uiSchema = cloneDeep(PreSurveySchema.uiSchema);
   }
   else if (page === DAY_SPAN_PAGE) {
-    schema = DaySpanSchema.schema;
-    uiSchema = DaySpanSchema.uiSchema;
+    schema = cloneDeep(DaySpanSchema.schema);
+    uiSchema = cloneDeep(DaySpanSchema.uiSchema);
   }
   else {
     schema = createFormSchema(page, pagedData);

@@ -95,7 +95,7 @@ const createSchema = (pageNum :number) => ({
               [MEDIA]: {
                 enum: ['Yes']
               },
-              [MEDIA_AGE]: { // TODO: otherText radio
+              [MEDIA_AGE]: {
                 type: 'array',
                 title: SCHEMA_FIELDS_TITLES[MEDIA_AGE],
                 items: {
@@ -143,7 +143,10 @@ const createUiSchema = (pageNum :number) => ({
     },
     [MEDIA_AGE]: {
       classNames: 'column-span-12',
-      'ui:widget': 'OtherRadioWidget'
+      'ui:widget': 'OtherRadioWidget',
+      'ui:options': {
+        otherText: 'Don\'t know/other'
+      }
     },
     [SECONDARY_LOCATION]: {
       classNames: 'column-span-12',
