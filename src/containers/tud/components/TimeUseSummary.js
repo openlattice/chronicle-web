@@ -42,6 +42,10 @@ const Wrapper = styled.div`
   padding: 20px 0;
 `;
 
+const EditIcon = (
+  <FontAwesomeIcon icon={faPencilAlt} />
+);
+
 type Props = {
   formData :Object;
   goToPage :(pageNum :number) => void;
@@ -70,7 +74,7 @@ const TimeUseSummary = ({ formData, goToPage } :Props) => {
             </ItemSummary>
             <StyledButton
                 onClick={() => goToPage(item.pageNum)}
-                startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
+                startIcon={EditIcon}>
               Edit
             </StyledButton>
           </Wrapper>

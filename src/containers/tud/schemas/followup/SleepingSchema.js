@@ -30,6 +30,8 @@ const bgAudioSchema = {
     [BG_MEDIA_PROPORTION]: {
       title: SCHEMA_FIELDS_TITLES[BG_MEDIA_PROPORTION],
       type: 'number',
+      minimum: 0,
+      maximum: 100
     },
   },
   required: [BG_AUDIO_TYPE, BG_MEDIA_PROPORTION]
@@ -139,6 +141,8 @@ const createSchema = (pageNum :number) => ({
                               [BG_MEDIA_PROPORTION]: {
                                 title: SCHEMA_FIELDS_TITLES[BG_MEDIA_PROPORTION],
                                 type: 'number',
+                                minimum: 0,
+                                maximum: 100
                               }
                             },
                             required: [BG_MEDIA_PROPORTION]

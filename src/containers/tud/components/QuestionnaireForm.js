@@ -3,12 +3,8 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { DataProcessingUtils, Form, Paged } from 'lattice-fabricate';
-import {
-  Button,
-  Card,
-  CardSegment,
-} from 'lattice-ui-kit';
+import { DataProcessingUtils, Form } from 'lattice-fabricate';
+import { Button } from 'lattice-ui-kit';
 
 import TimeUseSummary from './TimeUseSummary';
 
@@ -36,113 +32,112 @@ const ButtonRow = styled.div`
   margin-top: 30px;
 `;
 
-const QuestionnaireForm = () => (
-  <Card>
-    <CardSegment>
-      <Paged
-          render={(pagedProps) => {
-            const {
-              formRef,
-              onBack,
-              onNext,
-              page,
-              pagedData,
-              setPage,
-              validateAndSubmit
-            } = pagedProps;
+type Props = {
+  pagedProps :Object;
+};
 
-            let schema = createFormSchema(page, pagedData);
-            let uiSchema = createUiSchema(page);
+const QuestionnaireForm = ({ pagedProps } :Props) => {
 
-            // presurvey
-            if (page === PRE_SURVEY_PAGE) {
-              schema = PreSurveySchema.schema;
-              uiSchema = PreSurveySchema.uiSchema;
+  const {
+    formRef,
+    onBack,
+    onNext,
+    page,
+    pagedData,
+    setPage,
+    validateAndSubmit
+  } = pagedProps;
+
+  let schema;
+  let uiSchema;
+
+  if (page === PRE_SURVEY_PAGE) {
+    schema = PreSurveySchema.schema;
+    uiSchema = PreSurveySchema.uiSchema;
+  }
+  else if (page === DAY_SPAN_PAGE) {
+    schema = DaySpanSchema.schema;
+    uiSchema = DaySpanSchema.uiSchema;
+  }
+  else {
+    schema = createFormSchema(page, pagedData);
+    uiSchema = createUiSchema(page);
+  }
+
+  const handleNext = () => {
+    //
+    validateAndSubmit();
+  };
+
+  const onChange = ({ formData } :Object) => {
+
+    const currentActivity = selectPrimaryActivityByPage(page, formData);
+    if (currentActivity) {
+      const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
+
+      if (endTimeInput) {
+        let parent = endTimeInput.parentNode;
+        if (parent) {
+          parent = parent.parentNode;
+          if (parent) {
+            const label = parent.previousSibling;
+            if (label) {
+              // $FlowFixMe
+              label.innerHTML = `When did your child stop ${currentActivity.description}?`;
             }
+          }
+        }
+      }
+    }
+  };
 
-            // day span
-            if (page === DAY_SPAN_PAGE) {
-              schema = DaySpanSchema.schema;
-              uiSchema = DaySpanSchema.uiSchema;
-            }
+  const validate = (formData, errors) => (
+    applyCustomValidation(formData, errors, page)
+  );
 
-            const handleNext = () => {
-              //
-              validateAndSubmit();
-            };
+  const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
+  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
 
-            const onChange = ({ formData } :Object) => {
+  const lastPage = prevEndTime.isValid && dayEndTime.isValid
+    && prevEndTime.equals(dayEndTime);
 
-              const currentActivity = selectPrimaryActivityByPage(page, formData);
-              if (currentActivity) {
-                const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
+  return (
+    <>
+      {
+        lastPage ? (
+          <TimeUseSummary
+              formData={pagedData}
+              goToPage={setPage} />
+        ) : (
+          <Form
+              formData={pagedData}
+              hideSubmit
+              noPadding
+              onChange={onChange}
+              onSubmit={onNext}
+              ref={formRef}
+              schema={schema}
+              uiSchema={uiSchema}
+              validate={validate} />
+        )
+      }
 
-                if (endTimeInput) {
-                  let parent = endTimeInput.parentNode;
-                  if (parent) {
-                    parent = parent.parentNode;
-                    if (parent) {
-                      const label = parent.previousSibling;
-                      if (label) {
-                        // $FlowFixMe
-                        label.innerHTML = `When did your child stop ${currentActivity.description}?`;
-                      }
-                    }
-                  }
-                }
-              }
-            };
-
-            const validate = (formData, errors) => (
-              applyCustomValidation(formData, errors, page)
-            );
-
-            const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
-            const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
-
-            const lastPage = prevEndTime.isValid && dayEndTime.isValid
-              && prevEndTime.equals(dayEndTime);
-
-            return (
-              <>
-                {
-                  lastPage ? (
-                    <TimeUseSummary
-                        formData={pagedData}
-                        goToPage={setPage} />
-                  ) : (
-                    <Form
-                        formData={pagedData}
-                        hideSubmit
-                        noPadding
-                        onChange={onChange}
-                        onSubmit={onNext}
-                        ref={formRef}
-                        schema={schema}
-                        uiSchema={uiSchema}
-                        validate={validate} />
-                  )
-                }
-
-                <ButtonRow>
-                  <Button
-                      disabled={page === 0}
-                      onClick={onBack}>
-                    Back
-                  </Button>
-                  <Button
-                      color="primary"
-                      onClick={handleNext}>
-                    {
-                      lastPage ? 'Submit' : 'Next'
-                    }
-                  </Button>
-                </ButtonRow>
-              </>
-            );
-          }} />
-    </CardSegment>
-  </Card>
-);
+      <ButtonRow>
+        <Button
+            disabled={page === 0}
+            onClick={onBack}>
+          Back
+        </Button>
+        <Button
+            color="primary"
+            onClick={handleNext}>
+          {
+            lastPage ? 'Submit' : 'Next'
+          }
+        </Button>
+      </ButtonRow>
+    </>
+  );
+};
 
 export default QuestionnaireForm;

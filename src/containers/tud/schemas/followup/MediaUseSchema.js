@@ -96,6 +96,8 @@ const subSchema = {
             [ADULT_MEDIA_PROPORTION]: {
               type: 'number',
               title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA_PROPORTION],
+              minimum: 0,
+              maximum: 100
             },
             ...otherMediaSchema.properties
           },
