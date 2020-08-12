@@ -10,8 +10,11 @@ import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
 import * as OutdoorRecSchema from '../schemas/followup/OutdoorRecSchema';
 import * as OutdoorsSchema from '../schemas/followup/OutdoorsSchema';
 import * as SleepingSchema from '../schemas/followup/SleepingSchema';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
+import { PAGE_NUMBERS } from '../constants/GeneralConstants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+
+const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE } = PAGE_NUMBERS;
 
 const {
   EATING_DRINKING,
@@ -48,7 +51,7 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) => {
 const createFormSchema = (pageNum :number, formData :Object) => {
 
   const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
-  const prevEndTime = pageNum === 2
+  const prevEndTime = pageNum === FIRST_ACTIVITY_PAGE
     ? selectTimeByPageAndKey(1, DAY_START_TIME, formData)
     : selectTimeByPageAndKey(pageNum - 1, ACTIVITY_END_TIME, formData);
   const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
@@ -70,7 +73,7 @@ const createFormSchema = (pageNum :number, formData :Object) => {
         properties: {
           [ACTIVITY_NAME]: {
             type: 'string',
-            title: (pageNum === 2
+            title: (pageNum === FIRST_ACTIVITY_PAGE
               ? `What did your child start doing at ${formattedTime}?`
               : `What time did your child start doing at ${formattedTime} after they
                 finished ${(prevActivity || {}).description}?`),
@@ -163,10 +166,10 @@ const createUiSchema = (pageNum :number) => {
     [getPageSectionKey(pageNum, 0)]: {
       classNames: 'column-span-12 grid-container',
       [ACTIVITY_NAME]: {
-        classNames: (pageNum === 1 ? 'hidden' : 'column-span-12')
+        classNames: (pageNum === DAY_SPAN_PAGE ? 'hidden' : 'column-span-12')
       },
       [ACTIVITY_START_TIME]: {
-        classNames: (pageNum === 1 ? 'column-span-12' : 'hidden'),
+        classNames: (pageNum === DAY_SPAN_PAGE ? 'column-span-12' : 'hidden'),
         'ui:widget': 'TimeWidget',
       },
       [ACTIVITY_END_TIME]: {
@@ -190,7 +193,7 @@ const createTimeUseSummary = (formData :Object) => {
   summary.push({
     time: dayStartTime.toLocaleString(DateTime.TIME_SIMPLE),
     description: 'Child woke up',
-    pageNum: 1
+    pageNum: DAY_SPAN_PAGE
   });
 
   Object.keys(formData).forEach((key, index) => {
@@ -213,7 +216,7 @@ const createTimeUseSummary = (formData :Object) => {
   summary.push({
     time: dayEndTime.toLocaleString(DateTime.TIME_SIMPLE),
     description: 'Child went to bed',
-    pageNum: 1
+    pageNum: DAY_SPAN_PAGE
   });
 
   return summary;
@@ -223,14 +226,14 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   const psk = getPageSectionKey(pageNum, 0);
 
   // For each activity, end date should greater than start date
-  const startTimeKey = pageNum === 1 ? DAY_START_TIME : ACTIVITY_START_TIME;
-  const endTimeKey = pageNum === 1 ? DAY_END_TIME : ACTIVITY_END_TIME;
+  const startTimeKey = pageNum === DAY_SPAN_PAGE ? DAY_START_TIME : ACTIVITY_START_TIME;
+  const endTimeKey = pageNum === DAY_SPAN_PAGE ? DAY_END_TIME : ACTIVITY_END_TIME;
 
   const currentStartTime = selectTimeByPageAndKey(pageNum, startTimeKey, formData);
   const currentEndTime = selectTimeByPageAndKey(pageNum, endTimeKey, formData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
 
-  const errorMsg = pageNum === 1
+  const errorMsg = pageNum === DAY_SPAN_PAGE
     ? `Bed time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`
     : `End time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`;
 
