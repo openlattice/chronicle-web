@@ -22,6 +22,7 @@ import { createGlobalStyle } from 'styled-components';
 
 import AppContainer from './containers/app/AppContainer';
 import QuestionnaireContainer from './containers/questionnaire/QuestionnaireContainer';
+import TimeUseDiaryContainer from './containers/tud/TimeUseDiaryContainer';
 import SurveyContainer from './containers/survey/SurveyContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
@@ -103,6 +104,7 @@ if (APP_ROOT_NODE) {
                 <Switch>
                   <Route path={Routes.SURVEY} component={SurveyContainer} />
                   <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
+                  <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
                   <AuthRoute redirectToLogin path={Routes.ROOT} component={AppContainer} />
                 </Switch>
               </ConnectedRouter>
