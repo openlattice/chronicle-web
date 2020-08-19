@@ -12,8 +12,9 @@ import {
   AppNavigationWrapper,
   Spinner,
 } from 'lattice-ui-kit';
+import { Map } from 'immutable';
 import { LangUtils, useRequestState } from 'lattice-utils';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Redirect,
   Route,
@@ -23,6 +24,8 @@ import {
 import { NavLink } from 'react-router-dom';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
+
+import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 import * as AppActions from './AppActions';
 import { initializeApplication } from './AppActions';
@@ -37,10 +40,15 @@ const { isNonEmptyString } = LangUtils;
 
 const { INITIALIZE_APPLICATION } = AppActions;
 
+const { APP_TYPES_BY_ORG_ID, ORGS, SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
+
 const AppContainer = () => {
   const dispatch = useDispatch();
 
   const initializeApplicationRS :?RequestState = useRequestState(['app', INITIALIZE_APPLICATION]);
+
+  const organizations :Map = useSelector((state) => state.getIn(['app', ORGS], Map()));
+  const selectedOrgId :string = useSelector((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
   useEffect(() => {
     dispatch(initializeApplication());
@@ -86,9 +94,25 @@ const AppContainer = () => {
     user = userInfo.email;
   }
 
+  const switchOrganization = (organization :Object) => {
+    console.log(organization);
+  };
+
+  console.log(organizations, selectedOrgId);
+
   return (
     <AppContainerWrapper>
-      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" logout={logout} user={user}>
+      <AppHeaderWrapper
+          appIcon={OpenLatticeIcon}
+          appTitle="Chronicle"
+          logout={logout}
+          organizationsSelect={{
+            isLoading: initializeApplicationRS === RequestStates.PENDING,
+            onChange: switchOrganization,
+            organizations,
+            selectedOrganzationId: selectedOrgId
+          }}
+          user={user}>
         <AppNavigationWrapper>
           <NavLink to={Routes.STUDIES} />
           <NavLink to={Routes.STUDIES}> Studies </NavLink>

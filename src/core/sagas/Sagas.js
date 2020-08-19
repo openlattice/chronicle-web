@@ -26,6 +26,7 @@ export default function* sagas() :Generator<*, *, *> {
 
     // AppSagas
     fork(AppSagas.initializeApplicationWatcher),
+    fork(AppSagas.getConfigsWatcher),
 
     // DataSagas
     fork(DataSagas.submitDataGraphWatcher),

@@ -136,11 +136,34 @@ const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
   return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
 };
 
+const processAppConfigs = (appConfigs :Object[]) => {
+  // 1: organizations
+  const organizations = appConfigs.reduce((result, config) => ({
+    [config.organization.id]: {
+      id: config.organization.id,
+      title: config.organization.title
+    },
+    ...result
+  }), {});
+
+  // 2: entitySetIdsByOrgId: mapping from orgId -> appType
+  const appTypesByOrgId = appConfigs.reduce((result, config) => ({
+    [config.organization.id]: config.config,
+    ...result
+  }), {});
+
+  return {
+    appTypesByOrgId,
+    organizations,
+  };
+};
+
 export {
   getBaseUrl,
   getParticipantDataUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
   getSubmitQuestionnaireUrl,
+  processAppConfigs,
   getDeleteParticipantPath,
 };
