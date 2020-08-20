@@ -4,6 +4,7 @@
 
 import React, { useEffect } from 'react';
 
+import { Map } from 'immutable';
 import { AuthActions, AuthUtils } from 'lattice-auth';
 import {
   AppContainerWrapper,
@@ -12,7 +13,6 @@ import {
   AppNavigationWrapper,
   Spinner,
 } from 'lattice-ui-kit';
-import { Map } from 'immutable';
 import { LangUtils, useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -25,22 +25,18 @@ import { NavLink } from 'react-router-dom';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
-
-import * as AppActions from './AppActions';
-import { initializeApplication } from './AppActions';
+import { INITIALIZE_APPLICATION, initializeApplication, switchOrganization } from './AppActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as Routes from '../../core/router/Routes';
+import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { isNonEmptyString } = LangUtils;
 
-const { INITIALIZE_APPLICATION } = AppActions;
-
-const { APP_TYPES_BY_ORG_ID, ORGS, SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
+const { ORGS, SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
 
 const AppContainer = () => {
   const dispatch = useDispatch();
@@ -94,11 +90,13 @@ const AppContainer = () => {
     user = userInfo.email;
   }
 
-  const switchOrganization = (organization :Object) => {
-    console.log(organization);
+  const handleSwitchOrganization = (organization :Object) => {
+    if (organization.value !== selectedOrgId) {
+      dispatch(switchOrganization(organization.value));
+    }
   };
 
-  console.log(organizations, selectedOrgId);
+  // console.log(organizations, selectedOrgId);
 
   return (
     <AppContainerWrapper>
@@ -108,9 +106,9 @@ const AppContainer = () => {
           logout={logout}
           organizationsSelect={{
             isLoading: initializeApplicationRS === RequestStates.PENDING,
-            onChange: switchOrganization,
+            onChange: handleSwitchOrganization,
             organizations,
-            selectedOrganzationId: selectedOrgId
+            selectedOrganizationId: selectedOrgId
           }}
           user={user}>
         <AppNavigationWrapper>

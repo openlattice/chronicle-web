@@ -2,6 +2,9 @@
  * @flow
  */
 
+import merge from 'lodash/merge';
+import set from 'lodash/set';
+import update from 'lodash/update';
 import { AuthUtils } from 'lattice-auth';
 import { LangUtils, Logger, ValidationUtils } from 'lattice-utils';
 
@@ -137,23 +140,27 @@ const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
 };
 
 const processAppConfigs = (appConfigs :Object[]) => {
-  // 1: organizations
-  const organizations = appConfigs.reduce((result, config) => ({
-    [config.organization.id]: {
-      id: config.organization.id,
-      title: config.organization.title
-    },
-    ...result
-  }), {});
 
-  // 2: entitySetIdsByOrgId: mapping from orgId -> appType
-  const appTypesByOrgId = appConfigs.reduce((result, config) => ({
-    [config.organization.id]: config.config,
-    ...result
-  }), {});
+  const organizations = {};
+  const entitySetIdsByOrgId = {};
+
+  appConfigs.forEach((config) => {
+    const { organization } = config;
+    const { title, id: orgId } = organization;
+
+    set(organizations, orgId, { title, id: orgId });
+
+    const entities = Object.entries(config.config).reduce((result, [fqn, entity]) => ({
+      // $FlowFixMe
+      [fqn]: entity.entitySetId,
+      ...result,
+    }), {});
+
+    update(entitySetIdsByOrgId, orgId, (soFar) => merge(soFar, entities));
+  });
 
   return {
-    appTypesByOrgId,
+    entitySetIdsByOrgId,
     organizations,
   };
 };
