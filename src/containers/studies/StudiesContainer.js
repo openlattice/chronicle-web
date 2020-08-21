@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { Constants } from 'lattice';
 import {
   Button,
-  Card,
   Spinner
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
@@ -43,10 +42,6 @@ const CardGrid = styled.div`
   display: grid;
   grid-gap: 30px;
   grid-template-columns: 1fr 1fr;
-
-  ${Card} {
-    min-width: 0;
-  }
 `;
 
 const CenterText = styled.div`

@@ -57,7 +57,16 @@ const PROPERTY_TYPE_FQNS = {
   VALUES_FQN: FQN.of('ol.values'),
 };
 
+const APP_TYPE_FQNS = {
+  ADDRESSES_APP_TYPE_FQN: FQN.of('app.addresses'),
+  ANSWER_APP_TYPE: FQN.of('app.answer'),
+  NOTIFICATION_APP_TYPE_FQN: FQN.of('app.notification'),
+  PART_OF_APP_TYPE_FQN: FQN.of('app.partof'),
+  STUDY_APP_TYPE_FQN: FQN.of('app.study'),
+};
+
 export {
+  APP_TYPE_FQNS,
   ASSOCIATION_ENTITY_TYPE_FQNS,
   ENTITY_TYPE_FQNS,
   PROPERTY_TYPE_FQNS,
