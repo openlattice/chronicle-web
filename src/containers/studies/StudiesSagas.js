@@ -172,27 +172,23 @@ function* changeEnrollmentStatusWorker(action :SequenceAction) :Generator<*, *, 
     const newEnrollmentStatus = enrollmentStatus === ENROLLED ? NOT_ENROLLED : ENROLLED;
     const enrollmentDate = enrollmentStatus === ENROLLED ? null : new Date().toISOString();
 
-    const {
-      associationEntityKeyId,
-      participatedInEntitySetId,
-      statusPropertyTypeId,
-      startDateTimePropertyTypeId
-    } = yield select((state) => ({
-      associationEntityKeyId:
-        state.getIn(['studies', 'participants', studyId, participantEntityKeyId, PARTICIPATED_IN_EKID, 0]),
-      participatedInEntitySetId: state.getIn(['edm', 'entitySetIds', PARTICIPATED_IN]),
-      statusPropertyTypeId: state.getIn(['edm', 'propertyTypeIds', STATUS]),
-      startDateTimePropertyTypeId: state.getIn(['edm', 'propertyTypeIds', DATE_ENROLLED])
-    }));
+    // get entity set ids and property types
+    const participatedInESID = yield select(selectESIDByAppTypeFqn(PARTICIPATED_IN_APP_TYPE_FQN));
+    const statusPTID = yield select(selectPropertyTypeId(STATUS));
+    const datePTID = yield select(selectPropertyTypeId(DATE_ENROLLED));
+
+    const participatedInEKID = yield select(
+      (state) => state.getIn(['studies', 'participants', studyId, participantEntityKeyId, PARTICIPATED_IN_EKID, 0])
+    );
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
       entities: {
-        [associationEntityKeyId]: {
-          [statusPropertyTypeId]: [newEnrollmentStatus],
-          [startDateTimePropertyTypeId]: [enrollmentDate]
+        [participatedInEKID]: {
+          [statusPTID]: [newEnrollmentStatus],
+          [datePTID]: [enrollmentDate]
         }
       },
-      entitySetId: participatedInEntitySetId,
+      entitySetId: participatedInESID,
       updateType: UpdateTypes.PartialReplace
     }));
 
