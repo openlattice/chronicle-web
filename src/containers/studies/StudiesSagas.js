@@ -138,7 +138,9 @@ const {
 
 const {
   NOTIFICATION_APP_TYPE_FQN,
+  PARTICIPATED_IN_APP_TYPE_FQN,
   PART_OF_APP_TYPE_FQN,
+  PERSON_APP_TYPE_FQN,
   STUDY_APP_TYPE_FQN,
 } = APP_TYPE_FQNS;
 
@@ -628,19 +630,12 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const { studyId, studyEntityKeyId } = value;
     let { formData } = value;
 
-    let entitySetIds = yield select((state) => state.getIn(['edm', 'entitySetIds']));
-    const { participantEntitySetIds, propertyTypeIds } = yield select((state) => ({
-      participantEntitySetIds: state.getIn(['studies', 'participantEntitySetIds']),
-      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
-    }));
-    entitySetIds = entitySetIds.merge(participantEntitySetIds);
-
-    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
-    const participantsEntitySetId = participantEntitySetIds.get(participantsEntitySetName);
+    const propertyTypeIds = yield select(selectPropertyTypeIds());
+    const entitySetIds = yield select(getSelectedOrgEntitySetIds());
 
     const dateEnrolled = new Date().toISOString();
     const associations = [
-      [PARTICIPATED_IN, 0, participantsEntitySetName, studyEntityKeyId, CHRONICLE_STUDIES, {
+      [PARTICIPATED_IN_APP_TYPE_FQN, 0, PERSON_APP_TYPE_FQN, studyEntityKeyId, STUDY_APP_TYPE_FQN, {
         [STATUS.toString()]: [ENROLLED],
         [DATE_ENROLLED.toString()]: [dateEnrolled]
       }]
@@ -651,24 +646,29 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const response = yield call(submitDataGraphWorker, submitDataGraph({ entityData, associationEntityData }));
     if (response.error) throw response.error;
 
-    // get association entityKeyId
-    const participatedInEntitySetId = entitySetIds.get(PARTICIPATED_IN);
-    const participatedInEntityKeyId = getIn(response.data, ['entitySetIds', participatedInEntitySetId, 0]);
+    // get entity key ids from submitted data graph
+    const participatedInEKID = getIn(
+      response.data,
+      ['entitySetIds', entitySetIds.get(PARTICIPATED_IN_APP_TYPE_FQN), 0]
+    );
+    const participantEntityKeyId = getIn(
+      response.data,
+      ['entityKeyIds', entitySetIds.get(PERSON_APP_TYPE_FQN), 0]
+    );
 
     // reconstruct created entity
-    const participantEntityKeyId = getIn(response.data, ['entityKeyIds', participantsEntitySetId, 0]);
     formData = setIn(
       formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, participantsEntitySetName, OPENLATTICE_ID_FQN)],
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, PERSON_APP_TYPE_FQN, OPENLATTICE_ID_FQN)],
       participantEntityKeyId
     );
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    let participantEntityData = fromJS(getIn(entityData, [participantsEntitySetId, 0]));
+    let participantEntityData = fromJS(getIn(entityData, [entitySetIds.get(PERSON_APP_TYPE_FQN), 0]));
     participantEntityData = participantEntityData
       .set(STATUS, [ENROLLED])
       .set(EVENT_COUNT, ['---'])
-      .set(PARTICIPATED_IN_EKID, [participatedInEntityKeyId])
+      .set(PARTICIPATED_IN_EKID, [participatedInEKID])
       .set('id', [participantEntityKeyId]);
 
     yield put(addStudyParticipant.success(action.id, {

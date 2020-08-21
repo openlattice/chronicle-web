@@ -61,7 +61,9 @@ const APP_TYPE_FQNS = {
   ADDRESSES_APP_TYPE_FQN: FQN.of('app.addresses'),
   ANSWER_APP_TYPE: FQN.of('app.answer'),
   NOTIFICATION_APP_TYPE_FQN: FQN.of('app.notification'),
+  PARTICIPATED_IN_APP_TYPE_FQN: FQN.of('app.participatedin'),
   PART_OF_APP_TYPE_FQN: FQN.of('app.partof'),
+  PERSON_APP_TYPE_FQN: FQN.of('app.person'),
   STUDY_APP_TYPE_FQN: FQN.of('app.study'),
 };
 
