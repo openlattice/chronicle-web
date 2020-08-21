@@ -77,14 +77,14 @@ const StudyDetailsContainer = (props :Props) => {
   } = props;
   const dispatch = useDispatch();
 
-  const studyUUID :UUID = getIdFromMatch(match) || '';
+  const studyId :UUID = getIdFromMatch(match) || '';
 
-  const study = useSelector((state) => state.getIn([STUDIES, STUDIES, studyUUID], Map()));
+  const study = useSelector((state) => state.getIn([STUDIES, STUDIES, studyId], Map()));
   const notificationsEnabledStudies = useSelector(
     (state) => state.getIn([STUDIES, NOTIFICATIONS_ENABLED_STUDIES], Set())
   );
 
-  const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyUUID);
+  const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyId);
 
   if (!study) {
     dispatch(goToRoot());
@@ -96,13 +96,13 @@ const StudyDetailsContainer = (props :Props) => {
         { study.getIn([FULL_NAME_FQN, 0]) }
       </StudyNameWrapper>
       <Tabs>
-        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
+        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyId)}>
           Study Details
         </TabLink>
-        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
+        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyId)}>
           Participants
         </TabLink>
-        <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyUUID)}>
+        <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyId)}>
           Questionnaires
         </TabLink>
       </Tabs>

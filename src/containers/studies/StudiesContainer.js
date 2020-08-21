@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import styled from 'styled-components';
 import { Constants } from 'lattice';
@@ -17,7 +17,7 @@ import type { RequestState } from 'redux-reqseq';
 
 import StudyCard from './components/StudyCard';
 import StudyDetailsModal from './components/StudyDetailsModal';
-import { CREATE_STUDY, GET_STUDIES, getStudies } from './StudiesActions';
+import { CREATE_STUDY, GET_STUDIES } from './StudiesActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
 import { resetRequestState } from '../../core/redux/ReduxActions';
@@ -56,10 +56,6 @@ const StudiesContainer = () => {
   const studies = useSelector((state) => state.getIn(['studies', 'studies']));
 
   const getStudiesRS :?RequestState = useRequestState(['studies', GET_STUDIES]);
-
-  useEffect(() => {
-    dispatch(getStudies());
-  }, [dispatch]);
 
   const openCreateStudyModal = () => {
     // necessary after a successful or failed CREATE_STUDY action

@@ -30,8 +30,8 @@ import { getEntityDataModelTypes } from '../../core/edm/EDMActions';
 import { getEntityDataModelTypesWorker } from '../../core/edm/EDMSagas';
 import { processAppConfigs } from '../../utils/AppUtils';
 import { ERR_MISSING_CORE_MODULE } from '../../utils/Errors';
-import { getGlobalNotificationsEKID } from '../studies/StudiesActions';
-import { getGlobalNotificationsEKIDWorker } from '../studies/StudiesSagas';
+import { getGlobalNotificationsEKID, getStudies } from '../studies/StudiesActions';
+import { getGlobalNotificationsEKIDWorker, getStudiesWorker } from '../studies/StudiesSagas';
 
 const { getApp, getAppConfigs } = AppApiActions;
 const { getAppWorker, getAppConfigsWorker } = AppApiSagas;
@@ -114,6 +114,10 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     // get entity key id of entity in global notifications entity set
     const notificationsRes = yield call(getGlobalNotificationsEKIDWorker, getGlobalNotificationsEKID());
     if (notificationsRes.error) throw notificationsRes.error;
+
+    // get studies
+    const studiesRes = yield call(getStudiesWorker, getStudies());
+    if (studiesRes.error) throw studiesRes.error;
 
     yield put(initializeApplication.success(action.id));
   }

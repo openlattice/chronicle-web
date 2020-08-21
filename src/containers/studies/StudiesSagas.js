@@ -63,7 +63,7 @@ import {
   selectPropertyTypeId,
   selectESIDByAppTypeFqn,
   selectPropertyTypeIds,
-  selectEntitySetIdsByOrgId
+  getSelectedOrgEntitySetIds
 } from '../../core/edm/EDMUtils';
 import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
 import {
@@ -415,9 +415,9 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
 function* associateExistingStudyWithNotifications(studyId, studyEntityKeyId) :Generator<*, *, *> {
   const workerResponse = {};
   try {
-    const studyEntitySetId = yield select(selectEntitySetId(CHRONICLE_STUDIES));
-    const partOfEntitySetId = yield select(selectEntitySetId(PART_OF_ES_NAME));
-    const notificationsEntitySetId = yield select(selectEntitySetId(CHRONICLE_NOTIFICATIONS));
+    const studyEntitySetId = yield select(selectESIDByAppTypeFqn(STUDY_APP_TYPE_FQN));
+    const partOfEntitySetId = yield select(selectESIDByAppTypeFqn(PART_OF_APP_TYPE_FQN));
+    const notificationsEntitySetId = yield select(selectESIDByAppTypeFqn(NOTIFICATION_APP_TYPE_FQN));
 
     const IdFQNPropertyTypeId = yield select(selectPropertyTypeId(ID_FQN));
     const globalNotificationsEKID = yield select((state) => state.getIn([STUDIES, GLOBAL_NOTIFICATIONS_EKID]));
@@ -469,14 +469,12 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       (state) => state.getIn([STUDIES, PART_OF_ASSOCIATION_EKID_MAP, studyId])
     );
 
-    const { entitySetIds, propertyTypeIds } = yield select((state) => ({
-      entitySetIds: state.getIn(['edm', 'entitySetIds']),
-      propertyTypeIds: state.getIn(['edm', 'propertyTypeIds']),
-    }));
+    const entitySetIds = yield select(getSelectedOrgEntitySetIds());
+    const propertyTypeIds = yield select(selectPropertyTypeIds());
 
     // STEP 1: create notifications -> partof -> study association if it doesnt exist
     const notificationsEnabled = getIn(formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDY_APP_TYPE_FQN, NOTIFICATION_ENABLED)]);
 
     const partOfAssociationVal = notificationsEnabled ? studyId : null;
 
@@ -488,21 +486,21 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     else {
       formData = setIn(formData,
         [getPageSectionKey(1, 1), getEntityAddressKey(
-          partOfEntityKeyId, PART_OF_ES_NAME, ID_FQN
+          partOfEntityKeyId, PART_OF_APP_TYPE_FQN, ID_FQN
         )], partOfAssociationVal);
     }
 
     // remove notification_enabled property since it is not a part of chronicle_studies entity set
     formData = removeIn(formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDY_APP_TYPE_FQN, NOTIFICATION_ENABLED)]);
 
     initialFormData = removeIn(initialFormData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, CHRONICLE_STUDIES, NOTIFICATION_ENABLED)]);
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDY_APP_TYPE_FQN, NOTIFICATION_ENABLED)]);
 
     // Step 2: update study details
     const entityIndexToIdMap :Map = Map()
-      .setIn([CHRONICLE_STUDIES, 0], studyEntityKeyId)
-      .setIn([PART_OF_ES_NAME, 0], partOfEntityKeyId);
+      .setIn([STUDY_APP_TYPE_FQN, 0], studyEntityKeyId)
+      .setIn([PART_OF_APP_TYPE_FQN, 0], partOfEntityKeyId);
 
     const draftWithKeys = replaceEntityAddressKeys(
       formData,
@@ -528,7 +526,7 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     // construct updated study
     entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
 
-    const entitySetId :UUID = entitySetIds.get(CHRONICLE_STUDIES);
+    const entitySetId :UUID = entitySetIds.get(STUDY_APP_TYPE_FQN);
     const studyEntityData = getIn(entityData, [entitySetId, 0]);
 
     // update notifications : set entity set ids, and association key id
@@ -824,7 +822,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     let { formData } = value;
 
     const propertyTypeIds = yield select(selectPropertyTypeIds());
-    const entitySetIds = yield select(selectEntitySetIdsByOrgId());
+    const entitySetIds = yield select(getSelectedOrgEntitySetIds());
 
     const globalNotificationsEKID = yield select((state) => state.getIn([STUDIES, GLOBAL_NOTIFICATIONS_EKID]));
 

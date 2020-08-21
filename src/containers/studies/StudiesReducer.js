@@ -91,14 +91,13 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     }
 
     case getStudies.case(action.type): {
-      const seqAction :SequenceAction = action;
       return getStudies.reducer(state, action, {
         REQUEST: () => state.setIn([GET_STUDIES, REQUEST_STATE], RequestStates.PENDING),
         SUCCESS: () => state
-          .set('studies', fromJS(seqAction.value))
+          .set(STUDIES, fromJS(action.value))
           .setIn([GET_STUDIES, REQUEST_STATE], RequestStates.SUCCESS),
         FAILURE: () => state
-          .set('studies', Map())
+          .set(STUDIES, Map())
           .setIn([GET_STUDIES, REQUEST_STATE], RequestStates.FAILURE),
       });
     }

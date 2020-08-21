@@ -31,7 +31,7 @@ const selectPropertyTypeIds = () => (state :Map) => state.getIn(['edm', 'propert
 
 const selectEntitySetId = (esName :string) => (state :Map) => state.getIn(['edm', 'entitySetIds', esName]);
 
-const selectEntitySetIdsByOrgId = () => (state :Map) => {
+const getSelectedOrgEntitySetIds = () => (state :Map) => {
   const selectedOrgId = state.getIn(['app', SELECTED_ORG_ID]);
   return state.getIn(['app', ENTITY_SET_IDS_BY_ORG_ID, selectedOrgId]);
 };
@@ -39,7 +39,7 @@ const selectEntitySetIdsByOrgId = () => (state :Map) => {
 export {
   selectESIDByAppTypeFqn,
   selectEntitySetId,
-  selectEntitySetIdsByOrgId,
+  getSelectedOrgEntitySetIds,
   selectEntityType,
   selectEntityTypeId,
   selectPropertyTypeId,
