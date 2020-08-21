@@ -137,6 +137,8 @@ const {
 } = STUDIES_REDUX_CONSTANTS;
 
 const {
+  HAS_APP_TYPE_FQN,
+  METADATA_APP_TYPE_FQN,
   NOTIFICATION_APP_TYPE_FQN,
   PARTICIPATED_IN_APP_TYPE_FQN,
   PART_OF_APP_TYPE_FQN,
@@ -265,27 +267,24 @@ function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *,
     yield put(getParticipantsMetadata.request(action.id));
 
     const { value } = action;
-    const { participantEKIDs, participantsEntitySetId, participantsEntitySetName } = value;
+    const { participantEKIDs, participantsESID } = value;
+
+    // get entity sets
+    const hasESID = yield select(selectESIDByAppTypeFqn(HAS_APP_TYPE_FQN));
+    const metadataESID = yield select(selectESIDByAppTypeFqn(METADATA_APP_TYPE_FQN));
 
     if (participantEKIDs.length) {
-      const hasEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', HAS_ES_NAME])
-      );
-      const metadataEntitySetId = yield select(
-        (state) => state.getIn(['edm', 'entitySetIds', CHRONICLE_METADATA])
-      );
-
       const searchFilter = {
-        destinationEntitySetIds: [metadataEntitySetId],
-        edgeEntitySetIds: [hasEntitySetId],
+        destinationEntitySetIds: [metadataESID],
+        edgeEntitySetIds: [hasESID],
         entityKeyIds: participantEKIDs,
-        sourceEntitySetIds: [participantsEntitySetId]
+        sourceEntitySetIds: [participantsESID]
       };
 
       const response = yield call(
         searchEntityNeighborsWithFilterWorker,
         searchEntityNeighborsWithFilter({
-          entitySetId: participantsEntitySetId,
+          entitySetId: participantsESID,
           filter: searchFilter,
         })
       );
@@ -300,7 +299,7 @@ function* getParticipantsMetadataWorker(action :SequenceAction) :Generator<*, *,
       const neighborKeyIds :Map = fromJS(response.data)
         .map((neighbors :List) => neighbors.first().getIn(['neighborDetails', OPENLATTICE_ID_FQN, 0]));
 
-      yield put(getParticipantsMetadata.success(action.id, { neighborKeyIds, participantsEntitySetName }));
+      yield put(getParticipantsMetadata.success(action.id, { neighborKeyIds }));
     }
     else {
       yield put(getParticipantsMetadata.success(action.id));
@@ -330,26 +329,20 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
     const { studyEKID, studyId } = action.value;
 
-    const participatedInESID = yield select(selectEntitySetId(PARTICIPATED_IN));
-    const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
-
-    // get entity set id of participants entity set
-    const participantsEntitySetName = getParticipantsEntitySetName(studyId);
-    let response = {};
-
-    response = yield call(getEntitySetIdWorker, getEntitySetId(participantsEntitySetName));
-    if (response.error) throw response.error;
-    const participantsEntitySetId = response.data;
+    // get entity set ids
+    const participatedInESID = yield select(selectESIDByAppTypeFqn(PARTICIPATED_IN_APP_TYPE_FQN));
+    const studyESID = yield select(selectESIDByAppTypeFqn(STUDY_APP_TYPE_FQN));
+    const participantsESID = yield select(selectESIDByAppTypeFqn(PERSON_APP_TYPE_FQN));
 
     // filtered entity neighbor search on study entity set to get participants
     const searchFilter = {
       destinationEntitySetIds: [studyESID],
       edgeEntitySetIds: [participatedInESID],
       entityKeyIds: [studyEKID],
-      sourceEntitySetIds: [participantsEntitySetId]
+      sourceEntitySetIds: [participantsESID]
     };
 
-    response = yield call(
+    let response = yield call(
       searchEntityNeighborsWithFilterWorker,
       searchEntityNeighborsWithFilter({
         entitySetId: studyESID,
@@ -364,7 +357,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     // get participant metadata
     response = yield call(
       getParticipantsMetadataWorker,
-      getParticipantsMetadata({ participantEKIDs, participantsEntitySetId, participantsEntitySetName })
+      getParticipantsMetadata({ participantEKIDs, participantsESID })
     );
     const metadata :Map = response.data || Map();
 
@@ -394,8 +387,6 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
 
     yield put(getStudyParticipants.success(action.id, {
       participants: fromJS(participants),
-      participantsEntitySetId,
-      participantsEntitySetName,
       studyId,
     }));
   }

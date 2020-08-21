@@ -60,6 +60,8 @@ const PROPERTY_TYPE_FQNS = {
 const APP_TYPE_FQNS = {
   ADDRESSES_APP_TYPE_FQN: FQN.of('app.addresses'),
   ANSWER_APP_TYPE: FQN.of('app.answer'),
+  HAS_APP_TYPE_FQN: FQN.of('app.has'),
+  METADATA_APP_TYPE_FQN: FQN.of('app.metadata'),
   NOTIFICATION_APP_TYPE_FQN: FQN.of('app.notification'),
   PARTICIPATED_IN_APP_TYPE_FQN: FQN.of('app.participatedin'),
   PART_OF_APP_TYPE_FQN: FQN.of('app.partof'),
