@@ -19,6 +19,7 @@ const QUESTIONNAIRE_REDUX_CONSTANTS = {
 };
 
 const APP_REDUX_CONSTANTS = {
+  APP_MODULES_ORG_LIST_MAP: 'appModulesOrgListMap',
   ENTITY_SET_IDS_BY_ORG_ID: 'entitySetIdsByOrgId',
   ORGS: 'orgs',
   SELECTED_ORG_ID: 'selectedOrgId',

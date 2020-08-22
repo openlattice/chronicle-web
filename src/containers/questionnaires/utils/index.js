@@ -16,8 +16,7 @@ import { RRule, RRuleSet } from 'rrule';
 import { v4 as uuid } from 'uuid';
 
 import QuestionTypes from '../constants/questionTypes';
-import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
-import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { APP_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 
 const { isNonEmptyString } = LangUtils;
@@ -25,7 +24,13 @@ const { getEntityAddressKey, getPageSectionKey, processEntityData } = DataProces
 
 const { TEXT_ENTRY } = QuestionTypes;
 const { OPENLATTICE_ID_FQN } = Constants;
-const { PART_OF_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
+
+const {
+  STUDY_APP_TYPE_FQN,
+  SURVEY_APP_TYPE_FQN,
+  PART_OF_APP_TYPE_FQN,
+  QUESTION_APP_TYPE_FQN,
+} = APP_TYPE_FQNS;
 
 const {
   DESCRIPTION,
@@ -33,12 +38,6 @@ const {
   NUM_SINGLE_ANSWER,
   TITLE
 } = QUESTIONNAIRE_SUMMARY;
-
-const {
-  CHRONICLE_STUDIES,
-  QUESTIONNAIRE_ES_NAME,
-  QUESTIONS_ES_NAME
-} = ENTITY_SET_NAMES;
 
 const {
   COMPLETED_DATE_TIME_FQN,
@@ -56,10 +55,10 @@ const getQuestionnaireSummaryFromForm = (formData :Object = {}) => {
   const result = {};
 
   let psk = getPageSectionKey(1, 1);
-  let eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, NAME_FQN);
+  let eak = getEntityAddressKey(0, SURVEY_APP_TYPE_FQN, NAME_FQN);
   result[TITLE] = getIn(formData, [psk, eak]);
 
-  eak = getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN);
+  eak = getEntityAddressKey(0, SURVEY_APP_TYPE_FQN, DESCRIPTION_FQN);
   result[DESCRIPTION] = getIn(formData, [psk, eak]);
 
   psk = getPageSectionKey(2, 1);
@@ -140,8 +139,8 @@ const createPreviewQuestionEntities = (formData :Object) => {
   const psk = getPageSectionKey(2, 1);
   const questions :Object[] = get(formData, psk);
 
-  const valuesEAK = getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN);
-  const titleEAK = getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN);
+  const valuesEAK = getEntityAddressKey(-1, QUESTION_APP_TYPE_FQN, VALUES_FQN);
+  const titleEAK = getEntityAddressKey(-1, QUESTION_APP_TYPE_FQN, TITLE_FQN);
 
   const questionEntities = List().withMutations((list) => {
     questions.forEach((question) => {
@@ -166,14 +165,14 @@ const createQuestionnaireAssociations = (formData :Object[], studyEKID :UUID) =>
   const questions :Object[] = get(formData, psk);
 
   const associations = questions.map((question :Object, index :number) => [
-    PART_OF_ES_NAME, index, QUESTIONS_ES_NAME, 0, QUESTIONNAIRE_ES_NAME, {
+    PART_OF_APP_TYPE_FQN, index, QUESTION_APP_TYPE_FQN, 0, SURVEY_APP_TYPE_FQN, {
       [ID_FQN.toString()]: [uuid()]
     }
   ]);
 
   // $FlowFixMe
   return associations.concat(
-    [[PART_OF_ES_NAME, 0, QUESTIONNAIRE_ES_NAME, studyEKID, CHRONICLE_STUDIES, {
+    [[PART_OF_APP_TYPE_FQN, 0, SURVEY_APP_TYPE_FQN, studyEKID, STUDY_APP_TYPE_FQN, {
       [COMPLETED_DATE_TIME_FQN.toString()]: [new Date()]
     }]]
   );
@@ -182,8 +181,8 @@ const createQuestionnaireAssociations = (formData :Object[], studyEKID :UUID) =>
 const constructEntitiesFromFormData = (
   formData :Object, entityKeyIds :Object, entitySetIds :Map, propertyTypeIds :Map
 ) => {
-  const questionnaireESID = entitySetIds.get(QUESTIONNAIRE_ES_NAME);
-  const questionsESID = entitySetIds.get(QUESTIONS_ES_NAME);
+  const questionnaireESID = entitySetIds.get(SURVEY_APP_TYPE_FQN);
+  const questionsESID = entitySetIds.get(QUESTION_APP_TYPE_FQN);
 
   const questionnaireEKID = getIn(entityKeyIds, [questionnaireESID, 0]);
   const questionEKIDS = get(entityKeyIds, questionsESID);
@@ -191,14 +190,14 @@ const constructEntitiesFromFormData = (
   // update form data
   let updatedFormData = setIn(
     formData,
-    [getPageSectionKey(1, 1), getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, OPENLATTICE_ID_FQN)],
+    [getPageSectionKey(1, 1), getEntityAddressKey(0, SURVEY_APP_TYPE_FQN, OPENLATTICE_ID_FQN)],
     questionnaireEKID
   );
 
   questionEKIDS.forEach((questionEKID, index) => {
     updatedFormData = setIn(
       updatedFormData,
-      [getPageSectionKey(2, 1), index, getEntityAddressKey(-1, QUESTIONS_ES_NAME, OPENLATTICE_ID_FQN)],
+      [getPageSectionKey(2, 1), index, getEntityAddressKey(-1, QUESTION_APP_TYPE_FQN, OPENLATTICE_ID_FQN)],
       questionEKID
     );
   });

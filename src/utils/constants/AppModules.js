@@ -1,7 +1,7 @@
 // @flow
 
-const CHRONICLE_CORE = 'chronicle_core';
-const DATA_COLLECTION = 'chroncile_data';
+const CHRONICLE_CORE = 'chronicle';
+const DATA_COLLECTION = 'chronicle_data_collection';
 const QUESTIONNAIRES = 'chronicle_questionnaires';
 
 export {

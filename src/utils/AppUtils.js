@@ -139,10 +139,17 @@ const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
   return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
 };
 
-const processAppConfigs = (appConfigs :Object[]) => {
+const processAppConfigs = (appConfigsByModule :Object) => {
 
   const organizations = {};
   const entitySetIdsByOrgId = {};
+  const appModulesOrgListMap = Object.entries(appConfigsByModule).reduce((obj, [key :string, val :Object]) => ({
+    // $FlowFixMe
+    [key]: val.data.map((config) => config.organization.id),
+    ...obj
+  }), {});
+
+  const appConfigs = Object.values(appConfigsByModule).map((val :Object) => val.data).flat();
 
   appConfigs.forEach((config) => {
     const { organization } = config;
@@ -162,6 +169,7 @@ const processAppConfigs = (appConfigs :Object[]) => {
   return {
     entitySetIdsByOrgId,
     organizations,
+    appModulesOrgListMap
   };
 };
 

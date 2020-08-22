@@ -59,14 +59,17 @@ const PROPERTY_TYPE_FQNS = {
 
 const APP_TYPE_FQNS = {
   ADDRESSES_APP_TYPE_FQN: FQN.of('app.addresses'),
-  ANSWER_APP_TYPE: FQN.of('app.answer'),
+  ANSWER_APP_TYPE_FQN: FQN.of('app.answer'),
   HAS_APP_TYPE_FQN: FQN.of('app.has'),
   METADATA_APP_TYPE_FQN: FQN.of('app.metadata'),
   NOTIFICATION_APP_TYPE_FQN: FQN.of('app.notification'),
   PARTICIPATED_IN_APP_TYPE_FQN: FQN.of('app.participatedin'),
   PART_OF_APP_TYPE_FQN: FQN.of('app.partof'),
   PERSON_APP_TYPE_FQN: FQN.of('app.person'),
+  QUESTION_APP_TYPE_FQN: FQN.of('app.question'),
+  RESPONDSWITH_APP_TYPE_FQN: FQN.of('app.respondswith'),
   STUDY_APP_TYPE_FQN: FQN.of('app.study'),
+  SURVEY_APP_TYPE_FQN: FQN.of('app.survey'),
 };
 
 export {

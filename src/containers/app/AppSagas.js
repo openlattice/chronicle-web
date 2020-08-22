@@ -43,43 +43,42 @@ function* getConfigsWorker(action :SequenceAction) :Saga<*> {
   try {
 
     yield put(getConfigs.request(action.id));
-    // step1: get core features config
-    let response = yield call(getAppWorker, getApp(AppModules.CHRONICLE_CORE));
-    if (response.error) throw response.error;
 
-    response = yield call(getAppConfigsWorker, getAppConfigs(response.data.id));
-    if (response.error) throw response.error;
-
-    const coreConfig = response.data || [];
-    if (!coreConfig.length) throw ERR_MISSING_CORE_MODULE;
-
-    // get other modules
-    const responses = yield all(
-      [AppModules.DATA_COLLECTION, AppModules.QUESTIONNAIRES].map((module) => call(getAppWorker, getApp(module)))
+    // get app modules
+    const appModulesRes = yield all(
+      [
+        AppModules.CHRONICLE_CORE,
+        AppModules.DATA_COLLECTION,
+        AppModules.QUESTIONNAIRES
+      ].reduce((obj, moduleName :string) => ({
+        [moduleName]: call(getAppWorker, getApp(moduleName)),
+        ...obj
+      }), {})
     );
-    responses.forEach((res) => {
-      if (res.error) throw res.error;
-    });
 
-    const otherConfigsRes = yield all(
-      responses.map((res) => call(getAppConfigsWorker, getAppConfigs(res.data.id)))
+    // if core module is missing throw an error
+    if (!Object.keys(appModulesRes).includes(AppModules.CHRONICLE_CORE)) {
+      throw ERR_MISSING_CORE_MODULE;
+    }
+
+    const appConfigsRes = yield all(
+      Object.values(appModulesRes).reduce((obj, res :Object) => ({
+        [res.data.name]: call(getAppConfigsWorker, getAppConfigs(res.data.id)),
+        ...obj
+      }), {})
     );
-    otherConfigsRes.forEach((res) => {
-      if (res.error) throw res.error;
-    });
-
-    const allConfigs = coreConfig.flat().concat(otherConfigsRes.map((res) => res.data).flat());
 
     const {
+      appModulesOrgListMap,
       entitySetIdsByOrgId,
       organizations,
-    } = processAppConfigs(allConfigs);
+    } = processAppConfigs(appConfigsRes);
 
     yield put(getConfigs.success(action.id, {
       entitySetIdsByOrgId,
+      appModulesOrgListMap,
       organizations,
     }));
-
   }
   catch (error) {
     workerResponse.error = error;

@@ -19,12 +19,18 @@ import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { REQUEST_STATE } = ReduxConstants;
-const { ENTITY_SET_IDS_BY_ORG_ID, ORGS, SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
+const {
+  APP_MODULES_ORG_LIST_MAP,
+  ENTITY_SET_IDS_BY_ORG_ID,
+  ORGS,
+  SELECTED_ORG_ID,
+} = APP_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_CONFIGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [INITIALIZE_APPLICATION]: { [REQUEST_STATE]: RequestStates.STANDBY },
 
+  [APP_MODULES_ORG_LIST_MAP]: Map(),
   [ENTITY_SET_IDS_BY_ORG_ID]: Map(),
   [ORGS]: Map(),
   [SELECTED_ORG_ID]: '',
@@ -57,6 +63,7 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
         FAILURE: () => state.setIn([GET_CONFIGS, REQUEST_STATE], RequestStates.PENDING),
         SUCCESS: () => {
           const {
+            appModulesOrgListMap,
             entitySetIdsByOrgId,
             organizations,
           } = action.value;
@@ -72,6 +79,7 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
             .set(ENTITY_SET_IDS_BY_ORG_ID, fromJS(entitySetIdsByOrgId))
             .set(SELECTED_ORG_ID, selectedOrgId)
             .set(ORGS, fromJS(organizations))
+            .set(APP_MODULES_ORG_LIST_MAP, fromJS(appModulesOrgListMap))
             .setIn([GET_CONFIGS, REQUEST_STATE], RequestStates.PENDING);
         }
       });
