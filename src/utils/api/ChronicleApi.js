@@ -87,7 +87,7 @@ function deleteStudyParticipant(participantId :string, studyId :UUID) {
     const url = getDeleteParticipantPath(participantId, studyId);
     if (!url) return reject(new Error('Invalid Url'));
 
-    const authToken = AuthUtils.getAuthToken();
+    const authToken = AuthUtils.getAuthToken() ?? '';
 
     return axios({
       method: 'delete',

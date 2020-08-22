@@ -10,9 +10,7 @@ import type { EntityTypeObject, PropertyTypeObject } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
-  GET_ALL_ENTITY_SET_IDS,
   GET_EDM_TYPES,
-  getAllEntitySetIds,
   getEntityDataModelTypes,
 } from './EDMActions';
 
@@ -100,17 +98,6 @@ export default function reducer(state :Map<*, *> = INITIAL_STATE, action :Object
           .setIn([GET_EDM_TYPES, REQUEST_STATE], RequestStates.FAILURE),
         FINALLY: () => state
           .deleteIn([GET_EDM_TYPES, seqAction.id]),
-      });
-    }
-
-    case getAllEntitySetIds.case(action.type): {
-      const seqAction :SequenceAction = action;
-      return getAllEntitySetIds.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.FAILURE),
-        SUCCESS: () => state
-          .set('entitySetIds', fromJS(seqAction.value))
-          .setIn([GET_ALL_ENTITY_SET_IDS, REQUEST_STATE], RequestStates.SUCCESS)
       });
     }
 

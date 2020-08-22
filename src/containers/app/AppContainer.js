@@ -81,7 +81,7 @@ const AppContainer = () => {
     );
   };
 
-  const userInfo = AuthUtils.getUserInfo();
+  const userInfo = AuthUtils.getUserInfo() || {};
   let user = null;
   if (isNonEmptyString(userInfo.name)) {
     user = userInfo.name;

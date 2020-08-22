@@ -20,13 +20,11 @@ import {
   removeIn,
   setIn,
 } from 'immutable';
-import { Constants, Models, Types } from 'lattice';
+import { Constants, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import {
   DataApiActions,
   DataApiSagas,
-  EntitySetsApiActions,
-  EntitySetsApiSagas,
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
@@ -36,7 +34,6 @@ import type { SequenceAction } from 'redux-reqseq';
 import {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
-  CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
@@ -44,7 +41,6 @@ import {
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
-  createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
@@ -58,36 +54,18 @@ import {
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import {
-  selectEntitySetId,
-  selectEntityTypeId,
-  selectPropertyTypeId,
+  getSelectedOrgEntitySetIds,
   selectESIDByAppTypeFqn,
-  selectPropertyTypeIds,
-  getSelectedOrgEntitySetIds
+  selectPropertyTypeId,
+  selectPropertyTypeIds
 } from '../../core/edm/EDMUtils';
-import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
-import {
-  APP_TYPE_FQNS,
-  ENTITY_TYPE_FQNS,
-  PROPERTY_TYPE_FQNS
-} from '../../core/edm/constants/FullyQualifiedNames';
-import {
-  getStudyAuthorizations,
-  updateEntitySetPermissions
-} from '../../core/permissions/PermissionsActions';
-import {
-  getStudyAuthorizationsWorker,
-  updateEntitySetPermissionsWorker
-} from '../../core/permissions/PermissionsSagas';
+import { APP_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
-import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { createAssociations, getEntitySetData, updateEntityData } = DataApiActions;
 const { createAssociationsWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
-const { createEntitySets, getEntitySetId } = EntitySetsApiActions;
-const { createEntitySetsWorker, getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 
@@ -101,19 +79,10 @@ const {
   replaceEntityAddressKeys,
 } = DataProcessingUtils;
 
-const { EntitySetBuilder } = Models;
-const { PermissionTypes, UpdateTypes } = Types;
+const { UpdateTypes } = Types;
 const { isDefined } = LangUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
-
-const {
-  CHRONICLE_NOTIFICATIONS,
-  CHRONICLE_STUDIES,
-  CHRONICLE_METADATA,
-} = ENTITY_SET_NAMES;
-
-const { PARTICIPATED_IN, PART_OF_ES_NAME, HAS_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
 
 const {
   DATE_ENROLLED,
@@ -124,9 +93,7 @@ const {
   ID_FQN,
   NOTIFICATION_ENABLED,
   STATUS,
-  STUDY_EMAIL,
   STUDY_ID,
-  FULL_NAME_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -146,11 +113,9 @@ const {
   STUDY_APP_TYPE_FQN,
 } = APP_TYPE_FQNS;
 
-const { PERSON } = ENTITY_TYPE_FQNS;
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
-const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
 
 /*
  *
@@ -542,69 +507,6 @@ function* updateStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.createParticipantsEntitySet()
- *
- */
-
-function* createParticipantsEntitySetWorker(action :SequenceAction) :Generator<*, *, *> {
-
-  const workerResponse = {};
-
-  try {
-    yield put(createParticipantsEntitySet.request(action.id));
-
-    const { studyId, email, studyName } = action.value;
-
-    const entityTypeId :UUID = yield select(selectEntityTypeId(PERSON));
-
-    const entitySet = new EntitySetBuilder()
-      .setContacts([email])
-      .setDescription(`Participants of study with name ${studyName} and id ${studyId}`)
-      .setEntityTypeId(entityTypeId)
-      .setName(getParticipantsEntitySetName(studyId))
-      .setTitle(`${studyName} Participants`)
-      .setOrganizationId(CAFE_ORGANIZATION_ID)
-      .build();
-
-    let response = yield call(createEntitySetsWorker, createEntitySets([entitySet]));
-    if (response.error) throw response.error;
-
-    // set read/write permissions for chronicle super user
-    const entitySetId = response.data[entitySet.name];
-    response = yield call(
-      updateEntitySetPermissionsWorker,
-      updateEntitySetPermissions({
-        entitySetId,
-        entityTypeFQN: PERSON
-      })
-    );
-    if (response.error) throw response.error;
-
-    const responseObj = {
-      entitySetName: entitySet.name,
-      entitySetId
-    };
-    yield put(createParticipantsEntitySet.success(action.id, responseObj));
-
-  }
-  catch (error) {
-    workerResponse.error = error;
-    LOG.error(error.type, error);
-    yield put(createParticipantsEntitySet.failure(action.id, error));
-  }
-  finally {
-    yield put(createParticipantsEntitySet.finally(action.id));
-  }
-
-  return workerResponse;
-}
-
-function* createParticipantsEntitySetWatcher() :Generator<*, *, *> {
-  yield takeEvery(CREATE_PARTICIPANTS_ENTITY_SET, createParticipantsEntitySetWorker);
-}
-
-/*
- *
  * StudiesActions.addStudyParticipant()
  *
  */
@@ -919,8 +821,6 @@ export {
   addStudyParticipantWatcher,
   addStudyParticipantWorker,
   changeEnrollmentStatusWatcher,
-  createParticipantsEntitySetWatcher,
-  createParticipantsEntitySetWorker,
   createStudyWatcher,
   deleteStudyParticipantWatcher,
   getParticipantsMetadataWorker,

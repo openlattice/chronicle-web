@@ -57,7 +57,7 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
   }
 
   const baseUrl = getBaseUrl();
-  const csrfToken = AuthUtils.getCSRFToken();
+  const csrfToken = AuthUtils.getCSRFToken() ?? '';
   let dataTypePath;
 
   switch (dataType) {

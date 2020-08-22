@@ -6,19 +6,6 @@ import { Models } from 'lattice';
 
 const { FQN } = Models;
 
-const ASSOCIATION_ENTITY_TYPE_FQNS = {
-  PART_OF: FQN.of('ol.partof'),
-  RESPONDS_WITH_FQN: FQN.of('ol.respondswith')
-};
-
-const ENTITY_TYPE_FQNS = {
-  PERSON: FQN.of('general.person'),
-  NOTIFICATION: FQN.of('ol.notification'),
-  SURVEY_FQN: FQN.of('ol.survey'),
-  ANSWER_FQN: FQN.of('ol.answer'),
-  QUESTION_FQN: FQN.of('ol.question')
-};
-
 const PROPERTY_TYPE_FQNS = {
   // study
   FULL_NAME_FQN: FQN.of('general.fullname'),
@@ -74,7 +61,5 @@ const APP_TYPE_FQNS = {
 
 export {
   APP_TYPE_FQNS,
-  ASSOCIATION_ENTITY_TYPE_FQNS,
-  ENTITY_TYPE_FQNS,
   PROPERTY_TYPE_FQNS,
 };
