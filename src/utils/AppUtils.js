@@ -149,21 +149,23 @@ const processAppConfigs = (appConfigsByModule :Object) => {
     ...obj
   }), {});
 
-  const appConfigs = Object.values(appConfigsByModule).map((val :Object) => val.data).flat();
+  Object.entries(appConfigsByModule).forEach(([key, val]) => {
+    // $FlowFixMe
+    const configs = val.data;
+    configs.forEach((config) => {
+      const { organization } = config;
+      const { title, id: orgId } = organization;
 
-  appConfigs.forEach((config) => {
-    const { organization } = config;
-    const { title, id: orgId } = organization;
+      set(organizations, orgId, { title, id: orgId });
 
-    set(organizations, orgId, { title, id: orgId });
+      const entities = Object.entries(config.config).reduce((result, [fqn, entity]) => ({
+        // $FlowFixMe
+        [fqn]: entity.entitySetId,
+        ...result,
+      }), {});
 
-    const entities = Object.entries(config.config).reduce((result, [fqn, entity]) => ({
-      // $FlowFixMe
-      [fqn]: entity.entitySetId,
-      ...result,
-    }), {});
-
-    update(entitySetIdsByOrgId, orgId, (soFar) => merge(soFar, entities));
+      update(appModulesOrgListMap, [key, orgId], (prev) => merge(prev, entities));
+    });
   });
 
   return {
