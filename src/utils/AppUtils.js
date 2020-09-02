@@ -149,7 +149,7 @@ const processAppConfigs = (appConfigsByModule :Object) => {
     ...obj
   }), {});
 
-  Object.entries(appConfigsByModule).forEach(([key, val]) => {
+  Object.entries(appConfigsByModule).forEach(([appModule, val]) => {
     // $FlowFixMe
     const configs = val.data;
     configs.forEach((config) => {
@@ -164,7 +164,7 @@ const processAppConfigs = (appConfigsByModule :Object) => {
         ...result,
       }), {});
 
-      update(appModulesOrgListMap, [key, orgId], (prev) => merge(prev, entities));
+      update(entitySetIdsByOrgId, [appModule, orgId], (prev) => merge(prev, entities));
     });
   });
 

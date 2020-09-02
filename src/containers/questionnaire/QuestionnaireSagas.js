@@ -50,14 +50,24 @@ import {
 } from './QuestionnaireActions';
 import { getCsvFileName, getQuestionAnswerMapping } from './utils';
 
+import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import {
   getSelectedOrgEntitySetIds,
-  selectESIDByAppTypeFqn,
+  selectESIDByCollection,
   selectPropertyTypeId,
   selectPropertyTypeIds
 } from '../../core/edm/EDMUtils';
-import { APP_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
+import {
+  ADDRESSES,
+  ANSWER,
+  PART_OF,
+  QUESTION,
+  RESPONDS_WITH,
+  STUDIES,
+  SURVEY
+} from '../../core/edm/constants/CollectionTemplateNames';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
@@ -99,16 +109,6 @@ const {
   VALUES_FQN
 } = PROPERTY_TYPE_FQNS;
 
-const {
-  ADDRESSES_APP_TYPE_FQN,
-  RESPONDSWITH_APP_TYPE_FQN,
-  STUDY_APP_TYPE_FQN,
-  SURVEY_APP_TYPE_FQN,
-  PART_OF_APP_TYPE_FQN,
-  QUESTION_APP_TYPE_FQN,
-  ANSWER_APP_TYPE_FQN
-} = APP_TYPE_FQNS;
-
 const LOG = new Logger('QuestionnaireSagas');
 
 /*
@@ -122,7 +122,7 @@ function* changeActiveStatusWorker(action :SequenceAction) :Saga<*> {
 
     const { activeStatus, studyEKID, questionnaireEKID } = action.value;
 
-    const questionnaireESID = yield select(selectESIDByAppTypeFqn(SURVEY_APP_TYPE_FQN));
+    const questionnaireESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
     const activePTID = yield select(selectPropertyTypeId(ACTIVE_FQN));
 
     const response = yield call(updateEntityDataWorker, updateEntityData({
@@ -165,8 +165,8 @@ function* deleteQuestionnaireWorker(action :SequenceAction) :Saga<*> {
 
     const { studyEKID, questionnaireEKID } = action.value;
 
-    const questionnaireESID = yield select(selectESIDByAppTypeFqn(SURVEY_APP_TYPE_FQN));
-    const questionsESID = yield select(selectESIDByAppTypeFqn(QUESTION_APP_TYPE_FQN));
+    const questionnaireESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
+    const questionsESID = yield select(selectESIDByCollection(QUESTION, AppModules.QUESTIONNAIRES));
 
     const neighborFilter = {
       entityKeyIds: [questionnaireEKID],
@@ -221,7 +221,7 @@ function* createQuestionnaireWorker(action :SequenceAction) :Saga<*> {
 
     // update formdata with rrule
     let psk = getPageSectionKey(1, 1);
-    const eak = getEntityAddressKey(0, SURVEY_APP_TYPE_FQN, RRULE_FQN);
+    const eak = getEntityAddressKey(0, SURVEY, RRULE_FQN);
     formData = setIn(formData, [psk, eak], rruleSet);
 
     // remove notification schedule from form data
@@ -352,10 +352,10 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
 
     const studyEKID = action.value;
 
-    const questionnaireESID = yield select(selectESIDByAppTypeFqn(SURVEY_APP_TYPE_FQN));
-    const partOfESID = yield select(selectESIDByAppTypeFqn(PART_OF_APP_TYPE_FQN));
-    const studyESID = yield select(selectESIDByAppTypeFqn(STUDY_APP_TYPE_FQN));
-    const questionsESID = yield select(selectESIDByAppTypeFqn(QUESTION_APP_TYPE_FQN));
+    const questionnaireESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
+    const partOfESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
+    const studyESID = yield select(selectESIDByCollection(STUDIES, AppModules.CHRONICLE_CORE));
+    const questionsESID = yield select(selectESIDByCollection(QUESTION, AppModules.CHRONICLE_CORE));
 
     /*
      * STEP 1: filtered search to get questionnaires neighboring study
@@ -445,10 +445,10 @@ function* getQuestionnaireResponsesWorker(action :SequenceAction) :Saga<*> {
 
     const { participantEKID, studyId } = action.value;
 
-    const answersESID = yield select(selectESIDByAppTypeFqn(ANSWER_APP_TYPE_FQN));
-    const addressesESID = yield select(selectESIDByAppTypeFqn(ADDRESSES_APP_TYPE_FQN));
-    const questionsESID = yield select(selectESIDByAppTypeFqn(QUESTION_APP_TYPE_FQN));
-    const respondsWithESID = yield select(selectESIDByAppTypeFqn(RESPONDSWITH_APP_TYPE_FQN));
+    const answersESID = yield select(selectESIDByCollection(ANSWER, AppModules.QUESTIONNAIRES));
+    const addressesESID = yield select(selectESIDByCollection(ADDRESSES, AppModules.QUESTIONNAIRES));
+    const questionsESID = yield select(selectESIDByCollection(QUESTION, AppModules.QUESTIONNAIRES));
+    const respondsWithESID = yield select(selectESIDByCollection(RESPONDS_WITH, AppModules.QUESTIONNAIRES));
 
     const participantESName = getParticipantsEntitySetName(studyId);
     let response = yield call(getEntitySetIdWorker, getEntitySetId(participantESName));

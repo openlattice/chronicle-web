@@ -8,13 +8,14 @@ import {
 } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { APP_TYPE_FQNS, PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
+import { PARTICIPANTS } from '../core/edm/constants/CollectionTemplateNames';
+import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
 
 const { getEntityAddressKey, getPageSectionKey, parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
 const { NOTIFICATION_ENABLED, PERSON_ID } = PROPERTY_TYPE_FQNS;
-const { PERSON_APP_TYPE_FQN } = APP_TYPE_FQNS;
+
 /*
  * returns a FormData object similar to this
  *  {
@@ -91,7 +92,7 @@ const containsParticipantId = (participantId :string, participants :Map) => {
 const validateAddParticipantForm = (formData :Object, errors :Object, participants :Map) => {
 
   const pageSectionKey = getPageSectionKey(1, 1);
-  const entityAddressKey = getEntityAddressKey(0, PERSON_APP_TYPE_FQN, PERSON_ID);
+  const entityAddressKey = getEntityAddressKey(0, PARTICIPANTS, PERSON_ID);
   const participantId :string = getIn(formData, [pageSectionKey, entityAddressKey]);
 
   if (containsParticipantId(participantId, participants)) {

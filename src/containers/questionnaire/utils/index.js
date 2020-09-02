@@ -9,7 +9,8 @@ import {
 import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { PROPERTY_TYPE_FQNS, APP_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { QUESTION } from '../../../core/edm/constants/CollectionTemplateNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const {
   getEntityAddressKey,
@@ -19,14 +20,13 @@ const {
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const { TITLE_FQN, VALUES_FQN } = PROPERTY_TYPE_FQNS;
-const { QUESTION_APP_TYPE_FQN } = APP_TYPE_FQNS;
 
 const getSchemaProperties = (questions :List) => {
   let properties = {};
 
   questions.forEach((question) => {
     const entityKeyId = question.getIn([OPENLATTICE_ID_FQN, 0]);
-    const addressKey = getEntityAddressKey(entityKeyId, QUESTION_APP_TYPE_FQN, VALUES_FQN);
+    const addressKey = getEntityAddressKey(entityKeyId, QUESTION, VALUES_FQN);
 
     properties = setIn(properties, [addressKey, 'title'], question.getIn([TITLE_FQN, 0]));
     properties = setIn(properties, [addressKey, 'type'], 'string');
@@ -75,7 +75,7 @@ const createInitialFormData = (answersById :Map, answerQuestionIdMap :Map, quest
 
   answers.forEach((answer, answerId) => {
     const questionId = answerQuestionIdMap.get(answerId);
-    const addressKey = getEntityAddressKey(questionId, QUESTION_APP_TYPE_FQN, VALUES_FQN);
+    const addressKey = getEntityAddressKey(questionId, QUESTION, VALUES_FQN);
 
     const value = answersById.get(answerId).getIn([VALUES_FQN, 0]);
     result = setIn(result, [pageSection, addressKey], value);
