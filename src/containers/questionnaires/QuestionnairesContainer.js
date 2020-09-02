@@ -107,7 +107,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
   };
 
   if (getStudyQuestionnairesRS === RequestStates.PENDING) {
-    return <Spinner size="1x" />;
+    return <Spinner size="2x" />;
   }
 
   return (
