@@ -96,8 +96,6 @@ const AppContainer = () => {
     }
   };
 
-  // console.log(organizations, selectedOrgId);
-
   return (
     <AppContainerWrapper>
       <AppHeaderWrapper

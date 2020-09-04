@@ -1,7 +1,7 @@
 // @flow
 
 const STUDIES_REDUX_CONSTANTS = {
-  GLOBAL_NOTIFICATIONS_EKID: 'globalNotificationsEKID',
+  NOTIFICATIONS_EKID: 'notificationsEKID',
   NOTIFICATIONS_ENABLED_STUDIES: 'notificationsEnabledStudies',
   PARTICIPATED_IN_EKID: 'participatedInEKID',
   PART_OF_ASSOCIATION_EKID_MAP: 'partOfAssociationEKIDMap',
