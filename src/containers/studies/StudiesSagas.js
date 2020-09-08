@@ -195,9 +195,10 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
     yield put(deleteStudyParticipant.request(action.id));
 
     const { studyId, participantEntityKeyId, participantId } = action.value;
+    const selectedOrgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
     const { response, timeout } = yield race({
-      response: call(ChronicleApi.deleteStudyParticipant, participantId, studyId),
+      response: call(ChronicleApi.deleteStudyParticipant, selectedOrgId, participantId, studyId),
       timeout: delay(1000 * 10) // 10 seconds
     });
     if (response && response.error) throw response.error;

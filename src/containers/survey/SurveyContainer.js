@@ -49,8 +49,13 @@ const SurveyContainer = () => {
 
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
 
-  // $FlowFixMe
-  const { date, participantId, studyId } :{ date :string, participantId :string, studyId :UUID } = queryParams;
+  const {
+    date,
+    organizationId,
+    participantId,
+    studyId
+    // $FlowFixMe
+  } :{ date :string, organizationId :UUID, participantId :string, studyId :UUID } = queryParams;
 
   // selectors
   const userAppsData = useSelector((state) => state.getIn(['appsData', 'appsData'], Map()));
@@ -59,11 +64,12 @@ const SurveyContainer = () => {
 
   useEffect(() => {
     dispatch(getChronicleAppsData({
+      organizationId,
       date: date || DateTime.local().toISODate(),
       participantId,
       studyId,
     }));
-  }, [dispatch, participantId, studyId, date]);
+  }, [dispatch, participantId, studyId, date, organizationId]);
 
   const surveyDate = date ? DateTime.fromISO(date) : DateTime.local();
 
@@ -97,6 +103,7 @@ const SurveyContainer = () => {
                         { surveyDate.toLocaleString(DateTime.DATE_FULL) }
                       </SurveyDate>
                       <SurveyForm
+                          organizationId={organizationId}
                           participantId={participantId}
                           studyId={studyId}
                           submitSurveyRS={submitSurveyRS}

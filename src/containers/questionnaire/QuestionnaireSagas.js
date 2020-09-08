@@ -288,9 +288,9 @@ function* getQuestionnaireWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(getQuestionnaire.request(action.id));
 
-    const { studyId, questionnaireId } = action.value;
+    const { studyId, questionnaireId, organizationId } = action.value;
 
-    const response = yield call(ChronicleApi.getQuestionnaire, studyId, questionnaireId);
+    const response = yield call(ChronicleApi.getQuestionnaire, organizationId, studyId, questionnaireId);
     if (response.error) throw response.error;
 
     yield put(getQuestionnaire.success(action.id, fromJS(response.data)));
@@ -318,10 +318,17 @@ function* submitQuestionnaireWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(submitQuestionnaire.request(action.id));
 
-    const { formData, participantId, studyId } = action.value;
+    const {
+      formData,
+      participantId,
+      studyId,
+      organizationId
+    } = action.value;
     const questionAnswerMapping = getQuestionAnswerMapping(formData);
 
-    const response = yield call(ChronicleApi.submitQuestionnaire, studyId, participantId, questionAnswerMapping);
+    const response = yield call(
+      ChronicleApi.submitQuestionnaire, organizationId, studyId, participantId, questionAnswerMapping
+    );
     if (response.error) throw response.error;
 
     yield put(submitQuestionnaire.success(action.id));

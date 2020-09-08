@@ -13,6 +13,8 @@ import {
 
 const { DeleteTypes } = Types;
 
+const CAFE_ORG_ID :UUID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
+
 /*
  * `GET chronicle/study/participant/data/<study_id>/<participant_id>/apps`
  *
@@ -32,9 +34,9 @@ const { DeleteTypes } = Types;
         }
       ]
  */
-function getParticipantAppsUsageData(date :string, participantId :string, studyId :UUID) {
+function getParticipantAppsUsageData(date :string, participantId :string, studyId :UUID, orgId :UUID = CAFE_ORG_ID) {
   return new Promise<*>((resolve, reject) => {
-    const url = getParticipantUserAppsUrl(participantId, studyId);
+    const url = getParticipantUserAppsUrl(participantId, studyId, orgId);
     if (!url) return reject(new Error('Invalid Url'));
 
     return axios({
@@ -65,10 +67,12 @@ function getParticipantAppsUsageData(date :string, participantId :string, studyI
     }
  */
 
-function updateAppsUsageAssociationData(participantId :string, studyId :UUID, requestBody :Object) {
+function updateAppsUsageAssociationData(
+  organizationId :UUID = CAFE_ORG_ID, studyId :UUID, participantId :string, requestBody :Object
+) {
   return new Promise<*>((resolve, reject) => {
 
-    const url = getParticipantUserAppsUrl(participantId, studyId);
+    const url = getParticipantUserAppsUrl(participantId, studyId, organizationId);
     if (!url) return reject(new Error('Invalid Url'));
 
     return axios({
@@ -81,10 +85,10 @@ function updateAppsUsageAssociationData(participantId :string, studyId :UUID, re
 }
 
 // delete a participant and neighbors
-function deleteStudyParticipant(participantId :string, studyId :UUID) {
+function deleteStudyParticipant(orgId :UUID = CAFE_ORG_ID, participantId :string, studyId :UUID) {
   return new Promise<*>((resolve, reject) => {
 
-    const url = getDeleteParticipantPath(participantId, studyId);
+    const url = getDeleteParticipantPath(orgId, participantId, studyId);
     if (!url) return reject(new Error('Invalid Url'));
 
     const authToken = AuthUtils.getAuthToken() ?? '';
@@ -117,9 +121,9 @@ function deleteStudyParticipant(participantId :string, studyId :UUID) {
      ]
    }
  */
-function getQuestionnaire(studyId :UUID, questionnaireEKID :UUID) {
+function getQuestionnaire(orgId :UUID = CAFE_ORG_ID, studyId :UUID, questionnaireEKID :UUID) {
   return new Promise<*>((resolve, reject) => {
-    const url = getQuestionnaireUrl(studyId, questionnaireEKID);
+    const url = getQuestionnaireUrl(orgId, studyId, questionnaireEKID);
     if (!url) return reject(new Error('Invalid url'));
 
     return axios({
@@ -130,9 +134,11 @@ function getQuestionnaire(studyId :UUID, questionnaireEKID :UUID) {
   });
 }
 
-function submitQuestionnaire(studyId :UUID, participantId :UUID, questionAnswerMapping :Object) {
+function submitQuestionnaire(
+  orgId :UUID = CAFE_ORG_ID, studyId :UUID, participantId :UUID, questionAnswerMapping :Object
+) {
   return new Promise<*>((resolve, reject) => {
-    const url = getSubmitQuestionnaireUrl(studyId, participantId);
+    const url = getSubmitQuestionnaireUrl(orgId, studyId, participantId);
     if (!url) return reject(new Error('Invalid url'));
 
     return axios({

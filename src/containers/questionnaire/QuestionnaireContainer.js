@@ -59,10 +59,12 @@ const QuestionnaireContainer = () => {
 
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
   const {
+    organizationId,
     participantId,
     questionnaireId,
     studyId
   } :{
+    organizationId :UUID,
     participantId :UUID,
     questionnaireId :UUID,
     studyId :UUID
@@ -70,8 +72,8 @@ const QuestionnaireContainer = () => {
   } = queryParams;
 
   useEffect(() => {
-    dispatch(getQuestionnaire({ studyId, questionnaireId }));
-  }, [dispatch, questionnaireId, studyId]);
+    dispatch(getQuestionnaire({ organizationId, studyId, questionnaireId }));
+  }, [dispatch, questionnaireId, studyId, organizationId]);
 
   const questionnaireDetails = questionnaire.get('questionnaireDetails', Map());
 
@@ -111,6 +113,7 @@ const QuestionnaireContainer = () => {
                 { questionnaireDetails.getIn([DESCRIPTION_FQN, 0]) }
               </Description>
               <QuestionnaireForm
+                  organizationId={organizationId}
                   participantId={participantId}
                   questions={questionnaire.get('questions', List())}
                   studyId={studyId}

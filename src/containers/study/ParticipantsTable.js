@@ -21,7 +21,7 @@ import TABLE_HEADERS from './utils/tableHeaders';
 import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { STUDIES_REDUX_CONSTANTS, APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 import {
   CHANGE_ENROLLMENT_STATUS,
   DELETE_STUDY_PARTICIPANT,
@@ -33,6 +33,7 @@ import {
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const { TIMEOUT } = STUDIES_REDUX_CONSTANTS;
+const { SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
@@ -69,6 +70,8 @@ const ParticipantsTable = (props :Props) => {
   const deleteTimeout :boolean = useSelector(
     (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)
   );
+
+  const selectedOrgId :UUID = useSelector((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
   const studyId = study.getIn([STUDY_ID, 0]);
 
@@ -169,6 +172,7 @@ const ParticipantsTable = (props :Props) => {
           isVisible={downloadModalOpen}
           participantEntityKeyId={participantEntityKeyId}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
+          selectedOrgId={selectedOrgId}
           studyEntityKeyId={study.getIn([OPENLATTICE_ID_FQN, 0])}
           studyId={studyId} />
     </>

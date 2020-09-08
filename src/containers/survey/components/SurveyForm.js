@@ -53,17 +53,19 @@ const InstructionText = styled.span`
 `;
 
 type Props = {
+  organizationId ?:UUID;
   participantId :string;
   studyId :UUID;
   submitSurveyRS :?RequestState;
   userAppsData :Map;
 };
 
-const SurveyTable = ({
-  userAppsData,
+const SurveyForm = ({
+  organizationId,
   participantId,
   studyId,
-  submitSurveyRS
+  submitSurveyRS,
+  userAppsData,
 } :Props) => {
 
   const dispatch = useDispatch();
@@ -79,9 +81,10 @@ const SurveyTable = ({
 
   const handleOnSubmit = ({ formData } :Object) => {
     dispatch(submitSurvey({
+      formData,
+      organizationId,
       participantId,
       studyId,
-      formData,
       userAppsData
     }));
   };
@@ -124,4 +127,8 @@ const SurveyTable = ({
   );
 };
 
-export default SurveyTable;
+SurveyForm.defaultProps = {
+  organizationId: undefined
+};
+
+export default SurveyForm;
