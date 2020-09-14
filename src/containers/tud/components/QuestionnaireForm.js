@@ -16,7 +16,6 @@ import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
   createFormSchema,
-  createUiSchema,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
@@ -61,8 +60,9 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     uiSchema = cloneDeep(DaySpanSchema.uiSchema);
   }
   else {
-    schema = createFormSchema(page, pagedData);
-    uiSchema = createUiSchema(page, pagedData);
+    const formSchema = createFormSchema(page, pagedData);
+    schema = formSchema.schema;
+    uiSchema = formSchema.uiSchema;
   }
 
   const handleNext = () => {

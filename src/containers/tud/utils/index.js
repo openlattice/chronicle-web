@@ -5,7 +5,8 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
-import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
+import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
+import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
@@ -49,80 +50,26 @@ const hasFollowUpQuestions = (activity :string, pageNum :number, formData :Objec
 
 const createFormSchema = (pageNum :number, formData :Object) => {
 
-  // const prevStartTime = pageNum === FIRST_ACTIVITY_PAGE
-  //   ? selectTimeByPageAndKey(1, DAY_)
   const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
 
   const prevEndTime = pageNum === FIRST_ACTIVITY_PAGE
     ? selectTimeByPageAndKey(1, DAY_START_TIME, formData)
     : selectTimeByPageAndKey(pageNum - 1, ACTIVITY_END_TIME, formData);
-  const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
   const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
 
-  if (prevActivity && pageNum > FIRST_ACTIVITY_PAGE && hasFollowUpQuestions(prevActivity, pageNum - 1, formData)) {
-    return ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
-  }
+  const shouldDisplayFollowup = prevActivity && pageNum > FIRST_ACTIVITY_PAGE
+    && hasFollowUpQuestions(prevActivity, pageNum - 1, formData);
 
   return {
-    type: 'object',
-    title: '',
-    properties: {
-      [getPageSectionKey(pageNum, 0)]: {
-        title: '',
-        type: 'object',
-        properties: {
-          [ACTIVITY_NAME]: {
-            type: 'string',
-            title: (pageNum === FIRST_ACTIVITY_PAGE
-              ? `What did your child start doing at ${formattedTime}?`
-              : `What time did your child start doing at ${formattedTime} after they `
-                + `finished ${(prevActivity)}?`),
-            enum: PRIMARY_ACTIVITIES
-          },
-          [ACTIVITY_START_TIME]: {
-            type: 'string',
-            title: '',
-            default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
-          },
-          [ACTIVITY_END_TIME]: {
-            id: 'end_time',
-            type: 'string',
-            title: currentActivity
-              ? `When did your child stop ${currentActivity}?`
-              : 'When did the selected activity end?'
-          },
-        },
-        required: [ACTIVITY_NAME, ACTIVITY_END_TIME]
-      }
-    },
-  };
-};
+    schema: shouldDisplayFollowup
+      ? ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime)
+      : PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime),
 
-const createUiSchema = (pageNum :number, formData :Object) => {
-
-  const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
-
-  if (prevActivity && pageNum > FIRST_ACTIVITY_PAGE && hasFollowUpQuestions(prevActivity, pageNum - 1, formData)) {
-    return ContextualSchema.createUiSchema(pageNum, prevActivity);
-  }
-
-  return {
-    [getPageSectionKey(pageNum, 0)]: {
-      classNames: 'column-span-12 grid-container',
-      [ACTIVITY_NAME]: {
-        classNames: (pageNum === DAY_SPAN_PAGE ? 'hidden' : 'column-span-12')
-      },
-      [ACTIVITY_START_TIME]: {
-        classNames: (pageNum === DAY_SPAN_PAGE ? 'column-span-12' : 'hidden'),
-        'ui:widget': 'TimeWidget',
-      },
-      [ACTIVITY_END_TIME]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'TimeWidget'
-      },
-    },
+    uiSchema: shouldDisplayFollowup
+      ? ContextualSchema.createUiSchema(pageNum, prevActivity)
+      : PrimaryActivitySchema.createUiSchema(pageNum)
   };
 };
 
@@ -203,7 +150,6 @@ export {
   applyCustomValidation,
   createFormSchema,
   createTimeUseSummary,
-  createUiSchema,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 };

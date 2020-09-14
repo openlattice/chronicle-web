@@ -8,7 +8,6 @@ import * as SecondaryActivitySchema from './SecondaryActivitySchema';
 
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
 import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
-
 import {
   ADULT_MEDIA_PURPOSES,
   ADULT_MEDIA_USAGE_TYPES,
