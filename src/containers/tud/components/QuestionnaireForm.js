@@ -62,13 +62,15 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
   }
   else {
     schema = createFormSchema(page, pagedData);
-    uiSchema = createUiSchema(page);
+    uiSchema = createUiSchema(page, pagedData);
   }
 
   const handleNext = () => {
     //
     validateAndSubmit();
   };
+
+  // console.log(pagedData);
 
   const onChange = ({ formData } :Object) => {
 
@@ -84,7 +86,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
             const label = parent.previousSibling;
             if (label) {
               // $FlowFixMe
-              label.innerHTML = `When did your child stop ${currentActivity.description}?`;
+              label.innerHTML = `When did your child stop ${currentActivity}?`;
             }
           }
         }
@@ -102,6 +104,8 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
   const lastPage = prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime);
 
+  // console.log(schema);
+
   return (
     <>
       {
@@ -115,6 +119,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
               hideSubmit
               noPadding
               onChange={onChange}
+              omitExtraData={false}
               onSubmit={onNext}
               ref={formRef}
               schema={schema}

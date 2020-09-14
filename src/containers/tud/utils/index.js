@@ -1,15 +1,10 @@
 // @flow
 
-import merge from 'lodash/merge';
 import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
-import * as EatingIndoorRecSchema from '../schemas/followup/EatingIndoorRecSchema';
-import * as MediaUseSchema from '../schemas/followup/MediaUseSchema';
-import * as OutdoorRecSchema from '../schemas/followup/OutdoorRecSchema';
-import * as OutdoorsSchema from '../schemas/followup/OutdoorsSchema';
-import * as SleepingSchema from '../schemas/followup/SleepingSchema';
+import * as ContextualSchema from '../schemas/ContextualSchema';
 import { ACTIVITY_NAMES, PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
@@ -17,12 +12,8 @@ import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE } = PAGE_NUMBERS;
 
 const {
-  EATING_DRINKING,
-  MEDIA,
-  RECREATION_INSIDE,
-  RECREATION_OUTSIDE,
-  SLEEPING,
-  OUTDOORS,
+  CHILDCARE,
+  GROOMING,
 } = ACTIVITY_NAMES;
 
 const {
@@ -30,7 +21,8 @@ const {
   ACTIVITY_NAME,
   ACTIVITY_START_TIME,
   DAY_END_TIME,
-  DAY_START_TIME
+  DAY_START_TIME,
+  FOLLOWUP_COMPLETED
 } = PROPERTY_CONSTS;
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -41,43 +33,53 @@ const selectTimeByPageAndKey = (pageNum :number, key :string, formData :Object) 
   return DateTime.fromISO(result);
 };
 
-const selectPrimaryActivityByPage = (pageNum :number, formData :Object) => {
+const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string => {
   const psk = getPageSectionKey(pageNum, 0);
 
   const activityName = getIn(formData, [psk, ACTIVITY_NAME]);
-  return PRIMARY_ACTIVITIES.find((activity) => activity.name === activityName);
+  return activityName;
+};
+
+const hasFollowUpQuestions = (activity :string, pageNum :number, formData :Object) => {
+  const psk = getPageSectionKey(pageNum, 0);
+  const isFollowupCompleted = getIn(formData, [psk, FOLLOWUP_COMPLETED], false);
+
+  return ![GROOMING, CHILDCARE].includes(activity) && !isFollowupCompleted;
 };
 
 const createFormSchema = (pageNum :number, formData :Object) => {
 
-  const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
+  // const prevStartTime = pageNum === FIRST_ACTIVITY_PAGE
+  //   ? selectTimeByPageAndKey(1, DAY_)
+  const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
+
   const prevEndTime = pageNum === FIRST_ACTIVITY_PAGE
     ? selectTimeByPageAndKey(1, DAY_START_TIME, formData)
     : selectTimeByPageAndKey(pageNum - 1, ACTIVITY_END_TIME, formData);
   const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
+  const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
 
-  // follow up schemas
-  const sleepingSchema = SleepingSchema.createSchema(pageNum);
-  const eatingIndoorRecSchema = EatingIndoorRecSchema.createSchema(pageNum);
-  const mediaUseSchema = MediaUseSchema.createSchema(pageNum);
-  const outdoorRecSchema = OutdoorRecSchema.createSchema(pageNum);
-  const outdoorsSchema = OutdoorsSchema.createSchema(pageNum);
+  if (prevActivity && pageNum > FIRST_ACTIVITY_PAGE && hasFollowUpQuestions(prevActivity, pageNum - 1, formData)) {
+    return ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
+  }
 
   return {
     type: 'object',
     title: '',
     properties: {
       [getPageSectionKey(pageNum, 0)]: {
+        title: '',
+        type: 'object',
         properties: {
           [ACTIVITY_NAME]: {
             type: 'string',
             title: (pageNum === FIRST_ACTIVITY_PAGE
               ? `What did your child start doing at ${formattedTime}?`
               : `What time did your child start doing at ${formattedTime} after they `
-                + `finished ${(prevActivity || {}).description}?`),
-            enum: PRIMARY_ACTIVITIES.map((activity) => activity.name)
+                + `finished ${(prevActivity)}?`),
+            enum: PRIMARY_ACTIVITIES
           },
           [ACTIVITY_START_TIME]: {
             type: 'string',
@@ -88,80 +90,23 @@ const createFormSchema = (pageNum :number, formData :Object) => {
             id: 'end_time',
             type: 'string',
             title: currentActivity
-              ? `When did your child stop ${currentActivity.description}?`
+              ? `When did your child stop ${currentActivity}?`
               : 'When did the selected activity end?'
-          }
+          },
         },
-        dependencies: {
-          [ACTIVITY_NAME]: {
-            oneOf: [
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: [SLEEPING]
-                  },
-                  ...sleepingSchema,
-                }
-              },
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: [EATING_DRINKING, RECREATION_INSIDE]
-                  },
-                  ...eatingIndoorRecSchema
-                }
-              },
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: [RECREATION_OUTSIDE]
-                  },
-                  ...outdoorRecSchema
-                }
-              },
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: [MEDIA]
-                  },
-                  ...mediaUseSchema
-                }
-              },
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: [OUTDOORS]
-                  },
-                  ...outdoorsSchema
-                }
-              },
-              {
-                properties: {
-                  [ACTIVITY_NAME]: {
-                    enum: PRIMARY_ACTIVITIES.filter((activity) => !activity.followup).map((activity) => activity.name)
-                  }
-                }
-              }
-            ]
-          }
-        },
-        title: '',
-        type: 'object',
         required: [ACTIVITY_NAME, ACTIVITY_END_TIME]
       }
     },
   };
 };
 
-const createUiSchema = (pageNum :number) => {
+const createUiSchema = (pageNum :number, formData :Object) => {
 
-  const followUpUiSchema = merge(
-    SleepingSchema.createUiSchema(pageNum),
-    EatingIndoorRecSchema.createUiSchema(pageNum),
-    MediaUseSchema.createUiSchema(pageNum),
-    OutdoorRecSchema.createUiSchema(pageNum),
-    OutdoorsSchema.createUiSchema(pageNum)
-  );
+  const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
+
+  if (prevActivity && pageNum > FIRST_ACTIVITY_PAGE && hasFollowUpQuestions(prevActivity, pageNum - 1, formData)) {
+    return ContextualSchema.createUiSchema(pageNum, prevActivity);
+  }
 
   return {
     [getPageSectionKey(pageNum, 0)]: {
@@ -177,7 +122,6 @@ const createUiSchema = (pageNum :number) => {
         classNames: 'column-span-12',
         'ui:widget': 'TimeWidget'
       },
-      ...followUpUiSchema
     },
   };
 };

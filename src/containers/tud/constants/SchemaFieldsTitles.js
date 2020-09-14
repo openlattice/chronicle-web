@@ -14,6 +14,8 @@ const {
   BG_TV,
   BG_TV_AGE,
   CAREGIVER,
+  BOOK_TITLE,
+  BOOK_TYPE,
   DAY_END_TIME,
   DAY_OF_WEEK,
   DAY_START_TIME,
@@ -37,12 +39,12 @@ const SCHEMA_FIELDS_TITLES = {
       + 'For example, if your child was using media for 2 hours and you used your device for 1 hour, '
       + 'enter 50; if you used your device the entire time, enter 100.',
 
-  [ADULT_MEDIA_PURPOSE]: 'What was the tablet/laptop/cell phone/smart phone used for? Please choose all that apply',
+  [ADULT_MEDIA_PURPOSE]: 'What was the tablet/laptop/cell phone/smart phone used for?',
   [BEHAVIOR_AFTER]: 'How was your child behaving just after this activity ended?',
   [BEHAVIOR_BEFORE]: 'How was your child behaving just before this activity began?',
   [BG_AUDIO]: 'Was there audio entertainment (e.g., music, talk radio) '
       + 'on in the background while your child was doing this activity?',
-  [BG_AUDIO_TYPE]: 'What kind of audio was in the background',
+  [BG_AUDIO_TYPE]: 'What kind of audio was in the background?',
   [BG_MEDIA_PROPORTION]: 'Approximately what percentage of time that the child was'
       + 'sleeping was the background media in use? '
       + 'For example, if your child slept for 10 hours and the radio was on for 1, '
@@ -50,6 +52,10 @@ const SCHEMA_FIELDS_TITLES = {
   [BG_TV]: 'Was there a TV on in the background while your child did this activity?',
   [BG_TV_AGE]: 'Was the program for your child\'s age, for older children, '
       + 'for younger children, or for adults?',
+  [BOOK_TITLE]: 'What was the title of the book(s)'
+    + ' If you are unsure of exact title, either describe (e.g., a book about unicorns)'
+    + ' or leave it blank',
+  [BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
   [CAREGIVER]: 'Who was with your child when he/she was doing this? Please choose all that apply.',
   [DAY_OF_WEEK]: 'We would like you to think about your child\'s day and complete the time use diary for yesterday. '
       + 'What day of the week was yesterday?',
