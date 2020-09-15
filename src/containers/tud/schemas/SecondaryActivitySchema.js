@@ -13,14 +13,6 @@ const {
 const {
   READING,
   MEDIA_USE,
-  CHILDCARE,
-  EATING_DRINKING,
-  GROOMING,
-  NAPPING,
-  OTHER,
-  OUTDOORS,
-  PLAYING,
-  TRAVEL
 } = ACTIVITY_NAMES;
 
 const createSchema = (primaryActivity :string) => {
@@ -29,6 +21,10 @@ const createSchema = (primaryActivity :string) => {
 
   const readingSchema = FollowupSchema.createSchema(READING);
   const mediaUseSchema = FollowupSchema.createSchema(MEDIA_USE);
+
+  const arr = [READING, MEDIA_USE];
+  const activitiesWithoutFollowup :string[] = SECONDARY_ACTIVITIES
+    .filter((activity :string) => !arr.includes(activity));
 
   return {
     properties: {
@@ -66,7 +62,7 @@ const createSchema = (primaryActivity :string) => {
                   {
                     properties: {
                       [SECONDARY_ACTIVITY]: {
-                        enum: [CHILDCARE, EATING_DRINKING, GROOMING, NAPPING, OTHER, OUTDOORS, PLAYING, TRAVEL]
+                        enum: activitiesWithoutFollowup
                       }
                     }
                   },

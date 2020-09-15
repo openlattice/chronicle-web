@@ -1,6 +1,6 @@
 // @flow
 
-import { get, getIn } from 'immutable';
+import { getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
@@ -41,12 +41,11 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string 
   return activityName;
 };
 
-const hasFollowUpQuestions = (activity :string, pageNum :number, formData :Object) => {
-  const psk = getPageSectionKey(pageNum, 0);
-  const isFollowupCompleted = getIn(formData, [psk, FOLLOWUP_COMPLETED], false);
+const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
+  formData, [getPageSectionKey(pageNum, 0), FOLLOWUP_COMPLETED], false
+);
 
-  return ![GROOMING, CHILDCARE].includes(activity) && !isFollowupCompleted;
-};
+const activityRequiresFollowup = (activity :string) => ![GROOMING, CHILDCARE].includes(activity);
 
 const createFormSchema = (pageNum :number, formData :Object) => {
 
@@ -59,8 +58,10 @@ const createFormSchema = (pageNum :number, formData :Object) => {
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
   const prevActivity = selectPrimaryActivityByPage(pageNum - 1, formData);
 
-  const shouldDisplayFollowup = prevActivity && pageNum > FIRST_ACTIVITY_PAGE
-    && hasFollowUpQuestions(prevActivity, pageNum - 1, formData);
+  const shouldDisplayFollowup = prevActivity
+    && pageNum > FIRST_ACTIVITY_PAGE
+    && !pageHasFollowupQuestions(formData, pageNum - 1)
+    && activityRequiresFollowup(prevActivity);
 
   return {
     schema: shouldDisplayFollowup
@@ -89,14 +90,17 @@ const createTimeUseSummary = (formData :Object) => {
   });
 
   Object.keys(formData).forEach((key, index) => {
-    if (index !== 0 && index !== 1) { // skip page 0 and 1
+    const hasFollowupQuestions = pageHasFollowupQuestions(formData, index);
+
+    // skip page 0 and 1, and pages that have followup questions
+    if (index !== 0 && index !== 1 && !hasFollowupQuestions) {
       const startTime = selectTimeByPageAndKey(index, ACTIVITY_START_TIME, formData);
       const endTime = selectTimeByPageAndKey(index, ACTIVITY_END_TIME, formData);
-      const primaryActivity = selectPrimaryActivityByPage(index, formData);
+      const primaryActivity :string = selectPrimaryActivityByPage(index, formData);
 
       const entry = {
         time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
-        description: get(primaryActivity, 'name'),
+        description: primaryActivity,
         pageNum: index
       };
 
@@ -147,9 +151,11 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
 };
 
 export {
+  activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
   createTimeUseSummary,
+  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 };

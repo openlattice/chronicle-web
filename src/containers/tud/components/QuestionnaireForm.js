@@ -14,8 +14,10 @@ import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
+  activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
+  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
@@ -66,11 +68,8 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
   }
 
   const handleNext = () => {
-    //
     validateAndSubmit();
   };
-
-  // console.log(pagedData);
 
   const onChange = ({ formData } :Object) => {
 
@@ -98,18 +97,18 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     applyCustomValidation(formData, errors, page)
   );
 
+  const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
 
-  const lastPage = prevEndTime.isValid && dayEndTime.isValid
-    && prevEndTime.equals(dayEndTime);
-
-  // console.log(schema);
+  const isSummaryPage = prevEndTime.isValid && dayEndTime.isValid
+    && prevEndTime.equals(dayEndTime)
+    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(pagedData, page - 1));
 
   return (
     <>
       {
-        lastPage ? (
+        isSummaryPage ? (
           <TimeUseSummary
               formData={pagedData}
               goToPage={setPage} />
@@ -138,7 +137,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
             color="primary"
             onClick={handleNext}>
           {
-            lastPage ? 'Submit' : 'Next'
+            isSummaryPage ? 'Submit' : 'Next'
           }
         </Button>
       </ButtonRow>
