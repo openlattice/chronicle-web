@@ -68,7 +68,7 @@ import {
   PARTICIPATED_IN,
   PART_OF,
   STUDIES
-} from '../../core/edm/constants/CollectionTemplateNames';
+} from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';

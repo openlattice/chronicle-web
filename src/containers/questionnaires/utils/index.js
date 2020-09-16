@@ -21,7 +21,7 @@ import {
   QUESTION,
   STUDIES,
   SURVEY
-} from '../../../core/edm/constants/CollectionTemplateNames';
+} from '../../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { QUESTIONNAIRE_SUMMARY } from '../constants/constants';
 

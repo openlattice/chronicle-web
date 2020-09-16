@@ -4,7 +4,7 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
 import QuestionTypes from '../constants/questionTypes';
-import { QUESTION, SURVEY } from '../../../core/edm/constants/CollectionTemplateNames';
+import { QUESTION, SURVEY } from '../../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { TEXT_ENTRY, MULTIPLE_CHOICE } = QuestionTypes;

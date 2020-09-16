@@ -6,7 +6,7 @@ import { Constants } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { v4 as uuid } from 'uuid';
 
-import { STUDIES } from '../../../core/edm/constants/CollectionTemplateNames';
+import { STUDIES } from '../../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { getEntityAddressKey, getPageSectionKey } = DataProcessingUtils;

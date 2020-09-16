@@ -66,7 +66,7 @@ import {
   RESPONDS_WITH,
   STUDIES,
   SURVEY
-} from '../../core/edm/constants/CollectionTemplateNames';
+} from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker } from '../../core/sagas/data/DataSagas';
