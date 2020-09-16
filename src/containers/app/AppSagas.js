@@ -82,6 +82,8 @@ function* getConfigsWorker(action :SequenceAction) :Saga<*> {
   }
   catch (error) {
     workerResponse.error = error;
+    LOG.error(action.type, error);
+    yield put(getConfigs.failure(action.id));
   }
 
   return workerResponse;

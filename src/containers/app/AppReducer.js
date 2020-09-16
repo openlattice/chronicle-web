@@ -60,7 +60,7 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
     case getConfigs.case(action.type): {
       return getConfigs.reducer(state, action, {
         REQUEST: () => state.setIn([GET_CONFIGS, REQUEST_STATE], RequestStates.PENDING),
-        FAILURE: () => state.setIn([GET_CONFIGS, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_CONFIGS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
           const {
             appModulesOrgListMap,
