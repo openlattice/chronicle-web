@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Switch, Redirect } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
 
@@ -21,7 +21,7 @@ import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
-import { STUDIES_REDUX_CONSTANTS, APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
