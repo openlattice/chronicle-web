@@ -28,12 +28,16 @@ const PROPERTY_CONSTS = {
   MEDIA_AGE: 'mediaAge',
   MEDIA_NAME: 'mediaName',
   NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
+  NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepPattern',
   OTHER_ACTIVITY: 'otherActivity',
   OTHER_MEDIA: 'otherMedia',
   PROGRAM_AGE: 'programAge',
   SECONDARY_ACTIVITY: 'secondaryActivity',
   SECONDARY_LOCATION: 'secondaryLocation',
+  SLEEP_ARRANGEMENT: 'sleepArrangement',
+  SLEEP_PATTERN: 'sleepPattern',
   TYPICAL_DAY_FLAG: 'typicalDay',
+  WAKE_UP_COUNT: 'wakeUpCount'
 };
 
 const MEDIA_DEVICE_TYPES = [
@@ -117,11 +121,34 @@ const NON_TYPICAL_DAY_REASONS = [
   'Family visit'
 ];
 
+const NON_TYPICAL_SLEEP_REASONS = [
+  'Sick',
+  'Vacation'
+];
+
+const SLEEP_ARRANGEMENT_OPTIONS = [
+  'Crib/cot/bed in a separate room (not shared with others)',
+  'Crib/cot/bed in a parent\'s room',
+  'Crib/cot/bed in a shared room with a sibling',
+  'Co-sleeping in a parent\'s bed',
+  'Co-sleeping in a sibling\'s bed'
+];
+
+const WAKE_UP_COUNT_OPTIONS = [
+  'Didn\'t wake up',
+  '1 time',
+  '2 times',
+  '3 times',
+  '4 times',
+  '5 or more times',
+  'Don\'t know'
+];
+
 const BOOK_TYPES = ['Paper book', 'eBook'];
 
 export {
-  ADULT_MEDIA_USAGE_TYPES,
   ADULT_MEDIA_PURPOSES,
+  ADULT_MEDIA_USAGE_TYPES,
   BOOK_TYPES,
   CAREGIVERS,
   CHILD_BEHAVIOR_CATEGORIES,
@@ -129,6 +156,9 @@ export {
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
   NON_TYPICAL_DAY_REASONS,
+  NON_TYPICAL_SLEEP_REASONS,
   PROPERTY_CONSTS,
   SECONDARY_LOCATIONS,
+  SLEEP_ARRANGEMENT_OPTIONS,
+  WAKE_UP_COUNT_OPTIONS,
 };

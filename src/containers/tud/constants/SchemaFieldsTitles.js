@@ -13,9 +13,9 @@ const {
   BG_MEDIA_PROPORTION,
   BG_TV,
   BG_TV_AGE,
-  CAREGIVER,
   BOOK_TITLE,
   BOOK_TYPE,
+  CAREGIVER,
   DAY_END_TIME,
   DAY_OF_WEEK,
   DAY_START_TIME,
@@ -26,10 +26,14 @@ const {
   MEDIA_AGE,
   MEDIA_NAME,
   NON_TYPICAL_DAY_REASON,
+  NON_TYPICAL_SLEEP_PATTERN,
   OTHER_MEDIA,
   PROGRAM_AGE,
   SECONDARY_LOCATION,
+  SLEEP_ARRANGEMENT,
+  SLEEP_PATTERN,
   TYPICAL_DAY_FLAG,
+  WAKE_UP_COUNT,
 } = PROPERTY_CONSTS;
 
 const SCHEMA_FIELDS_TITLES = {
@@ -73,15 +77,19 @@ const SCHEMA_FIELDS_TITLES = {
       + 'If you are unsure of exact name, either describe (e.g., a drawing app, a movie about unicorns) '
       + 'or leave blank',
   [NON_TYPICAL_DAY_REASON]: 'What made yesterday a non-typical day?',
+  [NON_TYPICAL_SLEEP_PATTERN]: 'What made your child\'s sleeping pattern non-typical?',
   [OTHER_MEDIA]: 'Was any other media being used at the same time as this activity, '
       + 'such as television, movies, video or computer games, books, magazines, '
       + 'radio or CDs, cell phone/smart phone, laptop or a tablet?',
   [PROGRAM_AGE]: 'Was the program (e.g., show, app, movie, book, etc.) for your child\'s age, '
       + 'for older children, for younger children, or for adults?',
   [SECONDARY_LOCATION]: 'Where was your child when he/she was doing this activity?',
+  [SLEEP_ARRANGEMENT]: 'Las night, what was your child\'s sleeping arrangement?',
+  [SLEEP_PATTERN]: 'Last night, was your child\'s sleep pattern typical?',
   [TYPICAL_DAY_FLAG]: 'An important part of this project is to find out how children spend their time '
       + 'during the week. Was yesterday a typical weekday for you and your child? A typical day would include '
-      + 'a school closing, being on vacation, or being home sick.'
+      + 'a school closing, being on vacation, or being home sick.',
+  [WAKE_UP_COUNT]: 'Last night, how many ties did your child wake up in the middle of the night?'
 };
 
 export default SCHEMA_FIELDS_TITLES;
