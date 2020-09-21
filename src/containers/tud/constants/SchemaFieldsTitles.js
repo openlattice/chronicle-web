@@ -12,6 +12,8 @@ const {
   DAY_OF_WEEK,
   DAY_START_TIME,
   MEDIA_ACTIVITY,
+  MEDIA_AGE,
+  MEDIA_NAME,
   NON_TYPICAL_DAY_REASON,
   NON_TYPICAL_SLEEP_PATTERN,
   SLEEP_ARRANGEMENT,
@@ -34,6 +36,10 @@ const SCHEMA_FIELDS_TITLES = {
   [DAY_END_TIME]: 'What time did your child go to bed yesterday night?',
   [DAY_START_TIME]: 'What time did your child wake up yesterday morning?',
   [MEDIA_ACTIVITY]: 'Specifically, what primary media activity was your child engaged in?',
+  [MEDIA_AGE]: 'Was the media program (e.g. show, app, movie)'
+    + ' for your child\'s age, for older children, for younger children, or for adults?',
+  [MEDIA_NAME]: 'What was the name of the media program (e.g name of show, movie)?\n'
+    + 'If you are unsure of exact name, either describe (e.g. a drawing app, a movie about unicorns) or leave it blank',
   [NON_TYPICAL_DAY_REASON]: 'What made yesterday a non-typical day?',
   [NON_TYPICAL_SLEEP_PATTERN]: 'What made your child\'s sleeping pattern non-typical?',
   [SLEEP_ARRANGEMENT]: 'Las night, what was your child\'s sleeping arrangement?',

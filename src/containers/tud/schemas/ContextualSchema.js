@@ -24,6 +24,8 @@ const {
   ADULT_MEDIA,
   ADULT_MEDIA_PROPORTION,
   ADULT_MEDIA_PURPOSE,
+  MEDIA_AGE,
+  MEDIA_NAME,
   BG_AUDIO,
   BG_AUDIO_TYPE,
   BG_TV,
@@ -131,7 +133,7 @@ const getFollowupUiOrder = (activity :string) => {
     }
 
     case MEDIA_USE: {
-      return [DEVICE, MEDIA_ACTIVITY];
+      return [DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_NAME];
     }
     default:
       return [];
@@ -243,7 +245,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
 
 const createUiSchema = (pageNum :number, selectedActivity :string) => {
   const followupUiOrder :string[] = getFollowupUiOrder(selectedActivity);
-  const followUpFields = [BOOK_TYPE, BOOK_TITLE, DEVICE, MEDIA_ACTIVITY];
+  const followUpFields = [BOOK_TYPE, BOOK_TITLE, DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_ACTIVITY];
 
   const otherFollowupOrder = followUpFields.filter((field) => !followupUiOrder.includes(field));
   return {

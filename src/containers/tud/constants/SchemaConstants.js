@@ -22,6 +22,8 @@ const PROPERTY_CONSTS = {
   FOLLOWUP_COMPLETED: 'followUpCompleted',
   LOCATION: 'location',
   MEDIA_ACTIVITY: 'mediaActivity',
+  MEDIA_AGE: 'mediaAge',
+  MEDIA_NAME: 'mediaName',
   NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
   NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepPattern',
   OTHER_ACTIVITY: 'otherActivity',
@@ -131,6 +133,14 @@ const WAKE_UP_COUNT_OPTIONS = [
 
 const BOOK_TYPES = ['Paper book', 'eBook'];
 
+const MEDIA_AGE_OPTIONS = [
+  "Child's age",
+  'Older children',
+  'Younger children',
+  'Adults',
+  "Don't know"
+];
+
 export {
   ADULT_MEDIA_PURPOSES,
   ADULT_MEDIA_USAGE_OPTIONS,
@@ -139,6 +149,7 @@ export {
   CAREGIVERS,
   LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
+  MEDIA_AGE_OPTIONS,
   MEDIA_DEVICE_TYPES,
   NON_TYPICAL_DAY_REASONS,
   NON_TYPICAL_SLEEP_REASONS,

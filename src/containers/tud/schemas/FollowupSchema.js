@@ -6,14 +6,17 @@ import {
   BOOK_TYPES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,
-  PROPERTY_CONSTS
+  PROPERTY_CONSTS,
+  MEDIA_AGE_OPTIONS
 } from '../constants/SchemaConstants';
 
 const {
   BOOK_TITLE,
   BOOK_TYPE,
-  MEDIA_ACTIVITY,
   DEVICE,
+  MEDIA_ACTIVITY,
+  MEDIA_AGE,
+  MEDIA_NAME,
 } = PROPERTY_CONSTS;
 const { READING, MEDIA_USE } = ACTIVITY_NAMES;
 
@@ -59,9 +62,18 @@ const createSchema = (selectedActivity :string) => {
             title: SCHEMA_FIELDS_TITLES[MEDIA_ACTIVITY],
             type: 'string',
             enum: MEDIA_ACTIVITY_CATEGORIES
+          },
+          [MEDIA_AGE]: {
+            title: SCHEMA_FIELDS_TITLES[MEDIA_AGE],
+            type: 'string',
+            enum: MEDIA_AGE_OPTIONS
+          },
+          [MEDIA_NAME]: {
+            title: SCHEMA_FIELDS_TITLES[MEDIA_NAME],
+            type: 'string'
           }
         },
-        required: [DEVICE, MEDIA_ACTIVITY]
+        required: [DEVICE, MEDIA_ACTIVITY, MEDIA_AGE]
       };
     default: {
       return {
@@ -93,6 +105,13 @@ const uiSchema = {
   },
   [BOOK_TITLE]: {
     classNames: 'column-span-12',
+  },
+  [MEDIA_AGE]: {
+    classNames: 'column-span-12',
+    'ui:widget': 'radio'
+  },
+  [MEDIA_NAME]: {
+    classNames: 'column-span-12'
   }
 };
 
