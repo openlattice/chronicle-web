@@ -26,7 +26,7 @@ const {
 
 const createSchema = (pageNum :number) => ({
   type: 'object',
-  title: '',
+  title: 'Nighttime Activity',
   properties: {
     [getPageSectionKey(pageNum, 0)]: {
       type: 'object',
