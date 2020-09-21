@@ -16,17 +16,16 @@ const ButtonWrapper = styled(Button)`
 `;
 
 const StyledIcon = styled(FontAwesomeIcon)`
-  margin-right: 5px;
   font-size: 15px;
 `;
 
 const ContactSupportButton = () => (
   <ButtonWrapper
       href="https://support.openlattice.com/servicedesk/customer/portal/1"
+      startIcon={<StyledIcon color={NEUTRAL.N900} fixedWidth icon={faQuestionCircle} />}
       target="_blank"
       variant="outlined">
-    <StyledIcon color={NEUTRAL.N900} fixedWidth icon={faQuestionCircle} />
-    <span> Contact Support </span>
+    Contact Support
   </ButtonWrapper>
 );
 
