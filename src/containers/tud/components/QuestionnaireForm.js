@@ -19,7 +19,7 @@ import {
   createFormSchema,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey
+  selectTimeByPageAndKey,
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -69,6 +69,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
 
   const handleNext = () => {
     validateAndSubmit();
+    // onNext();
   };
 
   const onChange = ({ formData } :Object) => {
@@ -97,13 +98,13 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     applyCustomValidation(formData, errors, page)
   );
 
-  const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
-  const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
+  const prevActivity = selectPrimaryActivityByPage(page - 2, pagedData);
+  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, pagedData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
 
   const isSummaryPage = prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime)
-    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(pagedData, page - 1));
+    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(pagedData, page - 2));
 
   return (
     <>
@@ -118,7 +119,6 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
               hideSubmit
               noPadding
               onChange={onChange}
-              omitExtraData={false}
               onSubmit={onNext}
               ref={formRef}
               schema={schema}

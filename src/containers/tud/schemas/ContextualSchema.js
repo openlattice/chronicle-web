@@ -10,7 +10,7 @@ import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
 import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import {
   ADULT_MEDIA_PURPOSES,
-  ADULT_MEDIA_USAGE_TYPES,
+  ADULT_MEDIA_USAGE_OPTIONS,
   CAREGIVERS,
   LOCATION_CATEGORIES,
   PROPERTY_CONSTS
@@ -86,7 +86,7 @@ const getBgAudioSchema = (selectedActivity :string) => ({
               type: 'string',
               title: 'Approximately what proportion of the time for this activity'
                 + ` (${selectedActivity}) was the adult using their device?`,
-              enum: ADULT_MEDIA_USAGE_TYPES
+              enum: ADULT_MEDIA_USAGE_OPTIONS
             },
           },
           required: [ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION]

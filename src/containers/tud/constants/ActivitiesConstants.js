@@ -27,18 +27,6 @@ const ACTIVITY_NAMES = {
   UNKNOWN
 };
 
-// const PRIMARY_ACTIVITIES = [
-//   { name: SLEEPING, description: 'sleeping/resting', followup: true },
-//   { name: EATING_DRINKING, description: 'eating/drinking', followup: true },
-//   { name: GROOMING, description: 'grooming', followup: false },
-//   { name: MEDIA, description: 'using media', followup: true },
-//   { name: RECREATION_INSIDE, description: 'indoor recreation', followup: true },
-//   { name: RECREATION_OUTSIDE, description: 'outdoor recreation', followup: true },
-//   { name: CHILDCARE, description: 'child care', followup: false },
-//   { name: OUTDOORS, description: 'travelling/running errands', followup: true },
-//   { name: INDOORS, description: 'chores', followup: false },
-//   { name: OTHER, description: '', followup: false }
-// ];
 const PRIMARY_ACTIVITIES = [
   EATING_DRINKING,
   GROOMING,

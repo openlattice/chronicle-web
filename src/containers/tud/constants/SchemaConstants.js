@@ -7,8 +7,6 @@ const PROPERTY_CONSTS = {
   ADULT_MEDIA: 'adultMedia',
   ADULT_MEDIA_PROPORTION: 'adultMediaProportion',
   ADULT_MEDIA_PURPOSE: 'adultMediaPurpose',
-  BEHAVIOR_AFTER: 'behaviorAfter',
-  BEHAVIOR_BEFORE: 'behaviorBefore',
   BG_AUDIO: 'audio',
   BG_AUDIO_TYPE: 'audioType',
   BG_MEDIA_PROPORTION: 'proportion',
@@ -23,17 +21,11 @@ const PROPERTY_CONSTS = {
   DEVICE: 'device',
   FOLLOWUP_COMPLETED: 'followUpCompleted',
   LOCATION: 'location',
-  MEDIA: 'media',
   MEDIA_ACTIVITY: 'mediaActivity',
-  MEDIA_AGE: 'mediaAge',
-  MEDIA_NAME: 'mediaName',
   NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
   NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepPattern',
   OTHER_ACTIVITY: 'otherActivity',
-  OTHER_MEDIA: 'otherMedia',
-  PROGRAM_AGE: 'programAge',
   SECONDARY_ACTIVITY: 'secondaryActivity',
-  SECONDARY_LOCATION: 'secondaryLocation',
   SLEEP_ARRANGEMENT: 'sleepArrangement',
   SLEEP_PATTERN: 'sleepPattern',
   TYPICAL_DAY_FLAG: 'typicalDay',
@@ -80,7 +72,7 @@ const ADULT_MEDIA_PURPOSES = [
   'Social media',
 ];
 
-const ADULT_MEDIA_USAGE_TYPES = [
+const ADULT_MEDIA_USAGE_OPTIONS = [
   'None of the time',
   'Some of the time',
   'Half of the time',
@@ -88,14 +80,7 @@ const ADULT_MEDIA_USAGE_TYPES = [
   'The entire time'
 ];
 
-const CHILD_BEHAVIOR_CATEGORIES = [
-  'Calm',
-  'Whiny/bored',
-  'Active, but positive/cheerful',
-  'Active, with negative behaviors/cranky',
-  'Difficult to control',
-  "Don't know"
-];
+const BG_MEDIA_PROPORTION_OPTIONS = ADULT_MEDIA_USAGE_OPTIONS;
 
 const LOCATION_CATEGORIES = [
   'Room where child sleeps',
@@ -148,10 +133,10 @@ const BOOK_TYPES = ['Paper book', 'eBook'];
 
 export {
   ADULT_MEDIA_PURPOSES,
-  ADULT_MEDIA_USAGE_TYPES,
+  ADULT_MEDIA_USAGE_OPTIONS,
+  BG_MEDIA_PROPORTION_OPTIONS,
   BOOK_TYPES,
   CAREGIVERS,
-  CHILD_BEHAVIOR_CATEGORIES,
   LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_DEVICE_TYPES,

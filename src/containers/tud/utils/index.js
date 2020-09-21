@@ -5,6 +5,7 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
+import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
 import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
 import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
@@ -47,6 +48,16 @@ const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
 
 const activityRequiresFollowup = (activity :string) => ![GROOMING, CHILDCARE].includes(activity);
 
+const getIsDayTimeCompleted = (formData :Object, page :number) => {
+  const prevActivity = selectPrimaryActivityByPage(page - 1, formData);
+  const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+
+  return prevEndTime.isValid && dayEndTime.isValid
+    && prevEndTime.equals(dayEndTime)
+    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(formData, page - 1));
+};
+
 const createFormSchema = (pageNum :number, formData :Object) => {
 
   const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
@@ -63,14 +74,28 @@ const createFormSchema = (pageNum :number, formData :Object) => {
     && !pageHasFollowupQuestions(formData, pageNum - 1)
     && activityRequiresFollowup(prevActivity);
 
-  return {
-    schema: shouldDisplayFollowup
-      ? ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime)
-      : PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime),
+  // const isDaySummaryPage = getIsDaySummaryPage(formData)
+  const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
 
-    uiSchema: shouldDisplayFollowup
-      ? ContextualSchema.createUiSchema(pageNum, prevActivity)
-      : PrimaryActivitySchema.createUiSchema(pageNum)
+  let schema;
+  let uiSchema;
+
+  if (isDaytimeCompleted) {
+    schema = NightTimeActivitySchema.createSchema(pageNum);
+    uiSchema = NightTimeActivitySchema.createUiSchema(pageNum);
+  }
+  else if (shouldDisplayFollowup) {
+    schema = ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
+    uiSchema = ContextualSchema.createUiSchema(pageNum, prevActivity);
+  }
+  else {
+    schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime);
+    uiSchema = PrimaryActivitySchema.createUiSchema(pageNum);
+  }
+
+  return {
+    schema,
+    uiSchema
   };
 };
 
@@ -79,8 +104,11 @@ const createTimeUseSummary = (formData :Object) => {
   const summary = [];
 
   // get day duration (start and end)
-  const dayStartTime = selectTimeByPageAndKey(1, DAY_START_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+  const dayStartTime :DateTime = selectTimeByPageAndKey(1, DAY_START_TIME, formData);
+  const dayEndTime :DateTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+
+  const formattedDayStartTime = dayStartTime.toLocaleString(DateTime.TIME_SIMPLE);
+  const formattedDayEndTime = dayEndTime.toLocaleString(DateTime.TIME_SIMPLE);
 
   // add day start time
   summary.push({
@@ -89,30 +117,36 @@ const createTimeUseSummary = (formData :Object) => {
     pageNum: DAY_SPAN_PAGE
   });
 
+  const lastPage = Object.keys(formData).length - 1;
+
+  // omit the last 'page' since it covers nighttime
   Object.keys(formData).forEach((key, index) => {
     const hasFollowupQuestions = pageHasFollowupQuestions(formData, index);
 
     // skip page 0 and 1, and pages that have followup questions
     if (index !== 0 && index !== 1 && !hasFollowupQuestions) {
-      const startTime = selectTimeByPageAndKey(index, ACTIVITY_START_TIME, formData);
-      const endTime = selectTimeByPageAndKey(index, ACTIVITY_END_TIME, formData);
-      const primaryActivity :string = selectPrimaryActivityByPage(index, formData);
+      // if last page
+      if (index === lastPage) {
+        summary.push({
+          time: `${formattedDayEndTime} - ${formattedDayStartTime}`,
+          description: 'Sleeping',
+          pageNum: Object.keys(formData).length - 1
+        });
+      }
+      else {
+        const startTime = selectTimeByPageAndKey(index, ACTIVITY_START_TIME, formData);
+        const endTime = selectTimeByPageAndKey(index, ACTIVITY_END_TIME, formData);
+        const primaryActivity :string = selectPrimaryActivityByPage(index, formData);
 
-      const entry = {
-        time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
-        description: primaryActivity,
-        pageNum: index
-      };
+        const entry = {
+          time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
+          description: primaryActivity,
+          pageNum: index
+        };
 
-      summary.push(entry);
+        summary.push(entry);
+      }
     }
-  });
-
-  // add end of day
-  summary.push({
-    time: dayEndTime.toLocaleString(DateTime.TIME_SIMPLE),
-    description: 'Child went to bed',
-    pageNum: DAY_SPAN_PAGE
   });
 
   return summary;
@@ -157,5 +191,5 @@ export {
   createTimeUseSummary,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey
+  selectTimeByPageAndKey,
 };
