@@ -28,6 +28,7 @@ import * as AppActions from './AppActions';
 import { initializeApplication } from './AppActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
+import ContactSupportButton from '../shared/ContactSupportButton';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
@@ -97,6 +98,7 @@ const AppContainer = () => {
       <AppContentWrapper>
         { renderAppContent() }
       </AppContentWrapper>
+      <ContactSupportButton />
     </AppContainerWrapper>
   );
 };
