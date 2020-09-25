@@ -69,7 +69,6 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
 
   const handleNext = () => {
     validateAndSubmit();
-    // onNext();
   };
 
   const onChange = ({ formData } :Object) => {
