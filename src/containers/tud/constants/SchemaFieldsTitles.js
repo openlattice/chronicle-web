@@ -42,7 +42,7 @@ const SCHEMA_FIELDS_TITLES = {
     + 'If you are unsure of exact name, either describe (e.g. a drawing app, a movie about unicorns) or leave it blank',
   [NON_TYPICAL_DAY_REASON]: 'What made yesterday a non-typical day?',
   [NON_TYPICAL_SLEEP_PATTERN]: 'What made your child\'s sleeping pattern non-typical?',
-  [SLEEP_ARRANGEMENT]: 'Las night, what was your child\'s sleeping arrangement?',
+  [SLEEP_ARRANGEMENT]: 'Last night, what was your child\'s sleeping arrangement?',
   [SLEEP_PATTERN]: 'Last night, was your child\'s sleep pattern typical?',
   [TYPICAL_DAY_FLAG]: 'An important part of this project is to find out how children spend their time '
       + 'during the week. Was yesterday a typical weekday for you and your child? A typical day would include '
