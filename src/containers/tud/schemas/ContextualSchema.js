@@ -193,8 +193,10 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
             title: `Was there a TV on in the background while your child was ${selectedActivity}?`,
             enum: ['Yes', 'No', "Don't Know"]
           },
+          ...bgAudioSchema.properties
         },
         required: [LOCATION, CAREGIVER, BG_TV,
+          ...bgAudioSchema.required,
           ...followupSchema.required,
           ...secondaryActivitySchema.required],
         dependencies: {
@@ -204,12 +206,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
                 properties: {
                   [BG_TV]: {
                     enum: ['No', "Don't Know"]
-                  },
-                  ...bgAudioSchema.properties
-                },
-                required: bgAudioSchema.required,
-                dependencies: {
-                  ...bgAudioSchema.dependencies
+                  }
                 }
               },
               {
@@ -226,16 +223,13 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
                     },
                     uniqueItems: true
                   },
-                  ...bgAudioSchema.properties
                 },
-                required: [BG_TV_AGE, ...bgAudioSchema.required],
-                dependencies: {
-                  ...bgAudioSchema.dependencies
-                }
+                required: [BG_TV_AGE],
               }
             ]
           },
-          ...secondaryActivitySchema.dependencies
+          ...secondaryActivitySchema.dependencies,
+          ...bgAudioSchema.dependencies,
         },
       }
     },
