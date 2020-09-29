@@ -201,10 +201,15 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   return errors;
 };
 
+const createSubmitRequestBody = (formData :Object) => {
+  return formData;
+};
+
 export {
   activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
+  createSubmitRequestBody,
   createTimeUseSummary,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
