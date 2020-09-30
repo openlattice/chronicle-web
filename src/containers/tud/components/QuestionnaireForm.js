@@ -13,12 +13,11 @@ import TimeUseSummary from './TimeUseSummary';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
-  activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey,
+  selectTimeByPageAndKey
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -46,13 +45,12 @@ const ButtonRow = styled.div`
  * Summary page is displayed after night activity page, hence page - 2 accounts for the night activity page
  */
 const getIsSummaryPage = (formData :Object, page :number) => {
-  const prevActivity = selectPrimaryActivityByPage(page - 2, formData);
   const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
 
   return prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime)
-    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(formData, page - 2));
+    && pageHasFollowupQuestions(formData, page - 2);
 };
 
 /*
