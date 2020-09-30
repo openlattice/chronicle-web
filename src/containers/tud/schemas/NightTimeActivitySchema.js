@@ -45,7 +45,6 @@ const createSchema = (pageNum :number) => ({
             enum: SLEEP_ARRANGEMENT_OPTIONS
           },
           uniqueItems: true,
-          minItems: 1
         },
         [WAKE_UP_COUNT]: {
           type: 'string',
@@ -177,10 +176,7 @@ const createUiSchema = (pageNum :number) => ({
     },
     [SLEEP_ARRANGEMENT]: {
       classNames: 'column-span-12',
-      'ui:widget': 'checkboxes',
-      'ui:options': {
-        withOther: true
-      }
+      'ui:widget': 'OtherRadioWidget'
     },
     [WAKE_UP_COUNT]: {
       classNames: 'column-span-12',
