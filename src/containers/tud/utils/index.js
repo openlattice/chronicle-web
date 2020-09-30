@@ -5,13 +5,15 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
+import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
+import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
 import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
-const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE } = PAGE_NUMBERS;
+const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
 
 const {
   CHILDCARE,
@@ -58,7 +60,23 @@ const getIsDayTimeCompleted = (formData :Object, page :number) => {
     && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(formData, page - 1));
 };
 
-const createFormSchema = (pageNum :number, formData :Object) => {
+const createFormSchema = (formData :Object, pageNum :number) => {
+
+  // case 1:
+  if (pageNum === PRE_SURVEY_PAGE) {
+    return {
+      schema: PreSurveySchema.schema,
+      uiSchema: PreSurveySchema.uiSchema
+    };
+  }
+
+  // case 2:
+  if (pageNum === DAY_SPAN_PAGE) {
+    return {
+      schema: DaySpanSchema.schema,
+      uiSchema: DaySpanSchema.uiSchema
+    };
+  }
 
   const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
 
@@ -74,11 +92,10 @@ const createFormSchema = (pageNum :number, formData :Object) => {
     && !pageHasFollowupQuestions(formData, pageNum - 1)
     && activityRequiresFollowup(prevActivity);
 
-  // const isDaySummaryPage = getIsDaySummaryPage(formData)
-  const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
-
   let schema;
   let uiSchema;
+
+  const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
 
   if (isDaytimeCompleted) {
     schema = NightTimeActivitySchema.createSchema(pageNum);
