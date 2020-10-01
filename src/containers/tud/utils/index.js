@@ -5,18 +5,14 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
+import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
+import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
-import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
-const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE } = PAGE_NUMBERS;
-
-const {
-  CHILDCARE,
-  GROOMING,
-} = ACTIVITY_NAMES;
+const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
 
 const {
   ACTIVITY_END_TIME,
@@ -46,19 +42,32 @@ const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
   formData, [getPageSectionKey(pageNum, 0), FOLLOWUP_COMPLETED], false
 );
 
-const activityRequiresFollowup = (activity :string) => ![GROOMING, CHILDCARE].includes(activity);
-
 const getIsDayTimeCompleted = (formData :Object, page :number) => {
-  const prevActivity = selectPrimaryActivityByPage(page - 1, formData);
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, formData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
 
   return prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime)
-    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(formData, page - 1));
+    && pageHasFollowupQuestions(formData, page - 1);
 };
 
-const createFormSchema = (pageNum :number, formData :Object) => {
+const createFormSchema = (formData :Object, pageNum :number) => {
+
+  // case 1:
+  if (pageNum === PRE_SURVEY_PAGE) {
+    return {
+      schema: PreSurveySchema.schema,
+      uiSchema: PreSurveySchema.uiSchema
+    };
+  }
+
+  // case 2:
+  if (pageNum === DAY_SPAN_PAGE) {
+    return {
+      schema: DaySpanSchema.schema,
+      uiSchema: DaySpanSchema.uiSchema
+    };
+  }
 
   const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
 
@@ -71,14 +80,12 @@ const createFormSchema = (pageNum :number, formData :Object) => {
 
   const shouldDisplayFollowup = prevActivity
     && pageNum > FIRST_ACTIVITY_PAGE
-    && !pageHasFollowupQuestions(formData, pageNum - 1)
-    && activityRequiresFollowup(prevActivity);
-
-  // const isDaySummaryPage = getIsDaySummaryPage(formData)
-  const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
+    && !pageHasFollowupQuestions(formData, pageNum - 1);
 
   let schema;
   let uiSchema;
+
+  const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
 
   if (isDaytimeCompleted) {
     schema = NightTimeActivitySchema.createSchema(pageNum);
@@ -185,7 +192,6 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
 };
 
 export {
-  activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
   createTimeUseSummary,
