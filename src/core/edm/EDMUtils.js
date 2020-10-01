@@ -34,18 +34,22 @@ const selectEntitySetId = (esName :string) => (state :Map) => state.getIn(['edm'
 
 const getSelectedOrgEntitySetIds = () => (state :Map) => {
   const selectedOrgId = state.getIn(['app', SELECTED_ORG_ID]);
-  let result = Map().asMutable();
 
-  [CHRONICLE_CORE, DATA_COLLECTION, QUESTIONNAIRES].forEach((moduleName) => {
-    result = result.merge(state.getIn(['app', ENTITY_SET_IDS_BY_ORG_ID, moduleName, selectedOrgId], Map()));
+  const result = Map().withMutations((mutator) => {
+    [CHRONICLE_CORE, DATA_COLLECTION, QUESTIONNAIRES].forEach((moduleName) => {
+      mutator.merge(state.getIn(['app', ENTITY_SET_IDS_BY_ORG_ID, moduleName, selectedOrgId], Map()));
+    });
   });
-  return result.asImmutable();
+  return result;
 };
 
+const getSelectedOrgId = () => (state :Map) => state.getIn(['app', SELECTED_ORG_ID]);
+
 export {
+  getSelectedOrgEntitySetIds,
+  getSelectedOrgId,
   selectESIDByCollection,
   selectEntitySetId,
-  getSelectedOrgEntitySetIds,
   selectEntityType,
   selectEntityTypeId,
   selectPropertyTypeId,

@@ -43,7 +43,7 @@ import {
   changeEnrollmentStatus,
   createStudy,
   deleteStudyParticipant,
-  getNotificationsEntity,
+  getNotificationsEKID,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
@@ -385,7 +385,7 @@ function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEnt
     const notificationsESID = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
 
     const IdFQNPropertyTypeId = yield select(selectPropertyTypeId(ID_FQN));
-    const notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID]));
+    const notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID], 0));
 
     // case 1: notifications entity DNE: create entity and associate with study
     if (!notificationsEKID) {
@@ -397,7 +397,7 @@ function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEnt
       };
 
       const associations = [
-        [PART_OF, notificationsEKID || 0, NOTIFICATION, studyEntityKeyId, STUDIES, {
+        [PART_OF, notificationsEKID, NOTIFICATION, studyEntityKeyId, STUDIES, {
           [ID_FQN.toString()]: [partOfAssociationVal],
         }]
       ];
@@ -471,9 +471,9 @@ function* updateStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const studyEntityKeyId :UUID = study.getIn([OPENLATTICE_ID_FQN, 0]);
 
     let partOfEntityKeyId = yield select(
-      (state) => state.getIn(['studies', PART_OF_ASSOCIATION_EKID_MAP, studyId])
+      (state) => state.getIn([STUDIES_REDUX_CONSTANTS.STUDIES, PART_OF_ASSOCIATION_EKID_MAP, studyId])
     );
-    let notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID]));
+    let notificationsEKID = yield select((state) => state.getIn([STUDIES_REDUX_CONSTANTS.STUDIES, NOTIFICATIONS_EKID]));
 
     const entitySetIds = yield select(getSelectedOrgEntitySetIds());
     const propertyTypeIds = yield select(selectPropertyTypeIds());
@@ -767,7 +767,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const propertyTypeIds = yield select(selectPropertyTypeIds());
     const entitySetIds = yield select(getSelectedOrgEntitySetIds());
 
-    let notificationsEKID :UUID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID]));
+    let notificationsEKID :UUID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID], 0));
     const selectedOrgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
     const selectedOrg :Map = yield select((state) => state.getIn(['app', ORGS, selectedOrgId]));
 
@@ -785,7 +785,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const studyId = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, STUDY_ID)]);
     if (notificationsEnabled) {
       associations = [
-        [PART_OF, notificationsEKID || 0, NOTIFICATION, 0, STUDIES, {
+        [PART_OF, notificationsEKID, NOTIFICATION, 0, STUDIES, {
           [ID_FQN.toString()]: [studyId],
         }]
       ];
@@ -857,14 +857,14 @@ function* createStudyWatcher() :Generator<*, *, *> {
 
 /*
  *
- * StudiesActions.getNotificationsEntity()
+ * StudiesActions.getNotificationsEKID()
  *
  */
 
 function* getNotificationsEntityWorker(action :SequenceAction) :Generator<*, *, *> {
   const workerResponse = {};
   try {
-    yield put(getNotificationsEntity.request(action.id));
+    yield put(getNotificationsEKID.request(action.id));
 
     const entitySetId = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
 
@@ -873,14 +873,14 @@ function* getNotificationsEntityWorker(action :SequenceAction) :Generator<*, *, 
 
     const entityKeyId = getIn(response.data, [0, OPENLATTICE_ID_FQN, 0]);
 
-    yield put(getNotificationsEntity.success(action.id, { entityKeyId }));
+    yield put(getNotificationsEKID.success(action.id, { entityKeyId }));
   }
   catch (error) {
     workerResponse.error = error;
-    yield put(getNotificationsEntity.failure(action.id));
+    yield put(getNotificationsEKID.failure(action.id));
   }
   finally {
-    yield put(getNotificationsEntity.finally(action.id));
+    yield put(getNotificationsEKID.finally(action.id));
   }
 
   return workerResponse;

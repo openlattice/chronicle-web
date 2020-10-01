@@ -29,7 +29,6 @@ const {
 const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_CONFIGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [INITIALIZE_APPLICATION]: { [REQUEST_STATE]: RequestStates.STANDBY },
-
   [APP_MODULES_ORG_LIST_MAP]: Map(),
   [ENTITY_SET_IDS_BY_ORG_ID]: Map(),
   [ORGS]: Map(),
@@ -71,7 +70,7 @@ export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Obj
           let selectedOrgId = Object.keys(organizations)[0];
 
           const storedOrgId = AccountUtils.retrieveOrganizationId();
-          if (storedOrgId && Object.keys(organizations).includes(storedOrgId)) {
+          if (storedOrgId && organizations[storedOrgId]) {
             selectedOrgId = storedOrgId;
           }
 

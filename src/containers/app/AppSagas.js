@@ -30,7 +30,7 @@ import { getEntityDataModelTypes } from '../../core/edm/EDMActions';
 import { getEntityDataModelTypesWorker } from '../../core/edm/EDMSagas';
 import { processAppConfigs } from '../../utils/AppUtils';
 import { ERR_MISSING_CORE_MODULE } from '../../utils/Errors';
-import { getNotificationsEntity, getStudies } from '../studies/StudiesActions';
+import { getNotificationsEKID, getStudies } from '../studies/StudiesActions';
 import { getNotificationsEntityWorker, getStudiesWorker } from '../studies/StudiesSagas';
 
 const { getApp, getAppConfigs } = AppApiActions;
@@ -67,6 +67,11 @@ function* getConfigsWorker(action :SequenceAction) :Saga<*> {
         ...obj
       }), {})
     );
+
+    // check if any of the responses has error
+    // $FlowFixMe
+    const error :?Object = Object.values(appModulesRes).flat().find((item) => Object.keys(item).includes('error'));
+    if (error) throw error.error;
 
     const {
       appModulesOrgListMap,
@@ -113,7 +118,7 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     if (configsResponse.error) throw configsResponse.error;
 
     // get entity key id of entity in global notifications entity set
-    const notificationsRes = yield call(getNotificationsEntityWorker, getNotificationsEntity());
+    const notificationsRes = yield call(getNotificationsEntityWorker, getNotificationsEKID());
     if (notificationsRes.error) throw notificationsRes.error;
 
     // get studies
