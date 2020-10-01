@@ -31,7 +31,7 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
             type: 'string',
             title: (pageNum === FIRST_ACTIVITY_PAGE
               ? `What did your child start doing at ${formattedTime}?`
-              : `What time did your child start doing at ${formattedTime} after they `
+              : `What did your child start doing at ${formattedTime} after they `
                 + `finished ${(prevActivity)}?`),
             enum: PRIMARY_ACTIVITIES
           },
