@@ -2,6 +2,9 @@
  * @flow
  */
 
+import merge from 'lodash/merge';
+import set from 'lodash/set';
+import update from 'lodash/update';
 import { AuthUtils } from 'lattice-auth';
 import { LangUtils, Logger, ValidationUtils } from 'lattice-utils';
 
@@ -39,10 +42,15 @@ const getBaseUrl = () => {
   return ENV_URLS.get(PRODUCTION);
 };
 
-// @dataType RAW : <baseUrl>/study/participant/data/<studyId>/<participantEntityKeyId>?fileType=csv
-// @dataType RAW : <baseUrl>/study/participant/data/<studyId>/<participantEntityKeyId/preprocessed>?fileType=csv
+// @dataType RAW : <baseUrl>/study/participant/data/<orgId>/<studyId>/<participantEntityKeyId>?fileType=csv
+// @dataType RAW : <baseUrl>/study/participant/data/<orgId>/<studyId>/<participantEntityKeyId/preprocessed>?fileType=csv
 
-const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityKeyId :UUID, studyId :UUID) => {
+const getParticipantDataUrl = (
+  dataType :ParticipantDataType,
+  participantEntityKeyId :UUID,
+  studyId :UUID,
+  orgId :UUID
+) => {
   // validation
   if (!isValidUUID(participantEntityKeyId)) {
     LOG.error('participantEntityKeyId must be a valid UUID', participantEntityKeyId);
@@ -54,7 +62,7 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
   }
 
   const baseUrl = getBaseUrl();
-  const csrfToken = AuthUtils.getCSRFToken();
+  const csrfToken = AuthUtils.getCSRFToken() ?? '';
   let dataTypePath;
 
   switch (dataType) {
@@ -70,16 +78,21 @@ const getParticipantDataUrl = (dataType :ParticipantDataType, participantEntityK
   }
 
   return `${baseUrl}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
-  + `${studyId}/${participantEntityKeyId}${dataTypePath}`
+  + `${orgId}/${studyId}/${participantEntityKeyId}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
 
 };
 
-const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
+const getParticipantUserAppsUrl = (participantId :string, studyId :UUID, orgId :UUID) => {
 
   if (!isValidUUID(studyId)) {
     LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(orgId)) {
+    LOG.error('orgId must be a valiud UUID', orgId);
     return null;
   }
 
@@ -90,13 +103,17 @@ const getParticipantUserAppsUrl = (participantId :string, studyId :UUID) => {
 
   const baseUrl = getBaseUrl();
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${PARTICIPANT}/${DATA}`
-    + `/${studyId}/${participantId}/apps`;
+  return `${baseUrl}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${participantId}/apps`;
 };
 
-const getDeleteParticipantPath = (participantId :string, studyId :UUID) => {
+const getDeleteParticipantPath = (orgId :UUID, participantId :string, studyId :UUID) => {
   if (!isValidUUID(studyId)) {
     LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(orgId)) {
+    LOG.error('orgId must be a valiud UUID', orgId);
     return null;
   }
 
@@ -105,12 +122,17 @@ const getDeleteParticipantPath = (participantId :string, studyId :UUID) => {
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${studyId}/${participantId}`;
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${orgId}/${studyId}/${participantId}`;
 };
 
-const getQuestionnaireUrl = (studyId :UUID, questionnaireEKID :UUID) => {
+const getQuestionnaireUrl = (orgId :UUID, studyId :UUID, questionnaireEKID :UUID) => {
   if (!isValidUUID(studyId)) {
     LOG.error('studyId must be a valid UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(orgId)) {
+    LOG.error('orgId must be a valid UUID', orgId);
     return null;
   }
 
@@ -119,12 +141,17 @@ const getQuestionnaireUrl = (studyId :UUID, questionnaireEKID :UUID) => {
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
 };
 
-const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
+const getSubmitQuestionnaireUrl = (orgId :UUID, studyId :UUID, participantId :string) => {
   if (!isValidUUID(studyId)) {
     LOG.error('studyId must be a valiud UUID', studyId);
+    return null;
+  }
+
+  if (!isValidUUID(orgId)) {
+    LOG.error('orgId must be a valiud UUID', orgId);
     return null;
   }
 
@@ -133,7 +160,43 @@ const getSubmitQuestionnaireUrl = (studyId :UUID, participantId :string) => {
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
+};
+
+const processAppConfigs = (appConfigsByModule :Object) => {
+
+  const organizations = {};
+  const entitySetIdsByOrgId = {};
+  const appModulesOrgListMap = Object.entries(appConfigsByModule).reduce((obj, [key :string, val :Object]) => ({
+    // $FlowFixMe
+    [key]: val.data.map((config) => config.organization.id),
+    ...obj
+  }), {});
+
+  Object.entries(appConfigsByModule).forEach(([appModule, val]) => {
+    // $FlowFixMe
+    const configs = val.data;
+    configs.forEach((config) => {
+      const { organization } = config;
+      const { title, id: orgId } = organization;
+
+      set(organizations, orgId, { title, id: orgId });
+
+      const entities = Object.entries(config.config).reduce((result, [fqn, entity]) => ({
+        // $FlowFixMe
+        [fqn]: entity.entitySetId,
+        ...result,
+      }), {});
+
+      update(entitySetIdsByOrgId, [appModule, orgId], (prev) => merge(prev, entities));
+    });
+  });
+
+  return {
+    entitySetIdsByOrgId,
+    organizations,
+    appModulesOrgListMap
+  };
 };
 
 export {
@@ -142,5 +205,6 @@ export {
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
   getSubmitQuestionnaireUrl,
+  processAppConfigs,
   getDeleteParticipantPath,
 };
