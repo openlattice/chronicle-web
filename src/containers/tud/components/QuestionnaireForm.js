@@ -14,11 +14,12 @@ import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
+  activityRequiresFollowup,
   applyCustomValidation,
   createFormSchema,
-  createUiSchema,
+  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey
+  selectTimeByPageAndKey,
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -61,12 +62,12 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     uiSchema = cloneDeep(DaySpanSchema.uiSchema);
   }
   else {
-    schema = createFormSchema(page, pagedData);
-    uiSchema = createUiSchema(page);
+    const formSchema = createFormSchema(page, pagedData);
+    schema = formSchema.schema;
+    uiSchema = formSchema.uiSchema;
   }
 
   const handleNext = () => {
-    //
     validateAndSubmit();
   };
 
@@ -84,7 +85,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
             const label = parent.previousSibling;
             if (label) {
               // $FlowFixMe
-              label.innerHTML = `When did your child stop ${currentActivity.description}?`;
+              label.innerHTML = `When did your child stop ${currentActivity}?`;
             }
           }
         }
@@ -96,16 +97,18 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     applyCustomValidation(formData, errors, page)
   );
 
-  const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, pagedData);
+  const prevActivity = selectPrimaryActivityByPage(page - 2, pagedData);
+  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, pagedData);
   const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, pagedData);
 
-  const lastPage = prevEndTime.isValid && dayEndTime.isValid
-    && prevEndTime.equals(dayEndTime);
+  const isSummaryPage = prevEndTime.isValid && dayEndTime.isValid
+    && prevEndTime.equals(dayEndTime)
+    && (!activityRequiresFollowup(prevActivity) || pageHasFollowupQuestions(pagedData, page - 2));
 
   return (
     <>
       {
-        lastPage ? (
+        isSummaryPage ? (
           <TimeUseSummary
               formData={pagedData}
               goToPage={setPage} />
@@ -133,7 +136,7 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
             color="primary"
             onClick={handleNext}>
           {
-            lastPage ? 'Submit' : 'Next'
+            isSummaryPage ? 'Submit' : 'Next'
           }
         </Button>
       </ButtonRow>
