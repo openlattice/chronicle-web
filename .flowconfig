@@ -23,3 +23,6 @@
 
 [libs]
 ./src/types.js.flow
+
+[options]
+esproposal.optional_chaining=enable
