@@ -57,7 +57,7 @@ function* getConfigsWorker(action :SequenceAction) :Saga<*> {
     );
 
     // if core module is missing throw an error
-    if (!Object.keys(appModulesRes).includes(AppModules.CHRONICLE_CORE)) {
+    if (appModulesRes[AppModules.CHRONICLE_CORE].error) {
       throw ERR_MISSING_CORE_MODULE;
     }
 
