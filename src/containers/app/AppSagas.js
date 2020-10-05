@@ -8,23 +8,96 @@ import {
   put,
   takeEvery,
 } from '@redux-saga/core/effects';
+import { push } from 'connected-react-router';
+import { AccountUtils } from 'lattice-auth';
+import { AppApiActions, AppApiSagas } from 'lattice-sagas';
 import { Logger } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
-import { INITIALIZE_APPLICATION, initializeApplication } from './AppActions';
+import {
+  GET_CONFIGS,
+  INITIALIZE_APPLICATION,
+  SWITCH_ORGANIZATION,
+  getConfigs,
+  initializeApplication,
+  switchOrganization
+} from './AppActions';
 
-import {
-  getAllEntitySetIds,
-  getEntityDataModelTypes,
-} from '../../core/edm/EDMActions';
-import {
-  getAllEntitySetIdsWorker,
-  getEntityDataModelTypesWorker,
-} from '../../core/edm/EDMSagas';
-import { getGlobalNotificationsEKID, getStudies } from '../studies/StudiesActions';
-import { getGlobalNotificationsEKIDWorker, getStudiesWorker } from '../studies/StudiesSagas';
+import * as AppModules from '../../utils/constants/AppModules';
+import * as Routes from '../../core/router/Routes';
+import { getEntityDataModelTypes } from '../../core/edm/EDMActions';
+import { getEntityDataModelTypesWorker } from '../../core/edm/EDMSagas';
+import { processAppConfigs } from '../../utils/AppUtils';
+import { ERR_MISSING_CORE_MODULE } from '../../utils/Errors';
+import { getNotificationsEKID, getStudies } from '../studies/StudiesActions';
+import { getNotificationsEntityWorker, getStudiesWorker } from '../studies/StudiesSagas';
+
+const { getApp, getAppConfigs } = AppApiActions;
+const { getAppWorker, getAppConfigsWorker } = AppApiSagas;
 
 const LOG = new Logger('AppSagas');
+
+function* getConfigsWorker(action :SequenceAction) :Saga<*> {
+  const workerResponse = {};
+  try {
+
+    yield put(getConfigs.request(action.id));
+
+    // get app modules
+    const appModulesRes = yield all(
+      [
+        AppModules.CHRONICLE_CORE,
+        AppModules.DATA_COLLECTION,
+        AppModules.QUESTIONNAIRES
+      ].reduce((obj, moduleName :string) => ({
+        [moduleName]: call(getAppWorker, getApp(moduleName)),
+        ...obj
+      }), {})
+    );
+
+    // if core module is missing throw an error
+    if (appModulesRes[AppModules.CHRONICLE_CORE].error) {
+      throw ERR_MISSING_CORE_MODULE;
+    }
+
+    const appConfigsRes = yield all(
+      Object.values(appModulesRes).reduce((obj, res :Object) => ({
+        [res.data.name]: call(getAppConfigsWorker, getAppConfigs(res.data.id)),
+        ...obj
+      }), {})
+    );
+
+    // check if any of the responses has error
+    // $FlowFixMe
+    const error :?Object = Object.values(appModulesRes).flat().find((item) => Object.keys(item).includes('error'));
+    if (error) throw error.error;
+
+    const {
+      appModulesOrgListMap,
+      entitySetIdsByOrgId,
+      organizations,
+    } = processAppConfigs(appConfigsRes);
+
+    yield put(getConfigs.success(action.id, {
+      entitySetIdsByOrgId,
+      appModulesOrgListMap,
+      organizations,
+    }));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+    yield put(getConfigs.failure(action.id));
+  }
+
+  return workerResponse;
+}
+
+function* getConfigsWatcher() :Saga<*> {
+
+  yield takeEvery(GET_CONFIGS, getConfigsWorker);
+}
 
 /*
  *
@@ -36,21 +109,21 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
 
   try {
     yield put(initializeApplication.request(action.id));
-    const responses :Object[] = yield all([
+
+    const [edmResponse, configsResponse] :Object[] = yield all([
       call(getEntityDataModelTypesWorker, getEntityDataModelTypes()),
-      call(getAllEntitySetIdsWorker, getAllEntitySetIds()),
-      // ...any other required requests
+      call(getConfigsWorker, getConfigs())
     ]);
-    responses.forEach((res) => {
-      if (res.error) throw res.error;
-    });
-    // get all studies only after getting entitySetIds
-    let response = yield call(getStudiesWorker, getStudies());
-    if (response.error) throw response.error;
+    if (edmResponse.error) throw edmResponse.error;
+    if (configsResponse.error) throw configsResponse.error;
 
     // get entity key id of entity in global notifications entity set
-    response = yield call(getGlobalNotificationsEKIDWorker, getGlobalNotificationsEKID());
-    if (response.error) throw response.error;
+    const notificationsRes = yield call(getNotificationsEntityWorker, getNotificationsEKID());
+    if (notificationsRes.error) throw notificationsRes.error;
+
+    // get studies
+    const studiesRes = yield call(getStudiesWorker, getStudies());
+    if (studiesRes.error) throw studiesRes.error;
 
     yield put(initializeApplication.success(action.id));
   }
@@ -68,7 +141,29 @@ function* initializeApplicationWatcher() :Generator<*, *, *> {
   yield takeEvery(INITIALIZE_APPLICATION, initializeApplicationWorker);
 }
 
+function* switchOrganizationWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(switchOrganization.request(action.id));
+
+    AccountUtils.storeOrganizationId(action.value);
+    yield put(push(Routes.ROOT));
+    yield call(initializeApplicationWorker, initializeApplication());
+
+    yield put(switchOrganization.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(switchOrganization.failure(action.id));
+  }
+}
+
+function* switchOrganizationWatcher() :Saga<*> {
+  yield takeEvery(SWITCH_ORGANIZATION, switchOrganizationWorker);
+}
+
 export {
+  getConfigsWatcher,
   initializeApplicationWatcher,
   initializeApplicationWorker,
+  switchOrganizationWatcher,
 };

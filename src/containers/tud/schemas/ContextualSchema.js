@@ -239,7 +239,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
 
 const createUiSchema = (pageNum :number, selectedActivity :string) => {
   const followupUiOrder :string[] = getFollowupUiOrder(selectedActivity);
-  const followUpFields = [BOOK_TYPE, BOOK_TITLE, DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_ACTIVITY];
+  const followUpFields = [BOOK_TYPE, BOOK_TITLE, DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_NAME];
 
   const otherFollowupOrder = followUpFields.filter((field) => !followupUiOrder.includes(field));
   return {

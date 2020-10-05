@@ -5,10 +5,10 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { Map, Set } from 'immutable';
+import { List, Map, Set } from 'immutable';
 import { Colors } from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
 
@@ -16,15 +16,24 @@ import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
 import QuestionnairesContainer from '../questionnaires/QuestionnairesContainer';
+import * as AppModules from '../../utils/constants/AppModules';
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
-import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
-const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
+const {
+  NOTIFICATIONS_ENABLED_STUDIES,
+  STUDIES,
+} = STUDIES_REDUX_CONSTANTS;
+
+const {
+  APP_MODULES_ORG_LIST_MAP,
+  SELECTED_ORG_ID
+} = APP_REDUX_CONSTANTS;
 
 const { NEUTRAL, PURPLE } = Colors;
 
@@ -77,16 +86,21 @@ const StudyDetailsContainer = (props :Props) => {
   } = props;
   const dispatch = useDispatch();
 
-  const studyUUID :UUID = getIdFromMatch(match) || '';
+  const studyId :UUID = getIdFromMatch(match) || '';
 
-  const study = useSelector((state) => state.getIn([STUDIES, STUDIES, studyUUID], Map()));
+  const study = useSelector((state) => state.getIn([STUDIES, STUDIES, studyId], Map()));
   const notificationsEnabledStudies = useSelector(
     (state) => state.getIn([STUDIES, NOTIFICATIONS_ENABLED_STUDIES], Set())
   );
+  const questionnaireModuleOrgs = useSelector(
+    (state) => state.getIn(['app', APP_MODULES_ORG_LIST_MAP, AppModules.QUESTIONNAIRES], List())
+  );
 
-  const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyUUID);
+  const selectedOrgId = useSelector((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
-  if (!study) {
+  const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyId);
+
+  if (study.isEmpty()) {
     dispatch(goToRoot());
   }
 
@@ -96,26 +110,38 @@ const StudyDetailsContainer = (props :Props) => {
         { study.getIn([FULL_NAME_FQN, 0]) }
       </StudyNameWrapper>
       <Tabs>
-        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyUUID)}>
+        <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyId)}>
           Study Details
         </TabLink>
-        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyUUID)}>
+        <TabLink exact to={Routes.PARTICIPANTS.replace(Routes.ID_PARAM, studyId)}>
           Participants
         </TabLink>
-        <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyUUID)}>
-          Questionnaires
-        </TabLink>
+        {
+          questionnaireModuleOrgs.includes(selectedOrgId) && (
+            <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyId)}>
+              Questionnaires
+            </TabLink>
+          )
+        }
       </Tabs>
       <Switch>
         <Route
+            exact
             path={Routes.PARTICIPANTS}
             render={() => <StudyParticipants study={study} />} />
         <Route
-            path={Routes.QUESTIONNAIRES}
-            render={() => <QuestionnairesContainer study={study} />} />
-        <Route
+            exact
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
+        {
+          questionnaireModuleOrgs.includes(selectedOrgId) && (
+            <Route
+                path={Routes.QUESTIONNAIRES}
+                render={() => <QuestionnairesContainer study={study} />} />
+          )
+        }
+        <Redirect to={Routes.STUDY} />
+
       </Switch>
     </>
   );

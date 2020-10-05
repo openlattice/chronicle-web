@@ -4,9 +4,19 @@ import { RequestStates } from 'redux-reqseq';
 
 import reducer from './AppReducer';
 import {
+  GET_CONFIGS,
   INITIALIZE_APPLICATION,
-  initializeApplication,
+  initializeApplication
 } from './AppActions';
+
+import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+
+const {
+  APP_MODULES_ORG_LIST_MAP,
+  ENTITY_SET_IDS_BY_ORG_ID,
+  ORGS,
+  SELECTED_ORG_ID,
+} = APP_REDUX_CONSTANTS;
 
 const { REQUEST_STATE } = ReduxConstants;
 
@@ -25,9 +35,13 @@ describe('AppReducer', () => {
   test('INITIAL_STATE', () => {
     expect(INITIAL_STATE).toBeInstanceOf(Map);
     expect(INITIAL_STATE.toJS()).toEqual({
-      [INITIALIZE_APPLICATION]: {
-        requestState: RequestStates.STANDBY,
-      },
+      [GET_CONFIGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+      [INITIALIZE_APPLICATION]: { [REQUEST_STATE]: RequestStates.STANDBY },
+
+      [APP_MODULES_ORG_LIST_MAP]: {},
+      [ENTITY_SET_IDS_BY_ORG_ID]: {},
+      [ORGS]: {},
+      [SELECTED_ORG_ID]: '',
     });
   });
 
