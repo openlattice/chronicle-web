@@ -45,7 +45,7 @@ const SCHEMA_FIELDS_TITLES = {
   [SLEEP_ARRANGEMENT]: 'Last night, what was your child\'s sleeping arrangement?',
   [SLEEP_PATTERN]: 'Last night, was your child\'s sleep pattern typical?',
   [TYPICAL_DAY_FLAG]: 'An important part of this project is to find out how children spend their time '
-      + 'during the week. Was yesterday a typical weekday for you and your child? A typical day would include '
+      + 'during the week. Was yesterday a typical weekday for you and your child? A non-typical day would include '
       + 'a school closing, being on vacation, or being home sick.',
   [WAKE_UP_COUNT]: 'Last night, how many times did your child wake up in the middle of the night?'
 };
