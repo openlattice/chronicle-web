@@ -11,9 +11,10 @@ import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import {
   ADULT_MEDIA_PURPOSES,
   ADULT_MEDIA_USAGE_OPTIONS,
+  BG_MEDIA_PROPORTION_OPTIONS,
   CAREGIVERS,
   LOCATION_CATEGORIES,
-  PROPERTY_CONSTS
+  PROPERTY_CONSTS,
 } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -24,10 +25,9 @@ const {
   ADULT_MEDIA,
   ADULT_MEDIA_PROPORTION,
   ADULT_MEDIA_PURPOSE,
-  MEDIA_AGE,
-  MEDIA_NAME,
   BG_AUDIO,
   BG_AUDIO_TYPE,
+  BG_MEDIA_PROPORTION,
   BG_TV,
   BG_TV_AGE,
   BOOK_TITLE,
@@ -37,10 +37,12 @@ const {
   FOLLOWUP_COMPLETED,
   LOCATION,
   MEDIA_ACTIVITY,
+  MEDIA_AGE,
+  MEDIA_NAME,
   OTHER_ACTIVITY,
   SECONDARY_ACTIVITY,
 } = PROPERTY_CONSTS;
-const { MEDIA_USE, READING } = ACTIVITY_NAMES;
+const { MEDIA_USE, NAPPING, READING } = ACTIVITY_NAMES;
 
 const getBgAudioSchema = (selectedActivity :string) => ({
   properties: {
@@ -118,8 +120,16 @@ const getBgAudioSchema = (selectedActivity :string) => ({
               },
               uniqueItems: true
             },
+            ...(selectedActivity === NAPPING) && {
+              [BG_MEDIA_PROPORTION]: {
+                type: 'string',
+                title: 'Approximately'
+                  + ' what proportion of time that the child was napping was the background media in use?',
+                enum: BG_MEDIA_PROPORTION_OPTIONS
+              }
+            }
           },
-          required: [BG_AUDIO_TYPE]
+          required: [BG_AUDIO_TYPE, BG_MEDIA_PROPORTION]
         }
       ]
     }
@@ -223,8 +233,16 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
                     },
                     uniqueItems: true
                   },
+                  ...(selectedActivity === NAPPING) && {
+                    [BG_MEDIA_PROPORTION]: {
+                      type: 'string',
+                      title: 'Approximately'
+                        + ' what proportion of time that the child was napping was the background media in use?',
+                      enum: BG_MEDIA_PROPORTION_OPTIONS
+                    }
+                  }
                 },
-                required: [BG_TV_AGE],
+                required: [BG_TV_AGE, BG_MEDIA_PROPORTION],
               }
             ]
           },
@@ -248,7 +266,7 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
       'ui:order': [FOLLOWUP_COMPLETED, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
         LOCATION, CAREGIVER, ...followupUiOrder,
         OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...otherFollowupOrder, BG_TV, BG_TV_AGE,
-        BG_AUDIO, BG_AUDIO_TYPE, ADULT_MEDIA, ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION],
+        BG_AUDIO, BG_AUDIO_TYPE, BG_MEDIA_PROPORTION, ADULT_MEDIA, ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION],
 
       [FOLLOWUP_COMPLETED]: {
         classNames: 'hidden'
@@ -273,6 +291,10 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
       [BG_TV_AGE]: {
         classNames: 'column-span-12',
         'ui:widget': 'OtherRadioWidget',
+      },
+      [BG_MEDIA_PROPORTION]: {
+        classNames: 'column-span-12',
+        'ui:widget': 'radio'
       },
       [ADULT_MEDIA]: {
         classNames: 'column-span-12',
