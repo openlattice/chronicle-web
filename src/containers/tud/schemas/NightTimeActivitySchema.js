@@ -150,9 +150,15 @@ const createSchema = (pageNum :number) => ({
                   },
                   uniqueItems: true,
                   minItems: 1
+                },
+                [BG_MEDIA_PROPORTION]: {
+                  type: 'string',
+                  title: 'Approximately'
+                    + ' what proportion of time that the child was sleeping was the background media in use?',
+                  enum: BG_MEDIA_PROPORTION_OPTIONS
                 }
               },
-              required: [BG_TV_AGE]
+              required: [BG_TV_AGE, BG_MEDIA_PROPORTION]
             }
           ]
         }
