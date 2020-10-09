@@ -132,7 +132,7 @@ const createSchema = (pageNum :number) => ({
             {
               properties: {
                 [BG_TV]: {
-                  enum: ['No', "Don't Know"]
+                  enum: ['No', "Don't know"]
                 },
               }
             },
@@ -146,7 +146,7 @@ const createSchema = (pageNum :number) => ({
                   type: 'array',
                   items: {
                     type: 'string',
-                    enum: ["Child's age", 'Older children', 'Younger children', 'Adults', 'Don`t know'],
+                    enum: ["Child's age", 'Older children', 'Younger children', 'Adults', 'Don\'t know'],
                   },
                   uniqueItems: true,
                   minItems: 1

@@ -6,7 +6,6 @@ import set from 'lodash/set';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
-import { useRequestState } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -14,10 +13,7 @@ import type { RequestState } from 'redux-reqseq';
 
 import TimeUseSummary from './TimeUseSummary';
 
-import {
-  SUBMIT_TUD_DATA,
-  submitTudData
-} from '../TimeUseDiaryActions';
+import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
@@ -97,9 +93,15 @@ type Props = {
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
+  submitRequestState :?RequestState
 };
 
-const QuestionnaireForm = ({ pagedProps, studyId, participantId } :Props) => {
+const QuestionnaireForm = ({
+  pagedProps,
+  participantId,
+  studyId,
+  submitRequestState
+} :Props) => {
 
   const {
     formRef,
@@ -112,9 +114,6 @@ const QuestionnaireForm = ({ pagedProps, studyId, participantId } :Props) => {
   } = pagedProps;
 
   const dispatch = useDispatch();
-
-  // selectors
-  const submitTudDataRS :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
 
   const formSchema = createFormSchema(pagedData, page);
   const { schema, uiSchema } = formSchema;
@@ -182,7 +181,7 @@ const QuestionnaireForm = ({ pagedProps, studyId, participantId } :Props) => {
         </Button>
         <Button
             color="primary"
-            isLoading={submitTudDataRS === RequestStates.PENDING}
+            isLoading={submitRequestState === RequestStates.PENDING}
             onClick={handleNext}>
           {
             isSummaryPage ? 'Submit' : 'Next'

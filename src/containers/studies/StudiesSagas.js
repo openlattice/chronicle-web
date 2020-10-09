@@ -96,8 +96,8 @@ const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   DATE_ENROLLED,
-  DATE_FIRST_PUSHED,
-  DATE_LAST_PUSHED,
+  DATETIME_START_FQN,
+  DATETIME_END_FQN,
   DATE_LOGGED,
   DESCRIPTION_FQN,
   EVENT_COUNT,
@@ -340,8 +340,8 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       const participant = {
         ...get(neighbor, 'neighborDetails'),
         [DATE_ENROLLED.toString()]: metadata.getIn([participantEKID, DATE_ENROLLED]),
-        [DATE_FIRST_PUSHED.toString()]: metadata.getIn([participantEKID, DATE_FIRST_PUSHED]),
-        [DATE_LAST_PUSHED.toString()]: metadata.getIn([participantEKID, DATE_LAST_PUSHED]),
+        [DATETIME_START_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_START_FQN]),
+        [DATETIME_END_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_END_FQN]),
         [EVENT_COUNT.toString()]: [countValue],
         [PARTICIPATED_IN_EKID]: getIn(neighbor, ['associationDetails', OPENLATTICE_ID_FQN]),
         [STATUS.toString()]: getIn(neighbor, ['associationDetails', STATUS], [ENROLLED]),

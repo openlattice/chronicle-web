@@ -142,12 +142,15 @@ function submitQuestionnaire(
     const url = getSubmitQuestionnaireUrl(orgId, studyId, participantId);
     if (!url) return reject(new Error('Invalid url'));
 
-    return axios({
-      method: 'post',
-      url,
-      data: questionAnswerMapping
-    }).then((result) => resolve(result))
-      .catch((error) => reject(error));
+    // return axios({
+    //   method: 'post',
+    //   url,
+    //   data: questionAnswerMapping
+    // }).then((result) => resolve(result))
+    //   .catch((error) => reject(error));
+    return setTimeout(() => {
+      resolve();
+    }, 4000);
   });
 }
 
@@ -162,7 +165,7 @@ function submitTudData(studyId :UUID, participantId :string, requestBody :Object
     if (!url) return reject(new Error('Invalid url'));
 
     return axios({
-      method: 'get',
+      method: 'post',
       url,
       data: requestBody
     }).then((result) => resolve(result))
