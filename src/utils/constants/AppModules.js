@@ -2,7 +2,7 @@
 
 const CHRONICLE_CORE = 'chronicle';
 const DATA_COLLECTION = 'chronicle_data_collection';
-const QUESTIONNAIRES = 'chronicle_questionnaires';
+const QUESTIONNAIRES = 'chronicle_surveys';
 
 export {
   CHRONICLE_CORE,

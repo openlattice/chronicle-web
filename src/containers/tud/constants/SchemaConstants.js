@@ -16,7 +16,7 @@ const PROPERTY_CONSTS = {
   BOOK_TYPE: 'bookType',
   CAREGIVER: 'careGiver',
   DAY_END_TIME: 'dayEndTime',
-  DAY_OF_WEEK: 'daysOfWeek',
+  DAY_OF_WEEK: 'dayOfWeek',
   DAY_START_TIME: 'dayStartTime',
   DEVICE: 'device',
   FOLLOWUP_COMPLETED: 'followUpCompleted',
