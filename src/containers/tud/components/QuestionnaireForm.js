@@ -5,7 +5,7 @@ import React from 'react';
 import set from 'lodash/set';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
-import { Button } from 'lattice-ui-kit';
+import { Button, Typography } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 
 import TimeUseSummary from './TimeUseSummary';
@@ -27,7 +27,7 @@ const {
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME,
-  FOLLOWUP_COMPLETED,
+  HAS_FOLLOWUP_QUESTIONS,
   SLEEP_ARRANGEMENT,
 } = PROPERTY_CONSTS;
 
@@ -74,7 +74,7 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
     const sectionData = pagedData[psk];
 
     // current page contains followup questions for selected primary activity
-    if (Object.keys(sectionData).includes(FOLLOWUP_COMPLETED)) {
+    if (Object.keys(sectionData).includes(HAS_FOLLOWUP_QUESTIONS)) {
       set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_END_TIME], formattedTime);
     }
 
@@ -83,6 +83,13 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
       set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_START_TIME], formattedTime);
     }
   }
+};
+
+const schemaHasFollowupQuestions = (schema :Object, page :number) => {
+  const psk = getPageSectionKey(page, 0);
+  const { properties } = schema.properties[psk];
+
+  return Object.keys(properties).includes(HAS_FOLLOWUP_QUESTIONS);
 };
 
 type Props = {
@@ -129,6 +136,10 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     applyCustomValidation(formData, errors, page)
   );
 
+  const schemaHasFollowup = schemaHasFollowupQuestions(schema, page);
+  const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
+  const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_START_TIME, pagedData);
+
   return (
     <>
       {
@@ -137,16 +148,31 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
               formData={pagedData}
               goToPage={setPage} />
         ) : (
-          <Form
-              formData={pagedData}
-              hideSubmit
-              noPadding
-              onChange={onChange}
-              onSubmit={onNext}
-              ref={formRef}
-              schema={schema}
-              uiSchema={uiSchema}
-              validate={validate} />
+          <>
+            {
+              schemaHasFollowup && (
+                <>
+                  <Typography variant="body2">
+                    Now, let&apos;s talk about what your child did while
+                    <strong> { prevActivity } </strong> at
+                    <strong> { prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)}. </strong>
+                  </Typography>
+                  <br />
+                </>
+              )
+            }
+            <Form
+                formData={pagedData}
+                hideSubmit
+                noPadding
+                onChange={onChange}
+                onSubmit={onNext}
+                ref={formRef}
+                schema={schema}
+                uiSchema={uiSchema}
+                validate={validate} />
+
+          </>
         )
       }
 

@@ -34,7 +34,7 @@ const {
   BOOK_TYPE,
   CAREGIVER,
   DEVICE,
-  FOLLOWUP_COMPLETED,
+  HAS_FOLLOWUP_QUESTIONS,
   LOCATION,
   MEDIA_ACTIVITY,
   MEDIA_AGE,
@@ -164,7 +164,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
         type: 'object',
         title: '',
         properties: {
-          [FOLLOWUP_COMPLETED]: {
+          [HAS_FOLLOWUP_QUESTIONS]: {
             type: 'boolean',
             default: true
           },
@@ -263,12 +263,12 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
   return {
     [getPageSectionKey(pageNum, 0)]: {
       classNames: 'column-span-12 grid-container',
-      'ui:order': [FOLLOWUP_COMPLETED, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
+      'ui:order': [HAS_FOLLOWUP_QUESTIONS, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
         LOCATION, CAREGIVER, ...followupUiOrder,
         OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...otherFollowupOrder, BG_TV, BG_TV_AGE,
         BG_AUDIO, BG_AUDIO_TYPE, BG_MEDIA_PROPORTION, ADULT_MEDIA, ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION],
 
-      [FOLLOWUP_COMPLETED]: {
+      [HAS_FOLLOWUP_QUESTIONS]: {
         classNames: 'hidden'
       },
       [ACTIVITY_NAME]: {

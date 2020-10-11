@@ -20,7 +20,7 @@ const {
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME,
-  FOLLOWUP_COMPLETED
+  HAS_FOLLOWUP_QUESTIONS
 } = PROPERTY_CONSTS;
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -39,7 +39,7 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string 
 };
 
 const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
-  formData, [getPageSectionKey(pageNum, 0), FOLLOWUP_COMPLETED], false
+  formData, [getPageSectionKey(pageNum, 0), HAS_FOLLOWUP_QUESTIONS], false
 );
 
 const getIsDayTimeCompleted = (formData :Object, page :number) => {
