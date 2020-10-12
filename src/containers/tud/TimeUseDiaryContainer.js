@@ -23,7 +23,7 @@ import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
 
-const successText = 'Thank you for completing the Time Use Diary survey. Your responses have been recorded';
+const successText = 'Thank you for completing the Time Use Diary survey. Your responses have been recorded.';
 
 const TimeUseDiaryContainer = () => {
   const location = useLocation();
