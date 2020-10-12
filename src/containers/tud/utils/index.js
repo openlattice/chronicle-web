@@ -200,6 +200,16 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   return errors;
 };
 
+const stringifyValue = (value :any) => {
+  if (typeof value === 'boolean') {
+    if (value) {
+      return 'true';
+    }
+    return 'false';
+  }
+  return value;
+};
+
 const createSubmitRequestBody = (formData :Object) => {
   let result = [];
 
@@ -229,13 +239,14 @@ const createSubmitRequestBody = (formData :Object) => {
         .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, FOLLOWUP_COMPLETED, false)))
         .filter((entry) => !entriesToOmit.includes(entry[0]))
         .map(([key, value]) => {
+          const stringVal = stringifyValue(value);
           const entity = {
-            [VALUES_FQN.toString()]: [value],
+            [VALUES_FQN.toString()]: Array.isArray(stringVal) ? stringVal : [stringVal],
             [ID_FQN.toString()]: [key],
             [TITLE_FQN.toString()]: [get(QUESTION_TITLE_LOOKUP, key, key)],
             ...(startTime && endTime) && {
-              [DATETIME_START_FQN.toString()]: [startTime.toLocaleString(DateTime.DATETIME_MED)],
-              [DATETIME_END_FQN.toString()]: [endTime.toLocaleString(DateTime.DATETIME_MED)]
+              [DATETIME_START_FQN.toString()]: [startTime],
+              [DATETIME_END_FQN.toString()]: [endTime]
             }
           };
           return entity;

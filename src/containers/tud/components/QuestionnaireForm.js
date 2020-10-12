@@ -175,7 +175,7 @@ const QuestionnaireForm = ({
 
       <ButtonRow>
         <Button
-            disabled={page === 0}
+            disabled={page === 0 || submitRequestState === RequestStates.PENDING}
             onClick={onBack}>
           Back
         </Button>
