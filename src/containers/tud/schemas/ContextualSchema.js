@@ -129,7 +129,7 @@ const getBgAudioSchema = (selectedActivity :string) => ({
               }
             }
           },
-          required: [BG_AUDIO_TYPE, BG_MEDIA_PROPORTION]
+          required: [BG_AUDIO_TYPE, ...(selectedActivity === NAPPING ? [BG_MEDIA_PROPORTION] : [])]
         }
       ]
     }
@@ -242,7 +242,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
                     }
                   }
                 },
-                required: [BG_TV_AGE, BG_MEDIA_PROPORTION],
+                required: [BG_TV_AGE, ...(selectedActivity === NAPPING ? [BG_MEDIA_PROPORTION] : [])],
               }
             ]
           },
