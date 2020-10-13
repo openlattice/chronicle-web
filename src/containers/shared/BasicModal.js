@@ -1,9 +1,10 @@
 // @flow
 
 import React from 'react';
-import { Modal } from 'lattice-ui-kit';
+import type { Node } from 'react';
 
 import styled from 'styled-components';
+import { Modal } from 'lattice-ui-kit';
 
 const ModalBody = styled.div`
   max-width: 400px;
@@ -12,12 +13,12 @@ const ModalBody = styled.div`
 type Props ={
   handleOnClose :() => void;
   isVisible :boolean;
-  contentText :string;
+  children ?:Node;
   title :string;
 };
 
 const BasicModal = ({
-  contentText,
+  children,
   handleOnClose,
   isVisible,
   title
@@ -28,11 +29,13 @@ const BasicModal = ({
       textSecondary="Close"
       textTitle={title}>
     <ModalBody>
-      <p>
-        { contentText }
-      </p>
+      { children }
     </ModalBody>
   </Modal>
 );
+
+BasicModal.defaultProps = {
+  children: undefined
+};
 
 export default BasicModal;

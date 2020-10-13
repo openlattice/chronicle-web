@@ -1,11 +1,14 @@
 // @flow
 
 import React from 'react';
+import type { Node } from 'react';
+
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Colors,
+  Typography
 } from 'lattice-ui-kit';
 
 const { NEUTRAL, GREEN } = Colors;
@@ -34,20 +37,18 @@ const Wrapper = styled.div`
   }
 `;
 type Props = {
-  contentText ?:string
+  children ?:Node;
 }
-const SubmissionSuccessful = ({ contentText } :Props) => (
+const SubmissionSuccessful = ({ children } :Props) => (
   <Wrapper>
     <FontAwesomeIcon color={GREEN.G300} icon={faCheckCircle} size="3x" />
-    <h3> Submission Successful! </h3>
-    <p>
-      { contentText }
-    </p>
+    <Typography variant="h3"> Submission Successful! </Typography>
+    { children }
   </Wrapper>
 );
 
 SubmissionSuccessful.defaultProps = {
-  contentText: 'Thank you for participating in survey. Your responses have been successfully recorded'
+  children: undefined
 };
 
 export default SubmissionSuccessful;

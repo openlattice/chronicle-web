@@ -9,7 +9,8 @@ import {
   AppContentWrapper,
   AppHeaderWrapper,
   Card,
-  CardSegment
+  CardSegment,
+  Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
 import { useLocation } from 'react-router';
@@ -22,8 +23,6 @@ import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
-
-const successText = 'Thank you for completing the Time Use Diary survey. Your responses have been recorded.';
 
 const TimeUseDiaryContainer = () => {
   const location = useLocation();
@@ -48,13 +47,20 @@ const TimeUseDiaryContainer = () => {
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
       <AppContentWrapper>
         <BasicModal
-            contentText="An error occurred while trying to submit survey. Please try again later."
             handleOnClose={() => setIsModalVisible(false)}
             isVisible={isModalVisible}
-            title="Submission Error" />
+            title="Submission Error">
+          <p> An error occurred while trying to submit survey. Please try again later. </p>
+        </BasicModal>
         {
           submitRequestState === RequestStates.SUCCESS
-            ? <SubmissionSuccessful contentText={successText} />
+            ? (
+              <SubmissionSuccessful>
+                <Typography variant="body2">
+                  Thank you for completing the Time Use Diary survey. Your responses have been recorded.
+                </Typography>
+              </SubmissionSuccessful>
+            )
             : (
               <Card>
                 <CardSegment>
