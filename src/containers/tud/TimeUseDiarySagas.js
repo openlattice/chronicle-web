@@ -23,9 +23,9 @@ function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(submitTudData.request(action.id));
     const {
+      formData,
       participantId,
       studyId,
-      formData
     } = action.value;
 
     const requestBody = createSubmitRequestBody(formData);

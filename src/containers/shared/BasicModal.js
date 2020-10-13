@@ -11,9 +11,9 @@ const ModalBody = styled.div`
 `;
 
 type Props ={
+  children ?:Node;
   handleOnClose :() => void;
   isVisible :boolean;
-  children ?:Node;
   title :string;
 };
 
