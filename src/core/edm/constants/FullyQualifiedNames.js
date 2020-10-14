@@ -24,8 +24,8 @@ const PROPERTY_TYPE_FQNS = {
   USER_FQN: FQN.of('ol.user'),
 
   // metadata
-  DATE_FIRST_PUSHED: FQN.of('ol.datetimestart'),
-  DATE_LAST_PUSHED: FQN.of('ol.datetimeend'),
+  DATETIME_START_FQN: FQN.of('ol.datetimestart'),
+  DATETIME_END_FQN: FQN.of('ol.datetimeend'),
   DATE_LOGGED: FQN.of('ol.recordeddate'),
   EVENT_COUNT: FQN.of('ol.eventcount'),
 
@@ -35,6 +35,7 @@ const PROPERTY_TYPE_FQNS = {
 
   // survey
   ACTIVE_FQN: FQN.of('ol.active'),
+  CODE_FQN: FQN.of('ol.code'),
   COMPLETED_DATE_TIME_FQN: FQN.of('date.completeddatetime'),
   DATE_TIME_FQN: FQN.of('ol.datetime'),
   DESCRIPTION_FQN: FQN.of('ol.description'),

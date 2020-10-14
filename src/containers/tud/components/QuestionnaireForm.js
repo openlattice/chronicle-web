@@ -7,9 +7,13 @@ import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
+import { useDispatch } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+import type { RequestState } from 'redux-reqseq';
 
 import TimeUseSummary from './TimeUseSummary';
 
+import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
@@ -87,9 +91,17 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
 
 type Props = {
   pagedProps :Object;
+  participantId :string;
+  studyId :UUID;
+  submitRequestState :?RequestState
 };
 
-const QuestionnaireForm = ({ pagedProps } :Props) => {
+const QuestionnaireForm = ({
+  pagedProps,
+  participantId,
+  studyId,
+  submitRequestState
+} :Props) => {
 
   const {
     formRef,
@@ -101,12 +113,23 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
     validateAndSubmit
   } = pagedProps;
 
+  const dispatch = useDispatch();
+
   const formSchema = createFormSchema(pagedData, page);
   const { schema, uiSchema } = formSchema;
 
   const isSummaryPage = getIsSummaryPage(pagedData, page);
 
   const handleNext = () => {
+    if (isSummaryPage) {
+      dispatch(submitTudData({
+        formData: pagedData,
+        participantId,
+        studyId
+      }));
+      return;
+    }
+
     forceFormDataStateUpdate(formRef, pagedData, page);
     validateAndSubmit();
   };
@@ -152,12 +175,13 @@ const QuestionnaireForm = ({ pagedProps } :Props) => {
 
       <ButtonRow>
         <Button
-            disabled={page === 0}
+            disabled={page === 0 || submitRequestState === RequestStates.PENDING}
             onClick={onBack}>
           Back
         </Button>
         <Button
             color="primary"
+            isLoading={submitRequestState === RequestStates.PENDING}
             onClick={handleNext}>
           {
             isSummaryPage ? 'Submit' : 'Next'

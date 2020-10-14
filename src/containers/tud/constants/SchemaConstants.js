@@ -2,14 +2,14 @@
 
 const PROPERTY_CONSTS = {
   ACTIVITY_END_TIME: 'endTime',
-  ACTIVITY_NAME: 'activity',
+  ACTIVITY_NAME: 'primaryActivity',
   ACTIVITY_START_TIME: 'startTime',
   ADULT_MEDIA: 'adultMedia',
   ADULT_MEDIA_PROPORTION: 'adultMediaProportion',
   ADULT_MEDIA_PURPOSE: 'adultMediaPurpose',
   BG_AUDIO: 'audio',
   BG_AUDIO_TYPE: 'audioType',
-  BG_MEDIA_PROPORTION: 'proportion',
+  BG_MEDIA_PROPORTION: 'bgMediaProportion',
   BG_TV: 'backgroundTv',
   BG_TV_AGE: 'bgTvAge',
   BOOK_TITLE: 'bookTitle',
@@ -25,11 +25,11 @@ const PROPERTY_CONSTS = {
   MEDIA_AGE: 'mediaAge',
   MEDIA_NAME: 'mediaName',
   NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
-  NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepPattern',
+  NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepReason',
   OTHER_ACTIVITY: 'otherActivity',
   SECONDARY_ACTIVITY: 'secondaryActivity',
   SLEEP_ARRANGEMENT: 'sleepArrangement',
-  SLEEP_PATTERN: 'sleepPattern',
+  SLEEP_PATTERN: 'typicalSleepPattern',
   TYPICAL_DAY_FLAG: 'typicalDay',
   WAKE_UP_COUNT: 'wakeUpCount'
 };

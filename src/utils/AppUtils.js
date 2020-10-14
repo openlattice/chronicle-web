@@ -20,6 +20,7 @@ import {
   PARTICIPANT,
   QUESTIONNAIRE,
   STUDY,
+  TIME_USE_DIARY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
 
@@ -199,12 +200,26 @@ const processAppConfigs = (appConfigsByModule :Object) => {
   };
 };
 
+const getSubmitTudDataUrl = (studyId :UUID, participantId :string) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('studyId must be a valid UUID', studyId);
+    return null;
+  }
+  if (!isNonEmptyString(participantId)) {
+    LOG.error('participant id must be a valid string', participantId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
+};
+
 export {
   getBaseUrl,
+  getDeleteParticipantPath,
   getParticipantDataUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
   getSubmitQuestionnaireUrl,
+  getSubmitTudDataUrl,
   processAppConfigs,
-  getDeleteParticipantPath,
 };

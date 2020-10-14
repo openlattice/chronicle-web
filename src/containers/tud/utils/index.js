@@ -1,6 +1,6 @@
 // @flow
 
-import { getIn } from 'immutable';
+import { get, getIn } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
@@ -9,7 +9,8 @@ import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
 import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
-import { PAGE_NUMBERS } from '../constants/GeneralConstants';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
@@ -23,7 +24,15 @@ const {
   FOLLOWUP_COMPLETED
 } = PROPERTY_CONSTS;
 
-const { getPageSectionKey } = DataProcessingUtils;
+const {
+  DATETIME_END_FQN,
+  DATETIME_START_FQN,
+  ID_FQN,
+  TITLE_FQN,
+  VALUES_FQN,
+} = PROPERTY_TYPE_FQNS;
+
+const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
 
 const selectTimeByPageAndKey = (pageNum :number, key :string, formData :Object) => {
   const psk = getPageSectionKey(pageNum, 0);
@@ -191,9 +200,68 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   return errors;
 };
 
+const stringifyValue = (value :any) => {
+  if (typeof value === 'boolean') {
+    if (value) {
+      return 'true';
+    }
+    return 'false';
+  }
+  return value;
+};
+
+const createSubmitRequestBody = (formData :Object) => {
+  let result = [];
+
+  const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, FOLLOWUP_COMPLETED];
+
+  Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
+
+    const parsed :Object = parsePageSectionKey(psk);
+    const { page } :{ page :string } = parsed;
+
+    if (parseInt(page, 10) !== DAY_SPAN_PAGE) {
+
+      let startTime = get(pageData, ACTIVITY_START_TIME);
+      let endTime = get(pageData, ACTIVITY_END_TIME);
+
+      if (startTime && endTime) {
+        startTime = DateTime.fromISO(startTime);
+        startTime = dateYesterday.set({ hour: startTime.hour, minute: startTime.minute });
+
+        endTime = DateTime.fromISO(endTime);
+        endTime = dateYesterday.set({ hour: endTime.hour, minute: endTime.minute });
+      }
+
+      // $FlowFixMe
+      const sectionData = Object.entries(pageData) // $FlowFixMe
+        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, FOLLOWUP_COMPLETED, false)))
+        .filter((entry) => !entriesToOmit.includes(entry[0]))
+        .map(([key, value]) => {
+          const stringVal = stringifyValue(value);
+          const entity = {
+            [VALUES_FQN.toString()]: Array.isArray(stringVal) ? stringVal : [stringVal],
+            [ID_FQN.toString()]: [key],
+            [TITLE_FQN.toString()]: [get(QUESTION_TITLE_LOOKUP, key, key)],
+            ...(startTime && endTime) && {
+              [DATETIME_START_FQN.toString()]: [startTime],
+              [DATETIME_END_FQN.toString()]: [endTime]
+            }
+          };
+          return entity;
+        });
+
+      result = [...result, ...sectionData];
+    }
+  });
+  return result;
+};
+
 export {
   applyCustomValidation,
   createFormSchema,
+  createSubmitRequestBody,
   createTimeUseSummary,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,

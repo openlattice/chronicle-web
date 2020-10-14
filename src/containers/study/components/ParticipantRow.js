@@ -23,8 +23,8 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 const { formatDateTime } = DateTimeUtils;
 
 const {
-  DATE_FIRST_PUSHED,
-  DATE_LAST_PUSHED,
+  DATETIME_START_FQN,
+  DATETIME_END_FQN,
   EVENT_COUNT,
   PERSON_ID,
   STATUS,
@@ -116,8 +116,8 @@ const ParticipantRow = (props :Props) => {
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
   const enrollmentStatus = getIn(data, [STATUS, 0]);
-  const firstDataDate = formatDateTime(getIn(data, [DATE_FIRST_PUSHED, 0]), DateTime.DATETIME_SHORT);
-  const lastDataDate = formatDateTime(getIn(data, [DATE_LAST_PUSHED, 0]), DateTime.DATETIME_SHORT);
+  const firstDataDate = formatDateTime(getIn(data, [DATETIME_START_FQN, 0]), DateTime.DATETIME_SHORT);
+  const lastDataDate = formatDateTime(getIn(data, [DATETIME_END_FQN, 0]), DateTime.DATETIME_SHORT);
   const numDays = getIn(data, [EVENT_COUNT, 0]);
 
   const toggleIcon = enrollmentStatus === ENROLLED ? faToggleOn : faToggleOff;
