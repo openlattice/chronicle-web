@@ -3,8 +3,8 @@
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const {
-  DATE_FIRST_PUSHED,
-  DATE_LAST_PUSHED,
+  DATETIME_START_FQN,
+  DATETIME_END_FQN,
   EVENT_COUNT,
   PERSON_ID
 } = PROPERTY_TYPE_FQNS;
@@ -18,7 +18,7 @@ const TABLE_HEADERS = [
     }
   },
   {
-    key: DATE_FIRST_PUSHED,
+    key: DATETIME_START_FQN,
     label: 'First Data Received',
     cellStyle: {
       width: '22%',
@@ -26,7 +26,7 @@ const TABLE_HEADERS = [
     }
   },
   {
-    key: DATE_LAST_PUSHED,
+    key: DATETIME_END_FQN,
     label: 'Last Data Received',
     cellStyle: {
       width: '22%',

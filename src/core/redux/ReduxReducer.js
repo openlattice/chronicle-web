@@ -12,6 +12,7 @@ import permissionsReducer from '../permissions/PermissionsReducer';
 import questionnareReducer from '../../containers/questionnaire/QuestionnaireReducer';
 import studiesReducer from '../../containers/studies/StudiesReducer';
 import surveyReducer from '../../containers/survey/SurveyReducer';
+import timeUseDiaryReducer from '../../containers/tud/TimeUseDiaryReducer';
 
 export default function reduxReducer(routerHistory :any) {
 
@@ -24,5 +25,6 @@ export default function reduxReducer(routerHistory :any) {
     questionnaire: questionnareReducer,
     router: connectRouter(routerHistory),
     studies: studiesReducer,
+    tud: timeUseDiaryReducer
   });
 }
