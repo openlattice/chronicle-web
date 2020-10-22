@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import set from 'lodash/set';
 import styled from 'styled-components';
@@ -30,12 +30,13 @@ const {
   ACTIVITY_END_TIME,
   ACTIVITY_START_TIME,
   DAY_END_TIME,
+  DAY_OF_WEEK,
   DAY_START_TIME,
   FOLLOWUP_COMPLETED,
   SLEEP_ARRANGEMENT,
 } = PROPERTY_CONSTS;
 
-const { FIRST_ACTIVITY_PAGE } = PAGE_NUMBERS;
+const { FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
   align-items: center;
@@ -119,6 +120,18 @@ const QuestionnaireForm = ({
   const { schema, uiSchema } = formSchema;
 
   const isSummaryPage = getIsSummaryPage(pagedData, page);
+
+  useEffect(() => {
+    if (page === PRE_SURVEY_PAGE) {
+      const dayOfWeekInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`);
+      const label = dayOfWeekInput?.previousSibling;
+      if (label) {
+        // $FlowFixMe
+        label.innerHTML = 'We would like you to think about your child\'s day and complete the time use diary'
+          + ' for <i>yesterday</i>. What day of the week was <i>yesterday</i>?';
+      }
+    }
+  }, [page]);
 
   const handleNext = () => {
     if (isSummaryPage) {
