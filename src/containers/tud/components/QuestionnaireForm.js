@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 
 import set from 'lodash/set';
+import { get } from 'immutable';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
@@ -34,6 +35,7 @@ const {
   DAY_START_TIME,
   FOLLOWUP_COMPLETED,
   SLEEP_ARRANGEMENT,
+  TYPICAL_DAY_FLAG
 } = PROPERTY_CONSTS;
 
 const { FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
@@ -87,6 +89,17 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
     else if (!Object.keys(sectionData).includes(SLEEP_ARRANGEMENT)) {
       set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_START_TIME], formattedTime);
     }
+  }
+};
+
+const updateTypicalDayLabel = (dayOfWeek :string) => {
+  const typicalDayInput = document.getElementById(`root_${getPageSectionKey(0, 0)}_${TYPICAL_DAY_FLAG}`);
+  const label = typicalDayInput?.previousSibling;
+  if (label) {
+    // $FlowFixMe
+    label.innerHTML = 'An important part of this project is to find out how children spend'
+      + ` their time during the week. Was yesterday a typical ${dayOfWeek} for you`
+      + ' and your child? A non-typical day would include a school closing, being on vacation, or being home sick.';
   }
 };
 
@@ -159,6 +172,16 @@ const QuestionnaireForm = ({
         label.innerHTML = `When did your child stop ${currentActivity}?`;
       }
     }
+
+    if (page === PRE_SURVEY_PAGE) {
+      const psk = getPageSectionKey(0, 0);
+      const dayOfWeek = formRef?.current?.state?.formData?.[psk]?.[DAY_OF_WEEK];
+      if (dayOfWeek) {
+        updateTypicalDayLabel(dayOfWeek);
+      }
+      // console.log(dayOfWeek);
+    }
+
   };
 
   const validate = (formData, errors) => (
