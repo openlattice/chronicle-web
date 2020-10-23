@@ -19,7 +19,7 @@ const PROPERTY_CONSTS = {
   DAY_OF_WEEK: 'dayOfWeek',
   DAY_START_TIME: 'dayStartTime',
   DEVICE: 'device',
-  FOLLOWUP_COMPLETED: 'followUpCompleted',
+  HAS_FOLLOWUP_QUESTIONS: 'followUpCompleted',
   LOCATION: 'location',
   MEDIA_ACTIVITY: 'mediaActivity',
   MEDIA_AGE: 'mediaAge',

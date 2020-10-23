@@ -15,11 +15,11 @@ const {
   MEDIA_USE,
 } = PRIMARY_ACTIVITIES;
 
-const activitiesList = Object.values(PRIMARY_ACTIVITIES);
+// $FlowFixMe
+const activitiesList :string[] = Object.values(PRIMARY_ACTIVITIES);
 
 const createSchema = (primaryActivity :string) => {
-  const secondaryActivityOptions :string[] = activitiesList
-    .filter((activity :string) => activity !== primaryActivity);
+  const secondaryActivityOptions :string[] = activitiesList.filter((activity :string) => activity !== primaryActivity);
 
   const readingSchema = FollowupSchema.createSchema(READING);
   const mediaUseSchema = FollowupSchema.createSchema(MEDIA_USE);
