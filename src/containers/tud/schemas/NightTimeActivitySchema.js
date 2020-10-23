@@ -3,11 +3,11 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
 import {
-  BG_MEDIA_PROPORTION_OPTIONS,
   NON_TYPICAL_SLEEP_REASONS,
   PROPERTY_CONSTS,
   SLEEP_ARRANGEMENT_OPTIONS,
-  WAKE_UP_COUNT_OPTIONS
+  WAKE_UP_COUNT_OPTIONS,
+  BG_MEDIA_OPTIONS
 } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -17,11 +17,8 @@ const {
   SLEEP_PATTERN,
   SLEEP_ARRANGEMENT,
   NON_TYPICAL_SLEEP_PATTERN,
-  BG_TV,
-  BG_TV_AGE,
-  BG_AUDIO,
-  BG_AUDIO_TYPE,
-  BG_MEDIA_PROPORTION
+  BG_TV_NIGHT,
+  BG_AUDIO_NIGHT,
 } = PROPERTY_CONSTS;
 
 const createSchema = (pageNum :number) => ({
@@ -51,19 +48,18 @@ const createSchema = (pageNum :number) => ({
           title: SCHEMA_FIELDS_TITLES[WAKE_UP_COUNT],
           enum: WAKE_UP_COUNT_OPTIONS
         },
-        [BG_TV]: {
+        [BG_TV_NIGHT]: {
           type: 'string',
-          title: 'Was there a TV on in the background while your child slept at night?',
-          enum: ['Yes', 'No', 'Don\'t know']
+          title: 'Was there a TV playing in the room while your child slept at night?',
+          enum: BG_MEDIA_OPTIONS
         },
-        [BG_AUDIO]: {
+        [BG_AUDIO_NIGHT]: {
           type: 'string',
-          title: 'Was there audio entertainment(e.g. music, talk radio)'
-            + ' on in the background while your child slept at night?',
-          enum: ['Yes', 'No', 'Don\'t know']
+          title: 'Was there music or other audio playing in the room while your child slept at night?',
+          enum: BG_MEDIA_OPTIONS
         }
       },
-      required: [SLEEP_PATTERN, SLEEP_ARRANGEMENT, WAKE_UP_COUNT, BG_TV, BG_AUDIO],
+      required: [SLEEP_PATTERN, SLEEP_ARRANGEMENT, WAKE_UP_COUNT, BG_TV_NIGHT, BG_AUDIO_NIGHT],
       dependencies: {
         [SLEEP_PATTERN]: {
           oneOf: [
@@ -93,75 +89,6 @@ const createSchema = (pageNum :number) => ({
             }
           ]
         },
-        [BG_AUDIO]: {
-          oneOf: [
-            {
-              properties: {
-                [BG_AUDIO]: {
-                  enum: ['No', 'Don\'t know']
-                }
-              }
-            },
-            {
-              properties: {
-                [BG_AUDIO]: {
-                  enum: ['Yes']
-                },
-                [BG_AUDIO_TYPE]: {
-                  type: 'array',
-                  title: SCHEMA_FIELDS_TITLES[BG_AUDIO_TYPE],
-                  items: {
-                    type: 'string',
-                    enum: ['Music', 'Talk radio', 'Podcast', 'Don\'t know']
-                  },
-                  uniqueItems: true
-                },
-                [BG_MEDIA_PROPORTION]: {
-                  type: 'string',
-                  title: 'Approximately'
-                    + ' what proportion of time that the child was sleeping was the background media in use?',
-                  enum: BG_MEDIA_PROPORTION_OPTIONS
-                }
-              },
-              required: [BG_AUDIO_TYPE, BG_MEDIA_PROPORTION]
-            }
-          ]
-        },
-        [BG_TV]: {
-          oneOf: [
-            {
-              properties: {
-                [BG_TV]: {
-                  enum: ['No', "Don't know"]
-                },
-              }
-            },
-            {
-              properties: {
-                [BG_TV]: {
-                  enum: ['Yes']
-                },
-                [BG_TV_AGE]: {
-                  title: SCHEMA_FIELDS_TITLES[BG_TV_AGE],
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    enum: ["Child's age", 'Older children', 'Younger children', 'Adults', 'Don\'t know'],
-                  },
-                  uniqueItems: true,
-                  minItems: 1
-                },
-                [BG_MEDIA_PROPORTION]: {
-                  type: 'string',
-                  title: 'Approximately'
-                    + ' what proportion of time that the child was sleeping was the background media in use?',
-                  enum: BG_MEDIA_PROPORTION_OPTIONS
-                }
-              },
-              required: [BG_TV_AGE, BG_MEDIA_PROPORTION]
-            }
-          ]
-        }
       }
     }
   }
@@ -170,8 +97,8 @@ const createSchema = (pageNum :number) => ({
 const createUiSchema = (pageNum :number) => ({
   [getPageSectionKey(pageNum, 0)]: {
     classNames: 'column-span-12 grid-container',
-    'ui:order': [SLEEP_PATTERN, NON_TYPICAL_SLEEP_PATTERN, SLEEP_ARRANGEMENT, WAKE_UP_COUNT, BG_TV,
-      BG_TV_AGE, BG_AUDIO, BG_AUDIO_TYPE, BG_MEDIA_PROPORTION],
+    'ui:order': [SLEEP_PATTERN, NON_TYPICAL_SLEEP_PATTERN, SLEEP_ARRANGEMENT, WAKE_UP_COUNT, BG_TV_NIGHT,
+      BG_AUDIO_NIGHT],
     [SLEEP_PATTERN]: {
       classNames: 'column-span-12',
       'ui:widget': 'radio'
@@ -188,29 +115,14 @@ const createUiSchema = (pageNum :number) => ({
       classNames: 'column-span-12',
       'ui:widget': 'radio'
     },
-    [BG_TV]: {
+    [BG_TV_NIGHT]: {
       classNames: 'column-span-12',
       'ui:widget': 'radio'
     },
-    [BG_TV_AGE]: {
-      classNames: 'column-span-12',
-      'ui:widget': 'OtherRadioWidget',
-    },
-    [BG_AUDIO]: {
+    [BG_AUDIO_NIGHT]: {
       classNames: 'column-span-12',
       'ui:widget': 'radio'
     },
-    [BG_AUDIO_TYPE]: {
-      classNames: 'column-span-12',
-      'ui:widget': 'OtherRadioWidget',
-      'ui:options': {
-        withOther: true
-      }
-    },
-    [BG_MEDIA_PROPORTION]: {
-      classNames: 'column-span-12',
-      'ui:widget': 'radio'
-    }
   }
 });
 

@@ -5,73 +5,69 @@ const PROPERTY_CONSTS = {
   ACTIVITY_NAME: 'primaryActivity',
   ACTIVITY_START_TIME: 'startTime',
   ADULT_MEDIA: 'adultMedia',
-  ADULT_MEDIA_PROPORTION: 'adultMediaProportion',
-  ADULT_MEDIA_PURPOSE: 'adultMediaPurpose',
-  BG_AUDIO: 'audio',
-  BG_AUDIO_TYPE: 'audioType',
-  BG_MEDIA_PROPORTION: 'bgMediaProportion',
-  BG_TV: 'backgroundTv',
-  BG_TV_AGE: 'bgTvAge',
+  BG_AUDIO_DAY: 'bgTAudioDay',
+  BG_AUDIO_NIGHT: 'bgAudioNight',
+  BG_TV_DAY: 'bgTvDay',
+  BG_TV_NIGHT: 'bgTvNight',
   BOOK_TITLE: 'bookTitle',
   BOOK_TYPE: 'bookType',
   CAREGIVER: 'careGiver',
+  CLOCK_FORMAT: 'clockFormat',
   DAY_END_TIME: 'dayEndTime',
   DAY_OF_WEEK: 'dayOfWeek',
   DAY_START_TIME: 'dayStartTime',
-  DEVICE: 'device',
-  FOLLOWUP_COMPLETED: 'followUpCompleted',
-  LOCATION: 'location',
-  MEDIA_ACTIVITY: 'mediaActivity',
-  MEDIA_AGE: 'mediaAge',
-  MEDIA_NAME: 'mediaName',
+  HAS_FOLLOWUP_QUESTIONS: 'followUpCompleted',
   NON_TYPICAL_DAY_REASON: 'nonTypicalDayReason',
   NON_TYPICAL_SLEEP_PATTERN: 'nonTypicalSleepReason',
   OTHER_ACTIVITY: 'otherActivity',
+  SCREEN_MEDIA_ACTIVITY: 'screenMediaActivity',
+  SCREEN_MEDIA_AGE: 'screenMediaAge',
+  SCREEN_MEDIA_NAME: 'screenMediaName',
   SECONDARY_ACTIVITY: 'secondaryActivity',
   SLEEP_ARRANGEMENT: 'sleepArrangement',
   SLEEP_PATTERN: 'typicalSleepPattern',
+  TODAY_WAKEUP_TIME: 'todayWakeUpTime',
   TYPICAL_DAY_FLAG: 'typicalDay',
   WAKE_UP_COUNT: 'wakeUpCount'
 };
 
-const MEDIA_DEVICE_TYPES = [
-  'Television set',
-  'Computer (desktop or laptop)',
-  'Smartphone (e.g. iPhone)',
-  'Touchscreen tablet/device (e.g. iPad, iPod Touch, Galaxy Tab, Nook, Kindle, Fire 7)',
-  'Video player (e.g. DVD, DVR, or VCR)',
-  'Console gaming system (e.g. Wii, xBox)',
-  'Handheld gaming device (e.g. 3DS)',
-  'Went to a move in a movie theater or outdoor theater'
-];
+const PRIMARY_ACTIVITIES = {
+  CHILDCARE: 'Attending school/childcare',
+  NAPPING: 'Napping/sleeping',
+  EATING_DRINKING: 'Eating/drinking',
+  MEDIA_USE: 'Using screen media (videos, apps, chat, etc.)',
+  READING: 'Reading or listening to a story (paper book, eBook, audiobook, etc.)',
+  PLAYING_INDOORS: 'Playing indoors',
+  PLAYING_OUTDOORS: 'Playing outdoors',
+  GROOMING: 'Bathroom/grooming',
+  OTHER: 'Doing other activities at home (cooking, chores, etc.)',
+  OUTDOORS: 'Doing activities out of the house (errands, traveling, etc.)',
+};
 
 const MEDIA_ACTIVITY_CATEGORIES = [
-  `Watched video content (e.g. TV show, movie, video clips using a
-    streaming service (e.g Netflix, Youtube, Amazon Prime, Hulu))`,
-  'Played games (including playing on an app, a console, or a handheld device)',
-  'Video chat (e.g. Facetime, Skype, Google Hangout)',
-  'Communicated with others in another way (e.g. talked on phone, helped to write a text message)',
-  'Created content (e.g. recorded video, took photographs)',
+  'Watched video content (TV, movie, YouTube, etc.)',
+  'Played games (app, console game, etc.)',
+  'Video chat (Facetime, Zoom, etc.)',
+  'Communicated with others in another way (talked on phone, helped to write a text message, etc.)',
+  'Created content (recorded video, took photographs, etc.)',
   'Looked up information on the internet'
 ];
 
-const CAREGIVERS = [
-  'Mother/Mother figure',
-  'Father/Father figure',
-  'Grandparent',
-  'Sibling',
-  'Other relative',
-  'Childcare provider/nanny/babysitter',
-  'Other kids'
+const BG_MEDIA_OPTIONS = [
+  'No',
+  'Yes, some of the time',
+  'Yes, half of the time',
+  'Yes, most of the time',
+  'Yes, the entire time',
+  'Don\'t know'
 ];
 
-const ADULT_MEDIA_PURPOSES = [
-  'Work call',
-  'Work email',
-  'Review of documents for work',
-  'Social call',
-  'Entertainment',
-  'Social media',
+const CAREGIVERS = [
+  'A parent or parental figure',
+  'A grandparent',
+  'Another adult',
+  'A sibling',
+  'Another child',
 ];
 
 const ADULT_MEDIA_USAGE_OPTIONS = [
@@ -82,39 +78,14 @@ const ADULT_MEDIA_USAGE_OPTIONS = [
   'The entire time'
 ];
 
-const BG_MEDIA_PROPORTION_OPTIONS = ADULT_MEDIA_USAGE_OPTIONS;
-
-const LOCATION_CATEGORIES = [
-  'Room where child sleeps',
-  'In some other room in the house (e.g. kitchen, family room)',
-  'Outdoors (e.g. park or yard)',
-  'Library, museum, restaurant, grocery store, or shopping center',
-  'While travelling (e.g. car, train, or school bus)',
-  'Multiple locations',
-  'Other (e.g. another person\'s house, church)'
-];
-
-const SECONDARY_LOCATIONS = [
-  'While travelling (e.g. car, train, or school bus)',
-  'Restaurant, grocery store, or shopping center',
-  'Other'
-];
-
-const NON_TYPICAL_DAY_REASONS = [
-  'Child was sick',
-  'School/childcare was closed',
-  'Snow day',
-  'Vacation',
-  'Family visit'
-];
-
 const NON_TYPICAL_SLEEP_REASONS = [
-  'Sick',
-  'Vacation'
+  'My child was sick',
+  'We were traveling',
+  'We had visitors'
 ];
 
 const SLEEP_ARRANGEMENT_OPTIONS = [
-  'Crib/cot/bed in a separate room (not shared with others)',
+  'Crib/cot/bed in their own, separate room (not shared with others)',
   'Crib/cot/bed in a parent\'s room',
   'Crib/cot/bed in a shared room with a sibling',
   'Co-sleeping in a parent\'s bed',
@@ -131,7 +102,11 @@ const WAKE_UP_COUNT_OPTIONS = [
   'Don\'t know'
 ];
 
-const BOOK_TYPES = ['Paper book', 'eBook'];
+const BOOK_TYPES = [
+  'Printed book (paper, cardboard, etc.)',
+  'Electronic book (eBook)',
+  'Audiobook'
+];
 
 const MEDIA_AGE_OPTIONS = [
   "Child's age",
@@ -141,20 +116,25 @@ const MEDIA_AGE_OPTIONS = [
   "Don't know"
 ];
 
+const NON_TYPICAL_DAY_REASONS = [
+  'My child was sick.',
+  'School/childcare was closed.',
+  'The weather was bad and we could not go outside.',
+  'We were traveling.',
+  'We had visitors.'
+];
+
 export {
-  ADULT_MEDIA_PURPOSES,
   ADULT_MEDIA_USAGE_OPTIONS,
-  BG_MEDIA_PROPORTION_OPTIONS,
+  BG_MEDIA_OPTIONS,
   BOOK_TYPES,
   CAREGIVERS,
-  LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_AGE_OPTIONS,
-  MEDIA_DEVICE_TYPES,
   NON_TYPICAL_DAY_REASONS,
   NON_TYPICAL_SLEEP_REASONS,
+  PRIMARY_ACTIVITIES,
   PROPERTY_CONSTS,
-  SECONDARY_LOCATIONS,
   SLEEP_ARRANGEMENT_OPTIONS,
   WAKE_UP_COUNT_OPTIONS,
 };
