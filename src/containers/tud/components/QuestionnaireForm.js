@@ -48,11 +48,10 @@ const {
 } = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
-  align-items: flex-end;
+  align-items: center;
   display: flex;
   justify-content: space-between;
   margin-top: 30px;
-  align-content: flex-end;
 `;
 
 /*
