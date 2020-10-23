@@ -18,6 +18,7 @@ const {
   NON_TYPICAL_SLEEP_PATTERN,
   SLEEP_ARRANGEMENT,
   SLEEP_PATTERN,
+  TODAY_WAKEUP_TIME,
   TYPICAL_DAY_FLAG,
   WAKE_UP_COUNT,
 } = PROPERTY_CONSTS;
@@ -33,8 +34,12 @@ const SCHEMA_FIELDS_TITLES = {
   [BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
   [DAY_OF_WEEK]: 'We would like you to think about your child\'s day and complete the time use diary for yesterday. '
       + 'What day of the week was yesterday?',
-  [DAY_END_TIME]: 'What time did your child go to bed yesterday night?',
-  [DAY_START_TIME]: 'What time did your child wake up yesterday morning?',
+  [DAY_END_TIME]: 'What time did your child go to bed yesterday night?'
+     + ' Please think about when your child first fell asleep for the night.'
+     + ' Later in the survey, we will ask about how often your child woke up in the middle of the night.',
+  [DAY_START_TIME]: 'What time did your child wake up yesterday morning?'
+     + ' Please think about when your child woke up for the day, rather'
+     + ' than waking up in the middle of the night and going back to sleep.',
   [MEDIA_ACTIVITY]: 'Specifically, what primary media activity was your child engaged in?',
   [MEDIA_AGE]: 'Was the media program (e.g. show, app, movie)'
     + ' for your child\'s age, for older children, for younger children, or for adults?',
@@ -44,6 +49,7 @@ const SCHEMA_FIELDS_TITLES = {
   [NON_TYPICAL_SLEEP_PATTERN]: 'What made your child\'s sleeping pattern non-typical?',
   [SLEEP_ARRANGEMENT]: 'Last night, what was your child\'s sleeping arrangement?',
   [SLEEP_PATTERN]: 'Last night, was your child\'s sleep pattern typical?',
+  [TODAY_WAKEUP_TIME]: 'What time did your child wake up this morning?',
   [TYPICAL_DAY_FLAG]: 'An important part of this project is to find out how children spend their time '
       + 'during the week. Was yesterday a typical weekday for you and your child? A non-typical day would include '
       + 'a school closing, being on vacation, or being home sick.',

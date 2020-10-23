@@ -1,7 +1,7 @@
 // @flow
 
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
-import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
+import { PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 import {
   BOOK_TYPES,
   MEDIA_ACTIVITY_CATEGORIES,
@@ -18,7 +18,7 @@ const {
   MEDIA_AGE,
   MEDIA_NAME,
 } = PROPERTY_CONSTS;
-const { READING, MEDIA_USE } = ACTIVITY_NAMES;
+const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const createSchema = (selectedActivity :string) => {
   switch (selectedActivity) {

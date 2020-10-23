@@ -6,14 +6,13 @@ import { DateTime } from 'luxon';
 import * as FollowupSchema from './FollowupSchema';
 import * as SecondaryActivitySchema from './SecondaryActivitySchema';
 
+import { PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
-import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import {
   ADULT_MEDIA_PURPOSES,
   ADULT_MEDIA_USAGE_OPTIONS,
   BG_MEDIA_PROPORTION_OPTIONS,
   CAREGIVERS,
-  LOCATION_CATEGORIES,
   PROPERTY_CONSTS,
 } from '../constants/SchemaConstants';
 
@@ -35,14 +34,13 @@ const {
   CAREGIVER,
   DEVICE,
   FOLLOWUP_COMPLETED,
-  LOCATION,
   MEDIA_ACTIVITY,
   MEDIA_AGE,
   MEDIA_NAME,
   OTHER_ACTIVITY,
   SECONDARY_ACTIVITY,
 } = PROPERTY_CONSTS;
-const { MEDIA_USE, NAPPING, READING } = ACTIVITY_NAMES;
+const { MEDIA_USE, NAPPING, READING } = PRIMARY_ACTIVITIES;
 
 const getBgAudioSchema = (selectedActivity :string) => ({
   properties: {
@@ -180,11 +178,6 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
             type: 'string',
             default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
           },
-          [LOCATION]: {
-            type: 'string',
-            title: `Where was your child when he/she was ${selectedActivity}?`,
-            enum: LOCATION_CATEGORIES
-          },
           [CAREGIVER]: {
             type: 'array',
             title: `Who was with your child when he/she was ${selectedActivity}?`,
@@ -205,7 +198,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
           },
           ...bgAudioSchema.properties
         },
-        required: [LOCATION, CAREGIVER, BG_TV,
+        required: [CAREGIVER, BG_TV,
           ...bgAudioSchema.required,
           ...followupSchema.required,
           ...secondaryActivitySchema.required],
@@ -264,7 +257,7 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
     [getPageSectionKey(pageNum, 0)]: {
       classNames: 'column-span-12 grid-container',
       'ui:order': [FOLLOWUP_COMPLETED, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
-        LOCATION, CAREGIVER, ...followupUiOrder,
+        CAREGIVER, ...followupUiOrder,
         OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...otherFollowupOrder, BG_TV, BG_TV_AGE,
         BG_AUDIO, BG_AUDIO_TYPE, BG_MEDIA_PROPORTION, ADULT_MEDIA, ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION],
 
@@ -297,10 +290,6 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
         'ui:widget': 'radio'
       },
       [ADULT_MEDIA]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'radio'
-      },
-      [LOCATION]: {
         classNames: 'column-span-12',
         'ui:widget': 'radio'
       },

@@ -33,7 +33,7 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
               ? `What did your child start doing at ${formattedTime}?`
               : `What did your child start doing at ${formattedTime} after they `
                 + `finished ${(prevActivity)}?`),
-            enum: PRIMARY_ACTIVITIES
+            enum: Object.values(PRIMARY_ACTIVITIES)
           },
           [ACTIVITY_START_TIME]: {
             type: 'string',
@@ -45,7 +45,9 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
             type: 'string',
             title: currentActivity
               ? `When did your child stop ${currentActivity}?`
-              : 'When did the selected activity end?'
+              : 'When did the selected activity end?',
+            description: 'Please enter time by typing in the box below (e.g., 08:00 AM)'
+                + ' or clicking on the clock button.',
           },
         },
         required: [ACTIVITY_NAME, ACTIVITY_END_TIME]

@@ -3,7 +3,6 @@
 import React, { useEffect } from 'react';
 
 import set from 'lodash/set';
-import { get } from 'immutable';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
@@ -166,7 +165,7 @@ const QuestionnaireForm = ({
     if (currentActivity) {
       const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
 
-      const label = endTimeInput?.parentNode?.parentNode?.previousSibling;
+      const label = endTimeInput?.parentNode?.parentNode?.parentNode?.firstChild;
       if (label) {
         // $FlowFixMe
         label.innerHTML = `When did your child stop ${currentActivity}?`;
@@ -179,7 +178,6 @@ const QuestionnaireForm = ({
       if (dayOfWeek) {
         updateTypicalDayLabel(dayOfWeek);
       }
-      // console.log(dayOfWeek);
     }
 
   };

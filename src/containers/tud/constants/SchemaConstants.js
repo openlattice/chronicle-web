@@ -30,6 +30,7 @@ const PROPERTY_CONSTS = {
   SECONDARY_ACTIVITY: 'secondaryActivity',
   SLEEP_ARRANGEMENT: 'sleepArrangement',
   SLEEP_PATTERN: 'typicalSleepPattern',
+  TODAY_WAKEUP_TIME: 'todayWakeUpTime',
   TYPICAL_DAY_FLAG: 'typicalDay',
   WAKE_UP_COUNT: 'wakeUpCount'
 };
@@ -84,16 +85,6 @@ const ADULT_MEDIA_USAGE_OPTIONS = [
 
 const BG_MEDIA_PROPORTION_OPTIONS = ADULT_MEDIA_USAGE_OPTIONS;
 
-const LOCATION_CATEGORIES = [
-  'Room where child sleeps',
-  'In some other room in the house (e.g. kitchen, family room)',
-  'Outdoors (e.g. park or yard)',
-  'Library, museum, restaurant, grocery store, or shopping center',
-  'While travelling (e.g. car, train, or school bus)',
-  'Multiple locations',
-  'Other (e.g. another person\'s house, church)'
-];
-
 const SECONDARY_LOCATIONS = [
   'While travelling (e.g. car, train, or school bus)',
   'Restaurant, grocery store, or shopping center',
@@ -101,11 +92,11 @@ const SECONDARY_LOCATIONS = [
 ];
 
 const NON_TYPICAL_DAY_REASONS = [
-  'Child was sick',
-  'School/childcare was closed',
-  'Snow day',
-  'Vacation',
-  'Family visit'
+  'My child was sick.',
+  'School/childcare was closed.',
+  'The weather was bad and we could not go outside.',
+  'We were traveling.',
+  'We had visitors.'
 ];
 
 const NON_TYPICAL_SLEEP_REASONS = [
@@ -147,7 +138,6 @@ export {
   BG_MEDIA_PROPORTION_OPTIONS,
   BOOK_TYPES,
   CAREGIVERS,
-  LOCATION_CATEGORIES,
   MEDIA_ACTIVITY_CATEGORIES,
   MEDIA_AGE_OPTIONS,
   MEDIA_DEVICE_TYPES,

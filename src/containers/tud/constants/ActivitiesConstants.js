@@ -1,19 +1,20 @@
 // @flow
 
 // primary activities
-const CHILDCARE = 'Childcare/School';
-const EATING_DRINKING = 'Eating/Drinking';
-const GROOMING = 'Bathroom/Grooming';
+const CHILDCARE = 'Attending school/childcare';
+const EATING_DRINKING = 'Eating/drinking';
+const GROOMING = 'Bathroom/grooming';
+const MEDIA_USE = 'Using screen media (videos, apps, chat, etc.)';
+const NAPPING = 'Napping/sleeping';
+const OTHER = 'Doing other activities at home (cooking, chores, etc.)';
+const OUTDOORS = 'Doing activities out of the house (errands, traveling, etc.)';
 const PLAYING = 'Playing (e.g. indoor, outdoor)';
-const MEDIA_USE = 'Using screen media (e.g TV, Apps, games, video chat)';
-const READING = 'Reading (e.g. books, eBook)';
-const OTHER = 'Doing other activities at home (e.g. chores, cooking)';
-const OUTDOORS = 'Doing activities out of the house (e.g. traveling, errands)';
-const NAPPING = 'Napping in the middle of the day';
+const PLAYING_INDOORS = 'Playing indoors';
+const PLAYING_OUTDOORS = 'Playing outdoors';
+const READING = 'Reading or listening to a story (paper book, eBook, audiobook, etc.)';
 const TRAVEL = 'Traveling (e.g. bus, taxi, car)';
-const UNKNOWN = 'Don\'t know';
 
-const ACTIVITY_NAMES = {
+const PRIMARY_ACTIVITIES = {
   CHILDCARE,
   EATING_DRINKING,
   GROOMING,
@@ -22,31 +23,10 @@ const ACTIVITY_NAMES = {
   OTHER,
   OUTDOORS,
   PLAYING,
+  PLAYING_INDOORS,
+  PLAYING_OUTDOORS,
   READING,
   TRAVEL,
-  UNKNOWN
 };
 
-const PRIMARY_ACTIVITIES = [
-  EATING_DRINKING,
-  GROOMING,
-  PLAYING,
-  MEDIA_USE,
-  READING,
-  OTHER,
-  TRAVEL,
-  OUTDOORS,
-  CHILDCARE,
-  NAPPING,
-];
-
-const SECONDARY_ACTIVITIES = [
-  ...PRIMARY_ACTIVITIES,
-  UNKNOWN
-];
-
-export {
-  ACTIVITY_NAMES,
-  PRIMARY_ACTIVITIES,
-  SECONDARY_ACTIVITIES
-};
+export { PRIMARY_ACTIVITIES };

@@ -31,7 +31,7 @@ const schema = {
           title: SCHEMA_FIELDS_TITLES[TYPICAL_DAY_FLAG],
           type: 'boolean',
           enum: [true, false],
-          enumNames: ['Yes', 'No']
+          enumNames: ['Yes, yesterday was typical.', 'No, yesterday was non-typical.']
         }
       },
       dependencies: {
@@ -51,8 +51,13 @@ const schema = {
                 },
                 [NON_TYPICAL_DAY_REASON]: {
                   title: SCHEMA_FIELDS_TITLES[NON_TYPICAL_DAY_REASON],
-                  type: 'string',
-                  enum: NON_TYPICAL_DAY_REASONS
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: NON_TYPICAL_DAY_REASONS
+                  },
+                  uniqueItems: true,
+                  minItems: 1
                 }
               },
               required: [NON_TYPICAL_DAY_REASON]
@@ -78,7 +83,7 @@ const uiSchema = {
     },
     [NON_TYPICAL_DAY_REASON]: {
       classNames: 'column-span-12',
-      'ui:widget': 'radio'
+      'ui:widget': 'OtherRadioWidget'
     }
   }
 };
