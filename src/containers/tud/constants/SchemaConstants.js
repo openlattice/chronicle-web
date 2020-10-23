@@ -12,6 +12,7 @@ const PROPERTY_CONSTS = {
   BOOK_TITLE: 'bookTitle',
   BOOK_TYPE: 'bookType',
   CAREGIVER: 'careGiver',
+  CLOCK_FORMAT: 'clockFormat',
   DAY_END_TIME: 'dayEndTime',
   DAY_OF_WEEK: 'dayOfWeek',
   DAY_START_TIME: 'dayStartTime',

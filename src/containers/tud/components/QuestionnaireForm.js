@@ -12,6 +12,7 @@ import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
 import ContextualQuestionsIntro from './ContextualQuestionsIntro';
+import SurveyIntro from './SurveyIntro';
 import TimeUseSummary from './TimeUseSummary';
 
 import { submitTudData } from '../TimeUseDiaryActions';
@@ -22,7 +23,8 @@ import {
   createFormSchema,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey
+  selectTimeByPageAndKey,
+  getIs12HourFormatSelected
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -38,7 +40,12 @@ const {
   TYPICAL_DAY_FLAG
 } = PROPERTY_CONSTS;
 
-const { FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
+const {
+  FIRST_ACTIVITY_PAGE,
+  PRE_SURVEY_PAGE,
+  SURVEY_INTRO_PAGE,
+  DAY_SPAN_PAGE
+} = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
   align-items: center;
@@ -53,7 +60,7 @@ const ButtonRow = styled.div`
  */
 const getIsSummaryPage = (formData :Object, page :number) => {
   const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
   return prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime)
@@ -92,8 +99,8 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   }
 };
 
-const updateTypicalDayLabel = (dayOfWeek :string) => {
-  const typicalDayInput = document.getElementById(`root_${getPageSectionKey(0, 0)}_${TYPICAL_DAY_FLAG}`);
+const updateTypicalDayLabel = (dayOfWeek :string, page :number) => {
+  const typicalDayInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_${TYPICAL_DAY_FLAG}`);
   const label = typicalDayInput?.previousSibling;
   if (label) {
     // $FlowFixMe
@@ -103,9 +110,9 @@ const updateTypicalDayLabel = (dayOfWeek :string) => {
   }
 };
 
-const schemaHasFollowupQuestions = (schema :Object, page :number) => {
+const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
   const psk = getPageSectionKey(page, 0);
-  const { properties } = schema.properties[psk];
+  const properties = schema?.properties?.[psk]?.properties ?? {};
 
   return Object.keys(properties).includes(HAS_FOLLOWUP_QUESTIONS);
 };
@@ -181,10 +188,10 @@ const QuestionnaireForm = ({
     }
 
     if (page === PRE_SURVEY_PAGE) {
-      const psk = getPageSectionKey(0, 0);
+      const psk = getPageSectionKey(page, 0);
       const dayOfWeek = formRef?.current?.state?.formData?.[psk]?.[DAY_OF_WEEK];
       if (dayOfWeek) {
-        updateTypicalDayLabel(dayOfWeek);
+        updateTypicalDayLabel(dayOfWeek, page);
       }
     }
 
@@ -197,6 +204,11 @@ const QuestionnaireForm = ({
   const schemaHasFollowup = schemaHasFollowupQuestions(schema, page);
   const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_START_TIME, pagedData);
+
+  const is12hourFormat = getIs12HourFormatSelected(pagedData);
+  const formattedPrevEndTime = is12hourFormat
+    ? prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)
+    : prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 
   return (
     <>
@@ -211,8 +223,11 @@ const QuestionnaireForm = ({
               schemaHasFollowup && (
                 <ContextualQuestionsIntro
                     selectedActivity={prevActivity}
-                    time={prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)} />
+                    time={formattedPrevEndTime} />
               )
+            }
+            {
+              page === SURVEY_INTRO_PAGE && <SurveyIntro />
             }
             <Form
                 formData={pagedData}

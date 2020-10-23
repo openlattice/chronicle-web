@@ -15,8 +15,12 @@ const {
   ACTIVITY_START_TIME,
 } = PROPERTY_CONSTS;
 
-const createSchema = (pageNum :number, prevActivity :string, currentActivity :string, prevEndTime :DateTime) => {
-  const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_SIMPLE);
+const createSchema = (
+  pageNum :number, prevActivity :string, currentActivity :string, prevEndTime :DateTime, is12hourFormat :boolean
+) => {
+  const formattedTime = is12hourFormat
+    ? prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)
+    : prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 
   return {
     type: 'object',
@@ -45,8 +49,8 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
             title: currentActivity
               ? `When did your child stop ${currentActivity}?`
               : 'When did the selected activity end?',
-            description: 'Please enter time by typing in the box below (e.g., 08:00 AM)'
-                + ' or clicking on the clock button.',
+            description: 'Please enter time by typing in the'
+               + ` box below (e.g., ${formattedTime}) or clicking on the clock button.`,
             default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
           },
         },
@@ -56,7 +60,7 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
   };
 };
 
-const createUiSchema = (pageNum :number) => ({
+const createUiSchema = (pageNum :number, is12hourFormat :boolean) => ({
   [getPageSectionKey(pageNum, 0)]: {
     classNames: 'column-span-12 grid-container',
     [ACTIVITY_NAME]: {
@@ -65,10 +69,16 @@ const createUiSchema = (pageNum :number) => ({
     [ACTIVITY_START_TIME]: {
       classNames: (pageNum === DAY_SPAN_PAGE ? 'column-span-12' : 'hidden'),
       'ui:widget': 'TimeWidget',
+      'ui:options': {
+        ampm: is12hourFormat
+      }
     },
     [ACTIVITY_END_TIME]: {
       classNames: 'column-span-12',
-      'ui:widget': 'TimeWidget'
+      'ui:widget': 'TimeWidget',
+      'ui:options': {
+        ampm: is12hourFormat
+      }
     },
   },
 });
