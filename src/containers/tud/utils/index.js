@@ -214,7 +214,7 @@ const createSubmitRequestBody = (formData :Object) => {
   let result = [];
 
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
-  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, FOLLOWUP_COMPLETED];
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS];
 
   Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
 
@@ -236,7 +236,7 @@ const createSubmitRequestBody = (formData :Object) => {
 
       // $FlowFixMe
       const sectionData = Object.entries(pageData) // $FlowFixMe
-        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, FOLLOWUP_COMPLETED, false)))
+        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, HAS_FOLLOWUP_QUESTIONS, false)))
         .filter((entry) => !entriesToOmit.includes(entry[0]))
         .map(([key, value]) => {
           const stringVal = stringifyValue(value);

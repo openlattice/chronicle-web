@@ -20,18 +20,21 @@ const schema = {
           title: SCHEMA_FIELDS_TITLES[DAY_START_TIME],
           description: 'Please enter time by typing in the box below (e.g., 07:00 AM)'
             + ' or clicking on the clock button.',
+          default: '07:00'
         },
         [DAY_END_TIME]: {
           type: 'string',
           title: SCHEMA_FIELDS_TITLES[DAY_END_TIME],
           description: 'Please enter time by typing in the box below (e.g., 07:00 PM)'
             + ' or clicking on the clock button.',
+          default: '19:00'
         },
         [TODAY_WAKEUP_TIME]: {
           type: 'string',
           title: SCHEMA_FIELDS_TITLES[TODAY_WAKEUP_TIME],
           description: 'Please enter time by typing in the box below (e.g., 07:00 AM)'
             + ' or clicking on the clock button.',
+          default: '07:00'
         }
       },
       required: [DAY_START_TIME, DAY_END_TIME]

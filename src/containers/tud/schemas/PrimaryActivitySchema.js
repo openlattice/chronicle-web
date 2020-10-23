@@ -2,9 +2,8 @@
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
-import { PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -48,6 +47,7 @@ const createSchema = (pageNum :number, prevActivity :string, currentActivity :st
               : 'When did the selected activity end?',
             description: 'Please enter time by typing in the box below (e.g., 08:00 AM)'
                 + ' or clicking on the clock button.',
+            default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
           },
         },
         required: [ACTIVITY_NAME, ACTIVITY_END_TIME]

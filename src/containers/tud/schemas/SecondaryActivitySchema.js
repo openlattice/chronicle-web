@@ -2,8 +2,7 @@
 
 import * as FollowupSchema from './FollowupSchema';
 
-import { PRIMARY_ACTIVITIES } from '../constants/ActivitiesConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const {
   OTHER_ACTIVITY,
