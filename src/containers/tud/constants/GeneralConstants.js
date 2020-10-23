@@ -3,9 +3,10 @@
 import { PROPERTY_CONSTS } from './SchemaConstants';
 
 const PAGE_NUMBERS = {
-  DAY_SPAN_PAGE: 1,
-  FIRST_ACTIVITY_PAGE: 2,
-  PRE_SURVEY_PAGE: 0,
+  SURVEY_INTRO_PAGE: 0,
+  DAY_SPAN_PAGE: 2,
+  FIRST_ACTIVITY_PAGE: 3,
+  PRE_SURVEY_PAGE: 1,
 };
 
 // map from react json form schema properties to easily understandable titles
@@ -19,6 +20,9 @@ const QUESTION_TITLE_LOOKUP = {
   [PROPERTY_CONSTS.BG_TV_DAY]: 'Background TV',
   [PROPERTY_CONSTS.BOOK_TITLE]: 'Book title',
   [PROPERTY_CONSTS.BOOK_TYPE]: 'Book type',
+  [PROPERTY_CONSTS.DAY_END_TIME]: 'Bedtime last night',
+  [PROPERTY_CONSTS.DAY_START_TIME]: 'Wake-up time yesterday',
+  [PROPERTY_CONSTS.TODAY_WAKEUP_TIME]: 'Wake-up time today',
   [PROPERTY_CONSTS.CAREGIVER]: 'Caregiver',
   [PROPERTY_CONSTS.DAY_OF_WEEK]: 'Day of week',
   [PROPERTY_CONSTS.NON_TYPICAL_DAY_REASON]: 'Non typical day reason',

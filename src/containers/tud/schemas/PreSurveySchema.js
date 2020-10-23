@@ -4,9 +4,13 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
+import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { NON_TYPICAL_DAY_REASONS, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
+
+const { PRE_SURVEY_PAGE } = PAGE_NUMBERS;
+
 const {
   DAY_OF_WEEK,
   NON_TYPICAL_DAY_REASON,
@@ -17,7 +21,7 @@ const schema = {
   type: 'object',
   title: '',
   properties: {
-    [getPageSectionKey(0, 0)]: {
+    [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
       type: 'object',
       title: '',
       properties: {
@@ -71,7 +75,7 @@ const schema = {
 };
 
 const uiSchema = {
-  [getPageSectionKey(0, 0)]: {
+  [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
     classNames: 'column-span-12 grid-container',
     [DAY_OF_WEEK]: {
       classNames: 'column-span-12',

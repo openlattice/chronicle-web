@@ -6,6 +6,7 @@ const SCHEMA_FIELDS_TITLES = {
   [PROPERTY_CONSTS.BOOK_TITLE]: 'What was the name of the book?'
     + ' If you are don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
   [PROPERTY_CONSTS.BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
+  [PROPERTY_CONSTS.CLOCK_FORMAT]: 'To get started, please select your preferred clock format.',
   [PROPERTY_CONSTS.DAY_OF_WEEK]: 'We would like you to think about your child\'s day and complete'
       + ' the time use diary for yesterday. What day of the week was yesterday?',
   [PROPERTY_CONSTS.DAY_END_TIME]: 'What time did your child go to bed yesterday night?'
@@ -28,7 +29,7 @@ const SCHEMA_FIELDS_TITLES = {
   [PROPERTY_CONSTS.TYPICAL_DAY_FLAG]: 'An important part of this project is to find out how children spend their time '
       + 'during the week. Was yesterday a typical weekday for you and your child? A non-typical day would include '
       + 'a school closing, being on vacation, or being home sick.',
-  [PROPERTY_CONSTS.WAKE_UP_COUNT]: 'Last night, how many times did your child wake up in the middle of the night?'
+  [PROPERTY_CONSTS.WAKE_UP_COUNT]: 'Last night, how many times did your child wake up in the middle of the night?',
 };
 
 export default SCHEMA_FIELDS_TITLES;
