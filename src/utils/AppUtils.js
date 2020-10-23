@@ -13,13 +13,12 @@ import EnvTypes from './constants/EnvTypes';
 import ParticipantDataTypes from './constants/ParticipantDataTypes';
 import {
   AUTHENTICATED,
-  CHRONICLE,
+  BASE,
   CSRF_TOKEN,
   DATA,
   FILE_TYPE,
   PARTICIPANT,
   QUESTIONNAIRE,
-  STUDY,
   TIME_USE_DIARY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
@@ -78,7 +77,7 @@ const getParticipantDataUrl = (
       break;
   }
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
+  return `${baseUrl}/${BASE}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
   + `${orgId}/${studyId}/${participantEntityKeyId}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
@@ -104,7 +103,7 @@ const getParticipantUserAppsUrl = (participantId :string, studyId :UUID, orgId :
 
   const baseUrl = getBaseUrl();
 
-  return `${baseUrl}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${participantId}/apps`;
+  return `${baseUrl}/${BASE}/${orgId}/${studyId}/${participantId}/apps`;
 };
 
 const getDeleteParticipantPath = (orgId :UUID, participantId :string, studyId :UUID) => {
@@ -123,7 +122,7 @@ const getDeleteParticipantPath = (orgId :UUID, participantId :string, studyId :U
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${orgId}/${studyId}/${participantId}`;
+  return `${getBaseUrl()}/${BASE}/${AUTHENTICATED}/${orgId}/${studyId}/${participantId}`;
 };
 
 const getQuestionnaireUrl = (orgId :UUID, studyId :UUID, questionnaireEKID :UUID) => {
@@ -142,7 +141,7 @@ const getQuestionnaireUrl = (orgId :UUID, studyId :UUID, questionnaireEKID :UUID
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
+  return `${getBaseUrl()}/${BASE}/${orgId}/${studyId}/${QUESTIONNAIRE}/${questionnaireEKID}`;
 };
 
 const getSubmitQuestionnaireUrl = (orgId :UUID, studyId :UUID, participantId :string) => {
@@ -161,7 +160,7 @@ const getSubmitQuestionnaireUrl = (orgId :UUID, studyId :UUID, participantId :st
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${orgId}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
+  return `${getBaseUrl()}/${BASE}/${orgId}/${studyId}/${participantId}/${QUESTIONNAIRE}`;
 };
 
 const processAppConfigs = (appConfigsByModule :Object) => {
@@ -210,7 +209,7 @@ const getSubmitTudDataUrl = (studyId :UUID, participantId :string) => {
     return null;
   }
 
-  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
+  return `${getBaseUrl()}/${BASE}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
 };
 
 export {

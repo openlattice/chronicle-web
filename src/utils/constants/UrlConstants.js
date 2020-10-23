@@ -7,17 +7,17 @@ const DATA :'data' = 'data';
 const FILE_TYPE :'fileType' = 'fileType';
 const PARTICIPANT :'participant' = 'participant';
 const QUESTIONNAIRE :'questionnaire' = 'questionnaire';
-const STUDY :'study' = 'study';
 const TIME_USE_DIARY = 'time-use-diary';
+const BASE :'chronicle/v2' = 'chronicle/v2';
 
 export {
   AUTHENTICATED,
+  BASE,
   CHRONICLE,
   CSRF_TOKEN,
   DATA,
   FILE_TYPE,
   PARTICIPANT,
   QUESTIONNAIRE,
-  STUDY,
   TIME_USE_DIARY
 };
