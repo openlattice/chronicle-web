@@ -5,12 +5,13 @@ import React, { useEffect } from 'react';
 import set from 'lodash/set';
 import styled from 'styled-components';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
-import { Button, Typography } from 'lattice-ui-kit';
+import { Button } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import ContextualQuestionsIntro from './ContextualQuestionsIntro';
 import TimeUseSummary from './TimeUseSummary';
 
 import { submitTudData } from '../TimeUseDiaryActions';
@@ -208,14 +209,9 @@ const QuestionnaireForm = ({
           <>
             {
               schemaHasFollowup && (
-                <>
-                  <Typography variant="body2">
-                    Now, let&apos;s talk about what your child did while
-                    <strong> { prevActivity } </strong> at
-                    <strong> { prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)}. </strong>
-                  </Typography>
-                  <br />
-                </>
+                <ContextualQuestionsIntro
+                    selectedActivity={prevActivity}
+                    time={prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)} />
               )
             }
             <Form
