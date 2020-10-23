@@ -20,7 +20,7 @@ const ContextualQuestionsIntro = ({ selectedActivity, time } :Props) => (
       </span>
       <span> at </span>
       <strong>
-        { time}
+        { time }
       </strong>
       <span>.</span>
     </Typography>
