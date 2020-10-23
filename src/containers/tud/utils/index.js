@@ -21,7 +21,7 @@ const {
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME,
-  FOLLOWUP_COMPLETED
+  HAS_FOLLOWUP_QUESTIONS
 } = PROPERTY_CONSTS;
 
 const {
@@ -48,7 +48,7 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string 
 };
 
 const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
-  formData, [getPageSectionKey(pageNum, 0), FOLLOWUP_COMPLETED], false
+  formData, [getPageSectionKey(pageNum, 0), HAS_FOLLOWUP_QUESTIONS], false
 );
 
 const getIsDayTimeCompleted = (formData :Object, page :number) => {
@@ -214,7 +214,7 @@ const createSubmitRequestBody = (formData :Object) => {
   let result = [];
 
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
-  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, FOLLOWUP_COMPLETED];
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS];
 
   Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
 
@@ -236,7 +236,7 @@ const createSubmitRequestBody = (formData :Object) => {
 
       // $FlowFixMe
       const sectionData = Object.entries(pageData) // $FlowFixMe
-        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, FOLLOWUP_COMPLETED, false)))
+        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, HAS_FOLLOWUP_QUESTIONS, false)))
         .filter((entry) => !entriesToOmit.includes(entry[0]))
         .map(([key, value]) => {
           const stringVal = stringifyValue(value);
