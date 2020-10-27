@@ -156,15 +156,15 @@ function submitQuestionnaire(
  *
  * Submit time use diary survey data
  */
-function submitTudData(studyId :UUID, participantId :string, requestBody :Object) {
+function submitTudData(organizationId :UUID, studyId :UUID, participantId :string, requestBody :Object) {
   return new Promise<*>((resolve, reject) => {
-    const url = getSubmitTudDataUrl(studyId, participantId);
+    const url = getSubmitTudDataUrl(organizationId, studyId, participantId);
     if (!url) return reject(new Error('Invalid url'));
 
     return axios({
+      data: requestBody,
       method: 'post',
       url,
-      data: requestBody
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
   });

@@ -24,13 +24,19 @@ function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
     yield put(submitTudData.request(action.id));
     const {
       formData,
+      organizationId,
       participantId,
       studyId,
+    } :{
+      formData :Object,
+      organizationId :UUID,
+      participantId :string,
+      studyId :UUID,
     } = action.value;
 
     const requestBody = createSubmitRequestBody(formData);
 
-    const response = yield call(ChronicleApi.submitTudData, studyId, participantId, requestBody);
+    const response = yield call(ChronicleApi.submitTudData, organizationId, studyId, participantId, requestBody);
     if (response.error) throw response.error;
 
     yield put(submitTudData.success(action.id));
