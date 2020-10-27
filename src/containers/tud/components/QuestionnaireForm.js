@@ -118,11 +118,11 @@ const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
 };
 
 type Props = {
+  organizationId :UUID;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
-  organizationId :UUID;
-  submitRequestState :?RequestState
+  submitRequestState :?RequestState;
 };
 
 const QuestionnaireForm = ({
