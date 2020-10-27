@@ -199,17 +199,23 @@ const processAppConfigs = (appConfigsByModule :Object) => {
   };
 };
 
-const getSubmitTudDataUrl = (studyId :UUID, participantId :string) => {
+const getSubmitTudDataUrl = (orgId :UUID, studyId :UUID, participantId :string) => {
+  if (!isValidUUID(orgId)) {
+    LOG.error('orgId must be a valid UUID', orgId);
+    return null;
+  }
+
   if (!isValidUUID(studyId)) {
     LOG.error('studyId must be a valid UUID', studyId);
     return null;
   }
+
   if (!isNonEmptyString(participantId)) {
     LOG.error('participant id must be a valid string', participantId);
     return null;
   }
 
-  return `${getBaseUrl()}/${BASE}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
+  return `${getBaseUrl()}/${BASE}/${orgId}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
 };
 
 export {
