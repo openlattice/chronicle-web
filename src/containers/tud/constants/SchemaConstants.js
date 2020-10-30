@@ -31,7 +31,9 @@ const PROPERTY_CONSTS = {
   SLEEP_ARRANGEMENT: 'sleepArrangement',
   SLEEP_PATTERN: 'typicalSleepPattern',
   TYPICAL_DAY_FLAG: 'typicalDay',
-  WAKE_UP_COUNT: 'wakeUpCount'
+  WAKE_UP_COUNT: 'wakeUpCount',
+  FAMILY_ID: 'familyId',
+  WAVE_ID: 'waveId',
 };
 
 const MEDIA_DEVICE_TYPES = [

@@ -6,13 +6,13 @@ import {
   select,
   takeEvery
 } from '@redux-saga/core/effects';
-import merge from 'lodash/merge';
 import {
   List,
   Map,
-  getIn,
+  Set,
   fromJS,
-  get
+  get,
+  getIn
 } from 'immutable';
 import { Constants } from 'lattice';
 import {
@@ -36,7 +36,7 @@ import {
   getSubmissionsByDate,
   submitTudData,
 } from './TimeUseDiaryActions';
-import { createSubmitRequestBody } from './utils';
+import { createSubmitRequestBody, writeToCsvFile } from './utils';
 
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
@@ -53,14 +53,17 @@ const { getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 
-const { getEntityKeyId } = DataUtils;
+const { getEntityKeyId, getPropertyValue } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
-  PERSON_ID,
-  ID_FQN,
+  DATETIME_END_FQN,
+  DATETIME_START_FQN,
   DATE_TIME_FQN,
+  ID_FQN,
+  PERSON_ID,
+  VALUES_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -172,13 +175,10 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
             const dateStr = date.toLocaleString(DateTime.DATE_SHORT);
 
             const entity = fromJS({
-              [participantsES]: {
-                [PERSON_ID.toString()]: get(participants, participantEKID),
-                [ID_FQN.toString()]: participantEKID,
-              },
-              [SUBMISSION_ES_NAME]: {
-                [OPENLATTICE_ID_FQN]: neighbor.get('neighborId')
-              }
+              [OPENLATTICE_ID_FQN]: [neighbor.get('neighborId')],
+              [PERSON_ID.toString()]: [get(participants, participantEKID)],
+              [ID_FQN.toString()]: [participantEKID],
+              [DATE_TIME_FQN.toString()]: getPropertyValue(neighbor, DATE_TIME_FQN)
             });
             mutator.update(dateStr, List(), (list) => list.push(entity));
           }
@@ -206,10 +206,10 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(downloadTudResponses.request(action.id));
 
-    const { entities, studyId } = action.value;
+    const { entities } = action.value;
 
-    const participantsES = getParticipantsEntitySetName(studyId);
-    const submissionIds = entities.map((entity) => entity.get(SUBMISSION_ES_NAME).get(OPENLATTICE_ID_FQN));
+    const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN));
+    const submissionMetadata = Map(entities.map((entity) => [entity.get(OPENLATTICE_ID_FQN), entity]));
 
     // entity set ids
     const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
@@ -236,31 +236,27 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
     );
     if (response.error) throw response.error;
 
-    const submissionIdAnswersMap = {}; // { submissionId: list(answerIds)}
-    const answersMap = {}; // { answerId -> {ol.values: }}
+    // const answersMap = {}; // { answerId -> {ol.values: }}
+    const answerSubmissionIdMap = Map().asMutable(); // answerId -> submissionId
 
-    Object.entries(response.data).forEach(([submissionId :UUID, neighbors:UUID[]]) => {
-      // $FlowFixMe
-      const answerIds :UUID[] = neighbors.map((neighbor) => getIn(
-        neighbor, ['neighborDetails', OPENLATTICE_ID_FQN, 0]
-      ));
-      submissionIdAnswersMap[submissionId] = answerIds;
-      // $FlowFixMe
-      const answers = neighbors.reduce((obj, neighbor) => {
-        const answerId = get(neighbor, 'neighborId');
-        return {
-          [answerId]: get(neighbor, 'neighborDetails'),
-          ...obj
-        };
-      }, {});
-      merge(answersMap, answers);
+    const answersMap = Map().withMutations((mutator :Map) => {
+      fromJS(response.data).forEach((neighbors :List, submissionId :UUID) => {
+        neighbors.forEach((neighbor :Map) => {
+          const entity = neighbor.get('neighborDetails');
+          const values = getPropertyValue(entity, VALUES_FQN);
+          const answerId = getEntityKeyId(entity);
+
+          mutator.set(answerId, values);
+          answerSubmissionIdMap.set(answerId, submissionId);
+        });
+      });
     });
 
-    // filtered search on answers to get questions
+    // filtered search on answers to get time range data
     searchFilter = {
-      destinationEntitySetIds: [timeRangeESID, questionsESID],
-      edgeEntitySetIds: [registeredForESID, addressesESID],
-      entityKeyIds: Object.keys(answersMap),
+      destinationEntitySetIds: [timeRangeESID],
+      edgeEntitySetIds: [registeredForESID],
+      entityKeyIds: answersMap.keySeq().toJS(),
       sourceEntitySetIds: []
     };
     response = yield call(
@@ -270,8 +266,67 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
         filter: searchFilter,
       })
     );
-    //
+    if (response.error) throw response.error;
 
+    const answerIdTimeRangeIdMap = Map().asMutable(); // answerId -> submissionId
+    const submissionTimeRangeMap = Map().withMutations((mutator :Map) => { // submissionI -> timeRange ->set (answerIds)
+      fromJS(response.data).forEach((neighbors :List, answerId :UUID) => {
+
+        // each answer has a single registeredFor edge to timerange
+        const neighbor = neighbors.first().get('neighborDetails');
+        const timeRangeId = getEntityKeyId(neighbor);
+
+        // if timerange neighbor has endtime & startime properties, this is a valid timeRange
+        if (neighbor.has(DATETIME_END_FQN) && neighbor.has(DATETIME_START_FQN)) {
+          const submissionId = answerSubmissionIdMap.get(answerId);
+          mutator.updateIn([submissionId, timeRangeId], Set(), (set) => set.add(answerId));
+          answerIdTimeRangeIdMap.set(answerId, timeRangeId);
+        }
+      });
+    });
+
+    // filtered search on answers to get questions
+    searchFilter = {
+      destinationEntitySetIds: [questionsESID],
+      edgeEntitySetIds: [addressesESID],
+      entityKeyIds: answersMap.keySeq().toJS(),
+      sourceEntitySetIds: []
+    };
+    response = yield call(
+      searchEntityNeighborsWithFilterWorker,
+      searchEntityNeighborsWithFilter({
+        entitySetId: answersESID,
+        filter: searchFilter,
+      })
+    );
+    if (response.error) throw response.error;
+
+    const timeRangeQuestionAnswerMap = Map().asMutable(); // submissionId -> timeRangeId -> question code -> answerId
+    const nonTimeRangeQuestionAnswerMap = Map().asMutable(); // submissionId -> question code -> answerID
+
+    fromJS(response.data).forEach((neighbors :List, answerId :UUID) => {
+      // each answer has a single addresses edge to question
+      const submissionId = answerSubmissionIdMap.get(answerId);
+      const timeRangeId = answerIdTimeRangeIdMap.get(answerId);
+
+      const neighbor = neighbors.first().get('neighborDetails');
+      const questionCode = neighbor.getIn([ID_FQN, 0]);
+
+      if (timeRangeId) {
+        timeRangeQuestionAnswerMap.setIn([submissionId, timeRangeId, questionCode], answerId);
+      }
+      else {
+        nonTimeRangeQuestionAnswerMap.setIn([submissionId, questionCode], answerId);
+      }
+    });
+
+    writeToCsvFile(
+      submissionMetadata,
+      answersMap,
+      nonTimeRangeQuestionAnswerMap,
+      timeRangeQuestionAnswerMap,
+      submissionTimeRangeMap
+    );
   }
   catch (error) {
     LOG.error(action.type, error);

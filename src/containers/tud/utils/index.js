@@ -1,8 +1,11 @@
 // @flow
 
-import { get, getIn } from 'immutable';
+import FS from 'file-saver';
+import Papa from 'papaparse';
+import { get, getIn, Map } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
+import { DataUtils } from 'lattice-utils';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -13,6 +16,8 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
+const { getPropertyValue } = DataUtils;
+
 const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
 
 const {
@@ -21,7 +26,9 @@ const {
   ACTIVITY_START_TIME,
   DAY_END_TIME,
   DAY_START_TIME,
-  FOLLOWUP_COMPLETED
+  FAMILY_ID,
+  FOLLOWUP_COMPLETED,
+  WAVE_ID,
 } = PROPERTY_CONSTS;
 
 const {
@@ -30,6 +37,7 @@ const {
   ID_FQN,
   TITLE_FQN,
   VALUES_FQN,
+  DATE_TIME_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
@@ -258,6 +266,35 @@ const createSubmitRequestBody = (formData :Object) => {
   return result;
 };
 
+function writeToCsvFile(
+  submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
+  answersMap :Map, // { answerId -> answer value }
+  nonTimeRangeQuestionAnswerMap :Map, // submissionId -> question code -> answerID
+  timeRangeQuestionAnswerMap :Map, // submissionId -> timeRangeId -> question code -> answerId
+  submissionTimeRangeMap :Map  // submissionI -> timeRange ->set (answerIds)
+) {
+
+  const csvData :Object[] = [];
+  submissionMetadata.forEach((metadata :Map, submissionId :UUID) => {
+    const nonRangeQuestions = nonTimeRangeQuestionAnswerMap.get(submissionId);
+
+    const csvObject = {};
+    csvObject.Participant_ID = metadata.getIn([ID_FQN, 0]);
+    csvObject.Timestamp = DateTime
+      .fromISO((metadata.getIn([DATE_TIME_FQN, 0])))
+      .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+    csvObject.Family_ID = nonRangeQuestions.getIn([FAMILY_ID, 0]);
+    csvObject.Wave_Id = nonRangeQuestions.getIn([WAVE_ID, 0]);
+    csvObject.Day = nonRangeQuestions.getIn([])
+  });
+
+  const csv = Papa.unparse(csvData);
+  const blob = new Blob([csv], {
+    type: 'text/csv'
+  });
+  FS.saveAs(blob, 'tud_summary.csv');
+}
+
 export {
   applyCustomValidation,
   createFormSchema,
@@ -266,4 +303,5 @@ export {
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
+  writeToCsvFile
 };
