@@ -12,23 +12,29 @@ import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
 import * as PreSurveySchema from '../schemas/PreSurveySchema';
 import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
+import * as SurveyIntroSchema from '../schemas/SurveyIntroSchema';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
+const {
+  DAY_SPAN_PAGE,
+  FIRST_ACTIVITY_PAGE,
+  PRE_SURVEY_PAGE,
+  SURVEY_INTRO_PAGE
+} = PAGE_NUMBERS;
 const { getPropertyValue } = DataUtils;
-
-const { DAY_SPAN_PAGE, FIRST_ACTIVITY_PAGE, PRE_SURVEY_PAGE } = PAGE_NUMBERS;
 
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_NAME,
   ACTIVITY_START_TIME,
+  CLOCK_FORMAT,
   DAY_END_TIME,
   DAY_START_TIME,
   FAMILY_ID,
-  FOLLOWUP_COMPLETED,
   WAVE_ID,
+  HAS_FOLLOWUP_QUESTIONS,
 } = PROPERTY_CONSTS;
 
 const {
@@ -56,20 +62,32 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string 
 };
 
 const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
-  formData, [getPageSectionKey(pageNum, 0), FOLLOWUP_COMPLETED], false
+  formData, [getPageSectionKey(pageNum, 0), HAS_FOLLOWUP_QUESTIONS], false
 );
 
 const getIsDayTimeCompleted = (formData :Object, page :number) => {
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
   return prevEndTime.isValid && dayEndTime.isValid
     && prevEndTime.equals(dayEndTime)
     && pageHasFollowupQuestions(formData, page - 1);
 };
 
+const getIs12HourFormatSelected = (formData :Object) :boolean => getIn(
+  formData, [getPageSectionKey(SURVEY_INTRO_PAGE, 0), CLOCK_FORMAT]
+) === 12;
+
 const createFormSchema = (formData :Object, pageNum :number) => {
 
+  const is12hourFormat = getIs12HourFormatSelected(formData);
+
+  if (pageNum === SURVEY_INTRO_PAGE) {
+    return {
+      schema: SurveyIntroSchema.schema,
+      uiSchema: SurveyIntroSchema.uiSchema
+    };
+  }
   // case 1:
   if (pageNum === PRE_SURVEY_PAGE) {
     return {
@@ -81,15 +99,15 @@ const createFormSchema = (formData :Object, pageNum :number) => {
   // case 2:
   if (pageNum === DAY_SPAN_PAGE) {
     return {
-      schema: DaySpanSchema.schema,
-      uiSchema: DaySpanSchema.uiSchema
+      schema: DaySpanSchema.createSchema(is12hourFormat),
+      uiSchema: DaySpanSchema.createUiSchema(is12hourFormat)
     };
   }
 
   const prevStartTime = selectTimeByPageAndKey(pageNum - 1, ACTIVITY_START_TIME, formData);
 
   const prevEndTime = pageNum === FIRST_ACTIVITY_PAGE
-    ? selectTimeByPageAndKey(1, DAY_START_TIME, formData)
+    ? selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, formData)
     : selectTimeByPageAndKey(pageNum - 1, ACTIVITY_END_TIME, formData);
 
   const currentActivity = selectPrimaryActivityByPage(pageNum, formData);
@@ -113,8 +131,8 @@ const createFormSchema = (formData :Object, pageNum :number) => {
     uiSchema = ContextualSchema.createUiSchema(pageNum, prevActivity);
   }
   else {
-    schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime);
-    uiSchema = PrimaryActivitySchema.createUiSchema(pageNum);
+    schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat);
+    uiSchema = PrimaryActivitySchema.createUiSchema(pageNum, is12hourFormat);
   }
 
   return {
@@ -127,16 +145,23 @@ const createTimeUseSummary = (formData :Object) => {
 
   const summary = [];
 
-  // get day duration (start and end)
-  const dayStartTime :DateTime = selectTimeByPageAndKey(1, DAY_START_TIME, formData);
-  const dayEndTime :DateTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+  const is12hourFormat = getIs12HourFormatSelected(formData);
 
-  const formattedDayStartTime = dayStartTime.toLocaleString(DateTime.TIME_SIMPLE);
-  const formattedDayEndTime = dayEndTime.toLocaleString(DateTime.TIME_SIMPLE);
+  // get day duration (start and end)
+  const dayStartTime :DateTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, formData);
+  const dayEndTime :DateTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
+
+  const formattedDayStartTime = is12hourFormat
+    ? dayStartTime.toLocaleString(DateTime.TIME_SIMPLE)
+    : dayStartTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+
+  const formattedDayEndTime = is12hourFormat
+    ? dayEndTime.toLocaleString(DateTime.TIME_SIMPLE)
+    : dayEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 
   // add day start time
   summary.push({
-    time: dayStartTime.toLocaleString(DateTime.TIME_SIMPLE),
+    time: formattedDayStartTime,
     description: 'Child woke up',
     pageNum: DAY_SPAN_PAGE
   });
@@ -147,8 +172,9 @@ const createTimeUseSummary = (formData :Object) => {
   Object.keys(formData).forEach((key, index) => {
     const hasFollowupQuestions = pageHasFollowupQuestions(formData, index);
 
-    // skip page 0 and 1, and pages that have followup questions
-    if (index !== 0 && index !== 1 && !hasFollowupQuestions) {
+    // skip page 0, 1, 2 and pages that have followup questions
+    if (!(index === SURVEY_INTRO_PAGE || index === PRE_SURVEY_PAGE
+        || index === DAY_SPAN_PAGE || hasFollowupQuestions)) {
       // if last page
       if (index === lastPage) {
         summary.push({
@@ -162,8 +188,16 @@ const createTimeUseSummary = (formData :Object) => {
         const endTime = selectTimeByPageAndKey(index, ACTIVITY_END_TIME, formData);
         const primaryActivity :string = selectPrimaryActivityByPage(index, formData);
 
+        const startFormatted = is12hourFormat
+          ? startTime.toLocaleString(DateTime.TIME_SIMPLE)
+          : startTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+
+        const endFormatted = is12hourFormat
+          ? endTime.toLocaleString(DateTime.TIME_SIMPLE)
+          : endTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+
         const entry = {
-          time: `${startTime.toLocaleString(DateTime.TIME_SIMPLE)} - ${endTime.toLocaleString(DateTime.TIME_SIMPLE)}`,
+          time: `${startFormatted} - ${endFormatted}`,
           description: primaryActivity,
           pageNum: index
         };
@@ -185,7 +219,7 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
 
   const currentStartTime = selectTimeByPageAndKey(pageNum, startTimeKey, formData);
   const currentEndTime = selectTimeByPageAndKey(pageNum, endTimeKey, formData);
-  const dayEndTime = selectTimeByPageAndKey(1, DAY_END_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
   const errorMsg = pageNum === DAY_SPAN_PAGE
     ? `Bed time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`
@@ -218,18 +252,19 @@ const stringifyValue = (value :any) => {
   return value;
 };
 
+// TODO: omit first page (clock format select) from form
 const createSubmitRequestBody = (formData :Object) => {
   let result = [];
 
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
-  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, FOLLOWUP_COMPLETED];
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS];
 
   Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
 
     const parsed :Object = parsePageSectionKey(psk);
     const { page } :{ page :string } = parsed;
 
-    if (parseInt(page, 10) !== DAY_SPAN_PAGE) {
+    if (parseInt(page, 10) !== SURVEY_INTRO_PAGE) {
 
       let startTime = get(pageData, ACTIVITY_START_TIME);
       let endTime = get(pageData, ACTIVITY_END_TIME);
@@ -244,7 +279,7 @@ const createSubmitRequestBody = (formData :Object) => {
 
       // $FlowFixMe
       const sectionData = Object.entries(pageData) // $FlowFixMe
-        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, FOLLOWUP_COMPLETED, false)))
+        .filter((entry) => !(entry[0] === ACTIVITY_NAME && !get(pageData, HAS_FOLLOWUP_QUESTIONS, false)))
         .filter((entry) => !entriesToOmit.includes(entry[0]))
         .map(([key, value]) => {
           const stringVal = stringifyValue(value);
@@ -300,6 +335,7 @@ export {
   createFormSchema,
   createSubmitRequestBody,
   createTimeUseSummary,
+  getIs12HourFormatSelected,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
