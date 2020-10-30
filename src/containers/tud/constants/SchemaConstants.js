@@ -5,7 +5,7 @@ const PROPERTY_CONSTS = {
   ACTIVITY_NAME: 'primaryActivity',
   ACTIVITY_START_TIME: 'startTime',
   ADULT_MEDIA: 'adultMedia',
-  BG_AUDIO_DAY: 'bgTAudioDay',
+  BG_AUDIO_DAY: 'bgAudioDay',
   BG_AUDIO_NIGHT: 'bgAudioNight',
   BG_TV_DAY: 'bgTvDay',
   BG_TV_NIGHT: 'bgTvNight',

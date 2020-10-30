@@ -109,7 +109,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
             enum: BG_MEDIA_OPTIONS
           },
         },
-        required: [CAREGIVER, BG_TV_DAY,
+        required: [CAREGIVER, BG_TV_DAY, BG_AUDIO_DAY, ADULT_MEDIA,
           ...followupSchema.required,
           ...secondaryActivitySchema.required],
         dependencies: {

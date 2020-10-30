@@ -60,6 +60,7 @@ const schema = {
                     type: 'string',
                     enum: NON_TYPICAL_DAY_REASONS
                   },
+                  description: 'Please choose all that apply.',
                   uniqueItems: true,
                   minItems: 1
                 }
@@ -87,7 +88,7 @@ const uiSchema = {
     },
     [NON_TYPICAL_DAY_REASON]: {
       classNames: 'column-span-12',
-      'ui:widget': 'OtherRadioWidget'
+      'ui:widget': 'checkboxes'
     }
   }
 };

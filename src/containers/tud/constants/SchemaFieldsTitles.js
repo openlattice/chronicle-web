@@ -9,7 +9,7 @@ const SCHEMA_FIELDS_TITLES = {
   [PROPERTY_CONSTS.CLOCK_FORMAT]: 'To get started, please select your preferred clock format.',
   [PROPERTY_CONSTS.DAY_OF_WEEK]: 'We would like you to think about your child\'s day and complete'
       + ' the time use diary for yesterday. What day of the week was yesterday?',
-  [PROPERTY_CONSTS.DAY_END_TIME]: 'What time did your child go to bed yesterday night?'
+  [PROPERTY_CONSTS.DAY_END_TIME]: 'What time did your child fall asleep last night?'
      + ' Please think about when your child first fell asleep for the night.'
      + ' Later in the survey, we will ask about how often your child woke up in the middle of the night.',
   [PROPERTY_CONSTS.DAY_START_TIME]: 'What time did your child wake up yesterday morning?'
