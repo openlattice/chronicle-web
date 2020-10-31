@@ -2,10 +2,16 @@
 
 import FS from 'file-saver';
 import Papa from 'papaparse';
-import { get, getIn, Map } from 'immutable';
+import {
+  List,
+  Map,
+  get,
+  getIn
+} from 'immutable';
+import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
-import { DateTime } from 'luxon';
 import { DataUtils } from 'lattice-utils';
+import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -25,25 +31,48 @@ const {
 } = PAGE_NUMBERS;
 const { getPropertyValue } = DataUtils;
 
+const { FQN } = Models;
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_NAME,
   ACTIVITY_START_TIME,
+  ADULT_MEDIA,
+  BG_AUDIO_DAY,
+  BG_AUDIO_NIGHT,
+  BG_TV_DAY,
+  BG_TV_NIGHT,
+  BOOK_TITLE,
+  BOOK_TYPE,
+  CAREGIVER,
   CLOCK_FORMAT,
   DAY_END_TIME,
+  DAY_OF_WEEK,
   DAY_START_TIME,
+  HAS_FOLLOWUP_QUESTIONS,
+  NON_TYPICAL_DAY_REASON,
+  NON_TYPICAL_SLEEP_PATTERN,
+  OTHER_ACTIVITY,
+  SCREEN_MEDIA_ACTIVITY,
+  SCREEN_MEDIA_AGE,
+  SCREEN_MEDIA_NAME,
+  SECONDARY_ACTIVITY,
+  SLEEP_ARRANGEMENT,
+  SLEEP_PATTERN,
+  TODAY_WAKEUP_TIME,
+  TYPICAL_DAY_FLAG,
+  WAKE_UP_COUNT,
   FAMILY_ID,
   WAVE_ID,
-  HAS_FOLLOWUP_QUESTIONS,
 } = PROPERTY_CONSTS;
 
 const {
   DATETIME_END_FQN,
   DATETIME_START_FQN,
+  DATE_TIME_FQN,
   ID_FQN,
+  PERSON_ID,
   TITLE_FQN,
   VALUES_FQN,
-  DATE_TIME_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
@@ -301,26 +330,89 @@ const createSubmitRequestBody = (formData :Object) => {
   return result;
 };
 
+function getAnswerString(
+  questionAnswerId :Map,
+  answersMap :Map,
+  property :string
+) {
+  return answersMap.get(questionAnswerId.get(property), List()).toJS();
+}
+
+function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
+  const dateVal = values.getIn([timeRangeId, key, 0]);
+  return DateTime.fromISO(dateVal);
+}
+
 function writeToCsvFile(
   submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
   answersMap :Map, // { answerId -> answer value }
   nonTimeRangeQuestionAnswerMap :Map, // submissionId -> question code -> answerID
   timeRangeQuestionAnswerMap :Map, // submissionId -> timeRangeId -> question code -> answerId
-  submissionTimeRangeMap :Map  // submissionI -> timeRange ->set (answerIds)
+  submissionTimeRangeValues :Map // submission -> timeRangeId -> { start: <val>, end: <val>}
 ) {
 
-  const csvData :Object[] = [];
+  let csvData :Object[] = [];
   submissionMetadata.forEach((metadata :Map, submissionId :UUID) => {
-    const nonRangeQuestions = nonTimeRangeQuestionAnswerMap.get(submissionId);
+    const questionAnswerId = nonTimeRangeQuestionAnswerMap.get(submissionId);
+    const timeRangeQuestions = timeRangeQuestionAnswerMap.get(submissionId); // timeRangeId -> question code -> answerId
+    const timeRangeValues = submissionTimeRangeValues.get(submissionId); // timeRangeId => { start: <?>, end: <?>}
 
-    const csvObject = {};
-    csvObject.Participant_ID = metadata.getIn([ID_FQN, 0]);
-    csvObject.Timestamp = DateTime
+    const csvMetadata = {};
+    csvMetadata.Participant_ID = String(metadata.getIn([PERSON_ID, 0]));
+    csvMetadata.Timestamp = DateTime
       .fromISO((metadata.getIn([DATE_TIME_FQN, 0])))
       .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
-    csvObject.Family_ID = nonRangeQuestions.getIn([FAMILY_ID, 0]);
-    csvObject.Wave_Id = nonRangeQuestions.getIn([WAVE_ID, 0]);
-    csvObject.Day = nonRangeQuestions.getIn([])
+    csvMetadata.Family_ID = getAnswerString(questionAnswerId, answersMap, FAMILY_ID);
+    csvMetadata.Wave_Id = getAnswerString(questionAnswerId, answersMap, WAVE_ID);
+    csvMetadata.Day = getAnswerString(questionAnswerId, answersMap, DAY_OF_WEEK);
+    csvMetadata.Typical_Day = getAnswerString(questionAnswerId, answersMap, TYPICAL_DAY_FLAG);
+    csvMetadata.Non_Typical_Reason = getAnswerString(questionAnswerId, answersMap, NON_TYPICAL_DAY_REASON);
+
+    let submissionData = [];
+    timeRangeQuestions.forEach((questions :Map, timeRangeId :UUID) => {
+      const activitiesData = {};
+
+      activitiesData.Primary_Activity = getAnswerString(questions, answersMap, ACTIVITY_NAME);
+      activitiesData.Activity_Start = getTimeRangeValue(
+        timeRangeValues, timeRangeId, DATETIME_START_FQN
+      );
+      activitiesData.Activity_End = getTimeRangeValue(
+        timeRangeValues, timeRangeId, DATETIME_END_FQN
+      );
+      activitiesData.Caregiver = getAnswerString(questions, answersMap, CAREGIVER);
+      activitiesData.Media_Activity = getAnswerString(questions, answersMap, SCREEN_MEDIA_ACTIVITY);
+      activitiesData.Media_Age = getAnswerString(questions, answersMap, SCREEN_MEDIA_AGE);
+      activitiesData.Media_Name = getAnswerString(questions, answersMap, SCREEN_MEDIA_NAME);
+      activitiesData.Book_Type = getAnswerString(questions, answersMap, BOOK_TYPE);
+      activitiesData.Book_Title = getAnswerString(questions, answersMap, BOOK_TITLE);
+      activitiesData.Secondary_Activity = getAnswerString(questions, answersMap, SECONDARY_ACTIVITY);
+      activitiesData.Background_TV_Day = getAnswerString(questions, answersMap, BG_TV_DAY);
+      activitiesData.Background_Audio_Day = getAnswerString(questions, answersMap, BG_AUDIO_DAY);
+
+      submissionData.push(activitiesData);
+    });
+
+    // sort
+    submissionData = submissionData.sort((row1 :Object, row2 :Object) => {
+      if (row1.Activity_Start > row2.Activity_Start) return 1;
+      if (row1.Activity_Start < row2.Activity_Start) return -1;
+      return 0;
+    }).map((row :Object, index :number) => {
+      let result = row;
+      result.Activity_Start = row.Activity_Start.toLocaleString(DateTime.TIME_24_SIMPLE);
+      result.Activity_End = row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE);
+      if (index === 0) {
+        result = {
+          ...csvMetadata,
+          ...result
+        };
+      }
+      return result;
+    });
+
+    csvData = csvData.concat(submissionData);
+
+    csvData.push({}); // empty line in csv to separate submissions
   });
 
   const csv = Papa.unparse(csvData);

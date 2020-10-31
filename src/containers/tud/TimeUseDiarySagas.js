@@ -174,11 +174,12 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
 
             const dateStr = date.toLocaleString(DateTime.DATE_SHORT);
 
+            const neighborDetails = neighbor.get('neighborDetails');
             const entity = fromJS({
-              [OPENLATTICE_ID_FQN]: [neighbor.get('neighborId')],
+              [OPENLATTICE_ID_FQN]: getPropertyValue(neighborDetails, OPENLATTICE_ID_FQN),
               [PERSON_ID.toString()]: [get(participants, participantEKID)],
               [ID_FQN.toString()]: [participantEKID],
-              [DATE_TIME_FQN.toString()]: getPropertyValue(neighbor, DATE_TIME_FQN)
+              [DATE_TIME_FQN.toString()]: getPropertyValue(neighborDetails, DATE_TIME_FQN)
             });
             mutator.update(dateStr, List(), (list) => list.push(entity));
           }
@@ -208,8 +209,8 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
 
     const { entities } = action.value;
 
-    const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN));
-    const submissionMetadata = Map(entities.map((entity) => [entity.get(OPENLATTICE_ID_FQN), entity]));
+    const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
+    const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
 
     // entity set ids
     const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
@@ -269,7 +270,7 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
     if (response.error) throw response.error;
 
     const answerIdTimeRangeIdMap = Map().asMutable(); // answerId -> submissionId
-    const submissionTimeRangeMap = Map().withMutations((mutator :Map) => { // submissionI -> timeRange ->set (answerIds)
+    const timeRangeValues = Map().withMutations((mutator :Map) => { // submission -> timeRangeId -> { start:, end: }
       fromJS(response.data).forEach((neighbors :List, answerId :UUID) => {
 
         // each answer has a single registeredFor edge to timerange
@@ -279,8 +280,11 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
         // if timerange neighbor has endtime & startime properties, this is a valid timeRange
         if (neighbor.has(DATETIME_END_FQN) && neighbor.has(DATETIME_START_FQN)) {
           const submissionId = answerSubmissionIdMap.get(answerId);
-          mutator.updateIn([submissionId, timeRangeId], Set(), (set) => set.add(answerId));
           answerIdTimeRangeIdMap.set(answerId, timeRangeId);
+
+          mutator
+            .setIn([submissionId, timeRangeId, DATETIME_START_FQN], neighbor.get(DATETIME_START_FQN))
+            .setIn([submissionId, timeRangeId, DATETIME_END_FQN], neighbor.get(DATETIME_END_FQN));
         }
       });
     });
@@ -325,8 +329,9 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
       answersMap,
       nonTimeRangeQuestionAnswerMap,
       timeRangeQuestionAnswerMap,
-      submissionTimeRangeMap
+      timeRangeValues
     );
+    yield put(downloadTudResponses.success(action.id));
   }
   catch (error) {
     LOG.error(action.type, error);
