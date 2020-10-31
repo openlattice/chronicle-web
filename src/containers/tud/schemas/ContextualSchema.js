@@ -9,7 +9,6 @@ import * as SecondaryActivitySchema from './SecondaryActivitySchema';
 import {
   BG_MEDIA_OPTIONS,
   CAREGIVERS,
-  PRIMARY_ACTIVITIES,
   PROPERTY_CONSTS
 } from '../constants/SchemaConstants';
 
@@ -21,31 +20,21 @@ const {
   ADULT_MEDIA,
   BG_AUDIO_DAY,
   BG_TV_DAY,
-  BOOK_TITLE,
-  BOOK_TYPE,
   CAREGIVER,
   HAS_FOLLOWUP_QUESTIONS,
-  SCREEN_MEDIA_ACTIVITY,
-  SCREEN_MEDIA_AGE,
-  SCREEN_MEDIA_NAME,
   OTHER_ACTIVITY,
+  PRIMARY_BOOK_TITLE,
+  PRIMARY_BOOK_TYPE,
+  PRIMARY_MEDIA_ACTIVITY,
+  PRIMARY_MEDIA_AGE,
+  PRIMARY_MEDIA_NAME,
   SECONDARY_ACTIVITY,
+  SECONDARY_BOOK_TITLE,
+  SECONDARY_BOOK_TYPE,
+  SECONDARY_MEDIA_ACTIVITY,
+  SECONDARY_MEDIA_AGE,
+  SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
-const { MEDIA_USE, READING } = PRIMARY_ACTIVITIES;
-
-const getFollowupUiOrder = (activity :string) => {
-  switch (activity) {
-    case READING: {
-      return [BOOK_TYPE, BOOK_TITLE];
-    }
-
-    case MEDIA_USE: {
-      return [SCREEN_MEDIA_ACTIVITY, SCREEN_MEDIA_AGE, SCREEN_MEDIA_NAME];
-    }
-    default:
-      return [];
-  }
-};
 
 const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :DateTime, prevEndTime :DateTime) => {
 
@@ -121,17 +110,19 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
   };
 };
 
-const createUiSchema = (pageNum :number, selectedActivity :string) => {
-  const followupUiOrder :string[] = getFollowupUiOrder(selectedActivity);
-  const followUpFields = [BOOK_TYPE, BOOK_TITLE, SCREEN_MEDIA_ACTIVITY, SCREEN_MEDIA_AGE, SCREEN_MEDIA_NAME];
+const createUiSchema = (pageNum :number) => {
 
-  const otherFollowupOrder = followUpFields.filter((field) => !followupUiOrder.includes(field));
+  const primaryFollowupOrder = [
+    PRIMARY_BOOK_TYPE, PRIMARY_BOOK_TITLE, PRIMARY_MEDIA_ACTIVITY, PRIMARY_MEDIA_AGE, PRIMARY_MEDIA_NAME];
+  const secondaryFollowupOrder = [
+    SECONDARY_BOOK_TYPE, SECONDARY_BOOK_TITLE, SECONDARY_MEDIA_ACTIVITY, SECONDARY_MEDIA_AGE, SECONDARY_MEDIA_NAME];
+
   return {
     [getPageSectionKey(pageNum, 0)]: {
       classNames: 'column-span-12 grid-container',
       'ui:order': [HAS_FOLLOWUP_QUESTIONS, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
-        CAREGIVER, ...followupUiOrder,
-        OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...otherFollowupOrder, BG_TV_DAY,
+        CAREGIVER, ...primaryFollowupOrder,
+        OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...secondaryFollowupOrder, BG_TV_DAY,
         BG_AUDIO_DAY, ADULT_MEDIA],
 
       [HAS_FOLLOWUP_QUESTIONS]: {
@@ -170,14 +161,14 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
           noneText: 'No one'
         }
       },
-      [BOOK_TYPE]: {
+      [PRIMARY_BOOK_TYPE]: {
         classNames: 'column-span-12',
         'ui:widget': 'checkboxes',
         'ui:options': {
           withOther: 'true'
         }
       },
-      [BOOK_TITLE]: {
+      [PRIMARY_BOOK_TITLE]: {
         classNames: 'column-span-12'
       },
       ...FollowupSchema.uiSchema,

@@ -10,13 +10,12 @@ import {
 } from '../constants/SchemaConstants';
 
 const {
-  PRIMARY_BOOK_TITLE,
-  PRIMARY_BOOK_TYPE,
-  PRIMARY_MEDIA_ACTIVITY,
-  PRIMARY_MEDIA_AGE,
-  PRIMARY_MEDIA_NAME,
+  SECONDARY_BOOK_TITLE,
+  SECONDARY_BOOK_TYPE,
+  SECONDARY_MEDIA_ACTIVITY,
+  SECONDARY_MEDIA_AGE,
+  SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
-
 const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const createSchema = (selectedActivity :string) => {
@@ -24,9 +23,9 @@ const createSchema = (selectedActivity :string) => {
     case READING: {
       return {
         properties: {
-          [PRIMARY_BOOK_TYPE]: {
+          [SECONDARY_BOOK_TYPE]: {
             type: 'array',
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_BOOK_TYPE],
+            title: SCHEMA_FIELDS_TITLES[SECONDARY_BOOK_TYPE],
             description: 'Please choose all that apply.',
             items: {
               type: 'string',
@@ -35,19 +34,19 @@ const createSchema = (selectedActivity :string) => {
             uniqueItems: true,
             minItems: 1
           },
-          [PRIMARY_BOOK_TITLE]: {
+          [SECONDARY_BOOK_TITLE]: {
             type: 'string',
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_BOOK_TITLE]
+            title: SCHEMA_FIELDS_TITLES[SECONDARY_BOOK_TITLE]
           }
         },
-        required: [PRIMARY_BOOK_TYPE]
+        required: [SECONDARY_BOOK_TYPE]
       };
     }
     case MEDIA_USE:
       return {
         properties: {
-          [PRIMARY_MEDIA_ACTIVITY]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_ACTIVITY],
+          [SECONDARY_MEDIA_ACTIVITY]: {
+            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_ACTIVITY],
             type: 'array',
             description: 'Please choose all that apply.',
             items: {
@@ -57,17 +56,17 @@ const createSchema = (selectedActivity :string) => {
             uniqueItems: true,
             minItems: 1
           },
-          [PRIMARY_MEDIA_AGE]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_AGE],
+          [SECONDARY_MEDIA_AGE]: {
+            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_AGE],
             type: 'string',
             enum: MEDIA_AGE_OPTIONS
           },
-          [PRIMARY_MEDIA_NAME]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_NAME],
+          [SECONDARY_MEDIA_NAME]: {
+            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_NAME],
             type: 'string'
           }
         },
-        required: [PRIMARY_MEDIA_ACTIVITY, PRIMARY_MEDIA_AGE]
+        required: [SECONDARY_MEDIA_ACTIVITY, SECONDARY_MEDIA_AGE]
       };
     default: {
       return {
@@ -79,28 +78,28 @@ const createSchema = (selectedActivity :string) => {
 };
 
 const uiSchema = {
-  [PRIMARY_MEDIA_ACTIVITY]: {
+  [SECONDARY_MEDIA_ACTIVITY]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',
     'ui:options': {
       withOther: true
     }
   },
-  [PRIMARY_BOOK_TYPE]: {
+  [SECONDARY_BOOK_TYPE]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',
     'ui:options': {
       withOther: true
     }
   },
-  [PRIMARY_BOOK_TITLE]: {
+  [SECONDARY_BOOK_TITLE]: {
     classNames: 'column-span-12',
   },
-  [PRIMARY_MEDIA_AGE]: {
+  [SECONDARY_MEDIA_AGE]: {
     classNames: 'column-span-12',
     'ui:widget': 'radio'
   },
-  [PRIMARY_MEDIA_NAME]: {
+  [SECONDARY_MEDIA_NAME]: {
     classNames: 'column-span-12'
   }
 };

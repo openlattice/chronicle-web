@@ -121,7 +121,7 @@ const createFormSchema = (formData :Object, pageNum :number) => {
   }
   else if (shouldDisplayFollowup) {
     schema = ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
-    uiSchema = ContextualSchema.createUiSchema(pageNum, prevActivity);
+    uiSchema = ContextualSchema.createUiSchema(pageNum);
   }
   else {
     schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat);
