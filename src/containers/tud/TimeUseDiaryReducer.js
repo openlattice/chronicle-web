@@ -5,8 +5,10 @@ import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
 } from './TimeUseDiaryActions';
@@ -42,6 +44,16 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
           .set(SUBMISSIONS_BY_DATE, action.value)
       });
     }
+
+    case downloadTudResponses.case(action.type): {
+      const date = action.value;
+      return downloadTudResponses.reducer(state, action, {
+        REQUEST: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.SUCCESS)
+      });
+    }
+
     default:
       return state;
   }

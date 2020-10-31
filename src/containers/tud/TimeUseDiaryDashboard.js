@@ -7,7 +7,7 @@ import {
   CardSegment,
 } from 'lattice-ui-kit';
 import { Map, List } from 'immutable';
-import { useRequestState, ReduxUtils } from 'lattice-utils';
+import { useRequestState, ReduxConstants } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RequestState } from 'redux-reqseq';
 
@@ -16,6 +16,7 @@ import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
 import {
   GET_SUBMISSIONS_BY_DATE,
+  DOWNLOAD_TUD_RESPONSES,
   getSubmissionsByDate,
   downloadTudResponses
 } from './TimeUseDiaryActions';
@@ -24,7 +25,7 @@ import { TUD_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
 
-const { isPending } = ReduxUtils;
+const { REQUEST_STATE } = ReduxConstants;
 
 type Props = {
   studyEKID :?UUID;
@@ -42,6 +43,7 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
   // selectors
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
+  const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_RESPONSES, REQUEST_STATE], Map()));
 
   const onSetDate = (name :string, value :string) => {
     setDates({
@@ -82,7 +84,7 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
       <CardSegment>
         <SearchPanel
             endDate={dates.endDate}
-            isLoading={isPending(getSubmissionsByDateRS)}
+            getSubmissionsRS={getSubmissionsByDateRS}
             onGetSubmissions={handleOnGetSubmissions}
             onSetDate={onSetDate}
             startDate={dates.startDate} />
@@ -100,6 +102,7 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
                         key={key}
                         date={key}
                         entities={entities}
+                        downloadRS={downloadStates.get(key)}
                         onDownloadData={handleDownload}>
                       {key}
                     </SummaryListComponent>

@@ -2,9 +2,15 @@
 
 import React from 'react';
 
-import { Typography, Button } from 'lattice-ui-kit';
 import styled from 'styled-components';
+import { ReduxUtils } from 'lattice-utils';
+import { faCloudDownload } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { List } from 'immutable';
+import { IconButton, Typography } from 'lattice-ui-kit';
+import type { RequestState } from 'redux-reqseq';
+
+const { isPending } = ReduxUtils;
 
 const Wrapper = styled.div`
   align-items: center;
@@ -19,12 +25,20 @@ const Wrapper = styled.div`
 `;
 
 type Props = {
+  downloadRS :RequestState;
   date :string;
   entities :List;
   onDownloadData :(entity :List, date :string) => void;
 }
 
-const SummaryListComponent = ({ date, entities, onDownloadData } :Props) => (
+const SummaryListComponent = (
+  {
+    date,
+    entities,
+    onDownloadData,
+    downloadRS
+  } :Props
+) => (
   <Wrapper>
     <Typography variant="body1" gutterBottom>
       { date }
@@ -34,7 +48,9 @@ const SummaryListComponent = ({ date, entities, onDownloadData } :Props) => (
       { entities.size }
     </Typography>
     <div />
-    <Button color="secondary" onClick={() => onDownloadData(entities, date)}> Preprocessed </Button>
+    <IconButton color="primary" onClick={() => onDownloadData(entities, date)} isLoading={isPending(downloadRS)}>
+      <FontAwesomeIcon icon={faCloudDownload} />
+    </IconButton>
   </Wrapper>
 );
 

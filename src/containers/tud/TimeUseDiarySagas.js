@@ -9,7 +9,6 @@ import {
 import {
   List,
   Map,
-  Set,
   fromJS,
   get,
   getIn
@@ -204,10 +203,9 @@ function* getSubmissionsByDateWatcher() :Saga<*> {
 }
 
 function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
+  const { entities, date } = action.value;
   try {
-    yield put(downloadTudResponses.request(action.id));
-
-    const { entities, date } = action.value;
+    yield put(downloadTudResponses.request(action.id, date));
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -332,11 +330,11 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
       timeRangeQuestionAnswerMap,
       timeRangeValues
     );
-    yield put(downloadTudResponses.success(action.id));
+    yield put(downloadTudResponses.success(action.id, date));
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(downloadTudResponses.failure(action.id));
+    yield put(downloadTudResponses.failure(action.id, date));
   }
   finally {
     yield put(downloadTudResponses.finally(action.id));

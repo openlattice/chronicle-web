@@ -3,6 +3,10 @@
 import React from 'react';
 import { DateTime } from 'luxon';
 
+import { ReduxUtils } from 'lattice-utils';
+
+import type { RequestState } from 'redux-reqseq';
+
 import {
   Typography,
   Button,
@@ -11,6 +15,8 @@ import {
 } from 'lattice-ui-kit';
 
 import styled from 'styled-components';
+
+const { isPending } = ReduxUtils;
 
 const SearchGrid = styled.div`
   display: grid;
@@ -21,7 +27,7 @@ const SearchGrid = styled.div`
 
 type Props = {
   endDate :?DateTime;
-  isLoading :boolean;
+  getSubmissionsRS :?RequestState;
   onGetSubmissions :() => void;
   onSetDate :(name :string, date :any) => void;
   startDate :?DateTime;
@@ -29,7 +35,7 @@ type Props = {
 const SearchPanel = (props :Props) => {
   const {
     endDate,
-    isLoading,
+    getSubmissionsRS,
     onGetSubmissions,
     onSetDate,
     startDate,
@@ -55,7 +61,7 @@ const SearchPanel = (props :Props) => {
         </div>
         <div />
         <Button
-            isLoading={isLoading}
+            isLoading={isPending(getSubmissionsRS)}
             onClick={onGetSubmissions}>
           Search
         </Button>

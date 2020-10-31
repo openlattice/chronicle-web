@@ -6,7 +6,7 @@ import { Typography } from 'lattice-ui-kit';
 
 const Wrapper = styled.div`
   display: grid;
-  grid-template-columns: auto auto 1fr 100px;
+  grid-template-columns: auto auto 1fr auto;
   grid-gap: 30px;
   margin-bottom: 10px;
 `;
