@@ -207,7 +207,7 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(downloadTudResponses.request(action.id));
 
-    const { entities } = action.value;
+    const { entities, date } = action.value;
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -325,6 +325,7 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
     });
 
     writeToCsvFile(
+      date,
       submissionMetadata,
       answersMap,
       nonTimeRangeQuestionAnswerMap,

@@ -63,10 +63,10 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
     }
   };
 
-  const handleDownload = (entities :List) => {
+  const handleDownload = (entities :List, date :string) => {
     dispatch(downloadTudResponses({
       entities,
-      studyId
+      date
     }));
   };
 

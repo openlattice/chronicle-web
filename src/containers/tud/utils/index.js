@@ -345,6 +345,7 @@ function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
 }
 
 function writeToCsvFile(
+  date :string,
   submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
   answersMap :Map, // { answerId -> answer value }
   nonTimeRangeQuestionAnswerMap :Map, // submissionId -> question code -> answerID
@@ -432,7 +433,8 @@ function writeToCsvFile(
   const blob = new Blob([csv], {
     type: 'text/csv'
   });
-  FS.saveAs(blob, 'tud_summary.csv');
+  const fileName = `TimeUseDiary_${date}`;
+  FS.saveAs(blob, fileName);
 }
 
 export {

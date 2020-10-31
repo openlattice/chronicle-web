@@ -21,7 +21,7 @@ const Wrapper = styled.div`
 type Props = {
   date :string;
   entities :List;
-  onDownloadData :(entity :List) => void;
+  onDownloadData :(entity :List, date :string) => void;
 }
 
 const SummaryListComponent = ({ date, entities, onDownloadData } :Props) => (
@@ -34,7 +34,7 @@ const SummaryListComponent = ({ date, entities, onDownloadData } :Props) => (
       { entities.size }
     </Typography>
     <div />
-    <Button color="secondary" onClick={() => onDownloadData(entities)}> Preprocessed </Button>
+    <Button color="secondary" onClick={() => onDownloadData(entities, date)}> Preprocessed </Button>
   </Wrapper>
 );
 
