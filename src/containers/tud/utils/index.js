@@ -10,7 +10,6 @@ import {
 } from 'immutable';
 import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
-import { DataUtils } from 'lattice-utils';
 import { DateTime } from 'luxon';
 
 import * as ContextualSchema from '../schemas/ContextualSchema';
@@ -29,7 +28,6 @@ const {
   PRE_SURVEY_PAGE,
   SURVEY_INTRO_PAGE
 } = PAGE_NUMBERS;
-const { getPropertyValue } = DataUtils;
 
 const { FQN } = Models;
 const {
@@ -41,27 +39,30 @@ const {
   BG_AUDIO_NIGHT,
   BG_TV_DAY,
   BG_TV_NIGHT,
-  BOOK_TITLE,
-  BOOK_TYPE,
   CAREGIVER,
   CLOCK_FORMAT,
   DAY_END_TIME,
   DAY_OF_WEEK,
   DAY_START_TIME,
+  FAMILY_ID,
   HAS_FOLLOWUP_QUESTIONS,
   NON_TYPICAL_DAY_REASON,
   NON_TYPICAL_SLEEP_PATTERN,
-  OTHER_ACTIVITY,
-  SCREEN_MEDIA_ACTIVITY,
-  SCREEN_MEDIA_AGE,
-  SCREEN_MEDIA_NAME,
+  PRIMARY_BOOK_TITLE,
+  PRIMARY_BOOK_TYPE,
+  PRIMARY_MEDIA_ACTIVITY,
+  PRIMARY_MEDIA_AGE,
+  PRIMARY_MEDIA_NAME,
   SECONDARY_ACTIVITY,
+  SECONDARY_BOOK_TITLE,
+  SECONDARY_BOOK_TYPE,
+  SECONDARY_MEDIA_ACTIVITY,
+  SECONDARY_MEDIA_AGE,
+  SECONDARY_MEDIA_NAME,
   SLEEP_ARRANGEMENT,
   SLEEP_PATTERN,
-  TODAY_WAKEUP_TIME,
   TYPICAL_DAY_FLAG,
   WAKE_UP_COUNT,
-  FAMILY_ID,
   WAVE_ID,
 } = PROPERTY_CONSTS;
 
@@ -359,14 +360,22 @@ function writeToCsvFile(
 
     const csvMetadata = {};
     csvMetadata.Participant_ID = String(metadata.getIn([PERSON_ID, 0]));
+    csvMetadata.Family_ID = getAnswerString(questionAnswerId, answersMap, FAMILY_ID);
+    csvMetadata.Wave_Id = getAnswerString(questionAnswerId, answersMap, WAVE_ID);
     csvMetadata.Timestamp = DateTime
       .fromISO((metadata.getIn([DATE_TIME_FQN, 0])))
       .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
-    csvMetadata.Family_ID = getAnswerString(questionAnswerId, answersMap, FAMILY_ID);
-    csvMetadata.Wave_Id = getAnswerString(questionAnswerId, answersMap, WAVE_ID);
     csvMetadata.Day = getAnswerString(questionAnswerId, answersMap, DAY_OF_WEEK);
     csvMetadata.Typical_Day = getAnswerString(questionAnswerId, answersMap, TYPICAL_DAY_FLAG);
     csvMetadata.Non_Typical_Reason = getAnswerString(questionAnswerId, answersMap, NON_TYPICAL_DAY_REASON);
+
+    const nightTimeData = {};
+    nightTimeData.Typical_Sleep_Pattern = getAnswerString(questionAnswerId, answersMap, SLEEP_PATTERN);
+    nightTimeData.Non_Typical_Sleep_Pattern = getAnswerString(questionAnswerId, answersMap, NON_TYPICAL_SLEEP_PATTERN);
+    nightTimeData.Sleeping_Arrangement = getAnswerString(questionAnswerId, answersMap, SLEEP_ARRANGEMENT);
+    nightTimeData.Wake_Up_Count = getAnswerString(questionAnswerId, answersMap, WAKE_UP_COUNT);
+    nightTimeData.Background_TV_Night = getAnswerString(questionAnswerId, answersMap, BG_TV_NIGHT);
+    nightTimeData.Background_Audio_Night = getAnswerString(questionAnswerId, answersMap, BG_AUDIO_NIGHT);
 
     let submissionData = [];
     timeRangeQuestions.forEach((questions :Map, timeRangeId :UUID) => {
@@ -380,15 +389,20 @@ function writeToCsvFile(
         timeRangeValues, timeRangeId, DATETIME_END_FQN
       );
       activitiesData.Caregiver = getAnswerString(questions, answersMap, CAREGIVER);
-      activitiesData.Media_Activity = getAnswerString(questions, answersMap, SCREEN_MEDIA_ACTIVITY);
-      activitiesData.Media_Age = getAnswerString(questions, answersMap, SCREEN_MEDIA_AGE);
-      activitiesData.Media_Name = getAnswerString(questions, answersMap, SCREEN_MEDIA_NAME);
-      activitiesData.Book_Type = getAnswerString(questions, answersMap, BOOK_TYPE);
-      activitiesData.Book_Title = getAnswerString(questions, answersMap, BOOK_TITLE);
+      activitiesData.Primary_Media_Activity = getAnswerString(questions, answersMap, PRIMARY_MEDIA_ACTIVITY);
+      activitiesData.Primary_Media_Age = getAnswerString(questions, answersMap, PRIMARY_MEDIA_AGE);
+      activitiesData.Primary_Media_Name = getAnswerString(questions, answersMap, PRIMARY_MEDIA_NAME);
+      activitiesData.Primary_Book_Type = getAnswerString(questions, answersMap, PRIMARY_BOOK_TYPE);
+      activitiesData.Primary_Book_Title = getAnswerString(questions, answersMap, PRIMARY_BOOK_TITLE);
+      activitiesData.Secondary_Media_Activity = getAnswerString(questions, answersMap, SECONDARY_MEDIA_ACTIVITY);
+      activitiesData.Secondary_Media_Age = getAnswerString(questions, answersMap, SECONDARY_MEDIA_AGE);
+      activitiesData.Secondary_Media_Name = getAnswerString(questions, answersMap, SECONDARY_MEDIA_NAME);
+      activitiesData.Secondary_Book_Type = getAnswerString(questions, answersMap, SECONDARY_BOOK_TYPE);
+      activitiesData.Secondary_Book_Title = getAnswerString(questions, answersMap, SECONDARY_BOOK_TITLE);
       activitiesData.Secondary_Activity = getAnswerString(questions, answersMap, SECONDARY_ACTIVITY);
       activitiesData.Background_TV_Day = getAnswerString(questions, answersMap, BG_TV_DAY);
       activitiesData.Background_Audio_Day = getAnswerString(questions, answersMap, BG_AUDIO_DAY);
-
+      activitiesData.Adult_Media_Use = getAnswerString(questions, answersMap, ADULT_MEDIA);
       submissionData.push(activitiesData);
     });
 
@@ -404,15 +418,14 @@ function writeToCsvFile(
       if (index === 0) {
         result = {
           ...csvMetadata,
-          ...result
+          ...result,
+          ...nightTimeData
         };
       }
       return result;
     });
 
     csvData = csvData.concat(submissionData);
-
-    csvData.push({}); // empty line in csv to separate submissions
   });
 
   const csv = Papa.unparse(csvData);
