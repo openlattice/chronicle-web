@@ -33,7 +33,9 @@ const PROPERTY_CONSTS = {
   SLEEP_PATTERN: 'typicalSleepPattern',
   TODAY_WAKEUP_TIME: 'todayWakeUpTime',
   TYPICAL_DAY_FLAG: 'typicalDay',
-  WAKE_UP_COUNT: 'wakeUpCount'
+  WAKE_UP_COUNT: 'wakeUpCount',
+  FAMILY_ID: 'familyId',
+  WAVE_ID: 'waveId',
 };
 
 const PRIMARY_ACTIVITIES = {

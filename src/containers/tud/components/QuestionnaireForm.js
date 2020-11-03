@@ -118,17 +118,21 @@ const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
 };
 
 type Props = {
+  familyId :?string;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
-  submitRequestState :?RequestState
+  submitRequestState :?RequestState;
+  waveId :?string;
 };
 
 const QuestionnaireForm = ({
+  familyId,
   pagedProps,
   participantId,
   studyId,
-  submitRequestState
+  submitRequestState,
+  waveId,
 } :Props) => {
 
   const {
@@ -163,9 +167,11 @@ const QuestionnaireForm = ({
   const handleNext = () => {
     if (isSummaryPage) {
       dispatch(submitTudData({
+        familyId,
         formData: pagedData,
         participantId,
-        studyId
+        studyId,
+        waveId,
       }));
       return;
     }

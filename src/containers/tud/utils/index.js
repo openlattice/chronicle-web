@@ -28,7 +28,9 @@ const {
   CLOCK_FORMAT,
   DAY_END_TIME,
   DAY_START_TIME,
+  FAMILY_ID,
   HAS_FOLLOWUP_QUESTIONS,
+  WAVE_ID,
 } = PROPERTY_CONSTS;
 
 const {
@@ -246,7 +248,7 @@ const stringifyValue = (value :any) => {
 };
 
 // TODO: omit first page (clock format select) from form
-const createSubmitRequestBody = (formData :Object) => {
+const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?string) => {
   let result = [];
 
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
@@ -291,6 +293,22 @@ const createSubmitRequestBody = (formData :Object) => {
       result = [...result, ...sectionData];
     }
   });
+
+  // waveId & familyId
+  if (waveId) {
+    result.push({
+      [VALUES_FQN.toString()]: [waveId],
+      [ID_FQN.toString()]: [WAVE_ID],
+      [TITLE_FQN.toString()]: ['Wave Id']
+    });
+  }
+  if (familyId) {
+    result.push({
+      [VALUES_FQN.toString()]: [familyId],
+      [ID_FQN.toString()]: [FAMILY_ID],
+      [TITLE_FQN.toString()]: ['Family Id']
+    });
+  }
   return result;
 };
 

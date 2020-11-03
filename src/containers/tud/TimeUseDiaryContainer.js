@@ -29,7 +29,17 @@ const TimeUseDiaryContainer = () => {
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
 
   // $FlowFixMe
-  const { participantId, studyId } :{ participantId :string, studyId :UUID } = queryParams;
+  const {
+    familyId,
+    participantId,
+    studyId,
+    waveId,
+  } :{
+    familyId :string,
+    participantId :string,
+    studyId :UUID,
+    waveId :string,
+  } = queryParams;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -67,10 +77,12 @@ const TimeUseDiaryContainer = () => {
                   <Paged
                       render={(pagedProps) => (
                         <QuestionnaireForm
-                            submitRequestState={submitRequestState}
+                            familyId={familyId}
                             pagedProps={pagedProps}
                             participantId={participantId}
-                            studyId={studyId} />
+                            studyId={studyId}
+                            submitRequestState={submitRequestState}
+                            waveId={waveId} />
                       )} />
                 </CardSegment>
               </Card>
