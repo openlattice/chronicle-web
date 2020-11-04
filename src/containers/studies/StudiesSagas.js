@@ -385,7 +385,7 @@ function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEnt
     const notificationsESID = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
 
     const IdFQNPropertyTypeId = yield select(selectPropertyTypeId(ID_FQN));
-    const notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID], 0));
+    const notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID]));
 
     // case 1: notifications entity DNE: create entity and associate with study
     if (!notificationsEKID) {
@@ -397,7 +397,7 @@ function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEnt
       };
 
       const associations = [
-        [PART_OF, notificationsEKID, NOTIFICATION, studyEntityKeyId, STUDIES, {
+        [PART_OF, 0, NOTIFICATION, studyEntityKeyId, STUDIES, {
           [ID_FQN.toString()]: [partOfAssociationVal],
         }]
       ];
