@@ -19,6 +19,7 @@ import type { RequestState } from 'redux-reqseq';
 
 import QuestionnaireForm from './components/QuestionnaireForm';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
+import { createFormSchema } from './utils';
 
 import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
@@ -28,7 +29,6 @@ const TimeUseDiaryContainer = () => {
   const location = useLocation();
   const queryParams = qs.parse(location.search, { ignoreQueryPrefix: true });
 
-  // $FlowFixMe
   const {
     familyId,
     participantId,
@@ -39,9 +39,15 @@ const TimeUseDiaryContainer = () => {
     participantId :string,
     studyId :UUID,
     waveId :string,
+    // $FlowFixMe
   } = queryParams;
 
+  const initFormSchema = createFormSchema({}, 0);
+
+  const [formSchema, setFormSchema] = useState(initFormSchema); // {schema, uiSchema}
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [page, setPage] = useState(0);
+  const [formData, setFormData] = useState({});
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -51,6 +57,24 @@ const TimeUseDiaryContainer = () => {
       setIsModalVisible(true);
     }
   }, [submitRequestState]);
+
+  useEffect(() => {
+    const newSchema = createFormSchema(formData, page);
+    setFormSchema(newSchema);
+  }, [page]);
+
+  const onPageChange = (currPage, currFormData) => {
+    setPage(currPage);
+    setFormData(currFormData);
+  };
+
+  const updateFormState = (schema, uiSchema, currFormData) => {
+    setFormData(currFormData);
+    setFormSchema({
+      uiSchema,
+      schema
+    });
+  };
 
   return (
     <AppContainerWrapper>
@@ -75,13 +99,19 @@ const TimeUseDiaryContainer = () => {
               <Card>
                 <CardSegment>
                   <Paged
+                      initialFormData={formData}
+                      onPageChange={onPageChange}
+                      page={page}
                       render={(pagedProps) => (
                         <QuestionnaireForm
                             familyId={familyId}
+                            formSchema={formSchema}
+                            initialFormData={formData}
                             pagedProps={pagedProps}
                             participantId={participantId}
                             studyId={studyId}
                             submitRequestState={submitRequestState}
+                            updateFormState={updateFormState}
                             waveId={waveId} />
                       )} />
                 </CardSegment>
