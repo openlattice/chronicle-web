@@ -199,7 +199,7 @@ const QuestionnaireForm = ({
 
   const updateFormSchema = (formData, currentSchema, currentUiSchema) => {
     const psk = getPageSectionKey(page, 0);
-    const secondaryActivities = getIn(formData, [psk, SECONDARY_ACTIVITY]);
+    const secondaryActivities = getIn(formData, [psk, SECONDARY_ACTIVITY], []);
 
     const { properties: mediaProperties, required: mediaRequired } = mediaUseSchema;
     const { properties: readingProperties, required: readingRequired } = readingSchema;
