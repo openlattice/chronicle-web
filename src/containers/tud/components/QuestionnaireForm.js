@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 
 import set from 'lodash/set';
 import styled from 'styled-components';
+import { getIn } from 'immutable';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
@@ -21,10 +22,10 @@ import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
   createFormSchema,
+  getIs12HourFormatSelected,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
-  selectTimeByPageAndKey,
-  getIs12HourFormatSelected
+  selectTimeByPageAndKey
 } from '../utils';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -195,7 +196,7 @@ const QuestionnaireForm = ({
 
     if (page === PRE_SURVEY_PAGE) {
       const psk = getPageSectionKey(page, 0);
-      const dayOfWeek = formRef?.current?.state?.formData?.[psk]?.[DAY_OF_WEEK];
+      const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
       if (dayOfWeek) {
         updateTypicalDayLabel(dayOfWeek, page);
       }
