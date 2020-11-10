@@ -201,10 +201,6 @@ const QuestionnaireForm = ({
     const psk = getPageSectionKey(page, 0);
     const secondaryActivities = getIn(formData, [psk, SECONDARY_ACTIVITY]);
 
-    if (!secondaryActivities) {
-      return;
-    }
-
     const { properties: mediaProperties, required: mediaRequired } = mediaUseSchema;
     const { properties: readingProperties, required: readingRequired } = readingSchema;
 
