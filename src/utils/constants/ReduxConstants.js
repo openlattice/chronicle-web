@@ -7,6 +7,7 @@ const STUDIES_REDUX_CONSTANTS = {
   PART_OF_ASSOCIATION_EKID_MAP: 'partOfAssociationEKIDMap',
   STUDIES: 'studies',
   TIMEOUT: 'timeout',
+  TIME_USE_DIARY_STUDIES: 'timeUseDiaryStudies',
 };
 
 const QUESTIONNAIRE_REDUX_CONSTANTS = {

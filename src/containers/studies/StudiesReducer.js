@@ -22,6 +22,7 @@ import {
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
+  GET_TIME_USE_DIARY_STUDIES,
   RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
@@ -34,7 +35,8 @@ import {
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
-  updateStudy,
+  getTimeUseDiaryStudies,
+  updateStudy
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -49,7 +51,8 @@ const {
   NOTIFICATIONS_ENABLED_STUDIES,
   PART_OF_ASSOCIATION_EKID_MAP,
   STUDIES,
-  TIMEOUT
+  TIMEOUT,
+  TIME_USE_DIARY_STUDIES
 } = STUDIES_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
@@ -65,11 +68,13 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [GET_STUDIES]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDY_PARTICIPANTS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_STUDY_NOTIFICATION_STATUS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [GET_TIME_USE_DIARY_STUDIES]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [UPDATE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GLOBAL_NOTIFICATIONS_EKID]: undefined,
   [NOTIFICATIONS_ENABLED_STUDIES]: Set(),
   [PART_OF_ASSOCIATION_EKID_MAP]: Map(),
   [STUDIES]: Map(),
+  [TIME_USE_DIARY_STUDIES]: Set(),
   participantEntitySetIds: Map(),
   participants: Map(),
 });
@@ -282,6 +287,16 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         SUCCESS: () => state
           .setIn([GET_GLOBAL_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.SUCCESS)
           .set(GLOBAL_NOTIFICATIONS_EKID, seqAction.value)
+      });
+    }
+
+    case getTimeUseDiaryStudies.case(action.type): {
+      return getTimeUseDiaryStudies.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.SUCCESS)
+          .set(GET_TIME_USE_DIARY_STUDIES, action.value)
       });
     }
 

@@ -31,6 +31,7 @@ import {
   SearchApiSagas,
 } from 'lattice-sagas';
 import { LangUtils, Logger } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -52,6 +53,7 @@ import {
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
+  getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
 
@@ -100,9 +102,10 @@ const { isDefined } = LangUtils;
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
+  CHRONICLE_METADATA,
   CHRONICLE_NOTIFICATIONS,
   CHRONICLE_STUDIES,
-  CHRONICLE_METADATA,
+  QUESTIONNAIRE_ES_NAME,
 } = ENTITY_SET_NAMES;
 
 const { PARTICIPATED_IN, PART_OF_ES_NAME, HAS_ES_NAME } = ASSOCIATION_ENTITY_SET_NAMES;
@@ -133,6 +136,53 @@ const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
+const TIME_USE_DIARY = 'Time Use Diary';
+
+function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
+  const workerResponse = {};
+  try {
+    yield put(getTimeUseDiaryStudies.request(action.id));
+    const studyEntityKeyIds = action.value;
+
+    // enityt set ids
+    const partOfESID = yield select(selectEntitySetId(PART_OF_ES_NAME));
+    const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
+    const surveyESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+
+    // filtered search on study dataset to get survey neighbors
+    const searchFilter = {
+      destinationEntitySetIds: [],
+      edgeEntitySetIds: [partOfESID],
+      entityKeyIds: studyEntityKeyIds,
+      sourceEntitySetIds: [surveyESID]
+    };
+
+    const response = yield call(
+      searchEntityNeighborsWithFilterWorker,
+      searchEntityNeighborsWithFilter({
+        entitySetId: studyESID,
+        filter: searchFilter,
+      })
+    );
+    if (response.error) throw response.error;
+
+    const timeUseDiaryStudies = Set().withMutations((mutator) => {
+      fromJS(response.data).forEach((neighbors, studyEKID) => {
+        if (neighbors.find((neighbor) => getIn(neighbor, ['neighborDetails', ID_FQN, 0], '') === TIME_USE_DIARY)) {
+          mutator.add(studyEKID);
+        }
+      });
+    });
+
+    yield put(getTimeUseDiaryStudies.success(action.id, timeUseDiaryStudies));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+  }
+
+  return workerResponse;
+}
 
 /*
  *
@@ -773,13 +823,20 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
     let authorizedStudies :Map<UUID, Map> = studies
       .filter((study) => authorizedStudyIds.includes(study.getIn([STUDY_ID, 0])));
 
-    // get notification status for authorized studies
     if (!authorizedStudies.isEmpty()) {
+      // get notification status for authorized studies
       response = yield call(getStudyNotificationStatusWorker, getStudyNotificationStatus({
         studiesEntitySetId,
         studies: authorizedStudies
       }));
       if (response.error) throw response.error;
+
+      // get studies that have time use diary
+      const studyEntityKeyIds = authorizedStudies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0]));
+      response = yield call(getTimeUseDiaryStudiesWorker, getTimeUseDiaryStudies(studyEntityKeyIds.toJS()));
+      if (response.error) {
+        throw response.error;
+      }
     }
 
     authorizedStudies = authorizedStudies
