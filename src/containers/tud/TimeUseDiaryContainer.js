@@ -39,6 +39,7 @@ const TimeUseDiaryContainer = () => {
     participantId :string,
     studyId :UUID,
     waveId :string,
+    // $FlowFixMe
   } = queryParams;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
