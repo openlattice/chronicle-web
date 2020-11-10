@@ -296,7 +296,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         FAILURE: () => state.setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state
           .setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.SUCCESS)
-          .set(GET_TIME_USE_DIARY_STUDIES, action.value)
+          .set(TIME_USE_DIARY_STUDIES, action.value)
       });
     }
 
