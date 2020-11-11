@@ -13,6 +13,7 @@ import {
   submitTudData,
 } from './TimeUseDiaryActions';
 
+import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
 import { TUD_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
@@ -27,6 +28,15 @@ const INITIAL_STATE = fromJS({
 
 export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :Object) {
   switch (action.type) {
+
+    case RESET_REQUEST_STATE: {
+      const { actionType } = action;
+      if (actionType && state.has(actionType)) {
+        return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
+      }
+      return state;
+    }
+
     case submitTudData.case(action.type): {
       return submitTudData.reducer(state, action, {
         REQUEST: () => state.setIn([SUBMIT_TUD_DATA, REQUEST_STATE], RequestStates.PENDING),

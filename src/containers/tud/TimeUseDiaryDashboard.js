@@ -1,31 +1,43 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+import { List, Map } from 'immutable';
 import {
   Card,
   CardSegment,
+  Spinner,
+  Typography
 } from 'lattice-ui-kit';
-import { Map, List } from 'immutable';
-import { useRequestState, ReduxConstants } from 'lattice-utils';
+import { ReduxConstants, ReduxUtils, useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RequestState } from 'redux-reqseq';
 
 import SearchPanel from './components/SearchPanel';
 import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
+import { resetRequestState } from '../../core/redux/ReduxActions';
+
 import {
-  GET_SUBMISSIONS_BY_DATE,
   DOWNLOAD_TUD_RESPONSES,
-  getSubmissionsByDate,
-  downloadTudResponses
+  GET_SUBMISSIONS_BY_DATE,
+  downloadTudResponses,
+  getSubmissionsByDate
 } from './TimeUseDiaryActions';
 
+import BasicErrorComponent from '../shared/BasicErrorComponent';
 import { TUD_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
 
 const { REQUEST_STATE } = ReduxConstants;
+
+const {
+  isFailure,
+  isPending,
+  isStandby,
+  isSuccess,
+} = ReduxUtils;
 
 type Props = {
   studyEKID :?UUID;
@@ -44,6 +56,11 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
   const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_RESPONSES, REQUEST_STATE], Map()));
+
+  // reset state on dismount
+  useEffect(() => () => {
+    dispatch(resetRequestState(GET_SUBMISSIONS_BY_DATE));
+  }, [dispatch]);
 
   const onSetDate = (name :string, value :string) => {
     setDates({
@@ -72,12 +89,8 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
     }));
   };
 
-  // const on
-
-  // TODO: spinner when fetching,
-  // error message if something goes wrong
-  // hide this when nothing has been searched yet?
-  // Placeholder message when no data for given date range
+  const errorMsg = 'An error occurred while loading time use diary data.'
+    + ' Please try reloading the page or contact support if the issue persists';
 
   return (
     <Card>
@@ -90,29 +103,57 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
             startDate={dates.startDate} />
       </CardSegment>
 
-      <CardSegment>
-        {
-          !submissionsByDate.isEmpty() && (
-            <>
-              <SummaryHeader />
-              <div>
-                {
-                  submissionsByDate.entrySeq().map(([key, entities]) => (
-                    <SummaryListComponent
-                        key={key}
-                        date={key}
-                        entities={entities}
-                        downloadRS={downloadStates.get(key)}
-                        onDownloadData={handleDownload}>
-                      {key}
-                    </SummaryListComponent>
-                  ))
-                }
-              </div>
-            </>
-          )
-        }
-      </CardSegment>
+      {
+        !isStandby(getSubmissionsByDateRS) && (
+          <CardSegment>
+            {
+              isPending(getSubmissionsByDateRS) && (
+                <Spinner size="2x" />
+              )
+            }
+            {
+              isFailure(getSubmissionsByDateRS) && (
+                <BasicErrorComponent>
+                  <Typography variant="body2">
+                    { errorMsg }
+                  </Typography>
+                </BasicErrorComponent>
+              )
+            }
+            {
+              isSuccess(getSubmissionsByDateRS) && (
+                <>
+                  {
+                    submissionsByDate.isEmpty() ? (
+                      <Typography>
+                        No submissions found for the selected date range.
+                      </Typography>
+                    ) : (
+                      <>
+                        <SummaryHeader />
+                        <div>
+                          {
+                            submissionsByDate.entrySeq().map(([key, entities]) => (
+                              <SummaryListComponent
+                                  key={key}
+                                  date={key}
+                                  entities={entities}
+                                  downloadRS={downloadStates.get(key)}
+                                  onDownloadData={handleDownload}>
+                                {key}
+                              </SummaryListComponent>
+                            ))
+                          }
+                        </div>
+                      </>
+                    )
+                  }
+                </>
+              )
+            }
+          </CardSegment>
+        )
+      }
     </Card>
   );
 };
