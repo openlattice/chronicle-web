@@ -6,15 +6,10 @@ import { DateTime } from 'luxon';
 import * as FollowupSchema from './FollowupSchema';
 import * as SecondaryActivitySchema from './SecondaryActivitySchema';
 
-import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
-import { ACTIVITY_NAMES } from '../constants/ActivitiesConstants';
 import {
-  ADULT_MEDIA_PURPOSES,
-  ADULT_MEDIA_USAGE_OPTIONS,
-  BG_MEDIA_PROPORTION_OPTIONS,
+  BG_MEDIA_OPTIONS,
   CAREGIVERS,
-  LOCATION_CATEGORIES,
-  PROPERTY_CONSTS,
+  PROPERTY_CONSTS
 } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
@@ -23,138 +18,28 @@ const {
   ACTIVITY_NAME,
   ACTIVITY_START_TIME,
   ADULT_MEDIA,
-  ADULT_MEDIA_PROPORTION,
-  ADULT_MEDIA_PURPOSE,
-  BG_AUDIO,
-  BG_AUDIO_TYPE,
-  BG_MEDIA_PROPORTION,
-  BG_TV,
-  BG_TV_AGE,
-  BOOK_TITLE,
-  BOOK_TYPE,
+  BG_AUDIO_DAY,
+  BG_TV_DAY,
   CAREGIVER,
-  DEVICE,
-  FOLLOWUP_COMPLETED,
-  LOCATION,
-  MEDIA_ACTIVITY,
-  MEDIA_AGE,
-  MEDIA_NAME,
+  HAS_FOLLOWUP_QUESTIONS,
   OTHER_ACTIVITY,
+  PRIMARY_BOOK_TITLE,
+  PRIMARY_BOOK_TYPE,
+  PRIMARY_MEDIA_ACTIVITY,
+  PRIMARY_MEDIA_AGE,
+  PRIMARY_MEDIA_NAME,
   SECONDARY_ACTIVITY,
+  SECONDARY_BOOK_TITLE,
+  SECONDARY_BOOK_TYPE,
+  SECONDARY_MEDIA_ACTIVITY,
+  SECONDARY_MEDIA_AGE,
+  SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
-const { MEDIA_USE, NAPPING, READING } = ACTIVITY_NAMES;
-
-const getBgAudioSchema = (selectedActivity :string) => ({
-  properties: {
-    [BG_AUDIO]: {
-      title: 'Was there audio entertainment (e.g., music, talk radio) on in the background while your child'
-        + ` was ${selectedActivity}?`,
-      type: 'string',
-      enum: ['Yes', 'No', "Don't Know"]
-    },
-    [ADULT_MEDIA]: {
-      type: 'string',
-      title: 'Was an adult using a tablet, laptop, or cell/smart phone at any point'
-        + ` while your child was ${selectedActivity}?`,
-      enum: ['Yes', 'No', "Don't Know"]
-    }
-  },
-  required: [BG_AUDIO, ADULT_MEDIA],
-  dependencies: {
-    [ADULT_MEDIA]: {
-      oneOf: [
-        {
-          properties: {
-            [ADULT_MEDIA]: {
-              enum: ['No', "Don't Know"]
-            }
-          },
-        },
-        {
-          properties: {
-            [ADULT_MEDIA]: {
-              enum: ['Yes']
-            },
-            [ADULT_MEDIA_PURPOSE]: {
-              type: 'array',
-              title: SCHEMA_FIELDS_TITLES[ADULT_MEDIA_PURPOSE],
-              description: 'Please choose all that apply',
-              items: {
-                type: 'string',
-                enum: ADULT_MEDIA_PURPOSES
-              },
-              uniqueItems: true,
-              minItems: 1
-            },
-            [ADULT_MEDIA_PROPORTION]: {
-              type: 'string',
-              title: 'Approximately what proportion of the time for this activity'
-                + ` (${selectedActivity}) was the adult using their device?`,
-              enum: ADULT_MEDIA_USAGE_OPTIONS
-            },
-          },
-          required: [ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION]
-        },
-      ]
-    },
-    [BG_AUDIO]: {
-      oneOf: [
-        {
-          properties: {
-            [BG_AUDIO]: {
-              enum: ['No', "Don't Know"]
-            }
-          },
-        },
-        {
-          properties: {
-            [BG_AUDIO]: {
-              enum: ['Yes']
-            },
-            [BG_AUDIO_TYPE]: {
-              title: SCHEMA_FIELDS_TITLES[BG_AUDIO_TYPE],
-              type: 'array',
-              items: {
-                type: 'string',
-                enum: ['Music', 'Talk Radio', 'Podcast', "Don't Know"]
-              },
-              uniqueItems: true
-            },
-            ...(selectedActivity === NAPPING) && {
-              [BG_MEDIA_PROPORTION]: {
-                type: 'string',
-                title: 'Approximately'
-                  + ' what proportion of time that the child was napping was the background media in use?',
-                enum: BG_MEDIA_PROPORTION_OPTIONS
-              }
-            }
-          },
-          required: [BG_AUDIO_TYPE, ...(selectedActivity === NAPPING ? [BG_MEDIA_PROPORTION] : [])]
-        }
-      ]
-    }
-  }
-});
-
-const getFollowupUiOrder = (activity :string) => {
-  switch (activity) {
-    case READING: {
-      return [BOOK_TYPE, BOOK_TITLE];
-    }
-
-    case MEDIA_USE: {
-      return [DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_NAME];
-    }
-    default:
-      return [];
-  }
-};
 
 const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :DateTime, prevEndTime :DateTime) => {
 
   const followupSchema = FollowupSchema.createSchema(selectedActivity);
   const secondaryActivitySchema = SecondaryActivitySchema.createSchema(selectedActivity);
-  const bgAudioSchema = getBgAudioSchema(selectedActivity);
 
   return {
     type: 'object',
@@ -164,7 +49,7 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
         type: 'object',
         title: '',
         properties: {
-          [FOLLOWUP_COMPLETED]: {
+          [HAS_FOLLOWUP_QUESTIONS]: {
             type: 'boolean',
             default: true
           },
@@ -180,15 +65,10 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
             type: 'string',
             default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
           },
-          [LOCATION]: {
-            type: 'string',
-            title: `Where was your child when he/she was ${selectedActivity}?`,
-            enum: LOCATION_CATEGORIES
-          },
           [CAREGIVER]: {
             type: 'array',
             title: `Who was with your child when he/she was ${selectedActivity}?`,
-            description: 'Please choose all that apply',
+            description: 'Please choose all that apply.',
             items: {
               type: 'string',
               enum: CAREGIVERS
@@ -198,56 +78,31 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
           },
           ...followupSchema.properties,
           ...secondaryActivitySchema.properties,
-          [BG_TV]: {
+          [BG_TV_DAY]: {
             type: 'string',
-            title: `Was there a TV on in the background while your child was ${selectedActivity}?`,
-            enum: ['Yes', 'No', "Don't Know"]
+            title: `Was there TV in the background while your child was  ${selectedActivity}? For example,`
+              + ' maybe a parent was watching TV while your child did something else in the room.',
+            enum: BG_MEDIA_OPTIONS
           },
-          ...bgAudioSchema.properties
+          [BG_AUDIO_DAY]: {
+            title: `Was there audio in the background (e.g., music, podcast) while your child was ${selectedActivity}?`
+              + ' For example, maybe a parent was listening to music while your child did something else in the room.',
+            type: 'string',
+            enum: BG_MEDIA_OPTIONS
+          },
+          [ADULT_MEDIA]: {
+            type: 'string',
+            title: 'Was an adult using a mobile device (phone, tablet, laptop) while your child'
+              + ` was ${selectedActivity}? For example, maybe a parent was sending text messages`
+              + ' while your child did something else in the room.',
+            enum: BG_MEDIA_OPTIONS
+          },
         },
-        required: [LOCATION, CAREGIVER, BG_TV,
-          ...bgAudioSchema.required,
+        required: [CAREGIVER, BG_TV_DAY, BG_AUDIO_DAY, ADULT_MEDIA,
           ...followupSchema.required,
           ...secondaryActivitySchema.required],
         dependencies: {
-          [BG_TV]: {
-            oneOf: [
-              {
-                properties: {
-                  [BG_TV]: {
-                    enum: ['No', "Don't Know"]
-                  }
-                }
-              },
-              {
-                properties: {
-                  [BG_TV]: {
-                    enum: ['Yes']
-                  },
-                  [BG_TV_AGE]: {
-                    title: SCHEMA_FIELDS_TITLES[BG_TV_AGE],
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: ["Child's age", 'Older children', 'Younger children', 'Adults', 'Don`t know'],
-                    },
-                    uniqueItems: true
-                  },
-                  ...(selectedActivity === NAPPING) && {
-                    [BG_MEDIA_PROPORTION]: {
-                      type: 'string',
-                      title: 'Approximately'
-                        + ' what proportion of time that the child was napping was the background media in use?',
-                      enum: BG_MEDIA_PROPORTION_OPTIONS
-                    }
-                  }
-                },
-                required: [BG_TV_AGE, ...(selectedActivity === NAPPING ? [BG_MEDIA_PROPORTION] : [])],
-              }
-            ]
-          },
           ...secondaryActivitySchema.dependencies,
-          ...bgAudioSchema.dependencies,
         },
       }
     },
@@ -255,20 +110,22 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
   };
 };
 
-const createUiSchema = (pageNum :number, selectedActivity :string) => {
-  const followupUiOrder :string[] = getFollowupUiOrder(selectedActivity);
-  const followUpFields = [BOOK_TYPE, BOOK_TITLE, DEVICE, MEDIA_ACTIVITY, MEDIA_AGE, MEDIA_NAME];
+const createUiSchema = (pageNum :number) => {
 
-  const otherFollowupOrder = followUpFields.filter((field) => !followupUiOrder.includes(field));
+  const primaryFollowupOrder = [
+    PRIMARY_BOOK_TYPE, PRIMARY_BOOK_TITLE, PRIMARY_MEDIA_ACTIVITY, PRIMARY_MEDIA_AGE, PRIMARY_MEDIA_NAME];
+  const secondaryFollowupOrder = [
+    SECONDARY_BOOK_TYPE, SECONDARY_BOOK_TITLE, SECONDARY_MEDIA_ACTIVITY, SECONDARY_MEDIA_AGE, SECONDARY_MEDIA_NAME];
+
   return {
     [getPageSectionKey(pageNum, 0)]: {
       classNames: 'column-span-12 grid-container',
-      'ui:order': [FOLLOWUP_COMPLETED, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
-        LOCATION, CAREGIVER, ...followupUiOrder,
-        OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...otherFollowupOrder, BG_TV, BG_TV_AGE,
-        BG_AUDIO, BG_AUDIO_TYPE, BG_MEDIA_PROPORTION, ADULT_MEDIA, ADULT_MEDIA_PURPOSE, ADULT_MEDIA_PROPORTION],
+      'ui:order': [HAS_FOLLOWUP_QUESTIONS, ACTIVITY_NAME, ACTIVITY_START_TIME, ACTIVITY_END_TIME,
+        CAREGIVER, ...primaryFollowupOrder,
+        OTHER_ACTIVITY, SECONDARY_ACTIVITY, ...secondaryFollowupOrder, BG_TV_DAY,
+        BG_AUDIO_DAY, ADULT_MEDIA],
 
-      [FOLLOWUP_COMPLETED]: {
+      [HAS_FOLLOWUP_QUESTIONS]: {
         classNames: 'hidden'
       },
       [ACTIVITY_NAME]: {
@@ -280,27 +137,15 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
       [ACTIVITY_END_TIME]: {
         classNames: 'hidden'
       },
-      [BG_AUDIO]: {
+      [BG_AUDIO_DAY]: {
         classNames: 'column-span-12',
         'ui:widget': 'radio'
       },
-      [BG_TV]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'radio'
-      },
-      [BG_TV_AGE]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'OtherRadioWidget',
-      },
-      [BG_MEDIA_PROPORTION]: {
+      [BG_TV_DAY]: {
         classNames: 'column-span-12',
         'ui:widget': 'radio'
       },
       [ADULT_MEDIA]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'radio'
-      },
-      [LOCATION]: {
         classNames: 'column-span-12',
         'ui:widget': 'radio'
       },
@@ -316,32 +161,15 @@ const createUiSchema = (pageNum :number, selectedActivity :string) => {
           noneText: 'No one'
         }
       },
-      [BOOK_TYPE]: {
+      [PRIMARY_BOOK_TYPE]: {
         classNames: 'column-span-12',
         'ui:widget': 'checkboxes',
         'ui:options': {
           withOther: 'true'
         }
       },
-      [BOOK_TITLE]: {
+      [PRIMARY_BOOK_TITLE]: {
         classNames: 'column-span-12'
-      },
-      [BG_AUDIO_TYPE]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'OtherRadioWidget'
-      },
-      [ADULT_MEDIA_PROPORTION]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'radio'
-      },
-      [ADULT_MEDIA_PURPOSE]: {
-        classNames: 'column-span-12',
-        'ui:widget': 'checkboxes',
-        'ui:options': {
-          withNone: true,
-          noneText: "Don't know",
-          withOther: true
-        }
       },
       ...FollowupSchema.uiSchema,
       ...SecondaryActivitySchema.uiSchema

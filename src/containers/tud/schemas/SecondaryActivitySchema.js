@@ -1,9 +1,8 @@
 // @flow
 
-import * as FollowupSchema from './FollowupSchema';
+import * as SecondaryFollowUpSchema from './SecondaryFollowUpSchema';
 
-import { ACTIVITY_NAMES, SECONDARY_ACTIVITIES } from '../constants/ActivitiesConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const {
   OTHER_ACTIVITY,
@@ -13,17 +12,19 @@ const {
 const {
   READING,
   MEDIA_USE,
-} = ACTIVITY_NAMES;
+} = PRIMARY_ACTIVITIES;
+
+// $FlowFixMe
+const activitiesList :string[] = Object.values(PRIMARY_ACTIVITIES);
 
 const createSchema = (primaryActivity :string) => {
-  const secondaryActivityOptions :string[] = SECONDARY_ACTIVITIES
-    .filter((activity :string) => activity !== primaryActivity);
+  const secondaryActivityOptions :string[] = activitiesList.filter((activity :string) => activity !== primaryActivity);
 
-  const readingSchema = FollowupSchema.createSchema(READING);
-  const mediaUseSchema = FollowupSchema.createSchema(MEDIA_USE);
+  const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
+  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
 
   const arr = [READING, MEDIA_USE];
-  const activitiesWithoutFollowup :string[] = SECONDARY_ACTIVITIES
+  const activitiesWithoutFollowup :string[] = activitiesList
     .filter((activity :string) => !arr.includes(activity));
 
   return {
@@ -103,7 +104,7 @@ const uiSchema = {
     classNames: 'column-span-12',
     'ui:widget': 'radio'
   },
-  ...FollowupSchema.uiSchema
+  ...SecondaryFollowUpSchema.uiSchema
 };
 
 /* eslint-disable import/prefer-default-export */

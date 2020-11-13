@@ -4,9 +4,13 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
 import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
+import { PAGE_NUMBERS } from '../constants/GeneralConstants';
 import { NON_TYPICAL_DAY_REASONS, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
+
+const { PRE_SURVEY_PAGE } = PAGE_NUMBERS;
+
 const {
   DAY_OF_WEEK,
   NON_TYPICAL_DAY_REASON,
@@ -17,7 +21,7 @@ const schema = {
   type: 'object',
   title: '',
   properties: {
-    [getPageSectionKey(0, 0)]: {
+    [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
       type: 'object',
       title: '',
       properties: {
@@ -31,7 +35,7 @@ const schema = {
           title: SCHEMA_FIELDS_TITLES[TYPICAL_DAY_FLAG],
           type: 'boolean',
           enum: [true, false],
-          enumNames: ['Yes', 'No']
+          enumNames: ['Yes, yesterday was typical.', 'No, yesterday was non-typical.']
         }
       },
       dependencies: {
@@ -51,8 +55,14 @@ const schema = {
                 },
                 [NON_TYPICAL_DAY_REASON]: {
                   title: SCHEMA_FIELDS_TITLES[NON_TYPICAL_DAY_REASON],
-                  type: 'string',
-                  enum: NON_TYPICAL_DAY_REASONS
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: NON_TYPICAL_DAY_REASONS
+                  },
+                  description: 'Please choose all that apply.',
+                  uniqueItems: true,
+                  minItems: 1
                 }
               },
               required: [NON_TYPICAL_DAY_REASON]
@@ -66,7 +76,7 @@ const schema = {
 };
 
 const uiSchema = {
-  [getPageSectionKey(0, 0)]: {
+  [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
     classNames: 'column-span-12 grid-container',
     [DAY_OF_WEEK]: {
       classNames: 'column-span-12',
@@ -78,7 +88,7 @@ const uiSchema = {
     },
     [NON_TYPICAL_DAY_REASON]: {
       classNames: 'column-span-12',
-      'ui:widget': 'radio'
+      'ui:widget': 'checkboxes'
     }
   }
 };
