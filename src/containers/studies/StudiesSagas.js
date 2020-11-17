@@ -180,6 +180,9 @@ function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
     workerResponse.error = error;
     LOG.error(action.type, error);
   }
+  finally {
+    yield put(getTimeUseDiaryStudies.finally(action.id));
+  }
 
   return workerResponse;
 }
