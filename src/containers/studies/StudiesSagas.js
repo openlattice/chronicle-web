@@ -30,7 +30,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { LangUtils, Logger } from 'lattice-utils';
+import { LangUtils, Logger, DataUtils } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -98,6 +98,7 @@ const {
 const { EntitySetBuilder } = Models;
 const { PermissionTypes, UpdateTypes } = Types;
 const { isDefined } = LangUtils;
+const { getEntityKeyId } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
@@ -835,7 +836,7 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       if (response.error) throw response.error;
 
       // get studies that have time use diary
-      const studyEntityKeyIds = authorizedStudies.map((study) => study.getIn([OPENLATTICE_ID_FQN, 0]));
+      const studyEntityKeyIds = authorizedStudies.map(getEntityKeyId);
       response = yield call(getTimeUseDiaryStudiesWorker, getTimeUseDiaryStudies(studyEntityKeyIds.toJS()));
       if (response.error) {
         throw response.error;

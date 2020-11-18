@@ -19,10 +19,10 @@ import styled from 'styled-components';
 const { isPending } = ReduxUtils;
 
 const SearchGrid = styled.div`
-  display: grid;
-  grid-template-columns: auto auto 1fr 200px;
-  grid-gap: 30px;
   align-items: end;
+  display: grid;
+  grid-gap: 30px;
+  grid-template-columns: auto auto 1fr 200px;
 `;
 
 type Props = {

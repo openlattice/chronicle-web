@@ -66,11 +66,12 @@ const {
 } = PROPERTY_TYPE_FQNS;
 
 const {
-  QUESTIONS_ES_NAME,
   ANSWERS_ES_NAME,
+  QUESTIONS_ES_NAME,
+  SUBMISSION_ES_NAME,
   TIMERANGE_ES_NAME,
-  SUBMISSION_ES_NAME
 } = ENTITY_SET_NAMES;
+
 const {
   ADDRESSES_ES_NAME,
   RESPONDS_WITH_ES_NAME,
@@ -136,7 +137,7 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
       ...result
     }), {});
 
-    const participantEKIDs :UUID[] = participantsRes.data.map((entity) => getEntityKeyId(entity));
+    const participantEKIDs :UUID[] = participantsRes.data.map(getEntityKeyId);
 
     const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
     const respondsWithESID = yield select(selectEntitySetId(RESPONDS_WITH_ES_NAME));

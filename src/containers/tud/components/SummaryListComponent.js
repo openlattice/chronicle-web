@@ -34,9 +34,9 @@ type Props = {
 const SummaryListComponent = (
   {
     date,
+    downloadRS,
     entities,
     onDownloadData,
-    downloadRS
   } :Props
 ) => (
   <Wrapper>

@@ -292,11 +292,14 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
 
     case getTimeUseDiaryStudies.case(action.type): {
       return getTimeUseDiaryStudies.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.PENDING),
+        REQUEST: () => state
+          .setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.PENDING)
+          .setIn([GET_TIME_USE_DIARY_STUDIES, action.id], action),
         FAILURE: () => state.setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state
           .setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.SUCCESS)
-          .set(TIME_USE_DIARY_STUDIES, action.value)
+          .set(TIME_USE_DIARY_STUDIES, action.value),
+        FINALLY: () => state.deleteIn([GET_TIME_USE_DIARY_STUDIES, action.id])
       });
     }
 

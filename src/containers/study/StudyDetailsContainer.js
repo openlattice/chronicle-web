@@ -129,7 +129,7 @@ const StudyDetailsContainer = (props :Props) => {
             render={() => <QuestionnairesContainer study={study} />} />
         <Route
             path={Routes.TUD_DASHBOARD}
-            render={() => <TimeUseDiaryDashboard studyEKID={getEntityKeyId(study)} studyId={studyUUID} />} />
+            render={() => <TimeUseDiaryDashboard studyEKID={studyEKID} studyId={studyUUID} />} />
         <Route
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
