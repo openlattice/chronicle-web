@@ -147,6 +147,7 @@ type Props = {
   studyId :UUID;
   submitRequestState :?RequestState;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
+  updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
 };
 
@@ -159,6 +160,7 @@ const QuestionnaireForm = ({
   studyId,
   submitRequestState,
   updateFormState,
+  updateSurveyProgress,
   waveId,
 } :Props) => {
 
@@ -243,6 +245,8 @@ const QuestionnaireForm = ({
     if (schemaHasFollowupQuestions(currentSchema, page)) {
       updateFormSchema(formData, currentSchema, currentUiSchema);
     }
+
+    updateSurveyProgress(formData);
   };
 
   const validate = (formData, errors) => (
@@ -310,5 +314,11 @@ const QuestionnaireForm = ({
     </>
   );
 };
+
+// const areEqual = (prevProps :Object, nextProps :Object) => {
+//   console.log(prevProps);
+//   console.log(nextProps);
+//   return false;
+// };
 
 export default QuestionnaireForm;

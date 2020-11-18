@@ -17,11 +17,12 @@ import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
-import { createFormSchema } from './utils';
+import { createFormSchema, selectTimeByPageAndKey } from './utils';
 
 import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
@@ -52,6 +53,10 @@ const TimeUseDiaryContainer = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [page, setPage] = useState(0);
   const [formData, setFormData] = useState({});
+
+  const [currentTime, setCurrentTime] = useState();
+  const [dayEndTime, setDayEndTime] = useState();
+  const [dayStartTime, setDayStartTime] = useState();
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -96,6 +101,18 @@ const TimeUseDiaryContainer = () => {
     });
   };
 
+  const updateSurveyProgress = (currFormData :Object) => {
+    const dayStart = selectTimeByPageAndKey(PAGE_NUMBERS.DAY_SPAN_PAGE, PROPERTY_CONSTS.DAY_START_TIME, currFormData);
+    const dayEnd = selectTimeByPageAndKey(PAGE_NUMBERS.DAY_SPAN_PAGE, PROPERTY_CONSTS.DAY_END_TIME, currFormData);
+    const currentEnd = selectTimeByPageAndKey(page, PROPERTY_CONSTS.ACTIVITY_END_TIME, currFormData);
+
+    setFormData(currFormData);
+
+    setDayStartTime(dayStart);
+    setDayEndTime(dayEnd);
+    setCurrentTime(currentEnd);
+  };
+
   return (
     <AppContainerWrapper>
       <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
@@ -118,6 +135,10 @@ const TimeUseDiaryContainer = () => {
             : (
               <Card>
                 <CardSegment>
+                  <ProgressBar
+                      currentTime={currentTime}
+                      dayEndTime={dayEndTime}
+                      dayStartTime={dayStartTime} />
                   <Paged
                       initialFormData={formData}
                       onPageChange={onPageChange}
@@ -132,6 +153,7 @@ const TimeUseDiaryContainer = () => {
                             studyId={studyId}
                             submitRequestState={submitRequestState}
                             updateFormState={updateFormState}
+                            updateSurveyProgress={updateSurveyProgress}
                             waveId={waveId} />
                       )} />
                 </CardSegment>
