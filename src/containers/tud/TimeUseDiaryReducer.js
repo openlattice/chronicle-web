@@ -47,20 +47,26 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
 
     case getSubmissionsByDate.case(action.type): {
       return getSubmissionsByDate.reducer(state, action, {
-        REQUEST: () => state.setIn([GET_SUBMISSIONS_BY_DATE, REQUEST_STATE], RequestStates.PENDING),
+        REQUEST: () => state
+          .setIn([GET_SUBMISSIONS_BY_DATE, REQUEST_STATE], RequestStates.PENDING)
+          .setIn([GET_SUBMISSIONS_BY_DATE, action.id], action),
         FAILURE: () => state.setIn([GET_SUBMISSIONS_BY_DATE, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state
           .setIn([GET_SUBMISSIONS_BY_DATE, REQUEST_STATE], RequestStates.SUCCESS)
-          .set(SUBMISSIONS_BY_DATE, action.value)
+          .set(SUBMISSIONS_BY_DATE, action.value),
+        FINALLY: () => state.deleteIn([GET_SUBMISSIONS_BY_DATE, action.id])
       });
     }
 
     case downloadTudResponses.case(action.type): {
       const date = action.value;
       return downloadTudResponses.reducer(state, action, {
-        REQUEST: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.PENDING),
+        REQUEST: () => state
+          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.PENDING)
+          .setIn([DOWNLOAD_TUD_RESPONSES, action.id], action),
         FAILURE: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.SUCCESS)
+        SUCCESS: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.SUCCESS),
+        FINALLY: () => state.deleteIn([DOWNLOAD_TUD_RESPONSES, action.id])
       });
     }
 
