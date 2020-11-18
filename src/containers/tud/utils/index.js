@@ -12,7 +12,9 @@ import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
 import * as SurveyIntroSchema from '../schemas/SurveyIntroSchema';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+
+const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const {
   DAY_SPAN_PAGE,
@@ -31,6 +33,7 @@ const {
   FAMILY_ID,
   HAS_FOLLOWUP_QUESTIONS,
   WAVE_ID,
+  SECONDARY_ACTIVITY
 } = PROPERTY_CONSTS;
 
 const {
@@ -73,9 +76,20 @@ const getIs12HourFormatSelected = (formData :Object) :boolean => getIn(
   formData, [getPageSectionKey(SURVEY_INTRO_PAGE, 0), CLOCK_FORMAT]
 ) === 12;
 
+const getSecondaryReadingSelected = (formData :Object, page :number) => getIn(
+  formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
+).includes(READING);
+
+const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
+  formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
+).includes(MEDIA_USE);
+
 const createFormSchema = (formData :Object, pageNum :number) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
+
+  const isSecondaryReadingSelected = getSecondaryReadingSelected(formData, pageNum);
+  const isSecondaryMediaSelected = getSecondaryMediaSelected(formData, pageNum);
 
   if (pageNum === SURVEY_INTRO_PAGE) {
     return {
@@ -122,7 +136,9 @@ const createFormSchema = (formData :Object, pageNum :number) => {
     uiSchema = NightTimeActivitySchema.createUiSchema(pageNum);
   }
   else if (shouldDisplayFollowup) {
-    schema = ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
+    schema = ContextualSchema.createSchema(
+      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected
+    );
     uiSchema = ContextualSchema.createUiSchema(pageNum);
   }
   else {
