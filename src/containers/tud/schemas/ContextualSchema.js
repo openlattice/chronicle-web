@@ -1,16 +1,24 @@
 // @flow
 
 import { DataProcessingUtils } from 'lattice-fabricate';
+import { merge } from 'lodash';
 import { DateTime } from 'luxon';
 
 import * as FollowupSchema from './FollowupSchema';
 import * as SecondaryActivitySchema from './SecondaryActivitySchema';
+import * as SecondaryFollowUpSchema from './SecondaryFollowUpSchema';
 
 import {
   BG_MEDIA_OPTIONS,
   CAREGIVERS,
+  PRIMARY_ACTIVITIES,
   PROPERTY_CONSTS
 } from '../constants/SchemaConstants';
+
+const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
+
+const secondaryReadingSchema = SecondaryFollowUpSchema.createSchema(READING);
+const secondaryMediaSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
 
 const { getPageSectionKey } = DataProcessingUtils;
 const {
@@ -36,16 +44,25 @@ const {
   SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
 
-const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :DateTime, prevEndTime :DateTime) => {
+const createSchema = (
+  pageNum :number,
+  selectedActivity :string,
+  prevStartTime :DateTime,
+  prevEndTime :DateTime,
+  isSecondaryReadingSelected :boolean,
+  isSecondaryMediaSelected :boolean
+) => {
+
+  const psk = getPageSectionKey(pageNum, 0);
 
   const followupSchema = FollowupSchema.createSchema(selectedActivity);
   const secondaryActivitySchema = SecondaryActivitySchema.createSchema(selectedActivity);
 
-  return {
+  const schema = {
     type: 'object',
     title: '',
     properties: {
-      [getPageSectionKey(pageNum, 0)]: {
+      [psk]: {
         type: 'object',
         title: '',
         properties: {
@@ -106,8 +123,17 @@ const createSchema = (pageNum :number, selectedActivity :string, prevStartTime :
         },
       }
     },
-
   };
+
+  if (isSecondaryReadingSelected) {
+    merge(schema[psk], secondaryReadingSchema);
+  }
+
+  if (isSecondaryMediaSelected) {
+    merge(schema[psk], secondaryMediaSchema);
+  }
+
+  return schema;
 };
 
 const createUiSchema = (pageNum :number) => {

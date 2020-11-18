@@ -1,12 +1,12 @@
 // @flow
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import set from 'lodash/set';
 import styled from 'styled-components';
-import { getIn } from 'immutable';
+import { getIn, setIn, merge } from 'immutable';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
+import { set } from 'lodash';
 import { DateTime } from 'luxon';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -16,12 +16,12 @@ import ContextualQuestionsIntro from './ContextualQuestionsIntro';
 import SurveyIntro from './SurveyIntro';
 import TimeUseSummary from './TimeUseSummary';
 
+import * as SecondaryFollowUpSchema from '../schemas/SecondaryFollowUpSchema';
 import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
-  createFormSchema,
   getIs12HourFormatSelected,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
@@ -30,6 +30,8 @@ import {
 
 const { getPageSectionKey } = DataProcessingUtils;
 
+const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
+
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_START_TIME,
@@ -37,8 +39,9 @@ const {
   DAY_OF_WEEK,
   DAY_START_TIME,
   HAS_FOLLOWUP_QUESTIONS,
+  SECONDARY_ACTIVITY,
   SLEEP_ARRANGEMENT,
-  TYPICAL_DAY_FLAG
+  TYPICAL_DAY_FLAG,
 } = PROPERTY_CONSTS;
 
 const {
@@ -100,14 +103,31 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   }
 };
 
-const updateTypicalDayLabel = (dayOfWeek :string, page :number) => {
-  const typicalDayInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_${TYPICAL_DAY_FLAG}`);
-  const label = typicalDayInput?.previousSibling;
-  if (label) {
-    // $FlowFixMe
-    label.innerHTML = 'An important part of this project is to find out how children spend'
-      + ` their time during the week. Was yesterday a typical ${dayOfWeek} for you`
-      + ' and your child? A non-typical day would include a school closing, being on vacation, or being home sick.';
+const updateTypicalDayLabel = (formData :Object, page :number) => {
+  const psk = getPageSectionKey(page, 0);
+  const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
+  if (dayOfWeek) {
+    const typicalDayInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_${TYPICAL_DAY_FLAG}`);
+    const label = typicalDayInput?.previousSibling;
+    if (label) {
+      // $FlowFixMe
+      label.innerHTML = 'An important part of this project is to find out how children spend'
+        + ` their time during the week. Was yesterday a typical ${dayOfWeek} for you`
+        + ' and your child? A non-typical day would include a school closing, being on vacation, or being home sick.';
+    }
+  }
+};
+
+const updatePrimaryActivityQuestion = (formData :Object, page :number) => {
+  const currentActivity = selectPrimaryActivityByPage(page, formData);
+  if (currentActivity) {
+    const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
+
+    const label = endTimeInput?.parentNode?.parentNode?.parentNode?.firstChild;
+    if (label) {
+      // $FlowFixMe
+      label.innerHTML = `When did your child stop ${currentActivity}?`;
+    }
   }
 };
 
@@ -120,19 +140,25 @@ const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
 
 type Props = {
   familyId :?string;
+  formSchema :Object;
+  initialFormData :Object;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
   submitRequestState :?RequestState;
+  updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   waveId :?string;
 };
 
 const QuestionnaireForm = ({
   familyId,
+  formSchema,
+  initialFormData,
   pagedProps,
   participantId,
   studyId,
   submitRequestState,
+  updateFormState,
   waveId,
 } :Props) => {
 
@@ -148,22 +174,12 @@ const QuestionnaireForm = ({
 
   const dispatch = useDispatch();
 
-  const formSchema = createFormSchema(pagedData, page);
   const { schema, uiSchema } = formSchema;
 
-  const isSummaryPage = getIsSummaryPage(pagedData, page);
+  const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
+  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
 
-  useEffect(() => {
-    if (page === PRE_SURVEY_PAGE) {
-      const dayOfWeekInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`);
-      const label = dayOfWeekInput?.previousSibling;
-      if (label) {
-        // $FlowFixMe
-        label.innerHTML = 'We would like you to think about your child\'s day and complete the time use diary'
-          + ' for <i>yesterday</i>. What day of the week was <i>yesterday</i>?';
-      }
-    }
-  }, [page]);
+  const isSummaryPage = getIsSummaryPage(pagedData, page);
 
   const handleNext = () => {
     if (isSummaryPage) {
@@ -181,27 +197,52 @@ const QuestionnaireForm = ({
     validateAndSubmit();
   };
 
-  const onChange = ({ formData } :Object) => {
+  const updateFormSchema = (formData, currentSchema, currentUiSchema) => {
+    const psk = getPageSectionKey(page, 0);
+    const secondaryActivities = getIn(formData, [psk, SECONDARY_ACTIVITY], []);
 
-    const currentActivity = selectPrimaryActivityByPage(page, formData);
-    if (currentActivity) {
-      const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
+    const { properties: mediaProperties, required: mediaRequired } = mediaUseSchema;
+    const { properties: readingProperties, required: readingRequired } = readingSchema;
 
-      const label = endTimeInput?.parentNode?.parentNode?.parentNode?.firstChild;
-      if (label) {
-        // $FlowFixMe
-        label.innerHTML = `When did your child stop ${currentActivity}?`;
-      }
+    let newProperties = getIn(currentSchema, ['properties', psk, 'properties'], {});
+    let newRequired = getIn(currentSchema, ['properties', psk, 'required'], []);
+
+    if (secondaryActivities.includes(MEDIA_USE)) {
+      newProperties = merge(newProperties, mediaProperties);
+      newRequired = merge(newRequired, mediaRequired);
     }
+    else {
+      // remove media properties & required
+      Object.keys(mediaProperties).forEach((property) => delete newProperties[property]);
+      newRequired = newRequired.filter((property) => !mediaRequired.includes(property));
+    }
+
+    if (secondaryActivities.includes(READING)) {
+      newProperties = merge(newProperties, readingProperties);
+      newRequired = merge(newRequired, readingRequired);
+    }
+    else {
+      // remove reading properties & required
+      Object.keys(readingProperties).forEach((property) => delete newProperties[property]);
+      newRequired = newRequired.filter((property) => !readingRequired.includes(property));
+    }
+
+    let newSchema = setIn(currentSchema, ['properties', psk, 'properties'], newProperties);
+    newSchema = setIn(newSchema, ['properties', psk, 'required'], [...new Set(newRequired)]);
+
+    updateFormState(newSchema, currentUiSchema, formData);
+  };
+
+  const onChange = ({ formData, schema: currentSchema, uiSchema: currentUiSchema }) => {
+    updatePrimaryActivityQuestion(formData, page);
 
     if (page === PRE_SURVEY_PAGE) {
-      const psk = getPageSectionKey(page, 0);
-      const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
-      if (dayOfWeek) {
-        updateTypicalDayLabel(dayOfWeek, page);
-      }
+      updateTypicalDayLabel(formData, page);
     }
 
+    if (schemaHasFollowupQuestions(currentSchema, page)) {
+      updateFormSchema(formData, currentSchema, currentUiSchema);
+    }
   };
 
   const validate = (formData, errors) => (
@@ -237,7 +278,7 @@ const QuestionnaireForm = ({
               page === SURVEY_INTRO_PAGE && <SurveyIntro />
             }
             <Form
-                formData={pagedData}
+                formData={initialFormData}
                 hideSubmit
                 noPadding
                 onChange={onChange}
