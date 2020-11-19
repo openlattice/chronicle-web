@@ -11,11 +11,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
+import { DataUtils } from 'lattice-utils';
 
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
 import QuestionnairesContainer from '../questionnaires/QuestionnairesContainer';
+import TimeUseDiaryDashboard from '../tud/TimeUseDiaryDashboard';
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
@@ -24,9 +26,11 @@ import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
-const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES } = STUDIES_REDUX_CONSTANTS;
+const { NOTIFICATIONS_ENABLED_STUDIES, STUDIES, TIME_USE_DIARY_STUDIES } = STUDIES_REDUX_CONSTANTS;
 
 const { NEUTRAL, PURPLE } = Colors;
+
+const { getEntityKeyId } = DataUtils;
 
 const StudyNameWrapper = styled.h2`
   align-items: flex-start;
@@ -83,9 +87,12 @@ const StudyDetailsContainer = (props :Props) => {
   const notificationsEnabledStudies = useSelector(
     (state) => state.getIn([STUDIES, NOTIFICATIONS_ENABLED_STUDIES], Set())
   );
+  const timeUseDiaryStudies = useSelector((state) => state.getIn([STUDIES, TIME_USE_DIARY_STUDIES], Set()));
+
+  const studyEKID = getEntityKeyId(study);
+  const hasTimeUseDiary = timeUseDiaryStudies.has(studyEKID);
 
   const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyUUID);
-
   if (!study) {
     dispatch(goToRoot());
   }
@@ -105,6 +112,13 @@ const StudyDetailsContainer = (props :Props) => {
         <TabLink exact to={Routes.QUESTIONNAIRES.replace(Routes.ID_PARAM, studyUUID)}>
           Questionnaires
         </TabLink>
+        {
+          hasTimeUseDiary && (
+            <TabLink exact to={Routes.TUD_DASHBOARD.replace(Routes.ID_PARAM, studyUUID)}>
+              Time Use Diary
+            </TabLink>
+          )
+        }
       </Tabs>
       <Switch>
         <Route
@@ -113,6 +127,9 @@ const StudyDetailsContainer = (props :Props) => {
         <Route
             path={Routes.QUESTIONNAIRES}
             render={() => <QuestionnairesContainer study={study} />} />
+        <Route
+            path={Routes.TUD_DASHBOARD}
+            render={() => <TimeUseDiaryDashboard studyEKID={studyEKID} studyId={studyUUID} />} />
         <Route
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />

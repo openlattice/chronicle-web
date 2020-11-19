@@ -33,8 +33,8 @@ const schema = {
         },
         [TYPICAL_DAY_FLAG]: {
           title: SCHEMA_FIELDS_TITLES[TYPICAL_DAY_FLAG],
-          type: 'boolean',
-          enum: [true, false],
+          type: 'string',
+          enum: ['Yes', 'No'],
           enumNames: ['Yes, yesterday was typical.', 'No, yesterday was non-typical.']
         }
       },
@@ -44,14 +44,14 @@ const schema = {
             {
               properties: {
                 [TYPICAL_DAY_FLAG]: {
-                  enum: [true]
+                  enum: ['Yes']
                 }
               }
             },
             {
               properties: {
                 [TYPICAL_DAY_FLAG]: {
-                  enum: [false]
+                  enum: ['No']
                 },
                 [NON_TYPICAL_DAY_REASON]: {
                   title: SCHEMA_FIELDS_TITLES[NON_TYPICAL_DAY_REASON],
