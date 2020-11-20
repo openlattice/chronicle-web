@@ -6,34 +6,38 @@ import styled from 'styled-components';
 import { Colors, Typography } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 
-const { PURPLES, NEUTRALS } = Colors;
+const { PURPLES, NEUTRALS, ORANGE } = Colors;
 
 const Grid = styled.div`
-  display: grid;
-  grid-template-columns: ${(props) => `${props.gridRatios[0]}fr ${props.gridRatios[1]}fr`};
   align-items: center;
+  display: grid;
+  grid-template-columns: ${(props) => `${props.completedRatio}fr auto`};
 `;
 
 const Wrapper = styled.div`
-    padding: 20px 0;
+    background: white;
     margin-bottom: 10px;
+    padding: 20px 0;
     position: sticky;
     top: 0;
     z-index: 10;
-    background: white;
 `;
 
 const ProgressIndicator = styled.div`
+  border-top-color: ${(props) => props.color};
   border-top-style: solid;
   border-top-width: 5px;
-  border-top-color: ${(props) => props.color};
 `;
 
 const ProgressLabelWrapper = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
   justify-content: space-between;
   padding-top: 5px;
+
+  :last-of-type {
+    padding-left: 10px;
+  }
 `;
 
 const validateDateTimes = (dateTimes :Array<?DateTime>) => {
@@ -42,76 +46,95 @@ const validateDateTimes = (dateTimes :Array<?DateTime>) => {
 };
 
 type Props = {
-  dayStartTime :?DateTime;
-  dayEndTime :?DateTime;
   currentTime :?DateTime;
+  dayEndTime :?DateTime;
+  dayStartTime :?DateTime;
+  is12hourFormat :boolean;
+  isDayActivityPage :boolean;
 }
 
-const ProgressBar = ({ dayStartTime, dayEndTime, currentTime } :Props) => {
+const ProgressBar = (props :Props) => {
 
-  const [completedRatio, setCompletedRatio] = useState([0, 1]);
+  const {
+    currentTime,
+    dayEndTime,
+    dayStartTime,
+    is12hourFormat,
+    isDayActivityPage,
+  } = props;
 
-  const dateTimes = [dayStartTime, dayEndTime, currentTime];
-
-  const isValidDateTimes = validateDateTimes(dateTimes);
+  const [completedRatio, setCompletedRatio] = useState(0);
+  const [isOutOfRange, setIsOutOfRange] = useState(true);
 
   useEffect(() => {
-    if (isValidDateTimes) {
+    if (validateDateTimes([dayStartTime, dayEndTime, currentTime])) {
       // $FlowFixMe
-      const dayDiff :Object = dayEndTime.diff(dayStartTime).toObject();
+      const totalTimeDiff :Object = dayEndTime.diff(dayStartTime).toObject().milliseconds;
       // $FlowFixMe
-      const currentDiff :Object = currentTime.diff(dayStartTime).toObject();
+      const completed :Object = currentTime.diff(dayStartTime).toObject().milliseconds;
 
-      const totalTime = dayDiff.milliseconds;
-      const timeCompleted = currentDiff.milliseconds;
-
-      const ratio = [
-        timeCompleted / totalTime,
-        (totalTime - timeCompleted) / totalTime
+      let ratio = [
+        completed / totalTimeDiff,
+        (totalTimeDiff - completed) / totalTimeDiff
       ];
 
-      if (ratio.every((val) => val >= 0)) {
-        setCompletedRatio(ratio);
-      }
-    }
-  }, [dayStartTime, dayEndTime, currentTime, isValidDateTimes]);
+      const isValid = ratio.every((val) => val >= 0);
+      setIsOutOfRange(isValid);
 
-  if (!isValidDateTimes) {
+      if (ratio[0] < 0) ratio = [0, 1];
+      if (ratio[1] < 0) ratio = [1, 0];
+
+      setCompletedRatio(ratio[0]);
+    }
+  }, [dayStartTime, dayEndTime, currentTime]);
+
+  if (!isDayActivityPage) {
     return null;
   }
 
-  const isCompleted = completedRatio[0] === 1;
-  const zeroProgress = completedRatio[0] === 0;
+  const formatTime = (input :?DateTime) => {
+    if (!validateDateTimes([input])) return null;
 
-  const labelGridRatio = (completedRatio[0] === 0 || completedRatio[1] === 0) ? [1, 2] : completedRatio;
+    return is12hourFormat
+      // $FlowFixMe
+      ? input.toLocaleString(DateTime.TIME_SIMPLE)
+      // $FlowFixMe
+      : input.toLocaleString(DateTime.TIME_24_SIMPLE);
+  };
+
+  const isCompleted = completedRatio === 1;
+  const zeroProgress = completedRatio === 0;
 
   return (
     <Wrapper>
-      <Grid gridRatios={completedRatio}>
-        <ProgressIndicator color={PURPLES[1]} />
-        <ProgressIndicator color={NEUTRALS[4]} />
+      <Grid completedRatio={completedRatio}>
+        <ProgressIndicator color={isOutOfRange ? PURPLES[1] : ORANGE.O300} />
+        <ProgressIndicator color={isOutOfRange ? NEUTRALS[4] : ORANGE.O300} />
       </Grid>
-      <Grid gridRatios={labelGridRatio}>
+      <Grid completedRatio={completedRatio}>
         <ProgressLabelWrapper>
           <Typography
+              noWrap
               variant="overline">
-            {dayStartTime.toLocaleString(DateTime.TIME_SIMPLE)}
+            {formatTime(dayStartTime)}
           </Typography>
         </ProgressLabelWrapper>
         <ProgressLabelWrapper>
           {
 
             <Typography
+                noWrap
                 variant="overline">
-              {!isCompleted && !zeroProgress && currentTime.toLocaleString(DateTime.TIME_SIMPLE)}
+              {!isCompleted && !zeroProgress && formatTime(currentTime)}
             </Typography>
 
           }
           {
             <Typography
                 align="right"
+                noWrap
                 variant="overline">
-              {dayEndTime.toLocaleString(DateTime.TIME_SIMPLE)}
+              {formatTime(dayEndTime)}
             </Typography>
           }
         </ProgressLabelWrapper>

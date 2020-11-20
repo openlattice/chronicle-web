@@ -23,7 +23,6 @@ import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstant
 import {
   applyCustomValidation,
   getIs12HourFormatSelected,
-  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
@@ -35,7 +34,6 @@ const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_START_TIME,
-  DAY_END_TIME,
   DAY_OF_WEEK,
   DAY_START_TIME,
   HAS_FOLLOWUP_QUESTIONS,
@@ -48,7 +46,6 @@ const {
   FIRST_ACTIVITY_PAGE,
   PRE_SURVEY_PAGE,
   SURVEY_INTRO_PAGE,
-  DAY_SPAN_PAGE
 } = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
@@ -57,19 +54,6 @@ const ButtonRow = styled.div`
   justify-content: space-between;
   margin-top: 30px;
 `;
-
-/*
- * Return true if the current page should display a summary of activities
- * Summary page is displayed after night activity page, hence page - 2 accounts for the night activity page
- */
-const getIsSummaryPage = (formData :Object, page :number) => {
-  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
-
-  return prevEndTime.isValid && dayEndTime.isValid
-    && prevEndTime.equals(dayEndTime)
-    && pageHasFollowupQuestions(formData, page - 2);
-};
 
 /*
  * This code is crucial when onSubmit is invoked on a page that already contains form data.
@@ -142,6 +126,7 @@ type Props = {
   familyId :?string;
   formSchema :Object;
   initialFormData :Object;
+  isSummaryPage :boolean;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
@@ -155,6 +140,7 @@ const QuestionnaireForm = ({
   familyId,
   formSchema,
   initialFormData,
+  isSummaryPage,
   pagedProps,
   participantId,
   studyId,
@@ -180,8 +166,6 @@ const QuestionnaireForm = ({
 
   const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
   const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
-
-  const isSummaryPage = getIsSummaryPage(pagedData, page);
 
   const handleNext = () => {
     if (isSummaryPage) {
@@ -314,11 +298,5 @@ const QuestionnaireForm = ({
     </>
   );
 };
-
-// const areEqual = (prevProps :Object, nextProps :Object) => {
-//   console.log(prevProps);
-//   console.log(nextProps);
-//   return false;
-// };
 
 export default QuestionnaireForm;

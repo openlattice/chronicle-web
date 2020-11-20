@@ -9,6 +9,7 @@ import {
   getIn
 } from 'immutable';
 import { Models } from 'lattice';
+import { isEqual } from 'lodash';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
@@ -32,6 +33,7 @@ const {
 } = PAGE_NUMBERS;
 
 const { FQN } = Models;
+
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_NAME,
@@ -96,6 +98,28 @@ const selectPrimaryActivityByPage = (pageNum :number, formData :Object) :string 
 const pageHasFollowupQuestions = (formData :Object, pageNum :number) => getIn(
   formData, [getPageSectionKey(pageNum, 0), HAS_FOLLOWUP_QUESTIONS], false
 );
+
+/*
+ * Return true if the current page should display a summary of activities
+ * Summary page is displayed after night activity page, hence page - 2 accounts for the night activity page
+ */
+const getIsSummaryPage = (formData :Object, page :number) => {
+  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
+  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
+
+  return prevEndTime.isValid && dayEndTime.isValid
+    && prevEndTime.equals(dayEndTime)
+    && pageHasFollowupQuestions(formData, page - 2);
+};
+
+/*
+ * Return true if the schema is the night activity schema
+ */
+const getIsNightActivityPage = (schema :Object, page :number) => {
+  const nightSchema = NightTimeActivitySchema.createSchema(page);
+
+  return isEqual(schema, nightSchema);
+};
 
 const getIsDayTimeCompleted = (formData :Object, page :number) => {
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_END_TIME, formData);
@@ -474,8 +498,10 @@ export {
   createSubmitRequestBody,
   createTimeUseSummary,
   getIs12HourFormatSelected,
+  getIsSummaryPage,
+  getIsNightActivityPage,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
-  writeToCsvFile
+  writeToCsvFile,
 };

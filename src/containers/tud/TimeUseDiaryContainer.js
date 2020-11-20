@@ -13,6 +13,7 @@ import {
   Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
+import { isEqual } from 'lodash';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -22,11 +23,27 @@ import QuestionnaireForm from './components/QuestionnaireForm';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
-import { createFormSchema, selectTimeByPageAndKey } from './utils';
+import { usePrevious } from './hooks';
+import {
+  createFormSchema,
+  getIs12HourFormatSelected,
+  getIsNightActivityPage,
+  getIsSummaryPage,
+  selectTimeByPageAndKey
+} from './utils';
 
 import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
+
+const {
+  ACTIVITY_END_TIME,
+  DAY_END_TIME,
+  DAY_OF_WEEK,
+  DAY_START_TIME
+} = PROPERTY_CONSTS;
+
+const { DAY_SPAN_PAGE } = PAGE_NUMBERS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -57,6 +74,8 @@ const TimeUseDiaryContainer = () => {
   const [currentTime, setCurrentTime] = useState();
   const [dayEndTime, setDayEndTime] = useState();
   const [dayStartTime, setDayStartTime] = useState();
+  const [isSummaryPage, setIsSummaryPage] = useState(false);
+  const [isNightActivityPage, setIsNightActivityPage] = useState(false);
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -77,7 +96,7 @@ const TimeUseDiaryContainer = () => {
   useEffect(() => {
     if (page === PAGE_NUMBERS.PRE_SURVEY_PAGE) {
       const dayOfWeekInput = document.getElementById(
-        `root_${getPageSectionKey(page, 0)}_${PROPERTY_CONSTS.DAY_OF_WEEK}`
+        `root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`
       );
       const label = dayOfWeekInput?.previousSibling;
       if (label) {
@@ -87,6 +106,36 @@ const TimeUseDiaryContainer = () => {
       }
     }
   }, [page, formSchema]);
+
+  const refreshProgress = (currFormData) => {
+    const dayStart = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, currFormData);
+    const dayEnd = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, currFormData);
+    const currentEnd = selectTimeByPageAndKey(page, ACTIVITY_END_TIME, currFormData);
+
+    setDayStartTime(dayStart);
+    setDayEndTime(dayEnd);
+    setCurrentTime(currentEnd);
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    refreshProgress(formData);
+  }, [page]);
+
+  useEffect(() => {
+    setIsSummaryPage(getIsSummaryPage(formData, page));
+  }, [page]);
+
+  /* eslint-enable */
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const prevSchema = usePrevious(formSchema.schema);
+  useEffect(() => {
+    if (!isEqual(prevSchema, formSchema.schema)) {
+      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page));
+    }
+  }, [page, formSchema]);
+  /* eslint-enable */
 
   const onPageChange = (currPage, currFormData) => {
     setPage(currPage);
@@ -102,16 +151,14 @@ const TimeUseDiaryContainer = () => {
   };
 
   const updateSurveyProgress = (currFormData :Object) => {
-    const dayStart = selectTimeByPageAndKey(PAGE_NUMBERS.DAY_SPAN_PAGE, PROPERTY_CONSTS.DAY_START_TIME, currFormData);
-    const dayEnd = selectTimeByPageAndKey(PAGE_NUMBERS.DAY_SPAN_PAGE, PROPERTY_CONSTS.DAY_END_TIME, currFormData);
-    const currentEnd = selectTimeByPageAndKey(page, PROPERTY_CONSTS.ACTIVITY_END_TIME, currFormData);
-
+    refreshProgress(currFormData);
     setFormData(currFormData);
-
-    setDayStartTime(dayStart);
-    setDayEndTime(dayEnd);
-    setCurrentTime(currentEnd);
   };
+
+  const is12hourFormat = getIs12HourFormatSelected(formData);
+  const isDayActivityPage = page >= PAGE_NUMBERS.FIRST_ACTIVITY_PAGE
+    && !isSummaryPage
+    && !isNightActivityPage;
 
   return (
     <AppContainerWrapper>
@@ -138,7 +185,9 @@ const TimeUseDiaryContainer = () => {
                   <ProgressBar
                       currentTime={currentTime}
                       dayEndTime={dayEndTime}
-                      dayStartTime={dayStartTime} />
+                      dayStartTime={dayStartTime}
+                      is12hourFormat={is12hourFormat}
+                      isDayActivityPage={isDayActivityPage} />
                   <Paged
                       initialFormData={formData}
                       onPageChange={onPageChange}
@@ -148,6 +197,7 @@ const TimeUseDiaryContainer = () => {
                             familyId={familyId}
                             formSchema={formSchema}
                             initialFormData={formData}
+                            isSummaryPage={isSummaryPage}
                             pagedProps={pagedProps}
                             participantId={participantId}
                             studyId={studyId}
