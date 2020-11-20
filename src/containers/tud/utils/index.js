@@ -1,6 +1,14 @@
 // @flow
 
-import { get, getIn } from 'immutable';
+import FS from 'file-saver';
+import Papa from 'papaparse';
+import {
+  List,
+  Map,
+  get,
+  getIn
+} from 'immutable';
+import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
@@ -12,7 +20,9 @@ import * as PrimaryActivitySchema from '../schemas/PrimaryActivitySchema';
 import * as SurveyIntroSchema from '../schemas/SurveyIntroSchema';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
-import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+
+const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const {
   DAY_SPAN_PAGE,
@@ -21,22 +31,49 @@ const {
   SURVEY_INTRO_PAGE
 } = PAGE_NUMBERS;
 
+const { FQN } = Models;
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_NAME,
   ACTIVITY_START_TIME,
+  ADULT_MEDIA,
+  BG_AUDIO_DAY,
+  BG_AUDIO_NIGHT,
+  BG_TV_DAY,
+  BG_TV_NIGHT,
+  CAREGIVER,
   CLOCK_FORMAT,
   DAY_END_TIME,
+  DAY_OF_WEEK,
   DAY_START_TIME,
   FAMILY_ID,
   HAS_FOLLOWUP_QUESTIONS,
+  NON_TYPICAL_DAY_REASON,
+  NON_TYPICAL_SLEEP_PATTERN,
+  PRIMARY_BOOK_TITLE,
+  PRIMARY_BOOK_TYPE,
+  PRIMARY_MEDIA_ACTIVITY,
+  PRIMARY_MEDIA_AGE,
+  PRIMARY_MEDIA_NAME,
+  SECONDARY_ACTIVITY,
+  SECONDARY_BOOK_TITLE,
+  SECONDARY_BOOK_TYPE,
+  SECONDARY_MEDIA_ACTIVITY,
+  SECONDARY_MEDIA_AGE,
+  SECONDARY_MEDIA_NAME,
+  SLEEP_ARRANGEMENT,
+  SLEEP_PATTERN,
+  TYPICAL_DAY_FLAG,
+  WAKE_UP_COUNT,
   WAVE_ID,
 } = PROPERTY_CONSTS;
 
 const {
   DATETIME_END_FQN,
   DATETIME_START_FQN,
+  DATE_TIME_FQN,
   ID_FQN,
+  PERSON_ID,
   TITLE_FQN,
   VALUES_FQN,
 } = PROPERTY_TYPE_FQNS;
@@ -73,9 +110,20 @@ const getIs12HourFormatSelected = (formData :Object) :boolean => getIn(
   formData, [getPageSectionKey(SURVEY_INTRO_PAGE, 0), CLOCK_FORMAT]
 ) === 12;
 
+const getSecondaryReadingSelected = (formData :Object, page :number) => getIn(
+  formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
+).includes(READING);
+
+const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
+  formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
+).includes(MEDIA_USE);
+
 const createFormSchema = (formData :Object, pageNum :number) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
+
+  const isSecondaryReadingSelected = getSecondaryReadingSelected(formData, pageNum);
+  const isSecondaryMediaSelected = getSecondaryMediaSelected(formData, pageNum);
 
   if (pageNum === SURVEY_INTRO_PAGE) {
     return {
@@ -122,7 +170,9 @@ const createFormSchema = (formData :Object, pageNum :number) => {
     uiSchema = NightTimeActivitySchema.createUiSchema(pageNum);
   }
   else if (shouldDisplayFollowup) {
-    schema = ContextualSchema.createSchema(pageNum, prevActivity, prevStartTime, prevEndTime);
+    schema = ContextualSchema.createSchema(
+      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected
+    );
     uiSchema = ContextualSchema.createUiSchema(pageNum);
   }
   else {
@@ -312,6 +362,112 @@ const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?s
   return result;
 };
 
+function getAnswerString(
+  questionAnswerId :Map,
+  answersMap :Map,
+  property :string
+) {
+  return answersMap.get(questionAnswerId.get(property), List()).toJS();
+}
+
+function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
+  const dateVal = values.getIn([timeRangeId, key, 0]);
+  return DateTime.fromISO(dateVal);
+}
+
+function writeToCsvFile(
+  date :string,
+  submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
+  answersMap :Map, // { answerId -> answer value }
+  nonTimeRangeQuestionAnswerMap :Map, // submissionId -> question code -> answerID
+  timeRangeQuestionAnswerMap :Map, // submissionId -> timeRangeId -> question code -> answerId
+  submissionTimeRangeValues :Map // submission -> timeRangeId -> { start: <val>, end: <val>}
+) {
+
+  let csvData :Object[] = [];
+  submissionMetadata.forEach((metadata :Map, submissionId :UUID) => {
+    const questionAnswerId = nonTimeRangeQuestionAnswerMap.get(submissionId);
+    const timeRangeQuestions = timeRangeQuestionAnswerMap.get(submissionId); // timeRangeId -> question code -> answerId
+    const timeRangeValues = submissionTimeRangeValues.get(submissionId); // timeRangeId => { start: <?>, end: <?>}
+
+    const csvMetadata = {};
+    csvMetadata.Participant_ID = String(metadata.getIn([PERSON_ID, 0]));
+    csvMetadata.Family_ID = getAnswerString(questionAnswerId, answersMap, FAMILY_ID);
+    csvMetadata.Wave_Id = getAnswerString(questionAnswerId, answersMap, WAVE_ID);
+    csvMetadata.Timestamp = DateTime
+      .fromISO((metadata.getIn([DATE_TIME_FQN, 0])))
+      .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+    csvMetadata.Day = getAnswerString(questionAnswerId, answersMap, DAY_OF_WEEK);
+    csvMetadata.Typical_Day = getAnswerString(questionAnswerId, answersMap, TYPICAL_DAY_FLAG);
+    csvMetadata.Non_Typical_Reason = getAnswerString(questionAnswerId, answersMap, NON_TYPICAL_DAY_REASON);
+
+    const nightTimeData = {};
+    nightTimeData.Typical_Sleep_Pattern = getAnswerString(questionAnswerId, answersMap, SLEEP_PATTERN);
+    nightTimeData.Non_Typical_Sleep_Pattern = getAnswerString(questionAnswerId, answersMap, NON_TYPICAL_SLEEP_PATTERN);
+    nightTimeData.Sleeping_Arrangement = getAnswerString(questionAnswerId, answersMap, SLEEP_ARRANGEMENT);
+    nightTimeData.Wake_Up_Count = getAnswerString(questionAnswerId, answersMap, WAKE_UP_COUNT);
+    nightTimeData.Background_TV_Night = getAnswerString(questionAnswerId, answersMap, BG_TV_NIGHT);
+    nightTimeData.Background_Audio_Night = getAnswerString(questionAnswerId, answersMap, BG_AUDIO_NIGHT);
+
+    let submissionData = [];
+    timeRangeQuestions.forEach((questions :Map, timeRangeId :UUID) => {
+      const activitiesData = {};
+
+      activitiesData.Primary_Activity = getAnswerString(questions, answersMap, ACTIVITY_NAME);
+      activitiesData.Activity_Start = getTimeRangeValue(
+        timeRangeValues, timeRangeId, DATETIME_START_FQN
+      );
+      activitiesData.Activity_End = getTimeRangeValue(
+        timeRangeValues, timeRangeId, DATETIME_END_FQN
+      );
+      activitiesData.Caregiver = getAnswerString(questions, answersMap, CAREGIVER);
+      activitiesData.Primary_Media_Activity = getAnswerString(questions, answersMap, PRIMARY_MEDIA_ACTIVITY);
+      activitiesData.Primary_Media_Age = getAnswerString(questions, answersMap, PRIMARY_MEDIA_AGE);
+      activitiesData.Primary_Media_Name = getAnswerString(questions, answersMap, PRIMARY_MEDIA_NAME);
+      activitiesData.Primary_Book_Type = getAnswerString(questions, answersMap, PRIMARY_BOOK_TYPE);
+      activitiesData.Primary_Book_Title = getAnswerString(questions, answersMap, PRIMARY_BOOK_TITLE);
+      activitiesData.Secondary_Media_Activity = getAnswerString(questions, answersMap, SECONDARY_MEDIA_ACTIVITY);
+      activitiesData.Secondary_Media_Age = getAnswerString(questions, answersMap, SECONDARY_MEDIA_AGE);
+      activitiesData.Secondary_Media_Name = getAnswerString(questions, answersMap, SECONDARY_MEDIA_NAME);
+      activitiesData.Secondary_Book_Type = getAnswerString(questions, answersMap, SECONDARY_BOOK_TYPE);
+      activitiesData.Secondary_Book_Title = getAnswerString(questions, answersMap, SECONDARY_BOOK_TITLE);
+      activitiesData.Secondary_Activity = getAnswerString(questions, answersMap, SECONDARY_ACTIVITY);
+      activitiesData.Background_TV_Day = getAnswerString(questions, answersMap, BG_TV_DAY);
+      activitiesData.Background_Audio_Day = getAnswerString(questions, answersMap, BG_AUDIO_DAY);
+      activitiesData.Adult_Media_Use = getAnswerString(questions, answersMap, ADULT_MEDIA);
+      submissionData.push(activitiesData);
+    });
+
+    // sort
+    submissionData = submissionData.sort((row1 :Object, row2 :Object) => {
+      if (row1.Activity_Start > row2.Activity_Start) return 1;
+      if (row1.Activity_Start < row2.Activity_Start) return -1;
+      return 0;
+    }).map((row :Object, index :number) => {
+      let result = row;
+      result.Activity_Start = row.Activity_Start.toLocaleString(DateTime.TIME_24_SIMPLE);
+      result.Activity_End = row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE);
+      if (index === 0) {
+        result = {
+          ...csvMetadata,
+          ...result,
+          ...nightTimeData
+        };
+      }
+      return result;
+    });
+
+    csvData = csvData.concat(submissionData);
+  });
+
+  const csv = Papa.unparse(csvData);
+  const blob = new Blob([csv], {
+    type: 'text/csv'
+  });
+  const fileName = `TimeUseDiary_${date}`;
+  FS.saveAs(blob, fileName);
+}
+
 export {
   applyCustomValidation,
   createFormSchema,
@@ -321,4 +477,5 @@ export {
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
+  writeToCsvFile
 };
