@@ -15,12 +15,12 @@ const Grid = styled.div`
 `;
 
 const Wrapper = styled.div`
-    background: white;
-    margin-bottom: 10px;
-    padding: 20px 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+  background: white;
+  margin-bottom: 10px;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 `;
 
 const ProgressIndicator = styled.div`
