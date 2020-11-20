@@ -109,7 +109,7 @@ const ProgressBar = (props :Props) => {
     <Wrapper>
       <Grid completedRatio={completedRatio}>
         <ProgressIndicator color={isOutOfRange ? PURPLES[1] : ORANGE.O300} />
-        <ProgressIndicator color={isOutOfRange ? NEUTRALS[4] : ORANGE.O300} />
+        <ProgressIndicator color={isOutOfRange ? NEUTRALS[3] : ORANGE.O300} />
       </Grid>
       <Grid completedRatio={completedRatio}>
         <ProgressLabelWrapper>
