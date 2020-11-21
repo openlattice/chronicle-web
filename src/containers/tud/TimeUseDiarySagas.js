@@ -245,7 +245,7 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
       fromJS(response.data).forEach((neighbors :List, submissionId :UUID) => {
         neighbors.forEach((neighbor :Map) => {
           const entity = neighbor.get('neighborDetails');
-          const values = getPropertyValue(entity, VALUES_FQN);
+          const values = getPropertyValue(entity, VALUES_FQN, List());
           const answerId = getEntityKeyId(entity);
 
           mutator.set(answerId, values);
