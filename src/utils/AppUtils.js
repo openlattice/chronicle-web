@@ -19,6 +19,7 @@ import {
   FILE_TYPE,
   PARTICIPANT,
   QUESTIONNAIRE,
+  STUDY,
   TIME_USE_DIARY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';

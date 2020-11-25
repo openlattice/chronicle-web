@@ -9,6 +9,7 @@ const PARTICIPANT :'participant' = 'participant';
 const QUESTIONNAIRE :'questionnaire' = 'questionnaire';
 const TIME_USE_DIARY = 'time-use-diary';
 const BASE :'chronicle/v2' = 'chronicle/v2';
+const STUDY :'study' = 'study';
 
 export {
   AUTHENTICATED,
@@ -19,5 +20,6 @@ export {
   FILE_TYPE,
   PARTICIPANT,
   QUESTIONNAIRE,
+  STUDY,
   TIME_USE_DIARY
 };

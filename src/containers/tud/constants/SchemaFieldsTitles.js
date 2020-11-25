@@ -3,24 +3,33 @@
 import { PROPERTY_CONSTS } from './SchemaConstants';
 
 const SCHEMA_FIELDS_TITLES = {
-  [PROPERTY_CONSTS.BOOK_TITLE]: 'What was the name of the book?'
+  [PROPERTY_CONSTS.PRIMARY_BOOK_TITLE]: 'What was the name of the book?'
     + ' If you are don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
-  [PROPERTY_CONSTS.BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
+  [PROPERTY_CONSTS.SECONDARY_BOOK_TITLE]: 'What was the name of the book?'
+      + ' If you are don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
+  [PROPERTY_CONSTS.PRIMARY_BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
+  [PROPERTY_CONSTS.SECONDARY_BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
   [PROPERTY_CONSTS.CLOCK_FORMAT]: 'To get started, please select your preferred clock format.',
   [PROPERTY_CONSTS.DAY_OF_WEEK]: 'We would like you to think about your child\'s day and complete'
       + ' the time use diary for yesterday. What day of the week was yesterday?',
-  [PROPERTY_CONSTS.DAY_END_TIME]: 'What time did your child go to bed yesterday night?'
+  [PROPERTY_CONSTS.DAY_END_TIME]: 'What time did your child fall asleep last night?'
      + ' Please think about when your child first fell asleep for the night.'
      + ' Later in the survey, we will ask about how often your child woke up in the middle of the night.',
   [PROPERTY_CONSTS.DAY_START_TIME]: 'What time did your child wake up yesterday morning?'
      + ' Please think about when your child woke up for the day, rather'
      + ' than waking up in the middle of the night and going back to sleep.',
-  [PROPERTY_CONSTS.SCREEN_MEDIA_ACTIVITY]: 'Specifically, what did your child do while using screen media?',
-  [PROPERTY_CONSTS.SCREEN_MEDIA_AGE]: 'Would you describe the program (e.g., TV show, app) as for your'
+  [PROPERTY_CONSTS.PRIMARY_MEDIA_ACTIVITY]: 'Specifically, what did your child do while using screen media?',
+  [PROPERTY_CONSTS.PRIMARY_MEDIA_AGE]: 'Would you describe the program (e.g., TV show, app) as for your'
     + ' child’s age, for older children, for younger children, or for adults?',
-  [PROPERTY_CONSTS.SCREEN_MEDIA_NAME]: 'What was the name of the media program (e.g., name of the show or app)?'
+  [PROPERTY_CONSTS.PRIMARY_MEDIA_NAME]: 'What was the name of the media program (e.g., name of the show or app)?'
     + ' If you don’t know the exact name, you can give a general'
     + ' description (e.g., a drawing app, a movie about unicorns).',
+  [PROPERTY_CONSTS.SECONDARY_MEDIA_ACTIVITY]: 'Specifically, what did your child do while using screen media?',
+  [PROPERTY_CONSTS.SECONDARY_MEDIA_AGE]: 'Would you describe the program (e.g., TV show, app) as for your'
+    + ' child’s age, for older children, for younger children, or for adults?',
+  [PROPERTY_CONSTS.SECONDARY_MEDIA_NAME]: 'What was the name of the media program (e.g., name of the show or app)?'
+      + ' If you don’t know the exact name, you can give a general'
+      + ' description (e.g., a drawing app, a movie about unicorns).',
   [PROPERTY_CONSTS.NON_TYPICAL_DAY_REASON]: 'What made yesterday a non-typical day?',
   [PROPERTY_CONSTS.NON_TYPICAL_SLEEP_PATTERN]: 'What made your child\'s sleeping pattern non-typical?',
   [PROPERTY_CONSTS.SLEEP_ARRANGEMENT]: 'Last night, what was your child\'s sleeping arrangement?',

@@ -28,7 +28,8 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { LangUtils, Logger } from 'lattice-utils';
+import { LangUtils, Logger, DataUtils } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -48,6 +49,7 @@ import {
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
+  getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
 
@@ -91,14 +93,15 @@ const {
 
 const { UpdateTypes } = Types;
 const { isDefined } = LangUtils;
+const { getEntityKeyId } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   DATE_ENROLLED,
   DATETIME_START_FQN,
-  DATETIME_END_FQN,
   DATE_LOGGED,
+  DATETIME_END_FQN,
   DESCRIPTION_FQN,
   EVENT_COUNT,
   ID_FQN,
@@ -121,6 +124,56 @@ const {
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
+const TIME_USE_DIARY = 'Time Use Diary';
+
+function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
+  const workerResponse = {};
+  try {
+    yield put(getTimeUseDiaryStudies.request(action.id));
+    // const studyEntityKeyIds = action.value;
+    //
+    // // enityt set ids
+    // const partOfESID = yield select(selectEntitySetId(PART_OF_ES_NAME));
+    // const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
+    // const surveyESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
+    //
+    // // filtered search on study dataset to get survey neighbors
+    // const searchFilter = {
+    //   destinationEntitySetIds: [],
+    //   edgeEntitySetIds: [partOfESID],
+    //   entityKeyIds: studyEntityKeyIds,
+    //   sourceEntitySetIds: [surveyESID]
+    // };
+    //
+    // const response = yield call(
+    //   searchEntityNeighborsWithFilterWorker,
+    //   searchEntityNeighborsWithFilter({
+    //     entitySetId: studyESID,
+    //     filter: searchFilter,
+    //   })
+    // );
+    // if (response.error) throw response.error;
+    //
+    // const timeUseDiaryStudies = Set().withMutations((mutator) => {
+    //   fromJS(response.data).forEach((neighbors, studyEKID) => {
+    //     if (neighbors.find((neighbor) => getIn(neighbor, ['neighborDetails', ID_FQN, 0], '') === TIME_USE_DIARY)) {
+    //       mutator.add(studyEKID);
+    //     }
+    //   });
+    // });
+    //
+    // yield put(getTimeUseDiaryStudies.success(action.id, timeUseDiaryStudies));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+  }
+  finally {
+    yield put(getTimeUseDiaryStudies.finally(action.id));
+  }
+
+  return workerResponse;
+}
 
 /*
  *
@@ -726,6 +779,13 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
         studies
       }));
       if (response.error) throw response.error;
+
+      // get studies that have time use diary
+      const studyEntityKeyIds = studies.map(getEntityKeyId);
+      response = yield call(getTimeUseDiaryStudiesWorker, getTimeUseDiaryStudies(studyEntityKeyIds.toJS()));
+      if (response.error) {
+        throw response.error;
+      }
     }
 
     studies = studies
