@@ -5,8 +5,10 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Colors, Typography } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
+import { LinearProgress } from '@material-ui/core';
+import { withStyles } from '@material-ui/styles';
 
-const { PURPLES, NEUTRALS, ORANGE } = Colors;
+const { PURPLES } = Colors;
 
 const Grid = styled.div`
   align-items: center;
@@ -23,12 +25,6 @@ const Wrapper = styled.div`
   z-index: 10;
 `;
 
-const ProgressIndicator = styled.div`
-  border-top-color: ${(props) => props.color};
-  border-top-style: solid;
-  border-top-width: 5px;
-`;
-
 const ProgressLabelWrapper = styled.div`
   align-items: center;
   display: flex;
@@ -40,10 +36,18 @@ const ProgressLabelWrapper = styled.div`
   }
 `;
 
-const validateDateTimes = (dateTimes :Array<?DateTime>) => {
-  const isValid = dateTimes.map((dateTime) => dateTime && dateTime.isValid);
-  return isValid.every((value) => value);
-};
+const StyledLinearProgress = withStyles({
+  barColorPrimary: {
+    backgroundColor: PURPLES[1]
+  },
+  colorPrimary: {
+    backgroundColor: PURPLES[5]
+  },
+})(LinearProgress);
+
+const validateDateTimes = (dateTimes :Array<?DateTime>) => (
+  dateTimes.every((dateTime :?DateTime) => dateTime && dateTime.isValid)
+);
 
 type Props = {
   currentTime :?DateTime;
@@ -64,22 +68,18 @@ const ProgressBar = (props :Props) => {
   } = props;
 
   const [completedRatio, setCompletedRatio] = useState(0);
-  const [isOutOfRange, setIsOutOfRange] = useState(true);
 
   useEffect(() => {
     if (validateDateTimes([dayStartTime, dayEndTime, currentTime])) {
       // $FlowFixMe
-      const totalTimeDiff :Object = dayEndTime.diff(dayStartTime).toObject().milliseconds;
+      const totalTimeDiff :number = dayEndTime.diff(dayStartTime).toObject().milliseconds;
       // $FlowFixMe
-      const completed :Object = currentTime.diff(dayStartTime).toObject().milliseconds;
+      const completed :number = currentTime.diff(dayStartTime).toObject().milliseconds;
 
       let ratio = [
         completed / totalTimeDiff,
         (totalTimeDiff - completed) / totalTimeDiff
       ];
-
-      const isValid = ratio.every((val) => val >= 0);
-      setIsOutOfRange(isValid);
 
       if (ratio[0] < 0) ratio = [0, 1];
       if (ratio[1] < 0) ratio = [1, 0];
@@ -107,10 +107,7 @@ const ProgressBar = (props :Props) => {
 
   return (
     <Wrapper>
-      <Grid completedRatio={completedRatio}>
-        <ProgressIndicator color={isOutOfRange ? PURPLES[1] : ORANGE.O300} />
-        <ProgressIndicator color={isOutOfRange ? NEUTRALS[3] : ORANGE.O300} />
-      </Grid>
+      <StyledLinearProgress variant="determinate" value={completedRatio * 100} />
       <Grid completedRatio={completedRatio}>
         <ProgressLabelWrapper>
           <Typography
