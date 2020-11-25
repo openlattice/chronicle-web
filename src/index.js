@@ -24,7 +24,6 @@ import AppContainer from './containers/app/AppContainer';
 import QuestionnaireContainer from './containers/questionnaire/QuestionnaireContainer';
 import TimeUseDiaryContainer from './containers/tud/TimeUseDiaryContainer';
 import SurveyContainer from './containers/survey/SurveyContainer';
-import TimeUseDiaryContainer from './containers/tud/TimeUseDiaryContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
 import * as Routes from './core/router/Routes';
