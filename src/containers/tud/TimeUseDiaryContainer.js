@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import isEqual from 'lodash/isEqual';
 import qs from 'qs';
 import { DataProcessingUtils, Paged } from 'lattice-fabricate';
 import {
@@ -13,7 +14,6 @@ import {
   Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
-import { isEqual } from 'lodash';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';

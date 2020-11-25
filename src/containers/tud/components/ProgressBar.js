@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 
+import LinearProgress from '@material-ui/core/LinearProgress';
 import styled from 'styled-components';
+import { withStyles } from '@material-ui/styles';
 import { Colors, Typography } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
-import { LinearProgress } from '@material-ui/core';
-import { withStyles } from '@material-ui/styles';
 
 const { PURPLES } = Colors;
 
@@ -118,13 +118,11 @@ const ProgressBar = (props :Props) => {
         </ProgressLabelWrapper>
         <ProgressLabelWrapper>
           {
-
             <Typography
                 noWrap
                 variant="overline">
               {!isCompleted && !zeroProgress && formatTime(currentTime)}
             </Typography>
-
           }
           {
             <Typography

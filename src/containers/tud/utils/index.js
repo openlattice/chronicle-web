@@ -2,6 +2,7 @@
 
 import FS from 'file-saver';
 import Papa from 'papaparse';
+import isEqual from 'lodash/isEqual';
 import {
   List,
   Map,
@@ -9,7 +10,6 @@ import {
   getIn
 } from 'immutable';
 import { Models } from 'lattice';
-import { isEqual } from 'lodash';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
