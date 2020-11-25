@@ -80,10 +80,12 @@ const removeExtraData = (formRef :Object, pagedData, page :number) => {
     if (!currEndDateTime.equals(dayEndTime)) {
       return;
     }
+
     const pages = Object.keys(formData)
-      .map((key) => parsePageSectionKey(key))
-      .map((parsedResult) => parsedResult.page)
-      .map((pageStr) => Number(pageStr));
+      .map((key) => {
+        const parsed = parsePageSectionKey(key);
+        return Number(parsed.page);
+      });
 
     let toRemoveStartIndex = page + 1;
     // if the next page has night activity page data, skip
