@@ -10,27 +10,27 @@ import {
 
 const { NEUTRAL, GREEN } = Colors;
 const Wrapper = styled.div`
+  align-items: center;
+  color: ${NEUTRAL.N900};
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  text-align: center;
   padding: 30px 0;
-  color: ${NEUTRAL.N900};
+  text-align: center;
 
   > h3 {
+    font-size: 18px;
+    font-weight: 500;
     margin: 5px 0;
     padding: 0;
-    font-weight: 500;
-    font-size: 18px;
   }
 
   > p {
-    margin: 0;
-    padding: 0;
-    font-weight: 400;
     color: ${NEUTRAL.N800};
     font-size: 15px;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
   }
 `;
 const SubmissionSuccessful = () => (

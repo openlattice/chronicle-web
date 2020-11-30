@@ -1,7 +1,7 @@
 // @flow
 
 import { DataProcessingUtils } from 'lattice-fabricate';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import { DateTime } from 'luxon';
 
 import * as FollowupSchema from './FollowupSchema';

@@ -30,16 +30,17 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
 
     const { value } = action;
     const {
+      formData,
+      organizationId,
       participantId,
       studyId,
-      formData,
-      userAppsData
+      userAppsData,
     } = value;
 
     const submissionData = createSubmissionData(formData, userAppsData);
 
     const response = yield call(
-      ChronicleApi.updateAppsUsageAssociationData, participantId, studyId, submissionData
+      ChronicleApi.updateAppsUsageAssociationData, organizationId, studyId, participantId, submissionData
     );
     if (response.error) throw response.error;
 
@@ -68,9 +69,14 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
     yield put(getChronicleAppsData.request(action.id));
 
     const { value } = action;
-    const { date, participantId, studyId } = value;
+    const {
+      date,
+      participantId,
+      studyId,
+      organizationId
+    } = value;
 
-    const response = yield call(ChronicleApi.getParticipantAppsUsageData, date, participantId, studyId);
+    const response = yield call(ChronicleApi.getParticipantAppsUsageData, date, participantId, studyId, organizationId);
     if (response.error) throw response.error;
 
     // mapping from association EKID -> associationDetails & entityDetails

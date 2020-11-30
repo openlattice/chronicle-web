@@ -40,6 +40,7 @@ const transformErrors = (errors) => errors.map((error) => {
 });
 
 type Props = {
+  organizationId ?:UUID;
   participantId ?:UUID;
   questions :List;
   studyId ?:UUID;
@@ -50,11 +51,12 @@ type Props = {
 const QuestionnaireForm = (props :Props) => {
   const {
     editable,
+    initialFormData,
+    organizationId,
     participantId,
     questions,
     studyId,
     submitRequestState,
-    initialFormData
   } = props;
   const dispatch = useDispatch();
 
@@ -65,6 +67,7 @@ const QuestionnaireForm = (props :Props) => {
 
   const handleSubmit = ({ formData } :Object) => {
     dispatch(submitQuestionnaire({
+      organizationId,
       studyId,
       participantId,
       formData
@@ -91,6 +94,7 @@ const QuestionnaireForm = (props :Props) => {
 QuestionnaireForm.defaultProps = {
   editable: true,
   initialFormData: {},
+  organizationId: undefined,
   participantId: undefined,
   studyId: undefined,
   submitRequestState: undefined,

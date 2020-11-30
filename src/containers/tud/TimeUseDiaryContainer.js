@@ -53,11 +53,13 @@ const TimeUseDiaryContainer = () => {
 
   const {
     familyId,
+    organizationId,
     participantId,
     studyId,
     waveId,
   } :{
     familyId :string,
+    organizationId :UUID,
     participantId :string,
     studyId :UUID,
     waveId :string,
@@ -198,6 +200,7 @@ const TimeUseDiaryContainer = () => {
                             formSchema={formSchema}
                             initialFormData={formData}
                             isSummaryPage={isSummaryPage}
+                            organizationId={organizationId}
                             pagedProps={pagedProps}
                             participantId={participantId}
                             studyId={studyId}

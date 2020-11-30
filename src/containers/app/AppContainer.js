@@ -4,6 +4,7 @@
 
 import React, { useEffect } from 'react';
 
+import { Map } from 'immutable';
 import { AuthActions, AuthUtils } from 'lattice-auth';
 import {
   AppContainerWrapper,
@@ -13,7 +14,7 @@ import {
   Spinner,
 } from 'lattice-ui-kit';
 import { LangUtils, useRequestState } from 'lattice-utils';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Redirect,
   Route,
@@ -24,8 +25,7 @@ import { NavLink } from 'react-router-dom';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-import * as AppActions from './AppActions';
-import { initializeApplication } from './AppActions';
+import { INITIALIZE_APPLICATION, initializeApplication, switchOrganization } from './AppActions';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
 import ContactSupportButton from '../shared/ContactSupportButton';
@@ -33,15 +33,19 @@ import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import StudiesContainer from '../studies/StudiesContainer';
 import StudyDetailsContainer from '../study/StudyDetailsContainer';
 import * as Routes from '../../core/router/Routes';
+import { APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { isNonEmptyString } = LangUtils;
 
-const { INITIALIZE_APPLICATION } = AppActions;
+const { ORGS, SELECTED_ORG_ID } = APP_REDUX_CONSTANTS;
 
 const AppContainer = () => {
   const dispatch = useDispatch();
 
   const initializeApplicationRS :?RequestState = useRequestState(['app', INITIALIZE_APPLICATION]);
+
+  const organizations :Map = useSelector((state) => state.getIn(['app', ORGS], Map()));
+  const selectedOrgId :string = useSelector((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
   useEffect(() => {
     dispatch(initializeApplication());
@@ -78,7 +82,7 @@ const AppContainer = () => {
     );
   };
 
-  const userInfo = AuthUtils.getUserInfo();
+  const userInfo = AuthUtils.getUserInfo() || {};
   let user = null;
   if (isNonEmptyString(userInfo.name)) {
     user = userInfo.name;
@@ -87,9 +91,25 @@ const AppContainer = () => {
     user = userInfo.email;
   }
 
+  const handleSwitchOrganization = (organization :Object) => {
+    if (organization.value !== selectedOrgId) {
+      dispatch(switchOrganization(organization.value));
+    }
+  };
+
   return (
     <AppContainerWrapper>
-      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" logout={logout} user={user}>
+      <AppHeaderWrapper
+          appIcon={OpenLatticeIcon}
+          appTitle="Chronicle"
+          logout={logout}
+          organizationsSelect={{
+            isLoading: initializeApplicationRS === RequestStates.PENDING,
+            onChange: handleSwitchOrganization,
+            organizations,
+            selectedOrganizationId: selectedOrgId
+          }}
+          user={user}>
         <AppNavigationWrapper>
           <NavLink to={Routes.STUDIES} />
           <NavLink to={Routes.STUDIES}> Studies </NavLink>

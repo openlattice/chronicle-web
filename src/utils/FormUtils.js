@@ -8,14 +8,14 @@ import {
 } from 'immutable';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import { getParticipantsEntitySetName } from './ParticipantUtils';
-
+import { PARTICIPANTS } from '../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../core/edm/constants/FullyQualifiedNames';
 
 const { getEntityAddressKey, getPageSectionKey, parseEntityAddressKey } = DataProcessingUtils;
 
 const PAGE_SECTION_PREFIX = 'page';
 const { NOTIFICATION_ENABLED, PERSON_ID } = PROPERTY_TYPE_FQNS;
+
 /*
  * returns a FormData object similar to this
  *  {
@@ -89,11 +89,10 @@ const containsParticipantId = (participantId :string, participants :Map) => {
 
 // custom react-jsonschema-form validation
 // ref: https://react-jsonschema-form.readthedocs.io/en/latest/validation/#custom-error-messages
-const validateAddParticipantForm = (formData :Object, errors :Object, participants :Map, studyId :UUID) => {
-  const participantsEntitySetName = getParticipantsEntitySetName(studyId);
+const validateAddParticipantForm = (formData :Object, errors :Object, participants :Map) => {
 
   const pageSectionKey = getPageSectionKey(1, 1);
-  const entityAddressKey = getEntityAddressKey(0, participantsEntitySetName, PERSON_ID);
+  const entityAddressKey = getEntityAddressKey(0, PARTICIPANTS, PERSON_ID);
   const participantId :string = getIn(formData, [pageSectionKey, entityAddressKey]);
 
   if (containsParticipantId(participantId, participants)) {
