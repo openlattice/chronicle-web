@@ -69,7 +69,8 @@ import {
   PARTICIPANTS,
   PARTICIPATED_IN,
   PART_OF,
-  STUDIES
+  STUDIES,
+  SURVEY
 } from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
@@ -130,39 +131,39 @@ function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
   const workerResponse = {};
   try {
     yield put(getTimeUseDiaryStudies.request(action.id));
-    // const studyEntityKeyIds = action.value;
-    //
-    // // enityt set ids
-    // const partOfESID = yield select(selectEntitySetId(PART_OF_ES_NAME));
-    // const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
-    // const surveyESID = yield select(selectEntitySetId(QUESTIONNAIRE_ES_NAME));
-    //
-    // // filtered search on study dataset to get survey neighbors
-    // const searchFilter = {
-    //   destinationEntitySetIds: [],
-    //   edgeEntitySetIds: [partOfESID],
-    //   entityKeyIds: studyEntityKeyIds,
-    //   sourceEntitySetIds: [surveyESID]
-    // };
-    //
-    // const response = yield call(
-    //   searchEntityNeighborsWithFilterWorker,
-    //   searchEntityNeighborsWithFilter({
-    //     entitySetId: studyESID,
-    //     filter: searchFilter,
-    //   })
-    // );
-    // if (response.error) throw response.error;
-    //
-    // const timeUseDiaryStudies = Set().withMutations((mutator) => {
-    //   fromJS(response.data).forEach((neighbors, studyEKID) => {
-    //     if (neighbors.find((neighbor) => getIn(neighbor, ['neighborDetails', ID_FQN, 0], '') === TIME_USE_DIARY)) {
-    //       mutator.add(studyEKID);
-    //     }
-    //   });
-    // });
-    //
-    // yield put(getTimeUseDiaryStudies.success(action.id, timeUseDiaryStudies));
+    const studyEntityKeyIds = action.value;
+
+    // enityt set ids
+    const partOfESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
+    const studyESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
+    const surveyESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
+
+    // filtered search on study dataset to get survey neighbors
+    const searchFilter = {
+      destinationEntitySetIds: [],
+      edgeEntitySetIds: [partOfESID],
+      entityKeyIds: studyEntityKeyIds,
+      sourceEntitySetIds: [surveyESID]
+    };
+
+    const response = yield call(
+      searchEntityNeighborsWithFilterWorker,
+      searchEntityNeighborsWithFilter({
+        entitySetId: studyESID,
+        filter: searchFilter,
+      })
+    );
+    if (response.error) throw response.error;
+
+    const timeUseDiaryStudies = Set().withMutations((mutator) => {
+      fromJS(response.data).forEach((neighbors, studyEKID) => {
+        if (neighbors.find((neighbor) => getIn(neighbor, ['neighborDetails', ID_FQN, 0], '') === TIME_USE_DIARY)) {
+          mutator.add(studyEKID);
+        }
+      });
+    });
+
+    yield put(getTimeUseDiaryStudies.success(action.id, timeUseDiaryStudies));
   }
   catch (error) {
     workerResponse.error = error;
