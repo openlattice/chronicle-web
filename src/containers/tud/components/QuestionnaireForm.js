@@ -3,10 +3,10 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { getIn, setIn, merge } from 'immutable';
+import { getIn, merge, setIn } from 'immutable';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
-import { set } from 'lodash';
+import { set, unset } from 'lodash';
 import { DateTime } from 'luxon';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -27,13 +27,14 @@ import {
   selectTimeByPageAndKey
 } from '../utils';
 
-const { getPageSectionKey } = DataProcessingUtils;
+const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
 
 const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const {
   ACTIVITY_END_TIME,
   ACTIVITY_START_TIME,
+  DAY_END_TIME,
   DAY_OF_WEEK,
   DAY_START_TIME,
   HAS_FOLLOWUP_QUESTIONS,
@@ -43,6 +44,7 @@ const {
 } = PROPERTY_CONSTS;
 
 const {
+  DAY_SPAN_PAGE,
   FIRST_ACTIVITY_PAGE,
   PRE_SURVEY_PAGE,
   SURVEY_INTRO_PAGE,
@@ -54,6 +56,52 @@ const ButtonRow = styled.div`
   justify-content: space-between;
   margin-top: 30px;
 `;
+
+/*
+ * This code fixes an issue where the survey enters an error state after a user fills out the survey
+ * and later changes the day end time value. If the day end time is changed such that certain sections
+ * of the formRef state contain invalid data (the start/end values are out of range), then this will cause
+ * validateAndSubmit to fail, hence the need to remove such sections. This deletion need only take place
+ * just before we enter the nightActivity portion of the survey. At this point, for all x s.t x > page
+ * only x == page + 1 can be expected to contain any data
+  (and it should be nightActivity data otherwise it also needs to be deleted)
+ */
+
+const removeExtraData = (formRef :Object, pagedData, page :number) => {
+  const psk = getPageSectionKey(page, 0);
+  const dayEndTime :?DateTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, pagedData);
+  const formData :Object = formRef?.current?.state?.formData || {};
+
+  const currEndTime = formData[psk]?.[ACTIVITY_END_TIME];
+
+  if (dayEndTime && currEndTime) {
+    const currEndDateTime :DateTime = DateTime.fromSQL(currEndTime);
+    if (!currEndDateTime.equals(dayEndTime)) {
+      return;
+    }
+
+    const pages = Object.keys(formData)
+      .map((key) => {
+        const parsed = parsePageSectionKey(key);
+        return Number(parsed.page);
+      });
+
+    let toRemoveStartIndex = page + 1;
+    // if the next page has night activity page data, skip
+    const nextPageData = formData[getPageSectionKey(toRemoveStartIndex, 0)] || {};
+    if (Object.keys(nextPageData).includes(SLEEP_ARRANGEMENT)) {
+      toRemoveStartIndex += 1;
+    }
+
+    const toRemovePsks = pages
+      .filter((index) => index >= toRemoveStartIndex)
+      .map((index) => getPageSectionKey(index, 0));
+
+    toRemovePsks.forEach((toRemovePsk) => {
+      unset(formData, toRemovePsk);
+    });
+  }
+};
 
 /*
  * This code is crucial when onSubmit is invoked on a page that already contains form data.
@@ -69,20 +117,28 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   const prevEndTime = selectTimeByPageAndKey(
     page - 1, (page === FIRST_ACTIVITY_PAGE ? DAY_START_TIME : ACTIVITY_END_TIME), pagedData
   );
+  const activityStartTime = selectTimeByPageAndKey(
+    page - 1, (page === FIRST_ACTIVITY_PAGE ? DAY_START_TIME : ACTIVITY_START_TIME), pagedData
+  );
 
   // current page already contains form data
-  if (Object.keys(pagedData).includes(psk) && prevEndTime.isValid) {
-    const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+  if (Object.keys(pagedData).includes(psk) && prevEndTime.isValid && activityStartTime.isValid) {
+    const formattedEndTime = prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+    const formattedStartTime = activityStartTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+
     const sectionData = pagedData[psk];
+    const formData = formRef?.current?.state?.formData || {};
 
     // current page contains followup questions for selected primary activity
     if (Object.keys(sectionData).includes(HAS_FOLLOWUP_QUESTIONS)) {
-      set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_END_TIME], formattedTime);
+      set(formData, [psk, ACTIVITY_END_TIME], formattedEndTime);
+      set(formData, [psk, ACTIVITY_START_TIME], formattedStartTime);
+      removeExtraData(formRef, pagedData, page);
     }
 
     // current page is night activity page
     else if (!Object.keys(sectionData).includes(SLEEP_ARRANGEMENT)) {
-      set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_START_TIME], formattedTime);
+      set(formData, [psk, ACTIVITY_START_TIME], formattedEndTime);
     }
   }
 };
