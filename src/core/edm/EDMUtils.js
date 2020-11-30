@@ -45,11 +45,18 @@ const getSelectedOrgEntitySetIds = () => (state :Map) => {
 
 const getSelectedOrgId = () => (state :Map) => state.getIn(['app', SELECTED_ORG_ID]);
 
+const selectEntitySetsByModule = (moduleName :string) => (state :Map) => {
+  const orgId = state.getIn(['app', SELECTED_ORG_ID]);
+
+  return state.getIn(['app', ENTITY_SET_IDS_BY_ORG_ID, moduleName, orgId], Map());
+};
+
 export {
   getSelectedOrgEntitySetIds,
   getSelectedOrgId,
   selectESIDByCollection,
   selectEntitySetId,
+  selectEntitySetsByModule,
   selectEntityType,
   selectEntityTypeId,
   selectPropertyTypeId,

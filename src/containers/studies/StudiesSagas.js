@@ -28,7 +28,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { LangUtils, Logger, DataUtils } from 'lattice-utils';
+import { DataUtils, LangUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -59,6 +59,7 @@ import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import {
   getSelectedOrgEntitySetIds,
   selectESIDByCollection,
+  selectEntitySetsByModule,
   selectPropertyTypeId,
   selectPropertyTypeIds
 } from '../../core/edm/EDMUtils';
@@ -75,7 +76,7 @@ import {
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
-import { STUDIES_REDUX_CONSTANTS, APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { createAssociations, getEntitySetData, updateEntityData } = DataApiActions;
 const { createAssociationsWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
@@ -133,10 +134,20 @@ function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
     yield put(getTimeUseDiaryStudies.request(action.id));
     const studyEntityKeyIds = action.value;
 
-    // enityt set ids
-    const partOfESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
-    const studyESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
-    const surveyESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
+    // entity set ids
+    const chronicleEntitySetIds = yield select(selectEntitySetsByModule(AppModules.CHRONICLE_CORE));
+    const surveyEntitySetIds = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const partOfESID = chronicleEntitySetIds.get(PART_OF);
+    const studyESID = chronicleEntitySetIds.get(STUDIES);
+    const surveyESID = surveyEntitySetIds.get(SURVEY);
+
+    // since SURVEYS module is optional, surveyESID will be undefined if currently
+    // selected organization hasn't installed module
+    if (!surveyESID) {
+      yield put(getTimeUseDiaryStudies.success(action.id, Set()));
+      return workerResponse;
+    }
 
     // filtered search on study dataset to get survey neighbors
     const searchFilter = {

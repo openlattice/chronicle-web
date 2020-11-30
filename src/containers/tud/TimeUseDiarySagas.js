@@ -17,8 +17,6 @@ import { Constants } from 'lattice';
 import {
   DataApiActions,
   DataApiSagas,
-  EntitySetsApiActions,
-  EntitySetsApiSagas,
   SearchApiActions,
   SearchApiSagas
 } from 'lattice-sagas';
@@ -37,18 +35,29 @@ import {
 } from './TimeUseDiaryActions';
 import { createSubmitRequestBody, writeToCsvFile } from './utils';
 
+import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
-import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
-import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
+import {
+  selectESIDByCollection,
+  selectEntitySetsByModule,
+  selectPropertyTypeId
+} from '../../core/edm/EDMUtils';
+import {
+  ADDRESSES,
+  ANSWER,
+  PARTICIPANTS,
+  QUESTION,
+  REGISTERED_FOR,
+  RESPONDS_WITH,
+  SUBMISSION,
+  TIME_RANGE,
+} from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 
 const LOG = new Logger('TimeUseDiarySagas');
 
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
-const { getEntitySetId } = EntitySetsApiActions;
-const { getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 
@@ -64,19 +73,6 @@ const {
   PERSON_ID,
   VALUES_FQN,
 } = PROPERTY_TYPE_FQNS;
-
-const {
-  ANSWERS_ES_NAME,
-  QUESTIONS_ES_NAME,
-  SUBMISSION_ES_NAME,
-  TIMERANGE_ES_NAME,
-} = ENTITY_SET_NAMES;
-
-const {
-  ADDRESSES_ES_NAME,
-  RESPONDS_WITH_ES_NAME,
-  REGISTERED_FOR_ES,
-} = ASSOCIATION_ENTITY_SET_NAMES;
 
 function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
   try {
@@ -117,13 +113,9 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
     const {
       endDate,
       startDate,
-      studyId,
     } = action.value;
 
-    const participantsES = getParticipantsEntitySetName(studyId);
-    const entitySetIdRes = yield call(getEntitySetIdWorker, getEntitySetId(participantsES));
-    if (entitySetIdRes.error) throw entitySetIdRes.error;
-    const participantsESID = entitySetIdRes.data;
+    const participantsESID = yield select(selectESIDByCollection(PARTICIPANTS, AppModules.CHRONICLE_CORE));
 
     const personPTID = yield select(selectPropertyTypeId(PERSON_ID));
     const participantsRes = yield call(getEntitySetDataWorker, getEntitySetData(
@@ -140,8 +132,8 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
 
     const participantEKIDs :UUID[] = participantsRes.data.map(getEntityKeyId);
 
-    const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
-    const respondsWithESID = yield select(selectEntitySetId(RESPONDS_WITH_ES_NAME));
+    const submissionESID = yield select(selectESIDByCollection(SUBMISSION, AppModules.QUESTIONNAIRES));
+    const respondsWithESID = yield select(selectESIDByCollection(RESPONDS_WITH, AppModules.QUESTIONNAIRES));
 
     // filtered neighbor entity search on participants entity set to get submissions
     const searchFilter = {
@@ -215,12 +207,14 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
 
     // entity set ids
-    const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
-    const answersESID = yield select(selectEntitySetId(ANSWERS_ES_NAME));
-    const registeredForESID = yield select(selectEntitySetId(REGISTERED_FOR_ES));
-    const questionsESID = yield select(selectEntitySetId(QUESTIONS_ES_NAME));
-    const timeRangeESID = yield select(selectEntitySetId(TIMERANGE_ES_NAME));
-    const addressesESID = yield select(selectEntitySetId(ADDRESSES_ES_NAME));
+    const surveyEntitySets :Map = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const submissionESID = surveyEntitySets.get(SUBMISSION);
+    const answersESID = surveyEntitySets.get(ANSWER);
+    const registeredForESID = surveyEntitySets.get(REGISTERED_FOR);
+    const questionsESID = surveyEntitySets.get(QUESTION);
+    const timeRangeESID = surveyEntitySets.get(TIME_RANGE);
+    const addressesESID = surveyEntitySets.get(ADDRESSES);
 
     // filtered neighbor search on submission es to get answers
     let searchFilter = {
