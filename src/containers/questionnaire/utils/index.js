@@ -19,7 +19,14 @@ const {
 } = DataProcessingUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
-const { TITLE_FQN, VALUES_FQN } = PROPERTY_TYPE_FQNS;
+const {
+  ACTIVE_FQN,
+  DESCRIPTION_FQN,
+  NAME_FQN,
+  RRULE_FQN,
+  TITLE_FQN,
+  VALUES_FQN,
+} = PROPERTY_TYPE_FQNS;
 
 const getSchemaProperties = (questions :List) => {
   let properties = {};
@@ -112,11 +119,20 @@ const createSchema = (schemaProperties :Object, uiSchemaOptions :Object) => {
   return { schema, uiSchema };
 };
 
+const getIsValidQuestionnaireEntity = (entity :Map) => (
+  // should contain ol.active, ol.description, ol.name and ol.rrule fqns
+  entity.has(ACTIVE_FQN)
+    && entity.has(DESCRIPTION_FQN)
+    && entity.has(RRULE_FQN)
+    && entity.has(NAME_FQN)
+);
+
 export {
   createInitialFormData,
   createSchema,
   getCsvFileName,
+  getIsValidQuestionnaireEntity,
   getQuestionAnswerMapping,
   getSchemaProperties,
-  getUiSchemaOptions
+  getUiSchemaOptions,
 };

@@ -13,12 +13,12 @@ import {
 const { getPageSectionKey } = DataProcessingUtils;
 
 const {
-  WAKE_UP_COUNT,
-  SLEEP_PATTERN,
-  SLEEP_ARRANGEMENT,
-  NON_TYPICAL_SLEEP_PATTERN,
-  BG_TV_NIGHT,
   BG_AUDIO_NIGHT,
+  BG_TV_NIGHT,
+  NON_TYPICAL_SLEEP_PATTERN,
+  SLEEP_ARRANGEMENT,
+  SLEEP_PATTERN,
+  WAKE_UP_COUNT,
 } = PROPERTY_CONSTS;
 
 const createSchema = (pageNum :number) => ({

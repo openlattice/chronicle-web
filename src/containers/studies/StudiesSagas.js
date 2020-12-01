@@ -28,7 +28,8 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { LangUtils, Logger } from 'lattice-utils';
+import { DataUtils, LangUtils, Logger } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -48,6 +49,7 @@ import {
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
+  getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
 
@@ -57,6 +59,7 @@ import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import {
   getSelectedOrgEntitySetIds,
   selectESIDByCollection,
+  selectEntitySetsByModule,
   selectPropertyTypeId,
   selectPropertyTypeIds
 } from '../../core/edm/EDMUtils';
@@ -67,12 +70,13 @@ import {
   PARTICIPANTS,
   PARTICIPATED_IN,
   PART_OF,
-  STUDIES
+  STUDIES,
+  SURVEY
 } from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { submitDataGraph, submitPartialReplace } from '../../core/sagas/data/DataActions';
 import { submitDataGraphWorker, submitPartialReplaceWorker } from '../../core/sagas/data/DataSagas';
-import { STUDIES_REDUX_CONSTANTS, APP_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { createAssociations, getEntitySetData, updateEntityData } = DataApiActions;
 const { createAssociationsWorker, getEntitySetDataWorker, updateEntityDataWorker } = DataApiSagas;
@@ -91,14 +95,15 @@ const {
 
 const { UpdateTypes } = Types;
 const { isDefined } = LangUtils;
+const { getEntityKeyId } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
   DATE_ENROLLED,
   DATETIME_START_FQN,
-  DATETIME_END_FQN,
   DATE_LOGGED,
+  DATETIME_END_FQN,
   DESCRIPTION_FQN,
   EVENT_COUNT,
   ID_FQN,
@@ -121,6 +126,66 @@ const {
 const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
+const TIME_USE_DIARY = 'Time Use Diary';
+
+function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
+  const workerResponse = {};
+  try {
+    yield put(getTimeUseDiaryStudies.request(action.id));
+    const studyEntityKeyIds = action.value;
+
+    // entity set ids
+    const chronicleEntitySetIds = yield select(selectEntitySetsByModule(AppModules.CHRONICLE_CORE));
+    const surveyEntitySetIds = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const partOfESID = chronicleEntitySetIds.get(PART_OF);
+    const studyESID = chronicleEntitySetIds.get(STUDIES);
+    const surveyESID = surveyEntitySetIds.get(SURVEY);
+
+    // since SURVEYS module is optional, surveyESID will be undefined if currently
+    // selected organization hasn't installed module
+    if (!surveyESID) {
+      yield put(getTimeUseDiaryStudies.success(action.id, Set()));
+      return workerResponse;
+    }
+
+    // filtered search on study dataset to get survey neighbors
+    const searchFilter = {
+      destinationEntitySetIds: [],
+      edgeEntitySetIds: [partOfESID],
+      entityKeyIds: studyEntityKeyIds,
+      sourceEntitySetIds: [surveyESID]
+    };
+
+    const response = yield call(
+      searchEntityNeighborsWithFilterWorker,
+      searchEntityNeighborsWithFilter({
+        entitySetId: studyESID,
+        filter: searchFilter,
+      })
+    );
+    if (response.error) throw response.error;
+
+    const timeUseDiaryStudies = Set().withMutations((mutator) => {
+      fromJS(response.data).forEach((neighbors, studyEKID) => {
+        if (neighbors.find((neighbor) => getIn(neighbor, ['neighborDetails', ID_FQN, 0], '') === TIME_USE_DIARY)) {
+          mutator.add(studyEKID);
+        }
+      });
+    });
+
+    yield put(getTimeUseDiaryStudies.success(action.id, timeUseDiaryStudies));
+  }
+  catch (error) {
+    workerResponse.error = error;
+    LOG.error(action.type, error);
+  }
+  finally {
+    yield put(getTimeUseDiaryStudies.finally(action.id));
+  }
+
+  return workerResponse;
+}
 
 /*
  *
@@ -726,6 +791,13 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
         studies
       }));
       if (response.error) throw response.error;
+
+      // get studies that have time use diary
+      const studyEntityKeyIds = studies.map(getEntityKeyId);
+      response = yield call(getTimeUseDiaryStudiesWorker, getTimeUseDiaryStudies(studyEntityKeyIds.toJS()));
+      if (response.error) {
+        throw response.error;
+      }
     }
 
     studies = studies
