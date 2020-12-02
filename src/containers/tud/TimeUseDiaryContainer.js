@@ -122,12 +122,8 @@ const TimeUseDiaryContainer = () => {
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     refreshProgress(formData);
-  }, [page]);
-
-  useEffect(() => {
     setIsSummaryPage(getIsSummaryPage(formData, page));
   }, [page]);
-
   /* eslint-enable */
 
   /* eslint-disable react-hooks/exhaustive-deps */
