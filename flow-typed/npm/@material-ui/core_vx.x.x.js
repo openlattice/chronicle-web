@@ -23,10 +23,10 @@ declare module '@material-ui/core' {
  * needed.
  */
 
- declare module '@material-ui/core/LinearProgress' {
-   declare module.exports: any;
- }
+declare module '@material-ui/core/LinearProgress' {
+  declare module.exports: any;
+}
 
- declare module '@material-ui/core/styles' {
-   declare module.exports: any;
- }
+declare module '@material-ui/core/styles' {
+  declare module.exports: any;
+}
