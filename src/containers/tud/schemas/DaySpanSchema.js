@@ -45,7 +45,7 @@ const createSchema = (is12hourFormat :boolean) => {
             default: '07:00'
           }
         },
-        required: [DAY_START_TIME, DAY_END_TIME]
+        required: [DAY_START_TIME, DAY_END_TIME, TODAY_WAKEUP_TIME]
       }
     }
   };

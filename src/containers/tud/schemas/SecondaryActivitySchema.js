@@ -1,31 +1,16 @@
 // @flow
 
-import * as FollowupSchema from './FollowupSchema';
+import * as SecondaryFollowUpSchema from './SecondaryFollowUpSchema';
 
 import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
-const {
-  OTHER_ACTIVITY,
-  SECONDARY_ACTIVITY,
-} = PROPERTY_CONSTS;
-
-const {
-  READING,
-  MEDIA_USE,
-} = PRIMARY_ACTIVITIES;
+const { OTHER_ACTIVITY, SECONDARY_ACTIVITY } = PROPERTY_CONSTS;
 
 // $FlowFixMe
 const activitiesList :string[] = Object.values(PRIMARY_ACTIVITIES);
 
 const createSchema = (primaryActivity :string) => {
   const secondaryActivityOptions :string[] = activitiesList.filter((activity :string) => activity !== primaryActivity);
-
-  const readingSchema = FollowupSchema.createSchema(READING);
-  const mediaUseSchema = FollowupSchema.createSchema(MEDIA_USE);
-
-  const arr = [READING, MEDIA_USE];
-  const activitiesWithoutFollowup :string[] = activitiesList
-    .filter((activity :string) => !arr.includes(activity));
 
   return {
     properties: {
@@ -52,42 +37,18 @@ const createSchema = (primaryActivity :string) => {
                 enum: ['Yes']
               },
               [SECONDARY_ACTIVITY]: {
-                title: `Ok, what else did your child do while ${primaryActivity}`,
-                enum: secondaryActivityOptions
+                title: `Ok, what else did your child do while ${primaryActivity}?`,
+                description: 'Please choose all that apply.',
+                type: 'array',
+                items: {
+                  enum: secondaryActivityOptions,
+                  type: 'string'
+                },
+                uniqueItems: true,
+                minItems: 1
               }
             },
             required: [SECONDARY_ACTIVITY],
-            dependencies: {
-              [SECONDARY_ACTIVITY]: {
-                oneOf: [
-                  {
-                    properties: {
-                      [SECONDARY_ACTIVITY]: {
-                        enum: activitiesWithoutFollowup
-                      }
-                    }
-                  },
-                  {
-                    properties: {
-                      [SECONDARY_ACTIVITY]: {
-                        enum: [READING]
-                      },
-                      ...readingSchema.properties
-                    },
-                    required: readingSchema.required
-                  },
-                  {
-                    properties: {
-                      [SECONDARY_ACTIVITY]: {
-                        enum: [MEDIA_USE]
-                      },
-                      ...mediaUseSchema.properties
-                    },
-                    required: mediaUseSchema.required
-                  }
-                ]
-              }
-            }
           }
         ]
       }
@@ -98,18 +59,16 @@ const createSchema = (primaryActivity :string) => {
 const uiSchema = {
   [SECONDARY_ACTIVITY]: {
     classNames: 'column-span-12',
-    'ui:widget': 'radio'
+    'ui:widget': 'checkboxes'
   },
   [OTHER_ACTIVITY]: {
     classNames: 'column-span-12',
     'ui:widget': 'radio'
   },
-  ...FollowupSchema.uiSchema
+  ...SecondaryFollowUpSchema.uiSchema
 };
 
-/* eslint-disable import/prefer-default-export */
 export {
   createSchema,
   uiSchema
 };
-/* eslint-enable */

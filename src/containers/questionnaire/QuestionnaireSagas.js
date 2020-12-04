@@ -48,7 +48,7 @@ import {
   getStudyQuestionnaires,
   submitQuestionnaire,
 } from './QuestionnaireActions';
-import { getCsvFileName, getQuestionAnswerMapping } from './utils';
+import { getCsvFileName, getQuestionAnswerMapping, getIsValidQuestionnaireEntity } from './utils';
 
 import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -388,7 +388,9 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
         const neighborId = neighbor.get('neighborId');
         const details = neighbor.get('neighborDetails');
 
-        mutator.set(neighborId, details);
+        if (getIsValidQuestionnaireEntity(details)) {
+          mutator.set(neighborId, details);
+        }
       });
     });
 

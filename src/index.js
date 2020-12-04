@@ -102,6 +102,7 @@ if (APP_ROOT_NODE) {
             <>
               <ConnectedRouter history={routerHistory}>
                 <Switch>
+                  <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
                   <Route path={Routes.SURVEY} component={SurveyContainer} />
                   <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
                   <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
