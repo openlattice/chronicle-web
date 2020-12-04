@@ -10,7 +10,7 @@ const ModalBody = styled.div`
 `;
 
 type Props ={
-  handleOnClose :(event :SyntheticEvent<HTMLButtonElement>) => void;
+  handleOnClose :() => void;
   isVisible :boolean;
 }
 const SubmissionFailureModal = (props :Props) => {
