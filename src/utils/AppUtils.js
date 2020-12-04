@@ -17,7 +17,6 @@ import {
   CSRF_TOKEN,
   DATA,
   FILE_TYPE,
-  PARTICIPANT,
   QUESTIONNAIRE,
   TIME_USE_DIARY
 } from './constants/UrlConstants';
@@ -42,8 +41,9 @@ const getBaseUrl = () => {
   return ENV_URLS.get(PRODUCTION);
 };
 
-// @dataType RAW : <baseUrl>/study/participant/data/<orgId>/<studyId>/<participantEntityKeyId>?fileType=csv
-// @dataType RAW : <baseUrl>/study/participant/data/<orgId>/<studyId>/<participantEntityKeyId/preprocessed>?fileType=csv
+// @dataType RAW : <baseUrl>/study/<orgId>/<studyId>/<participantEntityKeyId>/data?fileType=csv
+// @dataType PREPROCESSED : <baseUrl>/study/<orgId>/<studyId>/<participantEntityKeyId>/data/preprocessed?fileType=csv
+// @dataType USAGE : <baseUrl>/study/<orgId>/<studyId>/<participantEntityKeyId>/data/usage?fileType=csv
 
 const getParticipantDataUrl = (
   dataType :ParticipantDataType,
@@ -77,8 +77,8 @@ const getParticipantDataUrl = (
       break;
   }
 
-  return `${baseUrl}/${BASE}/${AUTHENTICATED}/${PARTICIPANT}/${DATA}/`
-  + `${orgId}/${studyId}/${participantEntityKeyId}${dataTypePath}`
+  return `${baseUrl}/${BASE}/${AUTHENTICATED}/`
+  + `${orgId}/${studyId}/${participantEntityKeyId}/${DATA}${dataTypePath}`
   + `?${FILE_TYPE}=csv`
   + `&${CSRF_TOKEN}=${csrfToken}`;
 

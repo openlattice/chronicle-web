@@ -23,7 +23,6 @@ import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstant
 import {
   applyCustomValidation,
   getIs12HourFormatSelected,
-  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
@@ -45,10 +44,10 @@ const {
 } = PROPERTY_CONSTS;
 
 const {
+  DAY_SPAN_PAGE,
   FIRST_ACTIVITY_PAGE,
   PRE_SURVEY_PAGE,
   SURVEY_INTRO_PAGE,
-  DAY_SPAN_PAGE
 } = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
@@ -102,19 +101,6 @@ const removeExtraData = (formRef :Object, pagedData, page :number) => {
       unset(formData, toRemovePsk);
     });
   }
-};
-
-/*
- * Return true if the current page should display a summary of activities
- * Summary page is displayed after night activity page, hence page - 2 accounts for the night activity page
- */
-const getIsSummaryPage = (formData :Object, page :number) => {
-  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
-
-  return prevEndTime.isValid && dayEndTime.isValid
-    && prevEndTime.equals(dayEndTime)
-    && pageHasFollowupQuestions(formData, page - 2);
 };
 
 /*
@@ -196,11 +182,13 @@ type Props = {
   familyId :?string;
   formSchema :Object;
   initialFormData :Object;
+  isSummaryPage :boolean;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
   submitRequestState :?RequestState;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
+  updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
   organizationId :UUID;
 };
@@ -209,12 +197,14 @@ const QuestionnaireForm = ({
   familyId,
   formSchema,
   initialFormData,
+  isSummaryPage,
   organizationId,
   pagedProps,
   participantId,
   studyId,
   submitRequestState,
   updateFormState,
+  updateSurveyProgress,
   waveId,
 } :Props) => {
 
@@ -234,8 +224,6 @@ const QuestionnaireForm = ({
 
   const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
   const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
-
-  const isSummaryPage = getIsSummaryPage(pagedData, page);
 
   const handleNext = () => {
     if (isSummaryPage) {
@@ -300,6 +288,8 @@ const QuestionnaireForm = ({
     if (schemaHasFollowupQuestions(currentSchema, page)) {
       updateFormSchema(formData, currentSchema, currentUiSchema);
     }
+
+    updateSurveyProgress(formData);
   };
 
   const validate = (formData, errors) => (
