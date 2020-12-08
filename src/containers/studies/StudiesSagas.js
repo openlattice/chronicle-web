@@ -30,6 +30,7 @@ import {
 } from 'lattice-sagas';
 import { DataUtils, LangUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
+import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -444,8 +445,8 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
  *
  */
 
-function* getNotificationsEntityWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
+function* getNotificationsEntityWorker(action :SequenceAction) :Saga<WorkerResponse> {
+  let workerResponse = {};
   try {
     yield put(getNotificationsEntity.request(action.id));
 
@@ -455,12 +456,12 @@ function* getNotificationsEntityWorker(action :SequenceAction) :Generator<*, *, 
     if (response.error) throw response.error;
 
     const entityKeyId = getIn(response.data, [0, OPENLATTICE_ID_FQN, 0]);
-    workerResponse.data = entityKeyId;
+    workerResponse = { data: entityKeyId };
 
     yield put(getNotificationsEntity.success(action.id, { entityKeyId }));
   }
   catch (error) {
-    workerResponse.error = error;
+    workerResponse = { error };
     yield put(getNotificationsEntity.failure(action.id));
   }
   finally {
