@@ -455,7 +455,7 @@ function* getNotificationsEntityWorker(action :SequenceAction) :Saga<WorkerRespo
     const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
     if (response.error) throw response.error;
 
-    const entityKeyId = getIn(response.data, [0, OPENLATTICE_ID_FQN, 0]);
+    const entityKeyId = getEntityKeyId(response.data);
     workerResponse = { data: entityKeyId };
 
     yield put(getNotificationsEntity.success(action.id, { entityKeyId }));
