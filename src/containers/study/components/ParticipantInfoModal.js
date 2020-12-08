@@ -5,7 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Modal } from 'lattice-ui-kit';
 
-import { getParticipantLoginLink } from '../../../utils/ParticipantUtils';
+import { getParticipantLoginLink } from '../utils';
 
 const ModalWrapper = styled.div`
   width: 500px;
@@ -31,19 +31,21 @@ const InfoWrapper = styled.div`
 type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
+  orgId :UUID;
   participantId :UUID;
-  studyId :UUID
+  studyId :UUID;
 }
 
 const ParticipantInfoModal = ({
   handleOnClose,
   isVisible,
+  orgId,
   participantId,
   studyId
 } :Props) => {
 
   const renderParticipantInfo = () => {
-    const participantLoginLink = getParticipantLoginLink(studyId, participantId);
+    const participantLoginLink = getParticipantLoginLink(orgId, studyId, participantId);
 
     const participantDetails = [
       { name: 'Participant ID', value: participantId },
