@@ -13,7 +13,7 @@ const INTRO_TEXT = 'Thank you for taking the time to complete this survey!'
 
 const SurveyIntro = () => (
 
-  <Typography variant="body1" color="textSecondary" gutterBottom>
+  <Typography gutterBottom variant="body2">
     { INTRO_TEXT }
   </Typography>
 );
