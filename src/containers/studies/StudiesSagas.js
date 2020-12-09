@@ -30,6 +30,7 @@ import {
 } from 'lattice-sagas';
 import { DataUtils, LangUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
+import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -44,7 +45,7 @@ import {
   changeEnrollmentStatus,
   createStudy,
   deleteStudyParticipant,
-  getNotificationsEKID,
+  getNotificationsEntity,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,
@@ -52,6 +53,7 @@ import {
   getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
+import { constructEntityFromFormData } from './utils';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import * as AppModules from '../../utils/constants/AppModules';
@@ -437,6 +439,38 @@ function* getStudyParticipantsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_PARTICIPANTS, getStudyParticipantsWorker);
 }
 
+/*
+ *
+ * StudiesActions.getNotificationsEntity()
+ *
+ */
+
+function* getNotificationsEntityWorker(action :SequenceAction) :Saga<WorkerResponse> {
+  let workerResponse = {};
+  try {
+    yield put(getNotificationsEntity.request(action.id));
+
+    const entitySetId = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
+
+    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
+    if (response.error) throw response.error;
+
+    const entityKeyId = getEntityKeyId(response.data);
+    workerResponse = { data: entityKeyId };
+
+    yield put(getNotificationsEntity.success(action.id, { entityKeyId }));
+  }
+  catch (error) {
+    workerResponse = { error };
+    yield put(getNotificationsEntity.failure(action.id));
+  }
+  finally {
+    yield put(getNotificationsEntity.finally(action.id));
+  }
+
+  return workerResponse;
+}
+
 function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEntityKeyId) :Generator<*, *, *> {
   const workerResponse = {};
   try {
@@ -450,7 +484,12 @@ function* associateExistingStudyWithNotifications(partOfAssociationVal, studyEnt
     const notificationsESID = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
 
     const IdFQNPropertyTypeId = yield select(selectPropertyTypeId(ID_FQN));
-    const notificationsEKID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID]));
+
+    // get notification entity if it exists
+    const notificationsRes = yield call(getNotificationsEntityWorker, getNotificationsEntity());
+    if (notificationsRes.error) throw notificationsRes.error;
+
+    const notificationsEKID = notificationsRes.data;
 
     // case 1: notifications entity DNE: create entity and associate with study
     if (!notificationsEKID) {
@@ -839,10 +878,6 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     const propertyTypeIds = yield select(selectPropertyTypeIds());
     const entitySetIds = yield select(getSelectedOrgEntitySetIds());
 
-    let notificationsEKID :UUID = yield select((state) => state.getIn(['studies', NOTIFICATIONS_EKID], 0));
-    const selectedOrgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
-    const selectedOrg :Map = yield select((state) => state.getIn(['app', ORGS, selectedOrgId]));
-
     const notificationsEnabled = getIn(formData,
       [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, NOTIFICATION_ENABLED)]);
 
@@ -852,33 +887,15 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, NOTIFICATION_ENABLED)]
     );
 
-    // create notification -> partof -> study association
-    let associations = [];
-    const studyId = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, STUDY_ID)]);
-    if (notificationsEnabled) {
-      associations = [
-        [PART_OF, notificationsEKID, NOTIFICATION, 0, STUDIES, {
-          [ID_FQN.toString()]: [studyId],
-        }]
-      ];
-
-      // create notification entity if it doesn't exist
-      if (!notificationsEKID) {
-        formData = setIn(
-          formData,
-          [getPageSectionKey(1, 1), getEntityAddressKey(0, NOTIFICATION, DESCRIPTION_FQN)],
-          `Notification entity for org: {title: ${selectedOrg.get('title')}, id: ${selectedOrg.get('id')}}`
-        );
-      }
-    }
+    const associations = [];
 
     const associationEntityData = processAssociationEntityData(
-      fromJS(associations),
+      associations,
       entitySetIds,
       propertyTypeIds
     );
 
-    let entityData = processEntityData(
+    const entityData = processEntityData(
       formData,
       entitySetIds,
       propertyTypeIds
@@ -888,29 +905,29 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
     if (response.error) throw response.error;
 
     const studyEntitySetId :UUID = entitySetIds.get(STUDIES);
-    const partOfESID :UUID = entitySetIds.get(PART_OF);
-    const notificationsESID = entitySetIds.get(NOTIFICATION);
-
     const studyEntityKeyId :UUID = getIn(response.data, ['entityKeyIds', studyEntitySetId, 0]);
-    notificationsEKID = getIn(response.data, ['entityKeyIds', notificationsESID, 0]);
-    const partOfEntityKeyId :UUID = getIn(response.data, ['entitySetIds', partOfESID, 0]);
+
+    // associate study with notifications
+    const studyId = getIn(formData, [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, STUDY_ID)]);
+    const partOfAssociationVal = notificationsEnabled ? studyId : null;
+
+    const notificationWorkerRes = yield call(
+      associateExistingStudyWithNotifications,
+      partOfAssociationVal,
+      studyEntityKeyId
+    );
+    if (notificationWorkerRes.error) throw notificationWorkerRes.error;
+
+    const { partOfEntityKeyId, notificationsEKID } = notificationWorkerRes.data;
 
     // reconstruct the created study
-    // update the study entity with its entity key id
-    formData = setIn(
-      formData,
-      [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, OPENLATTICE_ID_FQN)],
-      studyEntityKeyId,
-    );
-    entityData = processEntityData(formData, entitySetIds, propertyTypeIds.map((id, fqn) => fqn));
-
-    const studyEntityData = getIn(entityData, [studyEntitySetId, 0]);
+    const studyEntity = constructEntityFromFormData(entitySetIds, propertyTypeIds, formData, studyEntityKeyId);
 
     yield put(createStudy.success(action.id, {
       notificationsEKID,
       notificationsEnabled,
       partOfEntityKeyId,
-      studyEntityData,
+      studyEntity,
       studyId,
     }));
   }
@@ -925,37 +942,6 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
 
 function* createStudyWatcher() :Generator<*, *, *> {
   yield takeEvery(CREATE_STUDY, createStudyWorker);
-}
-
-/*
- *
- * StudiesActions.getNotificationsEKID()
- *
- */
-
-function* getNotificationsEntityWorker(action :SequenceAction) :Generator<*, *, *> {
-  const workerResponse = {};
-  try {
-    yield put(getNotificationsEKID.request(action.id));
-
-    const entitySetId = yield select(selectESIDByCollection(NOTIFICATION, AppModules.CHRONICLE_CORE));
-
-    const response = yield call(getEntitySetDataWorker, getEntitySetData({ entitySetId }));
-    if (response.error) throw response.error;
-
-    const entityKeyId = getIn(response.data, [0, OPENLATTICE_ID_FQN, 0]);
-
-    yield put(getNotificationsEKID.success(action.id, { entityKeyId }));
-  }
-  catch (error) {
-    workerResponse.error = error;
-    yield put(getNotificationsEKID.failure(action.id));
-  }
-  finally {
-    yield put(getNotificationsEKID.finally(action.id));
-  }
-
-  return workerResponse;
 }
 
 export {
