@@ -445,6 +445,7 @@ function writeToCsvFile(
     timeRangeQuestions.forEach((questions :Map, timeRangeId :UUID) => {
       const activitiesData = {};
 
+      activitiesData.Counter = 0;
       activitiesData.Primary_Activity = getAnswerString(questions, answersMap, ACTIVITY_NAME);
       activitiesData.Activity_Start = getTimeRangeValue(
         timeRangeValues, timeRangeId, DATETIME_START_FQN
@@ -452,6 +453,8 @@ function writeToCsvFile(
       activitiesData.Activity_End = getTimeRangeValue(
         timeRangeValues, timeRangeId, DATETIME_END_FQN
       );
+      const duration = activitiesData.Activity_End.diff(activitiesData.Activity_Start, 'minutes').toObject().minutes;
+      activitiesData['Duration(Min)'] = duration;
       activitiesData.Caregiver = getAnswerString(questions, answersMap, CAREGIVER);
       activitiesData.Primary_Media_Activity = getAnswerString(questions, answersMap, PRIMARY_MEDIA_ACTIVITY);
       activitiesData.Primary_Media_Age = getAnswerString(questions, answersMap, PRIMARY_MEDIA_AGE);
@@ -467,6 +470,7 @@ function writeToCsvFile(
       activitiesData.Background_TV_Day = getAnswerString(questions, answersMap, BG_TV_DAY);
       activitiesData.Background_Audio_Day = getAnswerString(questions, answersMap, BG_AUDIO_DAY);
       activitiesData.Adult_Media_Use = getAnswerString(questions, answersMap, ADULT_MEDIA);
+
       submissionData.push(activitiesData);
     });
 
@@ -475,11 +479,12 @@ function writeToCsvFile(
       if (row1.Activity_Start > row2.Activity_Start) return 1;
       if (row1.Activity_Start < row2.Activity_Start) return -1;
       return 0;
-    }).map((row :Object) => ({
+    }).map((row :Object, index :number) => ({
       ...csvMetadata,
       ...row,
       Activity_Start: row.Activity_Start.toLocaleString(DateTime.TIME_24_SIMPLE),
-      Activity_End: row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE)
+      Activity_End: row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE),
+      Counter: index + 1,
     }));
 
     csvData = csvData.concat(submissionData);
