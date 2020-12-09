@@ -24,7 +24,7 @@ const DELETE_STUDY_PARTICIPANT :'DELETE_STUDY_PARTICIPANT' = 'DELETE_STUDY_PARTI
 const deleteStudyParticipant :RequestSequence = newRequestSequence(DELETE_STUDY_PARTICIPANT);
 
 const GET_NOTIFICATIONS_EKID :'GET_NOTIFICATIONS_EKID' = 'GET_NOTIFICATIONS_EKID';
-const getNotificationsEKID = newRequestSequence(GET_NOTIFICATIONS_EKID);
+const getNotificationsEntity = newRequestSequence(GET_NOTIFICATIONS_EKID);
 
 const GET_PARTICIPANTS_METADATA :'GET_PARTICIPANTS_METADATA' = 'GET_PARTICIPANTS_METADATA';
 const getParticipantsMetadata :RequestSequence = newRequestSequence(GET_PARTICIPANTS_METADATA);
@@ -70,7 +70,7 @@ export {
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
-  getNotificationsEKID,
+  getNotificationsEntity,
   getParticipantsMetadata,
   getStudies,
   getStudyNotificationStatus,

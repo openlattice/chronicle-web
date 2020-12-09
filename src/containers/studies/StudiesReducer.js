@@ -31,7 +31,7 @@ import {
   createParticipantsEntitySet,
   createStudy,
   deleteStudyParticipant,
-  getNotificationsEKID,
+  getNotificationsEntity,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
@@ -119,7 +119,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
               notificationsEKID,
               notificationsEnabled,
               partOfEntityKeyId,
-              studyEntityData,
+              studyEntity,
               studyId
             } = seqAction.value;
 
@@ -129,7 +129,7 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
               .set(NOTIFICATIONS_ENABLED_STUDIES,
                 notificationsEnabled ? notificationEnabledStudies.add(studyId) : notificationEnabledStudies)
               .set(NOTIFICATIONS_EKID, notificationsEKID)
-              .setIn([STUDIES, studyId], fromJS(studyEntityData))
+              .setIn([STUDIES, studyId], fromJS(studyEntity))
               .setIn([PART_OF_ASSOCIATION_EKID_MAP, studyId], partOfEntityKeyId)
               .setIn([CREATE_STUDY, REQUEST_STATE], RequestStates.SUCCESS);
           }
@@ -282,8 +282,8 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
       });
     }
 
-    case getNotificationsEKID.case(action.type): {
-      return getNotificationsEKID.reducer(state, action, {
+    case getNotificationsEntity.case(action.type): {
+      return getNotificationsEntity.reducer(state, action, {
         REQUEST: () => state.setIn([GET_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_NOTIFICATIONS_EKID, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => {
