@@ -3,9 +3,12 @@
 import React from 'react';
 
 import styled from 'styled-components';
+import { faClipboard } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Modal } from 'lattice-ui-kit';
 
-import { getParticipantLoginLink } from '../utils';
+import { useHasQuestionnairesModule } from '../../shared/hooks';
+import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
 
 const ModalWrapper = styled.div`
   width: 500px;
@@ -44,14 +47,24 @@ const ParticipantInfoModal = ({
   studyId
 } :Props) => {
 
+  const hasQuestionnaireModule = useHasQuestionnairesModule();
+
   const renderParticipantInfo = () => {
     const participantLoginLink = getParticipantLoginLink(orgId, studyId, participantId);
+    const timeUseDiaryLink = getTimeUseDiaryLink(orgId, studyId, participantId);
 
     const participantDetails = [
       { name: 'Participant ID', value: participantId },
       { name: 'Study ID', value: studyId },
       { name: 'Enrollment Link', value: participantLoginLink }
     ];
+    if (hasQuestionnaireModule) {
+      participantDetails.push({
+        name: 'Time Use Diary Link',
+        value: timeUseDiaryLink
+      });
+    }
+
     return (
       <ModalWrapper>
         {
