@@ -27,6 +27,11 @@ const Wrapper = styled.div`
   }
 `;
 
+const ButtonWrapper = styled(Button)`
+  padding-left: 8px;
+  padding-right: 8px;
+`;
+
 type Props = {
   downloadRS :Map<DataType, RequestState>;
   date :string;
@@ -51,23 +56,23 @@ const SummaryListComponent = (
       { entities.size }
     </Typography>
     <div />
-    <Button
+    <ButtonWrapper
         isLoading={isPending(downloadRS.get(DataTypes.DAYTIME))}
         onClick={() => onDownloadData(entities, date, DataTypes.DAYTIME)}
         size="small"
         startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
         variant="outlined">
       Daytime
-    </Button>
+    </ButtonWrapper>
 
-    <Button
+    <ButtonWrapper
         isLoading={isPending(downloadRS.get(DataTypes.NIGHTTIME))}
         onClick={() => onDownloadData(entities, date, DataTypes.NIGHTTIME)}
         size="small"
         startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
         variant="outlined">
       Nighttime
-    </Button>
+    </ButtonWrapper>
   </Wrapper>
 );
 
