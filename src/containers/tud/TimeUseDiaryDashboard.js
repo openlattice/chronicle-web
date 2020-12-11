@@ -152,10 +152,10 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
                           {
                             submissionsByDate.entrySeq().sort().map(([key, entities]) => (
                               <SummaryListComponent
-                                  key={key}
                                   date={key}
-                                  entities={entities}
                                   downloadRS={downloadStates.get(key, Map())}
+                                  entities={entities}
+                                  key={key}
                                   onDownloadData={handleDownload}>
                                 {key}
                               </SummaryListComponent>
