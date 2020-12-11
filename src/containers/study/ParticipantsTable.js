@@ -16,7 +16,7 @@ import DeleteParticipantModal from './components/DeleteParticipantModal';
 import DownloadParticipantDataModal from './components/DownloadParticipantDataModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
-import TABLE_HEADERS from './utils/tableHeaders';
+import TABLE_HEADERS from './constants/tableHeaders';
 
 import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
 import { getSelectedOrgId } from '../../core/edm/EDMUtils';
@@ -147,6 +147,7 @@ const ParticipantsTable = (props :Props) => {
       <ParticipantInfoModal
           handleOnClose={() => setInfoModalOpen(false)}
           isVisible={infoModalOpen}
+          orgId={selectedOrgId}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           studyId={studyId} />
 
