@@ -12,10 +12,15 @@ const getSubmissionsByDate :RequestSequence = newRequestSequence(GET_SUBMISSIONS
 const DOWNLOAD_TUD_RESPONSES :'DOWNLOAD_TUD_RESPONSES' = 'DOWNLOAD_TUD_RESPONSES';
 const downloadTudResponses :RequestSequence = newRequestSequence(DOWNLOAD_TUD_RESPONSES);
 
+const DOWNLOAD_ALL_DATA :'DOWNOAD_ALL_DATA' = 'DOWNOAD_ALL_DATA';
+const downloadAllData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_DATA);
+
 export {
+  DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,

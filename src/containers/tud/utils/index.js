@@ -13,6 +13,7 @@ import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
+import DataTypes from '../constants/DataTypes';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
@@ -22,6 +23,7 @@ import * as SurveyIntroSchema from '../schemas/SurveyIntroSchema';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { PAGE_NUMBERS, QUESTION_TITLE_LOOKUP } from '../constants/GeneralConstants';
 import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import type { DataType } from '../constants/DataTypes';
 
 const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
@@ -400,7 +402,8 @@ function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
 }
 
 function writeToCsvFile(
-  date :string,
+  dataType :DataType,
+  outputFileName :string,
   submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
   answersMap :Map, // { answerId -> answer value }
   nonTimeRangeQuestionAnswerMap :Map, // submissionId -> question code -> answerID
@@ -433,10 +436,16 @@ function writeToCsvFile(
     nightTimeData.Background_TV_Night = getAnswerString(questionAnswerId, answersMap, BG_TV_NIGHT);
     nightTimeData.Background_Audio_Night = getAnswerString(questionAnswerId, answersMap, BG_AUDIO_NIGHT);
 
+    if (dataType === DataTypes.NIGHTTIME) {
+      csvData.push({ ...csvMetadata, ...nightTimeData });
+      return;
+    }
+
     let submissionData = [];
     timeRangeQuestions.forEach((questions :Map, timeRangeId :UUID) => {
       const activitiesData = {};
 
+      activitiesData.Counter = 0;
       activitiesData.Primary_Activity = getAnswerString(questions, answersMap, ACTIVITY_NAME);
       activitiesData.Activity_Start = getTimeRangeValue(
         timeRangeValues, timeRangeId, DATETIME_START_FQN
@@ -444,6 +453,8 @@ function writeToCsvFile(
       activitiesData.Activity_End = getTimeRangeValue(
         timeRangeValues, timeRangeId, DATETIME_END_FQN
       );
+      const duration = activitiesData.Activity_End.diff(activitiesData.Activity_Start, 'minutes').toObject().minutes;
+      activitiesData['Duration(Min)'] = duration;
       activitiesData.Caregiver = getAnswerString(questions, answersMap, CAREGIVER);
       activitiesData.Primary_Media_Activity = getAnswerString(questions, answersMap, PRIMARY_MEDIA_ACTIVITY);
       activitiesData.Primary_Media_Age = getAnswerString(questions, answersMap, PRIMARY_MEDIA_AGE);
@@ -459,6 +470,7 @@ function writeToCsvFile(
       activitiesData.Background_TV_Day = getAnswerString(questions, answersMap, BG_TV_DAY);
       activitiesData.Background_Audio_Day = getAnswerString(questions, answersMap, BG_AUDIO_DAY);
       activitiesData.Adult_Media_Use = getAnswerString(questions, answersMap, ADULT_MEDIA);
+
       submissionData.push(activitiesData);
     });
 
@@ -467,19 +479,13 @@ function writeToCsvFile(
       if (row1.Activity_Start > row2.Activity_Start) return 1;
       if (row1.Activity_Start < row2.Activity_Start) return -1;
       return 0;
-    }).map((row :Object, index :number) => {
-      let result = row;
-      result.Activity_Start = row.Activity_Start.toLocaleString(DateTime.TIME_24_SIMPLE);
-      result.Activity_End = row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE);
-      if (index === 0) {
-        result = {
-          ...csvMetadata,
-          ...result,
-          ...nightTimeData
-        };
-      }
-      return result;
-    });
+    }).map((row :Object, index :number) => ({
+      ...csvMetadata,
+      ...row,
+      Activity_Start: row.Activity_Start.toLocaleString(DateTime.TIME_24_SIMPLE),
+      Activity_End: row.Activity_End.toLocaleString(DateTime.TIME_24_SIMPLE),
+      Counter: index + 1,
+    }));
 
     csvData = csvData.concat(submissionData);
   });
@@ -488,9 +494,22 @@ function writeToCsvFile(
   const blob = new Blob([csv], {
     type: 'text/csv'
   });
-  const fileName = `TimeUseDiary_${date}`;
-  FS.saveAs(blob, fileName);
+
+  FS.saveAs(blob, outputFileName);
 }
+
+const getOutputFileName = (date :?string, startDate :?string, endDate :?string, dataType :DataType) => {
+  const prefix = 'TimeUseDiary';
+
+  if (date) {
+    return `${prefix}_${dataType}_${date}`;
+  }
+  if (startDate && endDate) {
+    return `${prefix}_${dataType}_${startDate}-${endDate}`;
+  }
+
+  return prefix;
+};
 
 export {
   applyCustomValidation,
@@ -504,4 +523,5 @@ export {
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
   writeToCsvFile,
+  getOutputFileName,
 };

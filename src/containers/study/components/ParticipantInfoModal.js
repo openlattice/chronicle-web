@@ -25,10 +25,10 @@ const DetailWrapper = styled.div`
 `;
 
 const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-gap: 20px;
   align-items: center;
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: 1fr auto;
 `;
 
 type Props = {

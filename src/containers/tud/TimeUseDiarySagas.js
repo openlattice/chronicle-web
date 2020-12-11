@@ -23,17 +23,20 @@ import {
 import { DataUtils, Logger } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import type { Saga } from '@redux-saga/core';
+import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
 } from './TimeUseDiaryActions';
-import { createSubmitRequestBody, writeToCsvFile } from './utils';
+import { createSubmitRequestBody, getOutputFileName, writeToCsvFile } from './utils';
 
 import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -198,10 +201,17 @@ function* getSubmissionsByDateWatcher() :Saga<*> {
   yield takeEvery(GET_SUBMISSIONS_BY_DATE, getSubmissionsByDateWorker);
 }
 
-function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
-  const { entities, date } = action.value;
+function* downloadTudResponsesWorker(action :SequenceAction) :Saga<WorkerResponse> {
+  let workerResponse = {};
+  const {
+    dataType,
+    date,
+    endDate,
+    entities,
+    startDate,
+  } = action.value;
   try {
-    yield put(downloadTudResponses.request(action.id, date));
+    yield put(downloadTudResponses.request(action.id, { date, dataType }));
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -320,31 +330,74 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
       }
     });
 
+    const outputFileName = getOutputFileName(date, startDate, endDate, dataType);
+
     writeToCsvFile(
-      date,
+      dataType,
+      outputFileName,
       submissionMetadata,
       answersMap,
       nonTimeRangeQuestionAnswerMap,
       timeRangeQuestionAnswerMap,
       timeRangeValues
     );
-    yield put(downloadTudResponses.success(action.id, date));
+    workerResponse = { data: null };
+    yield put(downloadTudResponses.success(action.id, { date, dataType }));
   }
   catch (error) {
+    workerResponse = { error };
     LOG.error(action.type, error);
-    yield put(downloadTudResponses.failure(action.id, date));
+    yield put(downloadTudResponses.failure(action.id, { date, dataType }));
   }
   finally {
     yield put(downloadTudResponses.finally(action.id));
   }
+
+  return workerResponse;
 }
 
 function* downloadTudResponsesWatcher() :Saga<*> {
   yield takeEvery(DOWNLOAD_TUD_RESPONSES, downloadTudResponsesWorker);
 }
 
+function* downloadAllDataWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(downloadAllData.request(action.id));
+
+    const {
+      entities,
+      startDate,
+      endDate,
+      dataType
+    } = action.value;
+
+    const response = yield call(downloadTudResponsesWorker, downloadTudResponses({
+      entities,
+      startDate,
+      endDate,
+      dataType
+    }));
+    if (response.error) throw response.error;
+
+    yield put(downloadAllData.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(downloadAllData.failure(action.id));
+  }
+  finally {
+    yield put(downloadAllData.finally(action.id));
+  }
+}
+
+function* downloadAllDataWatcher() :Saga<*> {
+
+  yield takeEvery(DOWNLOAD_ALL_DATA, downloadAllDataWorker);
+}
+
 export {
-  submitTudDataWatcher,
+  downloadAllDataWatcher,
+  downloadTudResponsesWatcher,
   getSubmissionsByDateWatcher,
-  downloadTudResponsesWatcher
+  submitTudDataWatcher,
 };

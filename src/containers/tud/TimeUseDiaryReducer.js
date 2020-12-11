@@ -5,9 +5,11 @@ import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
@@ -21,6 +23,7 @@ const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
 const { REQUEST_STATE } = ReduxConstants;
 
 const INITIAL_STATE = fromJS({
+  [DOWNLOAD_ALL_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_SUBMISSIONS_BY_DATE]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [SUBMIT_TUD_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [SUBMISSIONS_BY_DATE]: Map()
@@ -59,14 +62,31 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
     }
 
     case downloadTudResponses.case(action.type): {
-      const date = action.value;
+      const { date, dataType } = action.value;
       return downloadTudResponses.reducer(state, action, {
         REQUEST: () => state
-          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.PENDING)
+          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.PENDING)
           .setIn([DOWNLOAD_TUD_RESPONSES, action.id], action),
-        FAILURE: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.FAILURE),
-        SUCCESS: () => state.setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date], RequestStates.SUCCESS),
-        FINALLY: () => state.deleteIn([DOWNLOAD_TUD_RESPONSES, action.id])
+        FAILURE: () => state
+          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.SUCCESS),
+        FINALLY: () => state
+          .deleteIn([DOWNLOAD_TUD_RESPONSES, action.id])
+      });
+    }
+
+    case downloadAllData.case(action.type): {
+      return downloadAllData.reducer(state, action, {
+        REQUEST: () => state
+          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.PENDING)
+          .setIn([DOWNLOAD_ALL_DATA, action.id], action),
+        FAILURE: () => state
+          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.SUCCESS),
+        FINALLY: () => state
+          .deleteIn([DOWNLOAD_ALL_DATA, action.id])
       });
     }
 
