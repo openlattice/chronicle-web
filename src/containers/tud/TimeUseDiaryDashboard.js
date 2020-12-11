@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { List, Map } from 'immutable';
 import {
@@ -16,16 +16,18 @@ import type { RequestState } from 'redux-reqseq';
 import SearchPanel from './components/SearchPanel';
 import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
-import { resetRequestState } from '../../core/redux/ReduxActions';
-
 import {
+  DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
+  downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate
 } from './TimeUseDiaryActions';
+import type { DataType } from './constants/DataTypes';
 
 import BasicErrorComponent from '../shared/BasicErrorComponent';
+import { resetRequestState } from '../../core/redux/ReduxActions';
 import { TUD_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 
 const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
@@ -53,6 +55,7 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
   });
 
   // selectors
+  const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_DATA]);
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
   const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_RESPONSES, REQUEST_STATE], Map()));
@@ -82,11 +85,25 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
     }
   };
 
-  const handleDownload = (entities :List, date :string) => {
-    dispatch(downloadTudResponses({
-      entities,
-      date
-    }));
+  const handleDownload = (entities :?List, date :?string, dataType :DataType) => {
+    const { endDate, startDate } = dates;
+    if (!date) {
+      // download all
+      dispatch(downloadAllData({
+        entities: submissionsByDate.toList().flatten(true),
+        dataType,
+        endDate,
+        startDate
+      }));
+    }
+    else {
+      // download for specified date
+      dispatch(downloadTudResponses({
+        dataType,
+        date,
+        entities,
+      }));
+    }
   };
 
   const errorMsg = 'An error occurred while loading time use diary data.'
@@ -130,15 +147,15 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
                       </Typography>
                     ) : (
                       <>
-                        <SummaryHeader />
+                        <SummaryHeader onDownloadData={handleDownload} downloadAllDataRS={downloadAllDataRS} />
                         <div>
                           {
-                            submissionsByDate.entrySeq().map(([key, entities]) => (
+                            submissionsByDate.entrySeq().sort().map(([key, entities]) => (
                               <SummaryListComponent
-                                  key={key}
                                   date={key}
+                                  downloadRS={downloadStates.get(key, Map())}
                                   entities={entities}
-                                  downloadRS={downloadStates.get(key)}
+                                  key={key}
                                   onDownloadData={handleDownload}>
                                 {key}
                               </SummaryListComponent>

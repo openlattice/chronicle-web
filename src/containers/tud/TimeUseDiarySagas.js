@@ -17,38 +17,50 @@ import { Constants } from 'lattice';
 import {
   DataApiActions,
   DataApiSagas,
-  EntitySetsApiActions,
-  EntitySetsApiSagas,
   SearchApiActions,
   SearchApiSagas
 } from 'lattice-sagas';
 import { DataUtils, Logger } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import type { Saga } from '@redux-saga/core';
+import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
 } from './TimeUseDiaryActions';
-import { createSubmitRequestBody, writeToCsvFile } from './utils';
+import { createSubmitRequestBody, getOutputFileName, writeToCsvFile } from './utils';
 
+import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
-import { selectEntitySetId, selectPropertyTypeId } from '../../core/edm/EDMUtils';
-import { ASSOCIATION_ENTITY_SET_NAMES, ENTITY_SET_NAMES } from '../../core/edm/constants/EntitySetNames';
+import {
+  selectESIDByCollection,
+  selectEntitySetsByModule,
+  selectPropertyTypeId
+} from '../../core/edm/EDMUtils';
+import {
+  ADDRESSES,
+  ANSWER,
+  PARTICIPANTS,
+  QUESTION,
+  REGISTERED_FOR,
+  RESPONDS_WITH,
+  SUBMISSION,
+  TIME_RANGE,
+} from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
-import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
 
 const LOG = new Logger('TimeUseDiarySagas');
 
 const { getEntitySetDataWorker } = DataApiSagas;
 const { getEntitySetData } = DataApiActions;
-const { getEntitySetId } = EntitySetsApiActions;
-const { getEntitySetIdWorker } = EntitySetsApiSagas;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 
@@ -65,33 +77,21 @@ const {
   VALUES_FQN,
 } = PROPERTY_TYPE_FQNS;
 
-const {
-  ANSWERS_ES_NAME,
-  QUESTIONS_ES_NAME,
-  SUBMISSION_ES_NAME,
-  TIMERANGE_ES_NAME,
-} = ENTITY_SET_NAMES;
-
-const {
-  ADDRESSES_ES_NAME,
-  RESPONDS_WITH_ES_NAME,
-  REGISTERED_FOR_ES,
-} = ASSOCIATION_ENTITY_SET_NAMES;
-
 function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
   try {
     yield put(submitTudData.request(action.id));
     const {
+      familyId,
       formData,
+      organizationId,
       participantId,
       studyId,
       waveId,
-      familyId
     } = action.value;
 
     const requestBody = createSubmitRequestBody(formData, familyId, waveId);
 
-    const response = yield call(ChronicleApi.submitTudData, studyId, participantId, requestBody);
+    const response = yield call(ChronicleApi.submitTudData, organizationId, studyId, participantId, requestBody);
     if (response.error) throw response.error;
 
     yield put(submitTudData.success(action.id));
@@ -116,13 +116,9 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
     const {
       endDate,
       startDate,
-      studyId,
     } = action.value;
 
-    const participantsES = getParticipantsEntitySetName(studyId);
-    const entitySetIdRes = yield call(getEntitySetIdWorker, getEntitySetId(participantsES));
-    if (entitySetIdRes.error) throw entitySetIdRes.error;
-    const participantsESID = entitySetIdRes.data;
+    const participantsESID = yield select(selectESIDByCollection(PARTICIPANTS, AppModules.CHRONICLE_CORE));
 
     const personPTID = yield select(selectPropertyTypeId(PERSON_ID));
     const participantsRes = yield call(getEntitySetDataWorker, getEntitySetData(
@@ -139,8 +135,8 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
 
     const participantEKIDs :UUID[] = participantsRes.data.map(getEntityKeyId);
 
-    const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
-    const respondsWithESID = yield select(selectEntitySetId(RESPONDS_WITH_ES_NAME));
+    const submissionESID = yield select(selectESIDByCollection(SUBMISSION, AppModules.QUESTIONNAIRES));
+    const respondsWithESID = yield select(selectESIDByCollection(RESPONDS_WITH, AppModules.QUESTIONNAIRES));
 
     // filtered neighbor entity search on participants entity set to get submissions
     const searchFilter = {
@@ -205,21 +201,30 @@ function* getSubmissionsByDateWatcher() :Saga<*> {
   yield takeEvery(GET_SUBMISSIONS_BY_DATE, getSubmissionsByDateWorker);
 }
 
-function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
-  const { entities, date } = action.value;
+function* downloadTudResponsesWorker(action :SequenceAction) :Saga<WorkerResponse> {
+  let workerResponse = {};
+  const {
+    dataType,
+    date,
+    endDate,
+    entities,
+    startDate,
+  } = action.value;
   try {
-    yield put(downloadTudResponses.request(action.id, date));
+    yield put(downloadTudResponses.request(action.id, { date, dataType }));
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
 
     // entity set ids
-    const submissionESID = yield select(selectEntitySetId(SUBMISSION_ES_NAME));
-    const answersESID = yield select(selectEntitySetId(ANSWERS_ES_NAME));
-    const registeredForESID = yield select(selectEntitySetId(REGISTERED_FOR_ES));
-    const questionsESID = yield select(selectEntitySetId(QUESTIONS_ES_NAME));
-    const timeRangeESID = yield select(selectEntitySetId(TIMERANGE_ES_NAME));
-    const addressesESID = yield select(selectEntitySetId(ADDRESSES_ES_NAME));
+    const surveyEntitySets :Map = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const submissionESID = surveyEntitySets.get(SUBMISSION);
+    const answersESID = surveyEntitySets.get(ANSWER);
+    const registeredForESID = surveyEntitySets.get(REGISTERED_FOR);
+    const questionsESID = surveyEntitySets.get(QUESTION);
+    const timeRangeESID = surveyEntitySets.get(TIME_RANGE);
+    const addressesESID = surveyEntitySets.get(ADDRESSES);
 
     // filtered neighbor search on submission es to get answers
     let searchFilter = {
@@ -325,31 +330,74 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<*> {
       }
     });
 
+    const outputFileName = getOutputFileName(date, startDate, endDate, dataType);
+
     writeToCsvFile(
-      date,
+      dataType,
+      outputFileName,
       submissionMetadata,
       answersMap,
       nonTimeRangeQuestionAnswerMap,
       timeRangeQuestionAnswerMap,
       timeRangeValues
     );
-    yield put(downloadTudResponses.success(action.id, date));
+    workerResponse = { data: null };
+    yield put(downloadTudResponses.success(action.id, { date, dataType }));
   }
   catch (error) {
+    workerResponse = { error };
     LOG.error(action.type, error);
-    yield put(downloadTudResponses.failure(action.id, date));
+    yield put(downloadTudResponses.failure(action.id, { date, dataType }));
   }
   finally {
     yield put(downloadTudResponses.finally(action.id));
   }
+
+  return workerResponse;
 }
 
 function* downloadTudResponsesWatcher() :Saga<*> {
   yield takeEvery(DOWNLOAD_TUD_RESPONSES, downloadTudResponsesWorker);
 }
 
+function* downloadAllDataWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(downloadAllData.request(action.id));
+
+    const {
+      entities,
+      startDate,
+      endDate,
+      dataType
+    } = action.value;
+
+    const response = yield call(downloadTudResponsesWorker, downloadTudResponses({
+      entities,
+      startDate,
+      endDate,
+      dataType
+    }));
+    if (response.error) throw response.error;
+
+    yield put(downloadAllData.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(downloadAllData.failure(action.id));
+  }
+  finally {
+    yield put(downloadAllData.finally(action.id));
+  }
+}
+
+function* downloadAllDataWatcher() :Saga<*> {
+
+  yield takeEvery(DOWNLOAD_ALL_DATA, downloadAllDataWorker);
+}
+
 export {
-  submitTudDataWatcher,
+  downloadAllDataWatcher,
+  downloadTudResponsesWatcher,
   getSubmissionsByDateWatcher,
-  downloadTudResponsesWatcher
+  submitTudDataWatcher,
 };

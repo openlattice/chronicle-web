@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import isEqual from 'lodash/isEqual';
 import qs from 'qs';
 import { DataProcessingUtils, Paged } from 'lattice-fabricate';
 import {
@@ -17,15 +18,32 @@ import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
-import { createFormSchema } from './utils';
+import { usePrevious } from './hooks';
+import {
+  createFormSchema,
+  getIs12HourFormatSelected,
+  getIsNightActivityPage,
+  getIsSummaryPage,
+  selectTimeByPageAndKey
+} from './utils';
 
 import BasicModal from '../shared/BasicModal';
 import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
+
+const {
+  ACTIVITY_END_TIME,
+  DAY_END_TIME,
+  DAY_OF_WEEK,
+  DAY_START_TIME
+} = PROPERTY_CONSTS;
+
+const { DAY_SPAN_PAGE } = PAGE_NUMBERS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -35,11 +53,13 @@ const TimeUseDiaryContainer = () => {
 
   const {
     familyId,
+    organizationId,
     participantId,
     studyId,
     waveId,
   } :{
     familyId :string,
+    organizationId :UUID,
     participantId :string,
     studyId :UUID,
     waveId :string,
@@ -52,6 +72,12 @@ const TimeUseDiaryContainer = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [page, setPage] = useState(0);
   const [formData, setFormData] = useState({});
+
+  const [currentTime, setCurrentTime] = useState();
+  const [dayEndTime, setDayEndTime] = useState();
+  const [dayStartTime, setDayStartTime] = useState();
+  const [isSummaryPage, setIsSummaryPage] = useState(false);
+  const [isNightActivityPage, setIsNightActivityPage] = useState(false);
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -72,7 +98,7 @@ const TimeUseDiaryContainer = () => {
   useEffect(() => {
     if (page === PAGE_NUMBERS.PRE_SURVEY_PAGE) {
       const dayOfWeekInput = document.getElementById(
-        `root_${getPageSectionKey(page, 0)}_${PROPERTY_CONSTS.DAY_OF_WEEK}`
+        `root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`
       );
       const label = dayOfWeekInput?.previousSibling;
       if (label) {
@@ -82,6 +108,32 @@ const TimeUseDiaryContainer = () => {
       }
     }
   }, [page, formSchema]);
+
+  const refreshProgress = (currFormData) => {
+    const dayStart = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, currFormData);
+    const dayEnd = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, currFormData);
+    const currentEnd = selectTimeByPageAndKey(page, ACTIVITY_END_TIME, currFormData);
+
+    setDayStartTime(dayStart);
+    setDayEndTime(dayEnd);
+    setCurrentTime(currentEnd);
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    refreshProgress(formData);
+    setIsSummaryPage(getIsSummaryPage(formData, page));
+  }, [page]);
+  /* eslint-enable */
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const prevSchema = usePrevious(formSchema.schema);
+  useEffect(() => {
+    if (!isEqual(prevSchema, formSchema.schema)) {
+      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page));
+    }
+  }, [page, formSchema]);
+  /* eslint-enable */
 
   const onPageChange = (currPage, currFormData) => {
     setPage(currPage);
@@ -95,6 +147,16 @@ const TimeUseDiaryContainer = () => {
       schema
     });
   };
+
+  const updateSurveyProgress = (currFormData :Object) => {
+    refreshProgress(currFormData);
+    setFormData(currFormData);
+  };
+
+  const is12hourFormat = getIs12HourFormatSelected(formData);
+  const isDayActivityPage = page >= PAGE_NUMBERS.FIRST_ACTIVITY_PAGE
+    && !isSummaryPage
+    && !isNightActivityPage;
 
   return (
     <AppContainerWrapper>
@@ -118,6 +180,12 @@ const TimeUseDiaryContainer = () => {
             : (
               <Card>
                 <CardSegment>
+                  <ProgressBar
+                      currentTime={currentTime}
+                      dayEndTime={dayEndTime}
+                      dayStartTime={dayStartTime}
+                      is12hourFormat={is12hourFormat}
+                      isDayActivityPage={isDayActivityPage} />
                   <Paged
                       initialFormData={formData}
                       onPageChange={onPageChange}
@@ -127,11 +195,14 @@ const TimeUseDiaryContainer = () => {
                             familyId={familyId}
                             formSchema={formSchema}
                             initialFormData={formData}
+                            isSummaryPage={isSummaryPage}
+                            organizationId={organizationId}
                             pagedProps={pagedProps}
                             participantId={participantId}
                             studyId={studyId}
                             submitRequestState={submitRequestState}
                             updateFormState={updateFormState}
+                            updateSurveyProgress={updateSurveyProgress}
                             waveId={waveId} />
                       )} />
                 </CardSegment>

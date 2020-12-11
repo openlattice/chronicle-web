@@ -3,10 +3,10 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { getIn, setIn, merge } from 'immutable';
+import { getIn, merge, setIn } from 'immutable';
 import { DataProcessingUtils, Form } from 'lattice-fabricate';
 import { Button } from 'lattice-ui-kit';
-import { set } from 'lodash';
+import { set, unset } from 'lodash';
 import { DateTime } from 'luxon';
 import { useDispatch } from 'react-redux';
 import { RequestStates } from 'redux-reqseq';
@@ -23,12 +23,11 @@ import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstant
 import {
   applyCustomValidation,
   getIs12HourFormatSelected,
-  pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
 
-const { getPageSectionKey } = DataProcessingUtils;
+const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
 
 const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
@@ -45,10 +44,10 @@ const {
 } = PROPERTY_CONSTS;
 
 const {
+  DAY_SPAN_PAGE,
   FIRST_ACTIVITY_PAGE,
   PRE_SURVEY_PAGE,
   SURVEY_INTRO_PAGE,
-  DAY_SPAN_PAGE
 } = PAGE_NUMBERS;
 
 const ButtonRow = styled.div`
@@ -59,16 +58,49 @@ const ButtonRow = styled.div`
 `;
 
 /*
- * Return true if the current page should display a summary of activities
- * Summary page is displayed after night activity page, hence page - 2 accounts for the night activity page
+ * This code fixes an issue where the survey enters an error state after a user fills out the survey
+ * and later changes the day end time value. If the day end time is changed such that certain sections
+ * of the formRef state contain invalid data (the start/end values are out of range), then this will cause
+ * validateAndSubmit to fail, hence the need to remove such sections. This deletion need only take place
+ * just before we enter the nightActivity portion of the survey. At this point, for all x s.t x > page
+ * only x == page + 1 can be expected to contain any data
+  (and it should be nightActivity data otherwise it also needs to be deleted)
  */
-const getIsSummaryPage = (formData :Object, page :number) => {
-  const prevEndTime = selectTimeByPageAndKey(page - 2, ACTIVITY_END_TIME, formData);
-  const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
-  return prevEndTime.isValid && dayEndTime.isValid
-    && prevEndTime.equals(dayEndTime)
-    && pageHasFollowupQuestions(formData, page - 2);
+const removeExtraData = (formRef :Object, pagedData, page :number) => {
+  const psk = getPageSectionKey(page, 0);
+  const dayEndTime :?DateTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, pagedData);
+  const formData :Object = formRef?.current?.state?.formData || {};
+
+  const currEndTime = formData[psk]?.[ACTIVITY_END_TIME];
+
+  if (dayEndTime && currEndTime) {
+    const currEndDateTime :DateTime = DateTime.fromSQL(currEndTime);
+    if (!currEndDateTime.equals(dayEndTime)) {
+      return;
+    }
+
+    const pages = Object.keys(formData)
+      .map((key) => {
+        const parsed = parsePageSectionKey(key);
+        return Number(parsed.page);
+      });
+
+    let toRemoveStartIndex = page + 1;
+    // if the next page has night activity page data, skip
+    const nextPageData = formData[getPageSectionKey(toRemoveStartIndex, 0)] || {};
+    if (Object.keys(nextPageData).includes(SLEEP_ARRANGEMENT)) {
+      toRemoveStartIndex += 1;
+    }
+
+    const toRemovePsks = pages
+      .filter((index) => index >= toRemoveStartIndex)
+      .map((index) => getPageSectionKey(index, 0));
+
+    toRemovePsks.forEach((toRemovePsk) => {
+      unset(formData, toRemovePsk);
+    });
+  }
 };
 
 /*
@@ -85,20 +117,28 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   const prevEndTime = selectTimeByPageAndKey(
     page - 1, (page === FIRST_ACTIVITY_PAGE ? DAY_START_TIME : ACTIVITY_END_TIME), pagedData
   );
+  const activityStartTime = selectTimeByPageAndKey(
+    page - 1, (page === FIRST_ACTIVITY_PAGE ? DAY_START_TIME : ACTIVITY_START_TIME), pagedData
+  );
 
   // current page already contains form data
-  if (Object.keys(pagedData).includes(psk) && prevEndTime.isValid) {
-    const formattedTime = prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+  if (Object.keys(pagedData).includes(psk) && prevEndTime.isValid && activityStartTime.isValid) {
+    const formattedEndTime = prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+    const formattedStartTime = activityStartTime.toLocaleString(DateTime.TIME_24_SIMPLE);
+
     const sectionData = pagedData[psk];
+    const formData = formRef?.current?.state?.formData || {};
 
     // current page contains followup questions for selected primary activity
     if (Object.keys(sectionData).includes(HAS_FOLLOWUP_QUESTIONS)) {
-      set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_END_TIME], formattedTime);
+      set(formData, [psk, ACTIVITY_END_TIME], formattedEndTime);
+      set(formData, [psk, ACTIVITY_START_TIME], formattedStartTime);
+      removeExtraData(formRef, pagedData, page);
     }
 
     // current page is night activity page
     else if (!Object.keys(sectionData).includes(SLEEP_ARRANGEMENT)) {
-      set(formRef, ['current', 'state', 'formData', psk, ACTIVITY_START_TIME], formattedTime);
+      set(formData, [psk, ACTIVITY_START_TIME], formattedEndTime);
     }
   }
 };
@@ -142,23 +182,29 @@ type Props = {
   familyId :?string;
   formSchema :Object;
   initialFormData :Object;
+  isSummaryPage :boolean;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
   submitRequestState :?RequestState;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
+  updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
+  organizationId :UUID;
 };
 
 const QuestionnaireForm = ({
   familyId,
   formSchema,
   initialFormData,
+  isSummaryPage,
+  organizationId,
   pagedProps,
   participantId,
   studyId,
   submitRequestState,
   updateFormState,
+  updateSurveyProgress,
   waveId,
 } :Props) => {
 
@@ -179,13 +225,12 @@ const QuestionnaireForm = ({
   const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
   const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
 
-  const isSummaryPage = getIsSummaryPage(pagedData, page);
-
   const handleNext = () => {
     if (isSummaryPage) {
       dispatch(submitTudData({
         familyId,
         formData: pagedData,
+        organizationId,
         participantId,
         studyId,
         waveId,
@@ -243,6 +288,8 @@ const QuestionnaireForm = ({
     if (schemaHasFollowupQuestions(currentSchema, page)) {
       updateFormSchema(formData, currentSchema, currentUiSchema);
     }
+
+    updateSurveyProgress(formData);
   };
 
   const validate = (formData, errors) => (

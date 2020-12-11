@@ -4,15 +4,11 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { Info } from 'luxon';
 
 import QuestionTypes from '../constants/questionTypes';
-import { ENTITY_SET_NAMES } from '../../../core/edm/constants/EntitySetNames';
+import { QUESTION, SURVEY } from '../../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const { TEXT_ENTRY, MULTIPLE_CHOICE } = QuestionTypes;
 
-const {
-  QUESTIONNAIRE_ES_NAME,
-  QUESTIONS_ES_NAME
-} = ENTITY_SET_NAMES;
 const {
   ACTIVE_FQN,
   DESCRIPTION_FQN,
@@ -31,22 +27,22 @@ const aboutSchema = {
       type: 'object',
       title: 'About',
       properties: {
-        [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, NAME_FQN)]: {
+        [getEntityAddressKey(0, SURVEY, NAME_FQN)]: {
           type: 'string',
           title: 'Questionnaire Title',
         },
-        [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN)]: {
+        [getEntityAddressKey(0, SURVEY, DESCRIPTION_FQN)]: {
           type: 'string',
           title: 'Description'
         },
-        [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN)]: {
+        [getEntityAddressKey(0, SURVEY, ACTIVE_FQN)]: {
           type: 'boolean',
           default: true
         }
       },
       required: [
-        getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN),
-        getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, NAME_FQN)
+        getEntityAddressKey(0, SURVEY, DESCRIPTION_FQN),
+        getEntityAddressKey(0, SURVEY, NAME_FQN)
       ]
     }
   }
@@ -55,15 +51,15 @@ const aboutSchema = {
 const aboutUiSchema = {
   [getPageSectionKey(1, 1)]: {
     classNames: 'column-span-12 grid-container',
-    [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, NAME_FQN)]: {
+    [getEntityAddressKey(0, SURVEY, NAME_FQN)]: {
       classNames: 'column-span-12',
       'ui:autofocus': true
     },
-    [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, DESCRIPTION_FQN)]: {
+    [getEntityAddressKey(0, SURVEY, DESCRIPTION_FQN)]: {
       classNames: 'column-span-12',
       'ui:widget': 'textarea',
     },
-    [getEntityAddressKey(0, QUESTIONNAIRE_ES_NAME, ACTIVE_FQN)]: {
+    [getEntityAddressKey(0, SURVEY, ACTIVE_FQN)]: {
       classNames: 'hidden'
     }
   }
@@ -79,7 +75,7 @@ const questionsSchema = {
       items: {
         type: 'object',
         properties: {
-          [getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN)]: {
+          [getEntityAddressKey(-1, QUESTION, TITLE_FQN)]: {
             title: 'Question',
             type: 'string'
           },
@@ -105,7 +101,7 @@ const questionsSchema = {
                   questionType: {
                     enum: [MULTIPLE_CHOICE]
                   },
-                  [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]: {
+                  [getEntityAddressKey(-1, QUESTION, VALUES_FQN)]: {
                     type: 'array',
                     title: 'Answer choices',
                     items: {
@@ -116,13 +112,13 @@ const questionsSchema = {
                     minItems: 2
                   },
                 },
-                required: [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]
+                required: [getEntityAddressKey(-1, QUESTION, VALUES_FQN)]
               }
             ]
           }
         },
         required: [
-          getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN),
+          getEntityAddressKey(-1, QUESTION, TITLE_FQN),
           'questionType'
         ]
       },
@@ -140,7 +136,7 @@ const questionsUiSchema = {
     },
     items: {
       classNames: 'grid-container',
-      [getEntityAddressKey(-1, QUESTIONS_ES_NAME, TITLE_FQN)]: {
+      [getEntityAddressKey(-1, QUESTION, TITLE_FQN)]: {
         classNames: 'column-span-12',
         'ui:autofocus': true
       },
@@ -148,7 +144,7 @@ const questionsUiSchema = {
         classNames: 'column-span-12',
         'ui:widget': 'RadioWidget',
       },
-      [getEntityAddressKey(-1, QUESTIONS_ES_NAME, VALUES_FQN)]: {
+      [getEntityAddressKey(-1, QUESTION, VALUES_FQN)]: {
         classNames: 'column-span-12',
         'ui:options': {
           creatable: true,

@@ -16,9 +16,10 @@ import DeleteParticipantModal from './components/DeleteParticipantModal';
 import DownloadParticipantDataModal from './components/DownloadParticipantDataModal';
 import ParticipantInfoModal from './components/ParticipantInfoModal';
 import ParticipantRow from './components/ParticipantRow';
-import TABLE_HEADERS from './utils/tableHeaders';
+import TABLE_HEADERS from './constants/tableHeaders';
 
 import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
+import { getSelectedOrgId } from '../../core/edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
@@ -33,7 +34,6 @@ import {
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const { TIMEOUT } = STUDIES_REDUX_CONSTANTS;
-
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -69,6 +69,8 @@ const ParticipantsTable = (props :Props) => {
   const deleteTimeout :boolean = useSelector(
     (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)
   );
+
+  const selectedOrgId :UUID = useSelector(getSelectedOrgId());
 
   const studyId = study.getIn([STUDY_ID, 0]);
 
@@ -145,6 +147,7 @@ const ParticipantsTable = (props :Props) => {
       <ParticipantInfoModal
           handleOnClose={() => setInfoModalOpen(false)}
           isVisible={infoModalOpen}
+          orgId={selectedOrgId}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
           studyId={studyId} />
 
@@ -169,6 +172,7 @@ const ParticipantsTable = (props :Props) => {
           isVisible={downloadModalOpen}
           participantEntityKeyId={participantEntityKeyId}
           participantId={participants.getIn([participantEntityKeyId, PERSON_ID, 0])}
+          selectedOrgId={selectedOrgId}
           studyEntityKeyId={study.getIn([OPENLATTICE_ID_FQN, 0])}
           studyId={studyId} />
     </>
