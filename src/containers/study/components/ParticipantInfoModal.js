@@ -20,7 +20,7 @@ const ModalWrapper = styled.div`
   max-width: 500px;
 `;
 
-const InfoWrapper = styled.div`
+const DetailWrapper = styled.div`
   margin-bottom: 20px;
 `;
 
@@ -69,7 +69,7 @@ const ParticipantInfoModal = ({
       <ModalWrapper>
         {
           participantDetails.map((detail) => (
-            <InfoWrapper key={detail.name}>
+            <DetailWrapper key={detail.name}>
               <Typography variant="body2">
                 {detail.name}
               </Typography>
@@ -88,7 +88,7 @@ const ParticipantInfoModal = ({
                   </IconButton>
                 </Tooltip>
               </Grid>
-            </InfoWrapper>
+            </DetailWrapper>
           ))
         }
       </ModalWrapper>
