@@ -4,9 +4,9 @@ import { PROPERTY_CONSTS } from './SchemaConstants';
 
 const SCHEMA_FIELDS_TITLES = {
   [PROPERTY_CONSTS.PRIMARY_BOOK_TITLE]: 'What was the name of the book?'
-    + ' If you are don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
+    + ' If you don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
   [PROPERTY_CONSTS.SECONDARY_BOOK_TITLE]: 'What was the name of the book?'
-      + ' If you are don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
+      + ' If you don\'t know the exact name, you can give a general description (e.g., a book about unicorns).',
   [PROPERTY_CONSTS.PRIMARY_BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
   [PROPERTY_CONSTS.SECONDARY_BOOK_TYPE]: 'Specifically, what type(s) of book did your child read?',
   [PROPERTY_CONSTS.CLOCK_FORMAT]: 'To get started, please select your preferred clock format.',
