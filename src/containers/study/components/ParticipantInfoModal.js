@@ -3,34 +3,34 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { faClipboard } from '@fortawesome/pro-solid-svg-icons';
+import { faCopy } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Modal } from 'lattice-ui-kit';
+import {
+  IconButton,
+  Modal,
+  Tooltip,
+  Typography
+} from 'lattice-ui-kit';
 
+import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
 
 const ModalWrapper = styled.div`
-  width: 500px;
+  max-width: 500px;
 `;
 
 const InfoWrapper = styled.div`
   margin-bottom: 20px;
-
-  > h4 {
-    font-size: 16px;
-    font-weight: 500;
-    margin: 5px 0;
-    padding: 0;
-  }
-
-  > p {
-    font-size: 15px;
-    font-weight: 300;
-    margin: 5px 0;
-    padding: 0;
-  }
 `;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-gap: 20px;
+  align-items: center;
+`;
+
 type Props = {
   handleOnClose :() => void;
   isVisible :boolean;
@@ -70,12 +70,24 @@ const ParticipantInfoModal = ({
         {
           participantDetails.map((detail) => (
             <InfoWrapper key={detail.name}>
-              <h4>
+              <Typography variant="body2">
                 {detail.name}
-              </h4>
-              <p>
-                { detail.value }
-              </p>
+              </Typography>
+              <Grid>
+                <Typography variant="body1">
+                  { detail.value }
+                </Typography>
+                <Tooltip
+                    arrow
+                    placement="top"
+                    title="Copy to clipboard">
+                  <IconButton
+                      aria-label={`Copy ${detail.name}`}
+                      onClick={() => copyToClipboard(detail.value)}>
+                    <FontAwesomeIcon icon={faCopy} />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
             </InfoWrapper>
           ))
         }
