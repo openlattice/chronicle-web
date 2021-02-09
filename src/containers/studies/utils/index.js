@@ -50,9 +50,7 @@ const getMinDateFromMetadata = (metadata :Map<UUID, Map<FQN, List<UUID>>>, parti
   return minDate;
 };
 
-/* eslint-disable import/prefer-default-export */
 export {
   constructEntityFromFormData,
   getMinDateFromMetadata
 };
-/* eslint-enable */
