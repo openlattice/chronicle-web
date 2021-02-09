@@ -1,9 +1,15 @@
 // @flow
-import { Map, getIn, setIn } from 'immutable';
-import { Constants } from 'lattice';
+import {
+  List,
+  Map,
+  getIn,
+  setIn
+} from 'immutable';
+import { Constants, Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 
 import { STUDIES } from '../../../core/edm/constants/EntityTemplateNames';
+import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 
 const {
   getPageSectionKey,
@@ -12,6 +18,10 @@ const {
 } = DataProcessingUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
+
+const { FQN } = Models;
+
+const { DATETIME_START_FQN } = PROPERTY_TYPE_FQNS;
 
 const constructEntityFromFormData = (
   entitySetIds :Map,
@@ -30,8 +40,19 @@ const constructEntityFromFormData = (
   return getIn(entityData, [studyEntitySetId, 0]);
 };
 
+const getMinDateFromMetadata = (metadata :Map<UUID, Map<FQN, List<UUID>>>, participantEKID :UUID) => {
+  const dateValues = metadata.getIn([participantEKID, DATETIME_START_FQN], List());
+  const minDate = dateValues.min();
+
+  if (minDate) {
+    return List.of(minDate);
+  }
+  return minDate;
+};
+
 /* eslint-disable import/prefer-default-export */
 export {
-  constructEntityFromFormData
+  constructEntityFromFormData,
+  getMinDateFromMetadata
 };
 /* eslint-enable */
