@@ -30,7 +30,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { LangUtils, Logger, DataUtils } from 'lattice-utils';
+import { DataUtils, LangUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
@@ -56,6 +56,7 @@ import {
   getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
+import { getMinDateFromMetadata } from './utils';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -418,7 +419,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       const participant = {
         ...get(neighbor, 'neighborDetails'),
         [DATE_ENROLLED.toString()]: metadata.getIn([participantEKID, DATE_ENROLLED]),
-        [DATETIME_START_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_START_FQN]),
+        [DATETIME_START_FQN.toString()]: getMinDateFromMetadata(metadata, participantEKID),
         [DATETIME_END_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_END_FQN]),
         [EVENT_COUNT.toString()]: [countValue],
         [PARTICIPATED_IN_EKID]: getIn(neighbor, ['associationDetails', OPENLATTICE_ID_FQN]),
