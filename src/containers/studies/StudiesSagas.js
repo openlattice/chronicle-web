@@ -53,7 +53,7 @@ import {
   getTimeUseDiaryStudies,
   updateStudy
 } from './StudiesActions';
-import { constructEntityFromFormData } from './utils';
+import { constructEntityFromFormData, getMinDateFromMetadata } from './utils';
 
 import EnrollmentStatuses from '../../utils/constants/EnrollmentStatus';
 import * as AppModules from '../../utils/constants/AppModules';
@@ -407,13 +407,14 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
       const participant = {
         ...get(neighbor, 'neighborDetails'),
         [DATE_ENROLLED.toString()]: metadata.getIn([participantEKID, DATE_ENROLLED]),
-        [DATETIME_START_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_START_FQN]),
+        [DATETIME_START_FQN.toString()]: getMinDateFromMetadata(metadata, participantEKID),
         [DATETIME_END_FQN.toString()]: metadata.getIn([participantEKID, DATETIME_END_FQN]),
         [EVENT_COUNT.toString()]: [countValue],
         [PARTICIPATED_IN_EKID]: getIn(neighbor, ['associationDetails', OPENLATTICE_ID_FQN]),
         [STATUS.toString()]: getIn(neighbor, ['associationDetails', STATUS], [ENROLLED]),
         id: [participantEKID], // needed by LUK table
       };
+
       // eslint-disable-next-line
       result[participantEKID] = participant;
       return result;
