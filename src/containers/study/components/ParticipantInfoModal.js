@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   IconButton,
   Modal,
+  // $FlowFixMe
   Tooltip,
   Typography
 } from 'lattice-ui-kit';
