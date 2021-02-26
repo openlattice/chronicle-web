@@ -9,12 +9,12 @@ import { Constants } from 'lattice';
 import {
   // $FlowFixMe
   Box,
+  Button,
   Card,
   CardSegment,
   // $FlowFixMe
   Grid,
   Select,
-  Button,
   Spinner,
 } from 'lattice-ui-kit';
 import { ReduxConstants } from 'lattice-utils';
@@ -114,7 +114,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
             <>
               <CardSegment>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={9}>
+                  <Grid item sm={9} xs={12}>
                     <Select
                         isDisabled={isEditing}
                         isMulti
@@ -123,7 +123,7 @@ const QuestionnairesContainer = ({ study } :Props) => {
                         placeholder="Filter by status"
                         value={selectedStatus} />
                   </Grid>
-                  <Grid item xs={12} sm={3}>
+                  <Grid item sm={3} xs={12}>
                     <Button
                         disabled={isEditing}
                         color="primary"
