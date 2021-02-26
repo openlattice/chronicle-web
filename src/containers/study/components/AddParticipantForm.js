@@ -7,7 +7,7 @@ import { Constants } from 'lattice';
 import { Form } from 'lattice-fabricate';
 import { useDispatch } from 'react-redux';
 
-import { dataSchema, uiSchema } from './AddParticipantSchema';
+import { dataSchema, uiSchema } from '../schema/AddParticipantSchema';
 
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
 import { validateAddParticipantForm } from '../../../utils/FormUtils';

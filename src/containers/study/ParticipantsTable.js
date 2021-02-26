@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import styled from 'styled-components';
 import { Map } from 'immutable';
@@ -45,6 +45,7 @@ const {
 
 const TableWrapper = styled.div`
   margin-top: 20px;
+  overflow-x: scroll;
 `;
 
 type Props = {
@@ -65,6 +66,10 @@ const ParticipantsTable = (props :Props) => {
 
   const deleteParticipantRS :?RequestState = useRequestState(['studies', DELETE_STUDY_PARTICIPANT]);
   const changeEnrollmentStatusRS :?RequestState = useRequestState(['studies', CHANGE_ENROLLMENT_STATUS]);
+
+  useEffect(() => {
+    document.getElementsByTagName('table')[0].style.minWidth = '960px';
+  }, []);
 
   const deleteTimeout :boolean = useSelector(
     (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)

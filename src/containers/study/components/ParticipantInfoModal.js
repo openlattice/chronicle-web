@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   IconButton,
   Modal,
+  // $FlowFixMe
   Tooltip,
   Typography
 } from 'lattice-ui-kit';
@@ -17,7 +18,7 @@ import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
 
 const ModalWrapper = styled.div`
-  max-width: 500px;
+  /* max-width: 500px; */
 `;
 
 const DetailWrapper = styled.div`

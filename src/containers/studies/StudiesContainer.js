@@ -4,11 +4,15 @@
 
 import React, { useState } from 'react';
 
-import styled from 'styled-components';
 import { Constants } from 'lattice';
 import {
+  // $FlowFixMe
+  Box,
   Button,
-  Spinner
+  // $FlowFixMe
+  Grid,
+  Spinner,
+  Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,30 +27,6 @@ import BasicErrorComponent from '../shared/BasicErrorComponent';
 import { resetRequestState } from '../../core/redux/ReduxActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
-
-const ContainerHeader = styled.section`
-  display: flex;
-  justify-content: space-between;
-  margin: 20px 0;
-
-  > h1 {
-    cursor: default;
-    font-size: 28px;
-    font-weight: normal;
-    margin: 0;
-    padding: 0;
-  }
-`;
-
-const CardGrid = styled.div`
-  display: grid;
-  grid-gap: 30px;
-  grid-template-columns: 1fr 1fr;
-`;
-
-const CenterText = styled.div`
-  text-align: center;
-`;
 
 const StudiesContainer = () => {
 
@@ -77,25 +57,35 @@ const StudiesContainer = () => {
 
   return (
     <>
-      <ContainerHeader>
-        <h1> Studies </h1>
-        <Button color="primary" onClick={openCreateStudyModal}> Create Study </Button>
-      </ContainerHeader>
+      <Box mb={2}>
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Box fontWeight="fontWeightNormal" fontSize={28}>
+              Studies
+            </Box>
+          </Grid>
+          <Grid container item xs={6} justify="flex-end">
+            <Button color="primary" onClick={openCreateStudyModal}> Create Study </Button>
+          </Grid>
+        </Grid>
+      </Box>
       {
         studies.isEmpty()
           ? (
-            <CenterText>
+            <Typography variant="body2" align="center">
               Sorry, no studies were found. Please try refreshing the page, or contact support.
-            </CenterText>
+            </Typography>
           )
           : (
-            <CardGrid>
+            <Grid container spacing={3}>
               {
                 studies.valueSeq().map((study) => (
-                  <StudyCard key={study.getIn([OPENLATTICE_ID_FQN, 0])} study={study} />
+                  <Grid item xs={12} sm={6} key={study.getIn([OPENLATTICE_ID_FQN, 0])}>
+                    <StudyCard study={study} />
+                  </Grid>
                 ))
               }
-            </CardGrid>
+            </Grid>
           )
       }
       <StudyDetailsModal

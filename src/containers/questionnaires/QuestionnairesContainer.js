@@ -2,14 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 
-import styled from 'styled-components';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
+  // $FlowFixMe
+  Box,
   Card,
   CardSegment,
+  // $FlowFixMe
+  Grid,
   Select,
   Button,
   Spinner,
@@ -38,17 +41,6 @@ const getActiveStatus = (entity :Map) => {
   const active = entity.getIn([ACTIVE_FQN, 0], false);
   return active ? ACTIVE : NOT_ACTIVE;
 };
-
-const HeaderRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-`;
-
-const SelectWrapper = styled.div`
-  min-width: 200px;
-`;
 
 type Props = {
   study :Map;
@@ -112,24 +104,6 @@ const QuestionnairesContainer = ({ study } :Props) => {
 
   return (
     <>
-      <HeaderRow>
-        <SelectWrapper>
-          <Select
-              isDisabled={isEditing}
-              isMulti
-              onChange={onSelectStatus}
-              options={STATUS_SELECT_OPTIONS}
-              placeholder="Filter by status"
-              value={selectedStatus} />
-        </SelectWrapper>
-        <Button
-            disabled={isEditing}
-            color="primary"
-            startIcon={<FontAwesomeIcon icon={faPlus} />}
-            onClick={() => setIsEditing(true)}>
-          New Questionnaire
-        </Button>
-      </HeaderRow>
       <Card>
         {
           isEditing ? (
@@ -138,12 +112,33 @@ const QuestionnairesContainer = ({ study } :Props) => {
                 studyEKID={study.getIn([OPENLATTICE_ID_FQN, 0])} />
           ) : (
             <>
-              <CardSegment padding="0px">
+              <CardSegment>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={9}>
+                    <Select
+                        isDisabled={isEditing}
+                        isMulti
+                        onChange={onSelectStatus}
+                        options={STATUS_SELECT_OPTIONS}
+                        placeholder="Filter by status"
+                        value={selectedStatus} />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Button
+                        disabled={isEditing}
+                        color="primary"
+                        fullWidth
+                        startIcon={<FontAwesomeIcon icon={faPlus} />}
+                        onClick={() => setIsEditing(true)}>
+                      New Questionnaire
+                    </Button>
+                  </Grid>
+                </Grid>
                 {
                   filteredListData.isEmpty() ? (
-                    <div style={{ textAlign: 'center', padding: '60px' }}>
+                    <Box textAlign="center" mt="20px">
                       No questionnaires found.
-                    </div>
+                    </Box>
                   ) : (
                     <QuestionnairesList
                         questionnaires={filteredListData}
