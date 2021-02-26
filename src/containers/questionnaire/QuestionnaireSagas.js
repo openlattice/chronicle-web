@@ -362,7 +362,7 @@ function* getStudyQuestionnairesWorker(action :SequenceAction) :Saga<*> {
     const questionnaireESID = yield select(selectESIDByCollection(SURVEY, AppModules.QUESTIONNAIRES));
     const partOfESID = yield select(selectESIDByCollection(PART_OF, AppModules.CHRONICLE_CORE));
     const studyESID = yield select(selectESIDByCollection(STUDIES, AppModules.CHRONICLE_CORE));
-    const questionsESID = yield select(selectESIDByCollection(QUESTION, AppModules.CHRONICLE_CORE));
+    const questionsESID = yield select(selectESIDByCollection(QUESTION, AppModules.QUESTIONNAIRES));
 
     /*
      * STEP 1: filtered search to get questionnaires neighboring study
