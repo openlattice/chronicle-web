@@ -45,6 +45,7 @@ const {
 
 const TableWrapper = styled.div`
   overflow-x: scroll;
+  
   table {
     min-width: 960px;
   }
