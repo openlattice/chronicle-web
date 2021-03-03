@@ -55,7 +55,7 @@ const StudyDetailsItem = ({
   missingValue,
   placeholder,
   value,
-}:StudyDetailsItemProps) => {
+} :StudyDetailsItemProps) => {
   const detailValue = missingValue ? placeholder : value;
 
   return (
