@@ -19,6 +19,7 @@ import {
   getIn,
   removeIn,
   setIn,
+  updateIn
 } from 'immutable';
 import { Constants, Types } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
@@ -110,6 +111,7 @@ const {
   EVENT_COUNT,
   ID_FQN,
   NOTIFICATION_ENABLED,
+  PERSON_ID,
   STATUS,
   STUDY_ID,
 } = PROPERTY_TYPE_FQNS;
@@ -677,6 +679,13 @@ function* addStudyParticipantWorker(action :SequenceAction) :Generator<*, *, *> 
     const { value } = action;
     const { studyId, studyEntityKeyId } = value;
     let { formData } = value;
+
+    // remove extra spaces
+    formData = updateIn(
+      formData,
+      [getPageSectionKey(1, 1), getEntityAddressKey(0, PARTICIPANTS, PERSON_ID)],
+      (val) => val.trim()
+    );
 
     const propertyTypeIds = yield select(selectPropertyTypeIds());
     const entitySetIds = yield select(getSelectedOrgEntitySetIds());
