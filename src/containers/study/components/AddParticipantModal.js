@@ -2,7 +2,6 @@
 
 import React, { useRef } from 'react';
 
-import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
@@ -20,10 +19,6 @@ type Props = {
   study :Map;
 };
 
-const ModalBodyWrapper = styled.div`
-  min-width: 440px;
-`;
-
 const AddParticipantModal = (props :Props) => {
   const {
     isVisible,
@@ -38,19 +33,19 @@ const AddParticipantModal = (props :Props) => {
 
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
-      <ModalBodyWrapper>
+      <div>
         <AddParticipantForm participants={participants} ref={formRef} study={study} />
-      </ModalBodyWrapper>
+      </div>
     ),
     [RequestStates.FAILURE]: (
-      <ModalBodyWrapper>
+      <div>
         <span> Failed to add participant. Please try again. </span>
-      </ModalBodyWrapper>
+      </div>
     ),
     [RequestStates.SUCCESS]: (
-      <ModalBodyWrapper>
+      <div>
         <span> Successfully added participant.</span>
-      </ModalBodyWrapper>
+      </div>
     )
   };
 

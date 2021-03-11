@@ -9,7 +9,7 @@ import { Map } from 'immutable';
 import {
   Card,
   CardSegment,
-  Colors
+  Typography
 } from 'lattice-ui-kit';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -20,33 +20,10 @@ import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNa
 import { goToRoute } from '../../../core/router/RoutingActions';
 
 const { STUDY_DESCRIPTION, FULL_NAME_FQN, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { NEUTRAL } = Colors;
 
-const StudyName = styled.h2`
-  font-size: 20px;
-  font-weight: 400;
-  margin: 0 0 20px 0;
-  overflow: hidden;
-  padding: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+const StyledCard = styled(Card)`
+  height: 100%;
 `;
-
-/* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
-const StudyDescription = styled.p`
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  color: ${NEUTRAL.N600};
-  display: -webkit-box;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 0;
-  overflow-wrap: break-word;
-  overflow: hidden;
-  padding: 0;
-  text-overflow: ellipsis;
-`;
-/* stylelint-enable */
 
 type Props = {
   study :Map<*, *>;
@@ -68,16 +45,16 @@ class StudyCard extends Component<Props> {
   render() {
     const { study } = this.props;
     return (
-      <Card onClick={this.handleCardClick} data-study-id={study.getIn([STUDY_ID, 0])}>
+      <StyledCard onClick={this.handleCardClick} data-study-id={study.getIn([STUDY_ID, 0])}>
         <CardSegment vertical>
-          <StudyName>
+          <Typography variant="h4" gutterBottom>
             {study.getIn([FULL_NAME_FQN, 0])}
-          </StudyName>
-          <StudyDescription>
+          </Typography>
+          <Typography>
             {study.getIn([STUDY_DESCRIPTION, 0])}
-          </StudyDescription>
+          </Typography>
         </CardSegment>
-      </Card>
+      </StyledCard>
     );
   }
 }

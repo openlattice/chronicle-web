@@ -2,13 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 
-import LinearProgress from '@material-ui/core/LinearProgress';
 import styled from 'styled-components';
-import { withStyles } from '@material-ui/styles';
-import { Colors, Typography } from 'lattice-ui-kit';
+// $FlowFixMe
+import { Typography, LinearProgress } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
-
-const { PURPLES } = Colors;
 
 const Grid = styled.div`
   align-items: center;
@@ -35,15 +32,6 @@ const ProgressLabelWrapper = styled.div`
     padding-left: 10px;
   }
 `;
-
-const StyledLinearProgress = withStyles({
-  barColorPrimary: {
-    backgroundColor: PURPLES[1]
-  },
-  colorPrimary: {
-    backgroundColor: PURPLES[5]
-  },
-})(LinearProgress);
 
 const validateDateTimes = (dateTimes :Array<?DateTime>) => (
   dateTimes.every((dateTime :?DateTime) => dateTime && dateTime.isValid)
@@ -107,7 +95,7 @@ const ProgressBar = (props :Props) => {
 
   return (
     <Wrapper>
-      <StyledLinearProgress variant="determinate" value={completedRatio * 100} />
+      <LinearProgress variant="determinate" value={completedRatio * 100} />
       <Grid completedRatio={completedRatio}>
         <ProgressLabelWrapper>
           <Typography

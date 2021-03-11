@@ -50,7 +50,7 @@ const ListItemWrapper = styled.div`
   display: grid;
   grid-gap: 40px;
   grid-template-columns: 1fr auto 60px;
-  padding: 20px 30px;
+  padding: 20px 0;
 
   :last-of-type {
     border-bottom: none;
