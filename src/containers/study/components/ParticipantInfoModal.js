@@ -17,10 +17,6 @@ import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
 
-const ModalWrapper = styled.div`
-  max-width: 500px;
-`;
-
 const DetailWrapper = styled.div`
   margin-bottom: 20px;
 `;
@@ -67,7 +63,7 @@ const ParticipantInfoModal = ({
     }
 
     return (
-      <ModalWrapper>
+      <div>
         {
           participantDetails.map((detail) => (
             <DetailWrapper key={detail.name}>
@@ -92,7 +88,7 @@ const ParticipantInfoModal = ({
             </DetailWrapper>
           ))
         }
-      </ModalWrapper>
+      </div>
     );
   };
 

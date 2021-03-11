@@ -3,11 +3,8 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import {
-  // $FlowFixMe
-  LinearProgress,
-  Typography
-} from 'lattice-ui-kit';
+// $FlowFixMe
+import { Typography, LinearProgress } from 'lattice-ui-kit';
 import { DateTime } from 'luxon';
 
 const Grid = styled.div`

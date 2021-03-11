@@ -2,14 +2,9 @@
 
 import React from 'react';
 
-import styled from 'styled-components';
 import { Modal, ModalFooter, Spinner } from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
-
-const ModalBodyWrapper = styled.div`
-  width: 500px;
-`;
 
 type Props = {
   deleteTimeout :boolean;
@@ -97,11 +92,11 @@ const DeleteParticipantModal = ({
         textSecondary={textSecondary}
         textTitle="Delete Participant's Data"
         withFooter={renderFooter}>
-      <ModalBodyWrapper>
+      <div>
         {
           requestStateComponents[requestState || RequestStates.STANDBY]
         }
-      </ModalBodyWrapper>
+      </div>
     </Modal>
   );
 };

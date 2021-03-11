@@ -3,13 +3,8 @@
 import React, { useState } from 'react';
 
 import { List } from 'immutable';
-import {
-  Button,
-  // $FlowFixMe
-  Menu,
-  // $FlowFixMe
-  MenuItem
-} from 'lattice-ui-kit';
+// $FlowFixMe
+import { Button, Menu, MenuItem } from 'lattice-ui-kit';
 import { ReduxUtils } from 'lattice-utils';
 import type { RequestState } from 'redux-reqseq';
 
