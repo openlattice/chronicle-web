@@ -3,7 +3,6 @@
  */
 import React, { useRef } from 'react';
 
-import styled from 'styled-components';
 import { Map } from 'immutable';
 import { ActionModal } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
@@ -13,10 +12,6 @@ import type { RequestState } from 'redux-reqseq';
 import CreateStudyForm from './CreateStudyForm';
 
 import { CREATE_STUDY, UPDATE_STUDY } from '../StudiesActions';
-
-const ModalBodyWrapper = styled.div`
-  min-width: 500px;
-`;
 
 type Props = {
   handleOnCloseModal :() => void;
@@ -46,27 +41,27 @@ const StudyDetailsModal = (props :Props) => {
 
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
-      <ModalBodyWrapper>
+      <div>
         <CreateStudyForm ref={formRef} study={study} notificationsEnabled={notificationsEnabled} />
-      </ModalBodyWrapper>
+      </div>
     ),
     [RequestStates.FAILURE]: (
-      <ModalBodyWrapper>
+      <div>
         {
           study
             ? <span> Failed to update study. Please try again. </span>
             : <span> Failed to create a new study. Please try again. </span>
         }
-      </ModalBodyWrapper>
+      </div>
     ),
     [RequestStates.SUCCESS]: (
-      <ModalBodyWrapper>
+      <div>
         {
           study
             ? <span> Successfully updated study. </span>
             : <span> Successfully created a new study. </span>
         }
-      </ModalBodyWrapper>
+      </div>
     )
   };
 

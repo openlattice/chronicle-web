@@ -10,7 +10,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import {
+  // $FlowFixMe
+  Box,
   Button,
+  // $FlowFixMe
+  Grid,
   Card,
   CardSegment,
   SearchInput,
@@ -34,17 +38,6 @@ const { OPENLATTICE_ID_FQN } = Constants;
 const AddParticipantsButton = styled(Button)`
   align-self: flex-start;
   margin-bottom: 5px;
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const NoParticipants = styled.div`
-  margin-top: 20px;
-  text-align: ${(props) => props.textAlign};
 `;
 
 type Props = {
@@ -100,23 +93,28 @@ const StudyParticipants = ({ study } :Props) => {
   return (
     <Card>
       <CardSegment vertical>
-        <CardHeader>
-          <SearchInput placeholder="Filter..." onChange={handleOnChange} width="250px" />
-          <AddParticipantsButton
-              onClick={openAddParticipantModal}
-              color="primary"
-              startIcon={<FontAwesomeIcon icon={faPlus} />}>
-            Add Participant
-          </AddParticipantsButton>
-        </CardHeader>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={9}>
+            <SearchInput placeholder="Filter participants" onChange={handleOnChange} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <AddParticipantsButton
+                fullWidth
+                onClick={openAddParticipantModal}
+                color="primary"
+                startIcon={<FontAwesomeIcon icon={faPlus} />}>
+              Add Participant
+            </AddParticipantsButton>
+          </Grid>
+        </Grid>
         {
           !participants.isEmpty()
           && filteredParticipants.isEmpty()
-          && <NoParticipants textAlign="start"> No matching results. </NoParticipants>
+          && <Box mt={3} textAlign="left"> No matching results. </Box>
         }
         {
           participants.isEmpty()
-          && <NoParticipants textAlign="center"> No participants found! </NoParticipants>
+          && <Box mt={3} align="center"> No participants found! </Box>
         }
         {
           !filteredParticipants.isEmpty()

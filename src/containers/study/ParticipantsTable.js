@@ -44,7 +44,11 @@ const {
 } = ParticipantActionTypes;
 
 const TableWrapper = styled.div`
-  margin-top: 20px;
+  overflow-x: scroll;
+
+  table {
+    min-width: 960px;
+  }
 `;
 
 type Props = {

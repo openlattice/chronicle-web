@@ -2,7 +2,6 @@
 
 import React from 'react';
 
-import styled from 'styled-components';
 import { ActionModal, Colors } from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -11,10 +10,6 @@ import EnrollmentStatuses from '../../../utils/constants/EnrollmentStatus';
 
 const { ENROLLED } = EnrollmentStatuses;
 const { NEUTRAL } = Colors;
-
-const ModalWrapper = styled.div`
-  width: 500px;
-`;
 
 type Props = {
   enrollmentStatus :string;
@@ -39,7 +34,7 @@ const ChangeEnrollment = ({
 
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
-      <ModalWrapper>
+      <div>
         <span> Are you sure you want to </span>
         { action }
         <span> collecting data on </span>
@@ -47,21 +42,21 @@ const ChangeEnrollment = ({
           { participantId }
         </span>
         <span>?</span>
-      </ModalWrapper>
+      </div>
     ),
     [RequestStates.SUCCESS]: (
-      <ModalWrapper>
+      <div>
         <span> Successfully </span>
         { completedAction }
         <span> collecting data on participant. </span>
-      </ModalWrapper>
+      </div>
     ),
     [RequestStates.FAILURE]: (
-      <ModalWrapper>
+      <div>
         <span> Failed to </span>
         { action}
         <span> collecting data on participant. Please try again. </span>
-      </ModalWrapper>
+      </div>
     )
   };
 
