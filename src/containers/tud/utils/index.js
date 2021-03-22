@@ -168,7 +168,7 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
   // case 2:
   if (pageNum === DAY_SPAN_PAGE) {
     return {
-      schema: DaySpanSchema.createSchema(is12hourFormat),
+      schema: DaySpanSchema.createSchema(is12hourFormat, trans),
       uiSchema: DaySpanSchema.createUiSchema(is12hourFormat)
     };
   }
