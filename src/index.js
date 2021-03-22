@@ -2,7 +2,10 @@
  * @flow
  */
 
-import React from 'react';
+// import i18next
+import './i18n';
+
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import LatticeAuth from 'lattice-auth';
@@ -12,7 +15,6 @@ import {
   LatticeLuxonUtils,
   MuiPickersUtilsProvider,
   StylesProvider,
-  // $FlowFixMe
   ThemeProvider,
   lightTheme,
 } from 'lattice-ui-kit';
@@ -23,14 +25,11 @@ import { createGlobalStyle } from 'styled-components';
 
 import AppContainer from './containers/app/AppContainer';
 import QuestionnaireContainer from './containers/questionnaire/QuestionnaireContainer';
-import TimeUseDiaryContainer from './containers/tud/TimeUseDiaryContainer';
 import SurveyContainer from './containers/survey/SurveyContainer';
+import TimeUseDiaryContainer from './containers/tud/TimeUseDiaryContainer';
 import initializeReduxStore from './core/redux/ReduxStore';
 import initializeRouterHistory from './core/router/RouterHistory';
 import * as Routes from './core/router/Routes';
-
-// import i18next
-import './i18n';
 
 // injected by Webpack.DefinePlugin
 declare var __AUTH0_CLIENT_ID__ :string;
@@ -99,27 +98,29 @@ const reduxStore = initializeReduxStore(routerHistory);
 const APP_ROOT_NODE = document.getElementById('app');
 if (APP_ROOT_NODE) {
   ReactDOM.render(
-    <Provider store={reduxStore}>
-      <ThemeProvider theme={lightTheme}>
-        <MuiPickersUtilsProvider utils={LatticeLuxonUtils}>
-          <StylesProvider injectFirst>
-            <>
-              <ConnectedRouter history={routerHistory}>
-                <Switch>
-                  <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
-                  <Route path={Routes.SURVEY} component={SurveyContainer} />
-                  <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
-                  <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
-                  <AuthRoute redirectToLogin path={Routes.ROOT} component={AppContainer} />
-                </Switch>
-              </ConnectedRouter>
-              <NormalizeCSS />
-              <GlobalStyle />
-            </>
-          </StylesProvider>
-        </MuiPickersUtilsProvider>
-      </ThemeProvider>
-    </Provider>,
+    <Suspense fallback="...">
+      <Provider store={reduxStore}>
+        <ThemeProvider theme={lightTheme}>
+          <MuiPickersUtilsProvider utils={LatticeLuxonUtils}>
+            <StylesProvider injectFirst>
+              <>
+                <ConnectedRouter history={routerHistory}>
+                  <Switch>
+                    <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
+                    <Route path={Routes.SURVEY} component={SurveyContainer} />
+                    <Route path={Routes.QUESTIONNAIRE} component={QuestionnaireContainer} />
+                    <Route path={Routes.TUD} component={TimeUseDiaryContainer} />
+                    <AuthRoute redirectToLogin path={Routes.ROOT} component={AppContainer} />
+                  </Switch>
+                </ConnectedRouter>
+                <NormalizeCSS />
+                <GlobalStyle />
+              </>
+            </StylesProvider>
+          </MuiPickersUtilsProvider>
+        </ThemeProvider>
+      </Provider>
+    </Suspense>,
     APP_ROOT_NODE
   );
 }

@@ -8,18 +8,22 @@ import { DataProcessingUtils, Paged } from 'lattice-fabricate';
 import {
   AppContainerWrapper,
   AppContentWrapper,
-  AppHeaderWrapper,
   Card,
   CardSegment,
   Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
+// $FlowFixMe
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import HeaderComponent from './components/HeaderComponent';
 import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
+import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
+import TranslationKeys from './constants/TranslationKeys';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
@@ -33,7 +37,6 @@ import {
 } from './utils';
 
 import BasicModal from '../shared/BasicModal';
-import OpenLatticeIcon from '../../assets/images/ol_icon.png';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
 
 const {
@@ -66,7 +69,9 @@ const TimeUseDiaryContainer = () => {
     // $FlowFixMe
   } = queryParams;
 
-  const initFormSchema = createFormSchema({}, 0);
+  const { i18n, t } = useTranslation();
+
+  const initFormSchema = createFormSchema({}, 0, t);
 
   const [formSchema, setFormSchema] = useState(initFormSchema); // {schema, uiSchema}
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -78,6 +83,7 @@ const TimeUseDiaryContainer = () => {
   const [dayStartTime, setDayStartTime] = useState();
   const [isSummaryPage, setIsSummaryPage] = useState(false);
   const [isNightActivityPage, setIsNightActivityPage] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -88,11 +94,22 @@ const TimeUseDiaryContainer = () => {
     }
   }, [submitRequestState]);
 
+  // select default language
+  useEffect(() => {
+    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === 'en');
+    if (defaultLng) {
+      setSelectedLanguage({
+        label: defaultLng.language,
+        value: defaultLng.code
+      });
+    }
+  }, []);
+
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    const newSchema = createFormSchema(formData, page);
+    const newSchema = createFormSchema(formData, page, t);
     setFormSchema(newSchema);
-  }, [page]);
+  }, [page, selectedLanguage?.value, t]);
   /* eslint-enable */
 
   useEffect(() => {
@@ -102,12 +119,12 @@ const TimeUseDiaryContainer = () => {
       );
       const label = dayOfWeekInput?.previousSibling;
       if (label) {
+        // TODO: italics format
         // $FlowFixMe
-        label.innerHTML = 'We would like you to think about your child\'s day and complete the time use diary'
-          + ' for <i>yesterday</i>. What day of the week was <i>yesterday</i>?';
+        label.innerHTML = t(TranslationKeys.DAY_OF_WEEK);
       }
     }
-  }, [page, formSchema]);
+  }, [page, formSchema, t]);
 
   const refreshProgress = (currFormData) => {
     const dayStart = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, currFormData);
@@ -135,6 +152,13 @@ const TimeUseDiaryContainer = () => {
   }, [page, formSchema]);
   /* eslint-enable */
 
+  const onChangeLanguage = (lng :Object) => {
+    if (lng !== null) {
+      i18n.changeLanguage(lng.value);
+      setSelectedLanguage(lng);
+    }
+  };
+
   const onPageChange = (currPage, currFormData) => {
     setPage(currPage);
     setFormData(currFormData);
@@ -160,7 +184,7 @@ const TimeUseDiaryContainer = () => {
 
   return (
     <AppContainerWrapper>
-      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
+      <HeaderComponent onChangeLanguage={onChangeLanguage} selectedLanguage={selectedLanguage} />
       <AppContentWrapper>
         <BasicModal
             handleOnClose={() => setIsModalVisible(false)}
@@ -201,6 +225,7 @@ const TimeUseDiaryContainer = () => {
                             participantId={participantId}
                             studyId={studyId}
                             submitRequestState={submitRequestState}
+                            trans={t}
                             updateFormState={updateFormState}
                             updateSurveyProgress={updateSurveyProgress}
                             waveId={waveId} />

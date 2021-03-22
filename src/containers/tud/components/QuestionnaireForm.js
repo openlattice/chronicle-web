@@ -16,6 +16,7 @@ import ContextualQuestionsIntro from './ContextualQuestionsIntro';
 import SurveyIntro from './SurveyIntro';
 import TimeUseSummary from './TimeUseSummary';
 
+import TranslationKeys from '../constants/TranslationKeys';
 import * as SecondaryFollowUpSchema from '../schemas/SecondaryFollowUpSchema';
 import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
@@ -143,7 +144,7 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   }
 };
 
-const updateTypicalDayLabel = (formData :Object, page :number) => {
+const updateTypicalDayLabel = (formData :Object, page :number, trans :(string, ?Object) => void) => {
   const psk = getPageSectionKey(page, 0);
   const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
   if (dayOfWeek) {
@@ -151,9 +152,7 @@ const updateTypicalDayLabel = (formData :Object, page :number) => {
     const label = typicalDayInput?.previousSibling;
     if (label) {
       // $FlowFixMe
-      label.innerHTML = 'An important part of this project is to find out how children spend'
-        + ` their time during the week. Was yesterday a typical ${dayOfWeek} for you`
-        + ' and your child? A non-typical day would include a school closing, being on vacation, or being home sick.';
+      label.innerHTML = trans(TranslationKeys.TYPICAL_DAY, { day: dayOfWeek });
     }
   }
 };
@@ -183,14 +182,15 @@ type Props = {
   formSchema :Object;
   initialFormData :Object;
   isSummaryPage :boolean;
+  organizationId :UUID;
   pagedProps :Object;
   participantId :string;
   studyId :UUID;
   submitRequestState :?RequestState;
+  trans :(string, ?Object) => void;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
-  organizationId :UUID;
 };
 
 const QuestionnaireForm = ({
@@ -203,6 +203,7 @@ const QuestionnaireForm = ({
   participantId,
   studyId,
   submitRequestState,
+  trans,
   updateFormState,
   updateSurveyProgress,
   waveId,
@@ -282,7 +283,7 @@ const QuestionnaireForm = ({
     updatePrimaryActivityQuestion(formData, page);
 
     if (page === PRE_SURVEY_PAGE) {
-      updateTypicalDayLabel(formData, page);
+      updateTypicalDayLabel(formData, page, trans);
     }
 
     if (schemaHasFollowupQuestions(currentSchema, page)) {
@@ -343,14 +344,14 @@ const QuestionnaireForm = ({
         <Button
             disabled={page === 0 || submitRequestState === RequestStates.PENDING}
             onClick={onBack}>
-          Back
+          {trans(TranslationKeys.BTN_BACK)}
         </Button>
         <Button
             color="primary"
             isLoading={submitRequestState === RequestStates.PENDING}
             onClick={handleNext}>
           {
-            isSummaryPage ? 'Submit' : 'Next'
+            isSummaryPage ? trans(TranslationKeys.BTN_SUBMIT) : trans(TranslationKeys.BTN_NEXT)
           }
         </Button>
       </ButtonRow>

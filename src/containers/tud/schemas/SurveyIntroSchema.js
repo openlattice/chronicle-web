@@ -2,13 +2,13 @@
 
 import { DataProcessingUtils } from 'lattice-fabricate';
 
-import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
+import TranslationKeys from '../constants/TranslationKeys';
 import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 const { CLOCK_FORMAT } = PROPERTY_CONSTS;
 
-const schema = {
+const createSchema = (trans :(string, ?Object) => void) => ({
   type: 'object',
   title: '',
   properties: {
@@ -17,17 +17,17 @@ const schema = {
       title: '',
       properties: {
         [CLOCK_FORMAT]: {
-          title: SCHEMA_FIELDS_TITLES[CLOCK_FORMAT],
+          title: trans(TranslationKeys.CHOOSE_FORMAT),
           type: 'number',
           enum: [12, 24],
-          enumNames: ['12-hour clock format', '24-hour clock format'],
+          enumNames: trans(TranslationKeys.CLOCK_FORMATS, { returnObjects: true }),
           default: 12
         },
       },
       required: [CLOCK_FORMAT]
     }
   }
-};
+});
 
 const uiSchema = {
   [getPageSectionKey(0, 0)]: {
@@ -39,6 +39,6 @@ const uiSchema = {
 };
 
 export {
-  schema,
+  createSchema,
   uiSchema
 };

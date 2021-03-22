@@ -144,7 +144,7 @@ const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
   formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
 ).includes(MEDIA_USE);
 
-const createFormSchema = (formData :Object, pageNum :number) => {
+const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Object) => void) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
 
@@ -153,14 +153,14 @@ const createFormSchema = (formData :Object, pageNum :number) => {
 
   if (pageNum === SURVEY_INTRO_PAGE) {
     return {
-      schema: SurveyIntroSchema.schema,
+      schema: SurveyIntroSchema.createSchema(trans),
       uiSchema: SurveyIntroSchema.uiSchema
     };
   }
   // case 1:
   if (pageNum === PRE_SURVEY_PAGE) {
     return {
-      schema: PreSurveySchema.schema,
+      schema: PreSurveySchema.createSchema(trans),
       uiSchema: PreSurveySchema.uiSchema
     };
   }
