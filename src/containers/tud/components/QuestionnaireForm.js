@@ -144,7 +144,7 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   }
 };
 
-const updateTypicalDayLabel = (formData :Object, page :number, trans :(string, ?Object) => void) => {
+const updateTypicalDayLabel = (formData :Object, page :number, trans :(string, ?Object) => string) => {
   const psk = getPageSectionKey(page, 0);
   const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
   if (dayOfWeek) {
@@ -157,7 +157,7 @@ const updateTypicalDayLabel = (formData :Object, page :number, trans :(string, ?
   }
 };
 
-const updatePrimaryActivityQuestion = (formData :Object, page :number) => {
+const updatePrimaryActivityQuestion = (formData :Object, page :number, trans :(string, ?Object) => string) => {
   const currentActivity = selectPrimaryActivityByPage(page, formData);
   if (currentActivity) {
     const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
@@ -165,7 +165,7 @@ const updatePrimaryActivityQuestion = (formData :Object, page :number) => {
     const label = endTimeInput?.parentNode?.parentNode?.parentNode?.firstChild;
     if (label) {
       // $FlowFixMe
-      label.innerHTML = `When did your child stop ${currentActivity}?`;
+      label.innerHTML = trans(TranslationKeys.ACTIVITY_END_TIME, { activity: currentActivity });
     }
   }
 };
@@ -187,7 +187,7 @@ type Props = {
   participantId :string;
   studyId :UUID;
   submitRequestState :?RequestState;
-  trans :(string, ?Object) => void;
+  trans :(string, ?Object) => string;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
@@ -280,7 +280,7 @@ const QuestionnaireForm = ({
   };
 
   const onChange = ({ formData, schema: currentSchema, uiSchema: currentUiSchema }) => {
-    updatePrimaryActivityQuestion(formData, page);
+    updatePrimaryActivityQuestion(formData, page, trans);
 
     if (page === PRE_SURVEY_PAGE) {
       updateTypicalDayLabel(formData, page, trans);

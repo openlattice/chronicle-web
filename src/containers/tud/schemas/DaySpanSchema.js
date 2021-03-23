@@ -11,7 +11,7 @@ const { DAY_SPAN_PAGE } = PAGE_NUMBERS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 
-const createSchema = (is12hourFormat :boolean, trans :(string) => void) => ({
+const createSchema = (is12hourFormat :boolean, trans :(string) => string) => ({
   type: 'object',
   title: '',
   properties: {

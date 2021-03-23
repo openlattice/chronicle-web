@@ -16,7 +16,7 @@ const {
   TYPICAL_DAY_FLAG
 } = PROPERTY_CONSTS;
 
-const createSchema = (trans :(string, ?Object) => void) => ({
+const createSchema = (trans :(string, ?Object) => string) => ({
   type: 'object',
   title: '',
   properties: {

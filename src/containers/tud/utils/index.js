@@ -144,7 +144,7 @@ const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
   formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
 ).includes(MEDIA_USE);
 
-const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Object) => void) => {
+const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Object) => string) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
 
@@ -202,7 +202,9 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
     uiSchema = ContextualSchema.createUiSchema(pageNum);
   }
   else {
-    schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat);
+    schema = PrimaryActivitySchema.createSchema(
+      pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat, trans
+    );
     uiSchema = PrimaryActivitySchema.createUiSchema(pageNum, is12hourFormat);
   }
 
