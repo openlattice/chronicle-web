@@ -319,7 +319,8 @@ const QuestionnaireForm = ({
               schemaHasFollowup && (
                 <ContextualQuestionsIntro
                     selectedActivity={prevActivity}
-                    time={formattedPrevEndTime} />
+                    time={prevEndTime}
+                    trans={trans} />
               )
             }
             {

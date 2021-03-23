@@ -27,4 +27,5 @@ export default {
   WEEKDAY_OPTIONS: 'weekday_options',
   YES: 'yes',
   YESTERDAY: 'yesterday',
+  CONTEXTUAL_TEXT: 'contextual_text'
 };
