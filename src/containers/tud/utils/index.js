@@ -197,9 +197,9 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
   }
   else if (shouldDisplayFollowup) {
     schema = ContextualSchema.createSchema(
-      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected
+      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected, trans
     );
-    uiSchema = ContextualSchema.createUiSchema(pageNum);
+    uiSchema = ContextualSchema.createUiSchema(pageNum, trans);
   }
   else {
     schema = PrimaryActivitySchema.createSchema(

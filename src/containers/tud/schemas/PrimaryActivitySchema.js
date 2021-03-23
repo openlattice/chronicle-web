@@ -35,7 +35,11 @@ const createSchema = (
           type: 'string',
           title: (pageNum === FIRST_ACTIVITY_PAGE
             ? trans(TranslationKeys.PRIMARY_ACTIVITY, { time: prevEndTime.toJSDate() })
-            : trans(TranslationKeys.NEXT_ACTIVITY, { time: prevEndTime.toJSDate(), activity: prevActivity })),
+            : trans(TranslationKeys.NEXT_ACTIVITY, {
+              time: prevEndTime.toJSDate(),
+              activity: prevActivity,
+              interpolation: { escapeValue: false }
+            })),
           enum: Object.values(trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true }))
         },
         [ACTIVITY_START_TIME]: {

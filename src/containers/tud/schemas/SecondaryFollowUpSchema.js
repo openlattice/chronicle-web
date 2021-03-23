@@ -1,13 +1,7 @@
 // @flow
 
-import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
-import {
-  BOOK_TYPES,
-  MEDIA_ACTIVITY_CATEGORIES,
-  MEDIA_AGE_OPTIONS,
-  PRIMARY_ACTIVITIES,
-  PROPERTY_CONSTS,
-} from '../constants/SchemaConstants';
+import TranslationKeys from '../constants/TranslationKeys';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const {
   SECONDARY_BOOK_TITLE,
@@ -16,53 +10,54 @@ const {
   SECONDARY_MEDIA_AGE,
   SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
-const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
-const createSchema = (selectedActivity :string) => {
+const createSchema = (selectedActivity :string, trans :(string, ?Object) => Object) => {
+  const primaryActivities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+
   switch (selectedActivity) {
-    case READING: {
+    case primaryActivities.reading: {
       return {
         properties: {
           [SECONDARY_BOOK_TYPE]: {
             type: 'array',
-            title: SCHEMA_FIELDS_TITLES[SECONDARY_BOOK_TYPE],
-            description: 'Please choose all that apply.',
+            title: trans(TranslationKeys.BOOK_TYPE),
+            description: trans(TranslationKeys.CHOOSE_APPLICABLE),
             items: {
               type: 'string',
-              enum: BOOK_TYPES
+              enum: trans(TranslationKeys.BOOK_TYPE_OPTIONS, { returnObjects: true })
             },
             uniqueItems: true,
             minItems: 1
           },
           [SECONDARY_BOOK_TITLE]: {
             type: 'string',
-            title: SCHEMA_FIELDS_TITLES[SECONDARY_BOOK_TITLE]
+            title: trans(TranslationKeys.BOOK_TITLE)
           }
         },
         required: [SECONDARY_BOOK_TYPE]
       };
     }
-    case MEDIA_USE:
+    case primaryActivities.media_use:
       return {
         properties: {
           [SECONDARY_MEDIA_ACTIVITY]: {
-            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_ACTIVITY],
+            title: trans(TranslationKeys.MEDIA_ACTIVITY),
             type: 'array',
-            description: 'Please choose all that apply.',
+            description: trans(TranslationKeys.CHOOSE_APPLICABLE),
             items: {
-              enum: MEDIA_ACTIVITY_CATEGORIES,
+              enum: trans(TranslationKeys.MEDIA_ACTIVITY_OPTIONS, { returnObjects: true }),
               type: 'string'
             },
             uniqueItems: true,
             minItems: 1
           },
           [SECONDARY_MEDIA_AGE]: {
-            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_AGE],
+            title: trans(TranslationKeys.MEDIA_AGE),
             type: 'string',
-            enum: MEDIA_AGE_OPTIONS
+            enum: trans(TranslationKeys.MEDIA_AGE_OPTIONS, { returnObjects: true })
           },
           [SECONDARY_MEDIA_NAME]: {
-            title: SCHEMA_FIELDS_TITLES[SECONDARY_MEDIA_NAME],
+            title: trans(TranslationKeys.MEDIA_NAME, { returnObjects: true }),
             type: 'string'
           }
         },

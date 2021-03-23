@@ -1,24 +1,15 @@
 // @flow
 
-import { DataProcessingUtils } from 'lattice-fabricate';
 import merge from 'lodash/merge';
+import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import * as FollowupSchema from './FollowupSchema';
 import * as SecondaryActivitySchema from './SecondaryActivitySchema';
 import * as SecondaryFollowUpSchema from './SecondaryFollowUpSchema';
 
-import {
-  BG_MEDIA_OPTIONS,
-  CAREGIVERS,
-  PRIMARY_ACTIVITIES,
-  PROPERTY_CONSTS
-} from '../constants/SchemaConstants';
-
-const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
-
-const secondaryReadingSchema = SecondaryFollowUpSchema.createSchema(READING);
-const secondaryMediaSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
+import TranslationKeys from '../constants/TranslationKeys';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 const {
@@ -50,13 +41,19 @@ const createSchema = (
   prevStartTime :DateTime,
   prevEndTime :DateTime,
   isSecondaryReadingSelected :boolean,
-  isSecondaryMediaSelected :boolean
+  isSecondaryMediaSelected :boolean,
+  trans :(string, ?Object) => Object
 ) => {
 
   const psk = getPageSectionKey(pageNum, 0);
 
-  const followupSchema = FollowupSchema.createSchema(selectedActivity);
-  const secondaryActivitySchema = SecondaryActivitySchema.createSchema(selectedActivity);
+  const activities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+
+  const secondaryReadingSchema = SecondaryFollowUpSchema.createSchema(activities.reading, trans);
+  const secondaryMediaSchema = SecondaryFollowUpSchema.createSchema(activities.media_use, trans);
+
+  const followupSchema = FollowupSchema.createSchema(selectedActivity, trans);
+  const secondaryActivitySchema = SecondaryActivitySchema.createSchema(selectedActivity, trans);
 
   const schema = {
     type: 'object',
@@ -84,11 +81,14 @@ const createSchema = (
           },
           [CAREGIVER]: {
             type: 'array',
-            title: `Who was with your child when he/she was ${selectedActivity}?`,
-            description: 'Please choose all that apply.',
+            title: trans(TranslationKeys.CAREGIVER, {
+              activity: selectedActivity,
+              interpolation: { escapeValue: false }
+            }),
+            description: trans(TranslationKeys.CHOOSE_APPLICABLE),
             items: {
               type: 'string',
-              enum: CAREGIVERS
+              enum: trans(TranslationKeys.CAREGIVER_OPTIONS, { returnObjects: true })
             },
             uniqueItems: true,
             minItems: 1
@@ -97,22 +97,27 @@ const createSchema = (
           ...secondaryActivitySchema.properties,
           [BG_TV_DAY]: {
             type: 'string',
-            title: `Was there TV in the background while your child was  ${selectedActivity}? For example,`
-              + ' maybe a parent was watching TV while your child did something else in the room.',
-            enum: BG_MEDIA_OPTIONS
+            title: trans(TranslationKeys.BG_TV_DAY, {
+              activity: selectedActivity,
+              interpolation: { escapeValue: false }
+            }),
+            enum: trans(TranslationKeys.BG_MEDIA_OPTIONS, { returnObjects: true })
           },
           [BG_AUDIO_DAY]: {
-            title: `Was there audio in the background (e.g., music, podcast) while your child was ${selectedActivity}?`
-              + ' For example, maybe a parent was listening to music while your child did something else in the room.',
+            title: trans(TranslationKeys.BG_AUDIO_DAY, {
+              activity: selectedActivity,
+              interpolation: { escapeValue: false }
+            }),
             type: 'string',
-            enum: BG_MEDIA_OPTIONS
+            enum: trans(TranslationKeys.BG_MEDIA_OPTIONS, { returnObjects: true })
           },
           [ADULT_MEDIA]: {
             type: 'string',
-            title: 'Was an adult using a mobile device (phone, tablet, laptop) while your child'
-              + ` was ${selectedActivity}? For example, maybe a parent was sending text messages`
-              + ' while your child did something else in the room.',
-            enum: BG_MEDIA_OPTIONS
+            title: trans(TranslationKeys.ADULT_MEDIA, {
+              activity: selectedActivity,
+              interpolation: { escapeValue: false }
+            }),
+            enum: trans(TranslationKeys.BG_MEDIA_OPTIONS, { returnObjects: true })
           },
         },
         required: [CAREGIVER, BG_TV_DAY, BG_AUDIO_DAY, ADULT_MEDIA,
@@ -136,7 +141,7 @@ const createSchema = (
   return schema;
 };
 
-const createUiSchema = (pageNum :number) => {
+const createUiSchema = (pageNum :number, trans :(string, ?Object) => Object) => {
 
   const primaryFollowupOrder = [
     PRIMARY_BOOK_TYPE, PRIMARY_BOOK_TITLE, PRIMARY_MEDIA_ACTIVITY, PRIMARY_MEDIA_AGE, PRIMARY_MEDIA_NAME];
@@ -184,7 +189,7 @@ const createUiSchema = (pageNum :number) => {
         'ui:widget': 'checkboxes',
         'ui:options': {
           withNone: true,
-          noneText: 'No one'
+          noneText: trans(TranslationKeys.NO_ONE)
         }
       },
       [PRIMARY_BOOK_TYPE]: {

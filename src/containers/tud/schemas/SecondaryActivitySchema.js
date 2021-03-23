@@ -2,22 +2,27 @@
 
 import * as SecondaryFollowUpSchema from './SecondaryFollowUpSchema';
 
-import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import TranslationKeys from '../constants/TranslationKeys';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { OTHER_ACTIVITY, SECONDARY_ACTIVITY } = PROPERTY_CONSTS;
 
-// $FlowFixMe
-const activitiesList :string[] = Object.values(PRIMARY_ACTIVITIES);
+const createSchema = (primaryActivity :string, trans :(string, ?Object) => Object) => {
 
-const createSchema = (primaryActivity :string) => {
+  // $FlowFixMe
+  const activitiesList :string[] = Object.values(trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true }));
+
   const secondaryActivityOptions :string[] = activitiesList.filter((activity :string) => activity !== primaryActivity);
 
   return {
     properties: {
       [OTHER_ACTIVITY]: {
         type: 'string',
-        title: `Did your child do anything else while ${primaryActivity}?`,
-        enum: ['Yes', 'No', 'Don\'t know']
+        title: trans(TranslationKeys.OTHER_ACTIVITY, {
+          activity: primaryActivity,
+          interpolation: { escapeValue: false }
+        }),
+        enum: [trans(TranslationKeys.YES), trans(TranslationKeys.NO), trans(TranslationKeys.DONT_KNOW)]
       }
     },
     required: [OTHER_ACTIVITY],
@@ -27,18 +32,21 @@ const createSchema = (primaryActivity :string) => {
           {
             properties: {
               [OTHER_ACTIVITY]: {
-                enum: ['No', 'Don\'t know']
+                enum: [trans(TranslationKeys.NO), trans(TranslationKeys.DONT_KNOW)]
               },
             }
           },
           {
             properties: {
               [OTHER_ACTIVITY]: {
-                enum: ['Yes']
+                enum: [trans(TranslationKeys.YES)]
               },
               [SECONDARY_ACTIVITY]: {
-                title: `Ok, what else did your child do while ${primaryActivity}?`,
-                description: 'Please choose all that apply.',
+                title: trans(TranslationKeys.SECONDARY_ACTIVITY, {
+                  activity: primaryActivity,
+                  interpolation: { escapeValue: false }
+                }),
+                description: trans(TranslationKeys.CHOOSE_APPLICABLE),
                 type: 'array',
                 items: {
                   enum: secondaryActivityOptions,

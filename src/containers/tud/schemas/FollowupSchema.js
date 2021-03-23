@@ -1,13 +1,7 @@
 // @flow
 
-import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
-import {
-  BOOK_TYPES,
-  MEDIA_ACTIVITY_CATEGORIES,
-  MEDIA_AGE_OPTIONS,
-  PRIMARY_ACTIVITIES,
-  PROPERTY_CONSTS,
-} from '../constants/SchemaConstants';
+import TranslationKeys from '../constants/TranslationKeys';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const {
   PRIMARY_BOOK_TITLE,
@@ -17,53 +11,54 @@ const {
   PRIMARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
 
-const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
+const createSchema = (selectedActivity :string, trans :(string, ?Object) => Object) => {
 
-const createSchema = (selectedActivity :string) => {
+  const primaryActivities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+  // translate to find which activity this is
   switch (selectedActivity) {
-    case READING: {
+    case primaryActivities.reading: {
       return {
         properties: {
           [PRIMARY_BOOK_TYPE]: {
             type: 'array',
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_BOOK_TYPE],
-            description: 'Please choose all that apply.',
+            title: trans(TranslationKeys.BOOK_TYPE),
+            description: trans(TranslationKeys.CHOOSE_APPLICABLE),
             items: {
               type: 'string',
-              enum: BOOK_TYPES
+              enum: trans(TranslationKeys.BOOK_TYPE_OPTIONS, { returnObjects: true })
             },
             uniqueItems: true,
             minItems: 1
           },
           [PRIMARY_BOOK_TITLE]: {
             type: 'string',
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_BOOK_TITLE]
+            title: trans(TranslationKeys.BOOK_TITLE)
           }
         },
         required: [PRIMARY_BOOK_TYPE]
       };
     }
-    case MEDIA_USE:
+    case primaryActivities.media_use:
       return {
         properties: {
           [PRIMARY_MEDIA_ACTIVITY]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_ACTIVITY],
+            title: trans(TranslationKeys.MEDIA_ACTIVITY),
             type: 'array',
-            description: 'Please choose all that apply.',
+            description: trans(TranslationKeys.CHOOSE_APPLICABLE),
             items: {
-              enum: MEDIA_ACTIVITY_CATEGORIES,
+              enum: trans(TranslationKeys.MEDIA_ACTIVITY_OPTIONS, { returnObjects: true }),
               type: 'string'
             },
             uniqueItems: true,
             minItems: 1
           },
           [PRIMARY_MEDIA_AGE]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_AGE],
+            title: trans(TranslationKeys.MEDIA_AGE),
             type: 'string',
-            enum: MEDIA_AGE_OPTIONS
+            enum: trans(TranslationKeys.MEDIA_AGE_OPTIONS, { returnObjects: true })
           },
           [PRIMARY_MEDIA_NAME]: {
-            title: SCHEMA_FIELDS_TITLES[PRIMARY_MEDIA_NAME],
+            title: trans(TranslationKeys.MEDIA_NAME),
             type: 'string'
           }
         },
@@ -83,7 +78,7 @@ const uiSchema = {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',
     'ui:options': {
-      withOther: true
+      withOther: true,
     }
   },
   [PRIMARY_BOOK_TYPE]: {

@@ -20,17 +20,14 @@ import TranslationKeys from '../constants/TranslationKeys';
 import * as SecondaryFollowUpSchema from '../schemas/SecondaryFollowUpSchema';
 import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
-import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
-  getIs12HourFormatSelected,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
 
 const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
-
-const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const {
   ACTIVITY_END_TIME,
@@ -223,8 +220,10 @@ const QuestionnaireForm = ({
 
   const { schema, uiSchema } = formSchema;
 
-  const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
-  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
+  const activities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+
+  const readingSchema = SecondaryFollowUpSchema.createSchema(activities.reading, trans);
+  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(activities.media_use, trans);
 
   const handleNext = () => {
     if (isSummaryPage) {
@@ -253,7 +252,7 @@ const QuestionnaireForm = ({
     let newProperties = getIn(currentSchema, ['properties', psk, 'properties'], {});
     let newRequired = getIn(currentSchema, ['properties', psk, 'required'], []);
 
-    if (secondaryActivities.includes(MEDIA_USE)) {
+    if (secondaryActivities.includes(activities.media_use)) {
       newProperties = merge(newProperties, mediaProperties);
       newRequired = merge(newRequired, mediaRequired);
     }
@@ -263,7 +262,7 @@ const QuestionnaireForm = ({
       newRequired = newRequired.filter((property) => !mediaRequired.includes(property));
     }
 
-    if (secondaryActivities.includes(READING)) {
+    if (secondaryActivities.includes(activities.reading)) {
       newProperties = merge(newProperties, readingProperties);
       newRequired = merge(newRequired, readingRequired);
     }
@@ -300,11 +299,6 @@ const QuestionnaireForm = ({
   const schemaHasFollowup = schemaHasFollowupQuestions(schema, page);
   const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_START_TIME, pagedData);
-
-  const is12hourFormat = getIs12HourFormatSelected(pagedData);
-  const formattedPrevEndTime = is12hourFormat
-    ? prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)
-    : prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 
   return (
     <>
