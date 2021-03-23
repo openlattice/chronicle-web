@@ -47,7 +47,9 @@ const createSchema = (
           id: 'end_time',
           type: 'string',
           title: currentActivity
-            ? trans(TranslationKeys.ACTIVITY_END_TIME, { activity: currentActivity })
+            ? trans(
+              TranslationKeys.ACTIVITY_END_TIME, { activity: currentActivity, interpolation: { escapeValue: false } }
+            )
             : trans(TranslationKeys.DEFAULT_END_TIME),
           description: trans(TranslationKeys.DEFAULT_TIME),
           default: prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE)
