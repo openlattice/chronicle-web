@@ -148,7 +148,7 @@ const TimeUseDiaryContainer = () => {
   const prevSchema = usePrevious(formSchema.schema);
   useEffect(() => {
     if (!isEqual(prevSchema, formSchema.schema)) {
-      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page));
+      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page, t));
     }
   }, [page, formSchema]);
   /* eslint-enable */

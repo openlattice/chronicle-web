@@ -46,4 +46,14 @@ export default {
   MEDIA_ACTIVITY_OPTIONS: 'media_activity_options',
   BOOK_TYPE_OPTIONS: 'book_type_options',
   NO_ONE: 'no_one',
+  SLEEP_PATTERN: 'sleep_pattern',
+  SLEEP_ARRANGEMENT: 'sleep_arrangement',
+  SLEEP_ARRANGEMENT_OPTIONS: 'sleep_arrangement_options',
+  NON_TYPICAL_SLEEP_PATTERN: 'non_typical_sleep_pattern',
+  NON_TYPICAL_SLEEP_OPTIONS: 'non_typical_sleep_options',
+  WAKE_UP_COUNT: 'wake_up_count',
+  WAKE_UP_COUNT_OPTIONS: 'wake_up_count_options',
+  BG_TV_NIGHT: 'bg_tv_night',
+  BG_AUDIO_NIGHT: 'bg_audio_night',
+  OTHER: 'other'
 };

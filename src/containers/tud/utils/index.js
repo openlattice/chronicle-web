@@ -117,8 +117,8 @@ const getIsSummaryPage = (formData :Object, page :number) => {
 /*
  * Return true if the schema is the night activity schema
  */
-const getIsNightActivityPage = (schema :Object, page :number) => {
-  const nightSchema = NightTimeActivitySchema.createSchema(page);
+const getIsNightActivityPage = (schema :Object, page :number, trans :(string, ?Object) => Object) => {
+  const nightSchema = NightTimeActivitySchema.createSchema(page, trans);
 
   return isEqual(schema, nightSchema);
 };
@@ -192,8 +192,8 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
   const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
 
   if (isDaytimeCompleted) {
-    schema = NightTimeActivitySchema.createSchema(pageNum);
-    uiSchema = NightTimeActivitySchema.createUiSchema(pageNum);
+    schema = NightTimeActivitySchema.createSchema(pageNum, trans);
+    uiSchema = NightTimeActivitySchema.createUiSchema(pageNum, trans);
   }
   else if (shouldDisplayFollowup) {
     schema = ContextualSchema.createSchema(
