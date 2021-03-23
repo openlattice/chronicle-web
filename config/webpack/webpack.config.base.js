@@ -92,6 +92,16 @@ module.exports = (env) => {
       rules: [
         BABEL_LOADER,
         FILE_LOADER_ASSETS_IMAGES,
+        {
+          test: /translation\.json$/,
+          type: 'javascript/auto',
+          use: [{
+            loader: 'file-loader',
+            options: {
+              outputPath: (url, resourcePath) => `static/i18n/${resourcePath.split('i18n/')[1]}`,
+            },
+          }],
+        }
       ],
     },
     node: {
