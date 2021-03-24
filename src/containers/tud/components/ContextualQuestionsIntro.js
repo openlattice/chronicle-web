@@ -24,7 +24,7 @@ const ContextualQuestionsIntro = ({ selectedActivity, time, trans } :Props) => {
       {
         trans(
           TranslationKeys.CONTEXTUAL_TEXT,
-          { time: time.toJSDate(), activity: entry[1], interpolation: { escapeValue: false } }
+          { time: time.toLocaleString(DateTime.TIME_SIMPLE), activity: entry[1], interpolation: { escapeValue: false } }
         )
       }
     </Typography>

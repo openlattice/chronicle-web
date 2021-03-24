@@ -34,9 +34,9 @@ const createSchema = (
         [ACTIVITY_NAME]: {
           type: 'string',
           title: (pageNum === FIRST_ACTIVITY_PAGE
-            ? trans(TranslationKeys.PRIMARY_ACTIVITY, { time: prevEndTime.toJSDate() })
+            ? trans(TranslationKeys.PRIMARY_ACTIVITY, { time: prevEndTime.toLocaleString(DateTime.TIME_SIMPLE) })
             : trans(TranslationKeys.NEXT_ACTIVITY, {
-              time: prevEndTime.toJSDate(),
+              time: prevEndTime.toLocaleString(DateTime.TIME_SIMPLE),
               activity: prevActivity,
               interpolation: { escapeValue: false }
             })),
