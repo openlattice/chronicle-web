@@ -15,6 +15,7 @@ import {
   LatticeLuxonUtils,
   MuiPickersUtilsProvider,
   StylesProvider,
+  // $FlowFixMe
   ThemeProvider,
   lightTheme,
 } from 'lattice-ui-kit';
