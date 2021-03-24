@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 
 import isEqual from 'lodash/isEqual';
-import moment from 'moment';
 import qs from 'qs';
 import { DataProcessingUtils, Paged } from 'lattice-fabricate';
 import {
@@ -156,7 +155,6 @@ const TimeUseDiaryContainer = () => {
   const onChangeLanguage = (lng :Object) => {
     if (lng !== null) {
       i18n.changeLanguage(lng.value);
-      moment.locale(lng.value);
       setSelectedLanguage(lng);
     }
   };
