@@ -4,6 +4,7 @@ export default {
   ACTIVITY_END_TIME: 'activity_end_time',
   BTN_BACK: 'button_back',
   BTN_NEXT: 'button_next',
+  BTN_EDIT: 'button_edit',
   BTN_SUBMIT: 'button_submit',
   CHOOSE_APPLICABLE: 'choose_applicable',
   CHOOSE_FORMAT: 'choose_format',
@@ -61,4 +62,7 @@ export default {
   ERROR_INVALID_END_TIME: 'error_invalid_end',
   ERROR_INVALID_BED_TIME: 'error_invalid_bedtime',
   ERROR_END_PAST_BEDTIME: 'error_end_past_bedtime',
+  SUMMARY_TITLE: 'summary_title',
+  CHILD_WOKE_UP: 'child_woke_up',
+  SLEEPING: 'sleeping'
 };

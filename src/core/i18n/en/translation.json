@@ -138,5 +138,9 @@
   "error_min_items": "Please select at least one item",
   "error_invalid_end": "End time should be after {{time}}",
   "error_invalid_bedtime": "Bed time should be after {{time}}",
-  "error_end_past_bedtime": "The last activity of the day should end at {{time}} since you indicated the child went to bed then"
+  "error_end_past_bedtime": "The last activity of the day should end at {{time}} since you indicated the child went to bed then",
+  "summary_title": "Here is a summary of how your child spent their day. Please make sure this information is correct before submitting survey.",
+  "button_edit": "Edit",
+  "child_woke_up": "Child woke up",
+  "sleeping": "Sleeping"
 }

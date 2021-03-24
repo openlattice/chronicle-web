@@ -215,7 +215,7 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
   };
 };
 
-const createTimeUseSummary = (formData :Object) => {
+const createTimeUseSummary = (formData :Object, trans :(string, ?Object) => string) => {
 
   const summary = [];
 
@@ -236,7 +236,7 @@ const createTimeUseSummary = (formData :Object) => {
   // add day start time
   summary.push({
     time: formattedDayStartTime,
-    description: 'Child woke up',
+    description: trans(TranslationKeys.CHILD_WOKE_UP),
     pageNum: DAY_SPAN_PAGE
   });
 
@@ -253,7 +253,7 @@ const createTimeUseSummary = (formData :Object) => {
       if (index === lastPage) {
         summary.push({
           time: `${formattedDayEndTime} - ${formattedDayStartTime}`,
-          description: 'Sleeping',
+          description: trans(TranslationKeys.SLEEPING),
           pageNum: Object.keys(formData).length - 1
         });
       }

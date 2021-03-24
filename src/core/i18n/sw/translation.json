@@ -138,5 +138,9 @@
   "error_min_items": "Tafadhali chagua angalau kitu kimoja",
   "error_invalid_end": "Shughuli ya mwisho inapaswa kuwa baada ya {{time}}",
   "error_invalid_bedtime": "Wakati wa kulala unapaswa kuwa baada ya {{time}}",
-  "error_end_past_bedtime": "Shughuli ya mwisho ya siku inapaswa kuisha saa {{time}} kwani mtoto alienda kulala wakati huo"
+  "error_end_past_bedtime": "Shughuli ya mwisho ya siku inapaswa kuisha saa {{time}} kwani mtoto alienda kulala wakati huo",
+  "summary_title": "Huu ni muhtasari wa jinsi mtoto wako alivyotumia siku yake. Hakikisha habari hii ni sahihi kabla ya kuwasilisha uchunguzi.",
+  "button_edit": "Hariri",
+  "child_woke_up": "Mtoto aliamka",
+  "sleeping": "Kulala"
 }
