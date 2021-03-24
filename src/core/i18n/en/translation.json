@@ -133,5 +133,10 @@
     "We were traveling",
     "We had visitors"
   ],
-  "other": "Other"
+  "other": "Other",
+  "error_required": "Response is required",
+  "error_min_items": "Please select at least one item",
+  "error_invalid_end": "End time should be after {{time}}",
+  "error_invalid_bedtime": "Bed time should be after {{time}}",
+  "error_end_past_bedtime": "The last activity of the day should end at {{time}} since you indicated the child went to bed then"
 }

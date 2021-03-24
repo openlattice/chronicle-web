@@ -14,6 +14,7 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import DataTypes from '../constants/DataTypes';
+import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
@@ -283,7 +284,14 @@ const createTimeUseSummary = (formData :Object) => {
   return summary;
 };
 
-const applyCustomValidation = (formData :Object, errors :Object, pageNum :number) => {
+const formatTime = (time) => time.toLocaleString(DateTime.TIME_SIMPLE);
+
+const applyCustomValidation = (
+  formData :Object,
+  errors :Object,
+  pageNum :number,
+  trans :(string, ?Object) => string
+) => {
   const psk = getPageSectionKey(pageNum, 0);
 
   // For each activity, end date should greater than start date
@@ -295,20 +303,16 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
   const errorMsg = pageNum === DAY_SPAN_PAGE
-    ? `Bed time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`
-    : `End time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`;
+    ? trans(TranslationKeys.ERROR_INVALID_BED_TIME, { time: formatTime(currentStartTime) })
+    : trans(TranslationKeys.ERROR_INVALID_END_TIME, { time: formatTime(currentStartTime) });
 
   if (currentStartTime.isValid && currentEndTime.isValid) {
-    // $FlowFixMe invalid-compare
-    if (currentEndTime <= currentStartTime) {
+    if (currentEndTime.valueOf() <= currentStartTime.valueOf()) {
       errors[psk][endTimeKey].addError(errorMsg);
     }
     // the last activity of the day should end at the time the child went to bed
-    // $FlowFixMe invalid-compare
-    if (currentEndTime > dayEndTime) {
-      errors[psk][endTimeKey].addError(`The last activity of the
-          day should end at ${dayEndTime.toLocaleString(DateTime.TIME_SIMPLE)}
-          since you indicated the child went to bed then.`);
+    if (currentEndTime.valueOf() > dayEndTime.valueOf()) {
+      errors[psk][endTimeKey].addError(trans(TranslationKeys.ERROR_END_PAST_BEDTIME, { time: formatTime(dayEndTime) }));
     }
   }
 
@@ -518,12 +522,13 @@ export {
   createFormSchema,
   createSubmitRequestBody,
   createTimeUseSummary,
+  formatTime,
   getIs12HourFormatSelected,
-  getIsSummaryPage,
   getIsNightActivityPage,
+  getIsSummaryPage,
+  getOutputFileName,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
   writeToCsvFile,
-  getOutputFileName,
 };

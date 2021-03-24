@@ -55,5 +55,10 @@ export default {
   WAKE_UP_COUNT_OPTIONS: 'wake_up_count_options',
   BG_TV_NIGHT: 'bg_tv_night',
   BG_AUDIO_NIGHT: 'bg_audio_night',
-  OTHER: 'other'
+  OTHER: 'other',
+  ERROR_RESPONSE_REQUIRED: 'error_required',
+  ERROR_MIN_ITEMS: 'error_min_items',
+  ERROR_INVALID_END_TIME: 'error_invalid_end',
+  ERROR_INVALID_BED_TIME: 'error_invalid_bedtime',
+  ERROR_END_PAST_BEDTIME: 'error_end_past_bedtime',
 };

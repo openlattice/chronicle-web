@@ -293,8 +293,23 @@ const QuestionnaireForm = ({
   };
 
   const validate = (formData, errors) => (
-    applyCustomValidation(formData, errors, page)
+    applyCustomValidation(formData, errors, page, trans)
   );
+
+  /* eslint-disable no-param-reassign */
+  const transformErrors = (errors) => errors.map((error) => {
+    if (error.name === 'required') {
+      error.message = trans(TranslationKeys.ERROR_RESPONSE_REQUIRED);
+    }
+    if (error.name === 'minItems') {
+      error.message = trans(TranslationKeys.ERROR_MIN_ITEMS);
+    }
+    if (error.name === 'enum' || error.name === 'oneOf') {
+      error.message = '';
+    }
+    return error;
+  });
+  /* eslint-enable */
 
   const schemaHasFollowup = schemaHasFollowupQuestions(schema, page);
   const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
@@ -328,6 +343,7 @@ const QuestionnaireForm = ({
                 onSubmit={onNext}
                 ref={formRef}
                 schema={schema}
+                transformErrors={transformErrors}
                 uiSchema={uiSchema}
                 validate={validate} />
 
