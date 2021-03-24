@@ -98,7 +98,11 @@ module.exports = (env) => {
           use: [{
             loader: 'file-loader',
             options: {
-              outputPath: (url, resourcePath) => `static/i18n/${resourcePath.split('i18n/')[1]}`,
+              name: (filePath) => {
+                // filePath = "/path/to/src/core/i18n/en/translation.json"
+                const [language] = filePath.split('i18n/')[1].split('/');
+                return `static/i18n/${language}/[name].[contenthash].json`;
+              },
             },
           }],
         }
