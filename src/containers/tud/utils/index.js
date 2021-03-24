@@ -284,7 +284,7 @@ const createTimeUseSummary = (formData :Object) => {
   return summary;
 };
 
-const formatTime = (time) => time.toLocaleString(DateTime.TIME_SIMPLE);
+const formatTime = (time :DateTime) => time.toLocaleString(DateTime.TIME_SIMPLE);
 
 const applyCustomValidation = (
   formData :Object,
