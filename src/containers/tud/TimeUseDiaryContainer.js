@@ -19,6 +19,7 @@ import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import ConfirmChangeLanguage from './components/ConfirmChangeLanguage';
 import HeaderComponent from './components/HeaderComponent';
 import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
@@ -46,7 +47,7 @@ const {
   DAY_START_TIME
 } = PROPERTY_CONSTS;
 
-const { DAY_SPAN_PAGE } = PAGE_NUMBERS;
+const { DAY_SPAN_PAGE, SURVEY_INTRO_PAGE } = PAGE_NUMBERS;
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -84,6 +85,9 @@ const TimeUseDiaryContainer = () => {
   const [isSummaryPage, setIsSummaryPage] = useState(false);
   const [isNightActivityPage, setIsNightActivityPage] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [languageToChangeTo, setLanguageToChangeTo] = useState(null);
+  const [isChangeLanguageModalVisible, setChangeLanguageModalVisible] = useState(false);
+  const [shouldReset, setShouldReset] = useState(false);
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
@@ -152,16 +156,35 @@ const TimeUseDiaryContainer = () => {
   }, [page, formSchema]);
   /* eslint-enable */
 
-  const onChangeLanguage = (lng :Object) => {
+  const onPageChange = (currPage, currFormData) => {
+    setPage(currPage);
+    setFormData(currFormData);
+  };
+
+  const changeLanguage = (lng :Object) => {
     if (lng !== null) {
       i18n.changeLanguage(lng.value);
       setSelectedLanguage(lng);
     }
   };
 
-  const onPageChange = (currPage, currFormData) => {
-    setPage(currPage);
-    setFormData(currFormData);
+  const onConfirmChangeLanguage = () => {
+    if (languageToChangeTo !== null) {
+      setChangeLanguageModalVisible(false);
+      setShouldReset(true);
+      changeLanguage(languageToChangeTo);
+    }
+  };
+
+  const onChangeLanguage = (lng :Object) => {
+    if (lng.value === i18n.language) return;
+
+    if (page === SURVEY_INTRO_PAGE) {
+      changeLanguage(lng);
+      return;
+    }
+    setLanguageToChangeTo(lng);
+    setChangeLanguageModalVisible(true);
   };
 
   const updateFormState = (schema, uiSchema, currFormData) => {
@@ -177,6 +200,12 @@ const TimeUseDiaryContainer = () => {
     setFormData(currFormData);
   };
 
+  const resetSurvey = (goToPage) => {
+    goToPage(SURVEY_INTRO_PAGE);
+    setFormData({});
+    setShouldReset(false);
+  };
+
   const is12hourFormat = getIs12HourFormatSelected(formData);
   const isDayActivityPage = page >= PAGE_NUMBERS.FIRST_ACTIVITY_PAGE
     && !isSummaryPage
@@ -186,12 +215,19 @@ const TimeUseDiaryContainer = () => {
     <AppContainerWrapper>
       <HeaderComponent onChangeLanguage={onChangeLanguage} selectedLanguage={selectedLanguage} />
       <AppContentWrapper>
+        <ConfirmChangeLanguage
+            handleOnClose={() => setChangeLanguageModalVisible(false)}
+            handleOnConfirmChange={onConfirmChangeLanguage}
+            isVisible={isChangeLanguageModalVisible}
+            language={i18n.language}
+            trans={t} />
         <BasicModal
             handleOnClose={() => setIsModalVisible(false)}
             isVisible={isModalVisible}
             title="Submission Error">
           <p> An error occurred while trying to submit survey. Please try again later. </p>
         </BasicModal>
+
         {
           submitRequestState === RequestStates.SUCCESS
             ? (
@@ -223,6 +259,8 @@ const TimeUseDiaryContainer = () => {
                             organizationId={organizationId}
                             pagedProps={pagedProps}
                             participantId={participantId}
+                            resetSurvey={resetSurvey}
+                            shouldReset={shouldReset}
                             studyId={studyId}
                             submitRequestState={submitRequestState}
                             trans={t}

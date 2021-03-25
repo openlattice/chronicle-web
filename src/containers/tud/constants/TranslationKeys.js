@@ -64,5 +64,8 @@ export default {
   ERROR_END_PAST_BEDTIME: 'error_end_past_bedtime',
   SUMMARY_TITLE: 'summary_title',
   CHILD_WOKE_UP: 'child_woke_up',
-  SLEEPING: 'sleeping'
+  SLEEPING: 'sleeping',
+  CHANGE_LANGUAGE_WARNING: 'change_language_warning',
+  CHANGE_LANGUAGE: 'change_language',
+  BTN_CANCEL: 'button_cancel',
 };

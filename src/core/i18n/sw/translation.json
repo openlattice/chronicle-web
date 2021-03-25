@@ -34,6 +34,7 @@
   "button_back": "Nyuma",
   "button_next": "Ifuatayo",
   "button_submit": "Wasilisha",
+  "button_cancel": "Funga",
   "submit_success": "Thank you for completing the Time Use Diary survey. Your responses have been recorded.",
   "submit_failure": "An error occurred while trying to submit survey. Please try again later.",
   "weekday": "siku",
@@ -142,5 +143,7 @@
   "summary_title": "Huu ni muhtasari wa jinsi mtoto wako alivyotumia siku yake. Hakikisha habari hii ni sahihi kabla ya kuwasilisha uchunguzi.",
   "button_edit": "Hariri",
   "child_woke_up": "Mtoto aliamka",
-  "sleeping": "Kulala"
+  "sleeping": "Kulala",
+  "change_language_warning": "Je! Una uhakika unataka kubadilisha lugha? Hii itatatua mabadiliko yote ambayo umefanya hadi sasa.",
+  "change_language": "Badilisha Lugha"
 }
