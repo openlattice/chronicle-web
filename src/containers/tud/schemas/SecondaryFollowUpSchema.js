@@ -72,19 +72,21 @@ const createSchema = (selectedActivity :string, trans :(string, ?Object) => Obje
   }
 };
 
-const uiSchema = {
+const createUiSchema = (trans :(string, ?Object) => Object) => ({
   [SECONDARY_MEDIA_ACTIVITY]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',
     'ui:options': {
-      withOther: true
+      withOther: true,
+      otherText: trans(TranslationKeys.OTHER)
     }
   },
   [SECONDARY_BOOK_TYPE]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',
     'ui:options': {
-      withOther: true
+      withOther: true,
+      otherText: trans(TranslationKeys.OTHER)
     }
   },
   [SECONDARY_BOOK_TITLE]: {
@@ -97,9 +99,9 @@ const uiSchema = {
   [SECONDARY_MEDIA_NAME]: {
     classNames: 'column-span-12'
   }
-};
+});
 
 export {
   createSchema,
-  uiSchema
+  createUiSchema
 };

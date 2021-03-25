@@ -202,8 +202,8 @@ const createUiSchema = (pageNum :number, trans :(string, ?Object) => Object) => 
       [PRIMARY_BOOK_TITLE]: {
         classNames: 'column-span-12'
       },
-      ...FollowupSchema.uiSchema,
-      ...SecondaryActivitySchema.uiSchema
+      ...FollowupSchema.createUiSchema(trans),
+      ...SecondaryActivitySchema.createUiSchema(trans)
     }
   };
 

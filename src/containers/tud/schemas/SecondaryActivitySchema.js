@@ -64,7 +64,7 @@ const createSchema = (primaryActivity :string, trans :(string, ?Object) => Objec
   };
 };
 
-const uiSchema = {
+const createUiSchema = (trans :(string, ?Object) => Object) => ({
   [SECONDARY_ACTIVITY]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes'
@@ -73,10 +73,10 @@ const uiSchema = {
     classNames: 'column-span-12',
     'ui:widget': 'radio'
   },
-  ...SecondaryFollowUpSchema.uiSchema
-};
+  ...SecondaryFollowUpSchema.createUiSchema(trans)
+});
 
 export {
   createSchema,
-  uiSchema
+  createUiSchema
 };
