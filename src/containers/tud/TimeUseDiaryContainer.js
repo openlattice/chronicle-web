@@ -23,6 +23,7 @@ import ConfirmChangeLanguage from './components/ConfirmChangeLanguage';
 import HeaderComponent from './components/HeaderComponent';
 import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
+import SubmissionErrorModal from './components/SubmissionErrorModal';
 import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
 import TranslationKeys from './constants/TranslationKeys';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
@@ -37,7 +38,6 @@ import {
   selectTimeByPageAndKey
 } from './utils';
 
-import BasicModal from '../shared/BasicModal';
 import SubmissionSuccessful from '../shared/SubmissionSuccessful';
 
 const {
@@ -75,7 +75,7 @@ const TimeUseDiaryContainer = () => {
   const initFormSchema = createFormSchema({}, 0, t);
 
   const [formSchema, setFormSchema] = useState(initFormSchema); // {schema, uiSchema}
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
   const [page, setPage] = useState(0);
   const [formData, setFormData] = useState({});
 
@@ -94,7 +94,7 @@ const TimeUseDiaryContainer = () => {
 
   useEffect(() => {
     if (submitRequestState === RequestStates.FAILURE) {
-      setIsModalVisible(true);
+      setIsErrorModalVisible(true);
     }
   }, [submitRequestState]);
 
@@ -221,19 +221,16 @@ const TimeUseDiaryContainer = () => {
             isVisible={isChangeLanguageModalVisible}
             language={i18n.language}
             trans={t} />
-        <BasicModal
-            handleOnClose={() => setIsModalVisible(false)}
-            isVisible={isModalVisible}
-            title="Submission Error">
-          <p> An error occurred while trying to submit survey. Please try again later. </p>
-        </BasicModal>
-
+        <SubmissionErrorModal
+            handleOnClose={() => setIsErrorModalVisible(false)}
+            isVisible={isErrorModalVisible}
+            trans={t} />
         {
           submitRequestState === RequestStates.SUCCESS
             ? (
               <SubmissionSuccessful>
                 <Typography variant="body2">
-                  Thank you for completing the Time Use Diary survey. Your responses have been recorded.
+                  {t(TranslationKeys.SUBMISSION_SUCCESS)}
                 </Typography>
               </SubmissionSuccessful>
             )
