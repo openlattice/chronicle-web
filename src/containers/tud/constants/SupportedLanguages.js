@@ -6,7 +6,7 @@ export default [
     code: 'en',
   },
   {
-    language: 'Swahili',
-    code: 'sw'
+    language: 'Swedish',
+    code: 'sv'
   },
 ];
