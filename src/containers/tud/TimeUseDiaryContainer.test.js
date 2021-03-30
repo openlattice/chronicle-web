@@ -104,7 +104,7 @@ describe('TimeUseDiaryContainer', () => {
       expect(wrapper.find(QuestionnaireForm).prop('pagedProps').page).toEqual(1);
 
       // TODO: switch to a language defined in SupportedLanguages
-      const newLng = { label: 'Swahili', value: 'sw' };
+      const newLng = { label: 'Swedish', value: 'sv' };
       expect(SupportedLanguages)
         .toContainEqual(expect.objectContaining({ language: newLng.label, code: newLng.value }));
 
@@ -112,6 +112,7 @@ describe('TimeUseDiaryContainer', () => {
       act(() => {
         wrapper.find(Select).first().prop('onChange')(newLng);
       });
+      wrapper.update();
       expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeTruthy();
 
       // click on confirm
