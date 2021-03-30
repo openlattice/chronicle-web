@@ -11,12 +11,11 @@ i18n
   .use(Backend)
   .use(LanguageDetector)
   .init({
-    // resources,
     lng: 'en',
     backend: {
       // loadPath: 'static/i18n/{{lng}}/{{ns}}.json'
       loadPath: (language) => translations[language]
     },
     fallbackLng: 'en',
-    debug: true
+    debug: process.env.NODE_ENV === 'development'
   });

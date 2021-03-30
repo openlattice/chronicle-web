@@ -179,17 +179,19 @@ type Props = {
   formSchema :Object;
   initialFormData :Object;
   isSummaryPage :boolean;
+  language :string;
   organizationId :UUID;
   pagedProps :Object;
   participantId :string;
+  resetSurvey :(Function) => void;
+  shouldReset :boolean;
   studyId :UUID;
   submitRequestState :?RequestState;
   trans :(string, ?Object) => string;
+  translationData :Object;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
-  shouldReset :boolean;
-  resetSurvey :(Function) => void;
 };
 
 const QuestionnaireForm = ({
@@ -197,17 +199,19 @@ const QuestionnaireForm = ({
   formSchema,
   initialFormData,
   isSummaryPage,
+  language,
   organizationId,
   pagedProps,
   participantId,
+  resetSurvey,
+  shouldReset,
   studyId,
   submitRequestState,
   trans,
+  translationData,
   updateFormState,
   updateSurveyProgress,
   waveId,
-  shouldReset,
-  resetSurvey,
 } :Props) => {
 
   const {
@@ -243,6 +247,8 @@ const QuestionnaireForm = ({
         participantId,
         studyId,
         waveId,
+        language,
+        translationData
       }));
       return;
     }

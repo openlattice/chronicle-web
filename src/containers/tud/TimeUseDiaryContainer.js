@@ -23,8 +23,8 @@ import ConfirmChangeLanguage from './components/ConfirmChangeLanguage';
 import HeaderComponent from './components/HeaderComponent';
 import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
-import SubmissionErrorModal from './components/SubmissionErrorModal';
 import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
+import SubmissionErrorModal from './components/SubmissionErrorModal';
 import TranslationKeys from './constants/TranslationKeys';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
@@ -253,6 +253,7 @@ const TimeUseDiaryContainer = () => {
                             formSchema={formSchema}
                             initialFormData={formData}
                             isSummaryPage={isSummaryPage}
+                            language={i18n.language}
                             organizationId={organizationId}
                             pagedProps={pagedProps}
                             participantId={participantId}
@@ -261,6 +262,7 @@ const TimeUseDiaryContainer = () => {
                             studyId={studyId}
                             submitRequestState={submitRequestState}
                             trans={t}
+                            translationData={i18n.store.data}
                             updateFormState={updateFormState}
                             updateSurveyProgress={updateSurveyProgress}
                             waveId={waveId} />

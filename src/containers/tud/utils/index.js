@@ -3,6 +3,8 @@
 import FS from 'file-saver';
 import Papa from 'papaparse';
 import isEqual from 'lodash/isEqual';
+import isPlainObject from 'lodash/isPlainObject';
+import set from 'lodash/set';
 import {
   List,
   Map,
@@ -14,6 +16,7 @@ import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
 import DataTypes from '../constants/DataTypes';
+import JSONKEY_ID_LOOKUP from '../constants/JsonKeyAnswerIdMapping';
 import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -55,6 +58,7 @@ const {
   HAS_FOLLOWUP_QUESTIONS,
   NON_TYPICAL_DAY_REASON,
   NON_TYPICAL_SLEEP_PATTERN,
+  OTHER_ACTIVITY,
   PRIMARY_BOOK_TITLE,
   PRIMARY_BOOK_TYPE,
   PRIMARY_MEDIA_ACTIVITY,
@@ -329,12 +333,92 @@ const stringifyValue = (value :any) => {
   return value;
 };
 
+// create object { ol.id -> value -> english }
+const createEnglishTranslationLookup = (translationData :Object, language :string) => {
+  const result = {};
+
+  const english :Object = translationData.en.translation;
+  const srcLanguage :Object = translationData[language].translation;
+
+  Object.entries(srcLanguage).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((val, index) => {
+        const translation = getIn(english, [key, index], val);
+        // $FlowFixMe
+        set(result, [JSONKEY_ID_LOOKUP[key], val], translation);
+      });
+    }
+
+    if (isPlainObject(value)) {
+      // $FlowFixMe
+      Object.entries(value).forEach(([subKey, val]) => {
+        const translation = getIn(english, [key, subKey], val);
+        // $FlowFixMe
+        set(result, [JSONKEY_ID_LOOKUP[key], val], translation);
+      });
+    }
+  });
+
+  const yesNoDontKnow = [TranslationKeys.YES, TranslationKeys.NO, TranslationKeys.DONT_KNOW];
+  yesNoDontKnow.forEach((key) => {
+    set(result, [SLEEP_PATTERN, srcLanguage[key]], english[key]);
+    set(result, [TYPICAL_DAY_FLAG, srcLanguage[key]], english[key]);
+  });
+
+  // "Other" value in checkboxes / radio widgets
+  const withOtherIds = [NON_TYPICAL_SLEEP_PATTERN, SLEEP_ARRANGEMENT, PRIMARY_BOOK_TYPE, PRIMARY_MEDIA_ACTIVITY];
+  withOtherIds.forEach((id) => {
+    set(result, [id, srcLanguage[TranslationKeys.OTHER]], english[TranslationKeys.OTHER]);
+  });
+
+  // "None" value in checkboxes
+  set(result, [CAREGIVER, srcLanguage[TranslationKeys.NO_ONE]], english[TranslationKeys.NO_ONE]);
+
+  // secondary activity
+  set(result, SECONDARY_ACTIVITY, result[ACTIVITY_NAME]);
+
+  // secondary media + book type
+  set(result, SECONDARY_MEDIA_ACTIVITY, result[PRIMARY_MEDIA_ACTIVITY]);
+  set(result, SECONDARY_MEDIA_AGE, result[PRIMARY_MEDIA_AGE]);
+  set(result, SECONDARY_BOOK_TYPE, result[PRIMARY_BOOK_TYPE]);
+
+  // bg media
+  const bgMedia = result[BG_TV_DAY];
+  set(result, BG_AUDIO_DAY, bgMedia);
+  set(result, BG_TV_NIGHT, bgMedia);
+  set(result, BG_AUDIO_NIGHT, bgMedia);
+  set(result, ADULT_MEDIA, bgMedia);
+
+  return result;
+};
+
+const translateToEnglish = (key :string, val :Array<string> | string, language :string, translationLookup :Object) => {
+  if (language === 'en') {
+    return Array.isArray(val) ? val : [val];
+  }
+
+  if (!Array.isArray(val)) {
+    return [getIn(translationLookup, [key, val], val)];
+  }
+
+  return val.map((item) => getIn(translationLookup, [key, item], item));
+};
+
 // TODO: omit first page (clock format select) from form
-const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?string) => {
+const createSubmitRequestBody = (
+  formData :Object,
+  familyId :?string,
+  waveId :?string,
+  language :string,
+  translationData :Object
+) => {
   let result = [];
 
+  // create english translation lookup
+  const englishTranslationLookup = createEnglishTranslationLookup(translationData, language);
+
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
-  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS];
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS, OTHER_ACTIVITY, CLOCK_FORMAT];
 
   Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
 
@@ -361,7 +445,7 @@ const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?s
         .map(([key, value]) => {
           const stringVal = stringifyValue(value);
           const entity = {
-            [VALUES_FQN.toString()]: Array.isArray(stringVal) ? stringVal : [stringVal],
+            [VALUES_FQN.toString()]: translateToEnglish(key, stringVal, language, englishTranslationLookup),
             [ID_FQN.toString()]: [key],
             [TITLE_FQN.toString()]: [get(QUESTION_TITLE_LOOKUP, key, key)],
             ...(startTime && endTime) && {
@@ -391,6 +475,7 @@ const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?s
       [TITLE_FQN.toString()]: ['Family Id']
     });
   }
+
   return result;
 };
 
