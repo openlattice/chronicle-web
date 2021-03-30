@@ -22,7 +22,7 @@ const { media } = StyleUtils;
 const { NEUTRAL } = Colors;
 
 const Wrapper = styled.div`
-  background-color: #ffffff;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
