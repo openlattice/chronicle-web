@@ -22,25 +22,25 @@ const { media } = StyleUtils;
 const { NEUTRAL } = Colors;
 
 const Wrapper = styled.div`
-  background-color: #fff;
-  display: flex;
   align-items: center;
-  justify-content: space-between;
+  background-color: #fff;
   border-bottom: 1px solid ${NEUTRAL.N100};
-  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
   min-height: 60px;
+  padding: 0 32px;
 
   a {
-    display: flex;
     align-items: center;
+    display: flex;
     justify-content: center;
     text-decoration: none;
   }
 
   h1 {
+    color: ${NEUTRAL.N700};
     font-size: 14px;
     font-weight: 600;
-    color: ${NEUTRAL.N700};
   }
 
   img {
@@ -54,13 +54,13 @@ const Wrapper = styled.div`
 `;
 
 type Props = {
-  selectedLanguage :Object;
   onChangeLanguage :(lng :Object) => void;
+  selectedLanguage :Object;
 };
 
 const HeaderComponent = ({
+  onChangeLanguage,
   selectedLanguage,
-  onChangeLanguage
 } :Props) => (
   <Wrapper>
     <nav>
@@ -71,9 +71,9 @@ const HeaderComponent = ({
     </nav>
     <Box minWidth="200px">
       <Select
-          value={selectedLanguage}
           onChange={onChangeLanguage}
-          options={languageOptions} />
+          options={languageOptions}
+          value={selectedLanguage} />
     </Box>
   </Wrapper>
 );

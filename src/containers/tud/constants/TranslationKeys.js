@@ -59,8 +59,9 @@ export default {
   SLEEPING: 'sleeping',
   SLEEP_ARRANGEMENT: 'sleep_arrangement',
   SLEEP_ARRANGEMENT_OPTIONS: 'sleep_arrangement_options',
-  SUBMISSION_ERROR_TITLE: 'submission_error_title',
   SLEEP_PATTERN: 'sleep_pattern',
+  SUBMISSION_ERROR_TITLE: 'submission_error_title',
+  SUBMISSION_SUCCESS: 'submission_success',
   SUMMARY_TITLE: 'summary_title',
   TODAY_WAKEUP_TIME: 'today_wakeup_time',
   TYPICAL_DAY: 'typical_day',
@@ -71,5 +72,4 @@ export default {
   WEEKDAY_OPTIONS: 'weekday_options',
   YES: 'yes',
   YESTERDAY: 'yesterday',
-  SUBMISSION_SUCCESS: 'submission_success',
 };
