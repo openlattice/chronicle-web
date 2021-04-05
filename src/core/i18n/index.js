@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // NOTE: this is temporary. uncomment when in dev
-// import translations from './core/i18n/translations';
+import translations from './translations';
 
 i18n
   .use(initReactI18next)
@@ -13,8 +13,8 @@ i18n
   .init({
     lng: 'en',
     backend: {
-      loadPath: 'static/i18n/{{lng}}/{{ns}}.json'
-      // loadPath: (language) => translations[language]
+      // loadPath: 'static/i18n/{{lng}}/{{ns}}.json'
+      loadPath: (language) => translations[language]
     },
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development'

@@ -3,8 +3,6 @@
 import FS from 'file-saver';
 import Papa from 'papaparse';
 import isEqual from 'lodash/isEqual';
-import isPlainObject from 'lodash/isPlainObject';
-import set from 'lodash/set';
 import {
   List,
   Map,
@@ -15,8 +13,10 @@ import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
+import createEnglishTranslationLookup from './createEnglishTranslationLookup';
+import translateToEnglish from './translateToEnglish';
+
 import DataTypes from '../constants/DataTypes';
-import JSONKEY_ID_LOOKUP from '../constants/JsonKeyAnswerIdMapping';
 import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -331,77 +331,6 @@ const stringifyValue = (value :any) => {
     return 'false';
   }
   return value;
-};
-
-// create object { ol.id -> value -> english }
-const createEnglishTranslationLookup = (translationData :Object, language :string) => {
-  const result = {};
-
-  const english :Object = translationData.en.translation;
-  const srcLanguage :Object = translationData[language].translation;
-
-  Object.entries(srcLanguage).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
-      value.forEach((val, index) => {
-        const translation = getIn(english, [key, index], val);
-        // $FlowFixMe
-        set(result, [JSONKEY_ID_LOOKUP[key], val], translation);
-      });
-    }
-
-    if (isPlainObject(value)) {
-      // $FlowFixMe
-      Object.entries(value).forEach(([subKey, val]) => {
-        const translation = getIn(english, [key, subKey], val);
-        // $FlowFixMe
-        set(result, [JSONKEY_ID_LOOKUP[key], val], translation);
-      });
-    }
-  });
-
-  const yesNoDontKnow = [TranslationKeys.YES, TranslationKeys.NO, TranslationKeys.DONT_KNOW];
-  yesNoDontKnow.forEach((key) => {
-    set(result, [SLEEP_PATTERN, srcLanguage[key]], english[key]);
-    set(result, [TYPICAL_DAY_FLAG, srcLanguage[key]], english[key]);
-  });
-
-  // "Other" value in checkboxes / radio widgets
-  const withOtherIds = [NON_TYPICAL_SLEEP_PATTERN, SLEEP_ARRANGEMENT, PRIMARY_BOOK_TYPE, PRIMARY_MEDIA_ACTIVITY];
-  withOtherIds.forEach((id) => {
-    set(result, [id, srcLanguage[TranslationKeys.OTHER]], english[TranslationKeys.OTHER]);
-  });
-
-  // "None" value in checkboxes
-  set(result, [CAREGIVER, srcLanguage[TranslationKeys.NO_ONE]], english[TranslationKeys.NO_ONE]);
-
-  // secondary activity
-  set(result, SECONDARY_ACTIVITY, result[ACTIVITY_NAME]);
-
-  // secondary media + book type
-  set(result, SECONDARY_MEDIA_ACTIVITY, result[PRIMARY_MEDIA_ACTIVITY]);
-  set(result, SECONDARY_MEDIA_AGE, result[PRIMARY_MEDIA_AGE]);
-  set(result, SECONDARY_BOOK_TYPE, result[PRIMARY_BOOK_TYPE]);
-
-  // bg media
-  const bgMedia = result[BG_TV_DAY];
-  set(result, BG_AUDIO_DAY, bgMedia);
-  set(result, BG_TV_NIGHT, bgMedia);
-  set(result, BG_AUDIO_NIGHT, bgMedia);
-  set(result, ADULT_MEDIA, bgMedia);
-
-  return result;
-};
-
-const translateToEnglish = (key :string, val :Array<string> | string, language :string, translationLookup :Object) => {
-  if (language === 'en') {
-    return Array.isArray(val) ? val : [val];
-  }
-
-  if (!Array.isArray(val)) {
-    return [getIn(translationLookup, [key, val], val)];
-  }
-
-  return val.map((item) => getIn(translationLookup, [key, item], item));
 };
 
 // TODO: omit first page (clock format select) from form

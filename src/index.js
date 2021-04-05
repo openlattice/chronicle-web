@@ -3,7 +3,7 @@
  */
 
 // import i18next
-import './i18n';
+import './core/i18n';
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
