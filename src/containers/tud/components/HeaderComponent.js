@@ -23,7 +23,7 @@ const { NEUTRAL } = Colors;
 
 const Wrapper = styled.div`
   align-items: center;
-  background-color: #fff;
+  background-color: white;
   border-bottom: 1px solid ${NEUTRAL.N100};
   display: flex;
   justify-content: space-between;
