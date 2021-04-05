@@ -64,11 +64,11 @@ describe('Translation files structure', () => {
   });
 
   test('all keys in translation files should be defined in KeyMap', () => {
-    const allKeys = Object.values(TranslationKeys);
+    const translationKeys = Object.values(TranslationKeys);
 
     Object.values(Translations).forEach((lng :Object) => {
       Object.keys(lng).forEach((key) => {
-        expect(allKeys).toContain(key);
+        expect(translationKeys).toContain(key);
       });
     });
   });
