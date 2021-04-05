@@ -26,6 +26,7 @@ import TranslationKeys from './constants/TranslationKeys';
 import Translations from '../../core/i18n/translations';
 import initializeReduxStore from '../../core/redux/ReduxStore';
 import initializeRouterHistory from '../../core/router/RouterHistory';
+import * as LanguageCodes from '../../utils/constants/LanguageCodes';
 import * as Routes from '../../core/router/Routes';
 
 const resources = {
@@ -37,8 +38,8 @@ const resources = {
 i18n
   .use(initReactI18next)
   .init({
-    lng: 'en',
-    fallbackLng: 'en',
+    lng: LanguageCodes.ENGLISH,
+    fallbackLng: LanguageCodes.ENGLISH,
     resources
   });
 
