@@ -9,6 +9,7 @@ import { initReactI18next } from 'react-i18next';
 
 // NOTE: this is temporary. uncomment when in dev
 import translations from './translations';
+import * as LanguageCodes from '../../utils/constants/LanguageCodes';
 
 declare var __ENV_DEV__ :boolean;
 
@@ -17,11 +18,11 @@ i18n
   .use(Backend)
   .use(LanguageDetector)
   .init({
-    lng: 'en',
+    lng: LanguageCodes.ENGLISH,
     backend: {
       // loadPath: 'static/i18n/{{lng}}/{{ns}}.json'
       loadPath: (language) => translations[language]
     },
-    fallbackLng: 'en',
+    fallbackLng: LanguageCodes.ENGLISH,
     debug: __ENV_DEV__
   });

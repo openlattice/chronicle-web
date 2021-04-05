@@ -1,12 +1,13 @@
 // @flow
+import * as LanguageCodes from '../../../utils/constants/LanguageCodes';
 
 export default [
   {
     language: 'English',
-    code: 'en',
+    code: LanguageCodes.ENGLISH,
   },
   {
     language: 'Swedish',
-    code: 'sv'
+    code: LanguageCodes.SWEDISH
   },
 ];
