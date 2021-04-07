@@ -53,11 +53,11 @@
     "other": "Doing other activities at home (cooking, chores, etc.)",
     "outdoors": "Doing other activities out of the house (errands, traveling, etc.)"
   },
-  "primary_activity": "What did your child start doing at {{time, LT}}?",
-  "next_activity": "What did your child start doing at {{time, LT}} after they finished {{activity}}?",
+  "primary_activity": "What did your child start doing at {{time}}?",
+  "next_activity": "What did your child start doing at {{time}} after they finished {{activity}}?",
   "default_end_time": "When did the selected activity end?",
   "activity_end_time": "When did your child stop {{activity}}?",
-  "contextual_text": "Now, let's talk about what your child did while {{activity}} at {{time, LT}}.",
+  "contextual_text": "Now, let's talk about what your child did while {{activity}} at {{time}}.",
   "caregiver": "Who was with your child when he/she was {{activity}}?",
   "caregiver_options": [
     "A parent or parental figure",
