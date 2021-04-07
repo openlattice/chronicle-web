@@ -163,6 +163,15 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
                   placeholder="No group"
                   value={studyGroup} />
             </Grid>
+
+            <Grid item xs={12}>
+              <Box textAlign="center">
+                <Button
+                    color="error">
+                  Delete Study
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
           <StudyDetailsModal
               handleOnCloseModal={closeEditModal}
