@@ -82,7 +82,7 @@ const removeExtraData = (formRef :Object, pagedData, page :number) => {
 
     const pages = Object.keys(formData)
       .map((key) => {
-        const parsed = parsePageSectionKey(key);
+        const parsed :Object = parsePageSectionKey(key);
         return Number(parsed.page);
       });
 
