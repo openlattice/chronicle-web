@@ -101,6 +101,10 @@ const NotificationIconWrapper = styled.div`
   }
 `;
 
+const DeleteButtonWrapper = styled.div`
+  text-align: center;
+`;
+
 const StyledFontAwesome = styled(FontAwesomeIcon)`
   font-size: 22px;
 `;
@@ -220,6 +224,12 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
           {renderAbout()}
           {renderContactInfo()}
         </MainInfoContainer>
+
+        <DeleteButtonWrapper>
+          <Button color="error">
+            Delete Study
+          </Button>
+        </DeleteButtonWrapper>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
             notificationsEnabled={notificationsEnabled}
