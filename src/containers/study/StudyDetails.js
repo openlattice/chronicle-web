@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
@@ -114,20 +114,10 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   };
 
   const DetailsHeader = () => (
-    <Box display="flex" flexWrap="wrap">
-      <Box mr={4}>
-        <Button
-            color="primary"
-            onClick={openEditModal}
-            startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
-          Edit Details
-        </Button>
-      </Box>
-      <Box display="flex" alignItems="center">
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
-        <Box ml={1}>
-          <Typography color="textSecondary" variant="button"> Daily Notifications </Typography>
-        </Box>
+    <Box display="flex" alignItems="center">
+      <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
+      <Box ml={1}>
+        <Typography color="textSecondary" variant="button"> Daily Notifications </Typography>
       </Box>
     </Box>
   );
@@ -165,9 +155,17 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
             </Grid>
 
             <Grid item xs={12}>
-              <Box textAlign="center">
+              <Box display="flex" justifyContent="center">
+                <Box mr="20px">
+                  <Button
+                      color="secondary"
+                      onClick={openEditModal}>
+                    Edit Details
+                  </Button>
+                </Box>
+
                 <Button
-                    color="error">
+                    color="secondary">
                   Delete Study
                 </Button>
               </Box>

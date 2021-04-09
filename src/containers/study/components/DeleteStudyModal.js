@@ -60,3 +60,5 @@ const DeleteStudyModal = ({
     </Modal>
   );
 };
+
+export default DeleteStudyModal;

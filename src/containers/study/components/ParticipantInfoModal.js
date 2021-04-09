@@ -6,9 +6,9 @@ import styled from 'styled-components';
 import { faCopy } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Box,
   IconButton,
   Modal,
-  // $FlowFixMe
   Tooltip,
   Typography
 } from 'lattice-ui-kit';
@@ -66,7 +66,7 @@ const ParticipantInfoModal = ({
       <div>
         {
           participantDetails.map((detail) => (
-            <DetailWrapper key={detail.name}>
+            <Box mb="20px" maxWidth="600px">
               <Typography variant="body2">
                 {detail.name}
               </Typography>
@@ -85,7 +85,7 @@ const ParticipantInfoModal = ({
                   </IconButton>
                 </Tooltip>
               </Grid>
-            </DetailWrapper>
+            </Box>
           ))
         }
       </div>
