@@ -230,9 +230,6 @@ const QuestionnaireForm = ({
 
   const { schema, uiSchema } = formSchema;
 
-  // const psk = getPageSectionKey(0, 0);
-  // if (Object.keys(schema.properties).includes(psk) && page !== 0) resetPage(setPage);
-
   const activities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
 
   const readingSchema = SecondaryFollowUpSchema.createSchema(activities.reading, trans);
