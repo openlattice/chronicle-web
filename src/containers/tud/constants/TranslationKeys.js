@@ -62,6 +62,7 @@ export default {
   SLEEP_PATTERN: 'sleep_pattern',
   SUBMISSION_ERROR_TITLE: 'submission_error_title',
   SUBMISSION_SUCCESS: 'submission_success',
+  SUBMISSION_SUCCESS_TITLE: 'submission_success_title',
   SUMMARY_TITLE: 'summary_title',
   TODAY_WAKEUP_TIME: 'today_wakeup_time',
   TYPICAL_DAY: 'typical_day',

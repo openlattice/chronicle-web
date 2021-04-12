@@ -10,7 +10,6 @@ import {
   AppContentWrapper,
   Card,
   CardSegment,
-  Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
 import { useTranslation } from 'react-i18next';
@@ -24,12 +23,10 @@ import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
 import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
 import SubmissionErrorModal from './components/SubmissionErrorModal';
-import TranslationKeys from './constants/TranslationKeys';
+import SubmissionSuccessful from './components/SubmissionSuccessful';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
-import * as LanguageCodes from '../../utils/constants/LanguageCodes';
-
 import { usePrevious } from './hooks';
 import {
   createFormSchema,
@@ -39,7 +36,7 @@ import {
   selectTimeByPageAndKey
 } from './utils';
 
-import SubmissionSuccessful from '../shared/SubmissionSuccessful';
+import * as LanguageCodes from '../../utils/constants/LanguageCodes';
 
 const {
   ACTIVITY_END_TIME,
@@ -212,11 +209,7 @@ const TimeUseDiaryContainer = () => {
         {
           submitRequestState === RequestStates.SUCCESS
             ? (
-              <SubmissionSuccessful>
-                <Typography variant="body2">
-                  {t(TranslationKeys.SUBMISSION_SUCCESS)}
-                </Typography>
-              </SubmissionSuccessful>
+              <SubmissionSuccessful trans={t} />
             )
             : (
               <Card>
