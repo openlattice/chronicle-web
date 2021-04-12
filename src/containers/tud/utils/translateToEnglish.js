@@ -2,8 +2,10 @@
 import { getIn } from 'immutable';
 
 export default function translateToEnglish(
-  key :string, val :Array<string> | string,
-  language :string, translationLookup :Object
+  key :string,
+  val :Array<string> | string,
+  language :string,
+  translationLookup :Object
 ) :Array<Object> {
   if (language === 'en') {
     return Array.isArray(val) ? val : [val];

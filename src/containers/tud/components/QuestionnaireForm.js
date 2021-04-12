@@ -174,6 +174,19 @@ const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
   return Object.keys(properties).includes(HAS_FOLLOWUP_QUESTIONS);
 };
 
+type TudActivities = {|
+  childcare :'string';
+  napping :'string';
+  eating :'string';
+  media_use :'string';
+  reading :'string';
+  indoor :'string';
+  outdoor :'string';
+  grooming :'string';
+  other :'string';
+  outdoors :'string';
+|};
+
 type Props = {
   familyId :?string;
   formSchema :Object;
@@ -187,7 +200,7 @@ type Props = {
   shouldReset :boolean;
   studyId :UUID;
   submitRequestState :?RequestState;
-  trans :(string, ?Object) => string;
+  trans :(string, ?Object) => Object;
   translationData :Object;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   updateSurveyProgress :(formData :Object) => void;
@@ -230,7 +243,7 @@ const QuestionnaireForm = ({
 
   const { schema, uiSchema } = formSchema;
 
-  const activities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+  const activities :TudActivities = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
 
   const readingSchema = SecondaryFollowUpSchema.createSchema(activities.reading, trans);
   const mediaUseSchema = SecondaryFollowUpSchema.createSchema(activities.media_use, trans);

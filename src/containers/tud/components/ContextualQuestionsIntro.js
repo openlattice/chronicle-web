@@ -16,15 +16,15 @@ type Props = {
 
 const ContextualQuestionsIntro = ({ selectedActivity, time, trans } :Props) => {
   const activities = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
-  const entry = Object.entries(activities).find((obj) => obj[1] === selectedActivity);
-  if (!entry) return null;
+  const activity = Object.values(activities).find((val) => val === selectedActivity);
+  if (!activity) return null;
 
   return (
     <Typography gutterBottom variant="body2">
       {
         trans(
           TranslationKeys.CONTEXTUAL_TEXT,
-          { time: time.toLocaleString(DateTime.TIME_SIMPLE), activity: entry[1], interpolation: { escapeValue: false } }
+          { time: time.toLocaleString(DateTime.TIME_SIMPLE), activity, interpolation: { escapeValue: false } }
         )
       }
     </Typography>

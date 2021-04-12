@@ -2,7 +2,6 @@
  * @flow
  */
 
-// import i18next
 import './core/i18n';
 
 import React, { Suspense } from 'react';

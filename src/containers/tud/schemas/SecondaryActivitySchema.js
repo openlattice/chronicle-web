@@ -7,7 +7,7 @@ import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { OTHER_ACTIVITY, SECONDARY_ACTIVITY } = PROPERTY_CONSTS;
 
-const createSchema = (primaryActivity :string, trans :(string, ?Object) => Object) => {
+const createSchema = (primaryActivity :string, trans :TranslationFunction) => {
 
   // $FlowFixMe
   const activitiesList :string[] = Object.values(trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true }));

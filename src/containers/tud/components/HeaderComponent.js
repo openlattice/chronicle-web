@@ -54,8 +54,8 @@ const Wrapper = styled.div`
 `;
 
 type Props = {
-  onChangeLanguage :(lng :Object) => void;
-  selectedLanguage :Object;
+  onChangeLanguage :(lng :SelectLanguageOption) => void;
+  selectedLanguage :?SelectLanguageOption;
 };
 
 const HeaderComponent = ({

@@ -3,7 +3,6 @@
 import React from 'react';
 
 import { Typography } from 'lattice-ui-kit';
-// $FlowFixMe
 import { useTranslation } from 'react-i18next';
 
 import TranslationKeys from '../constants/TranslationKeys';
@@ -13,7 +12,7 @@ const SurveyIntro = () => {
 
   return (
     <Typography gutterBottom variant="body2">
-      { t(TranslationKeys.INTRO_TEXT) }
+      {t(TranslationKeys.INTRO_TEXT)}
     </Typography>
   );
 };

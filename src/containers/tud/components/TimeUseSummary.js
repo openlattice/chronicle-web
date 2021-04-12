@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import { faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Colors } from 'lattice-ui-kit';
-// $FlowFixMe
 import { useTranslation } from 'react-i18next';
 
 import TranslationKeys from '../constants/TranslationKeys';

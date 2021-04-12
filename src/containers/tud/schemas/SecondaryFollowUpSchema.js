@@ -11,7 +11,7 @@ const {
   SECONDARY_MEDIA_NAME,
 } = PROPERTY_CONSTS;
 
-const createSchema = (selectedActivity :string, trans :(string, ?Object) => Object) => {
+const createSchema = (selectedActivity :string, trans :TranslationFunction) => {
   const primaryActivities :Object = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
 
   switch (selectedActivity) {
@@ -72,7 +72,7 @@ const createSchema = (selectedActivity :string, trans :(string, ?Object) => Obje
   }
 };
 
-const createUiSchema = (trans :(string, ?Object) => Object) => ({
+const createUiSchema = (trans :TranslationFunction) => ({
   [SECONDARY_MEDIA_ACTIVITY]: {
     classNames: 'column-span-12',
     'ui:widget': 'checkboxes',

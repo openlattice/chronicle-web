@@ -122,7 +122,7 @@ const getIsSummaryPage = (formData :Object, page :number) => {
 /*
  * Return true if the schema is the night activity schema
  */
-const getIsNightActivityPage = (schema :Object, page :number, trans :(string, ?Object) => Object) => {
+const getIsNightActivityPage = (schema :Object, page :number, trans :TranslationFunction) => {
   const nightSchema = NightTimeActivitySchema.createSchema(page, trans);
 
   return isEqual(schema, nightSchema);
@@ -149,7 +149,7 @@ const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
   formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
 ).includes(MEDIA_USE);
 
-const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Object) => string) => {
+const createFormSchema = (formData :Object, pageNum :number, trans :TranslationFunction) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
 
@@ -219,7 +219,7 @@ const createFormSchema = (formData :Object, pageNum :number, trans :(string, ?Ob
   };
 };
 
-const createTimeUseSummary = (formData :Object, trans :(string, ?Object) => string) => {
+const createTimeUseSummary = (formData :Object, trans :TranslationFunction) => {
 
   const summary = [];
 
@@ -294,7 +294,7 @@ const applyCustomValidation = (
   formData :Object,
   errors :Object,
   pageNum :number,
-  trans :(string, ?Object) => string
+  trans :TranslationFunction
 ) => {
   const psk = getPageSectionKey(pageNum, 0);
 

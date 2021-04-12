@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import isEqual from 'lodash/isEqual';
 import qs from 'qs';
-import { DataProcessingUtils, Paged } from 'lattice-fabricate';
+import { Paged } from 'lattice-fabricate';
 import {
   AppContainerWrapper,
   AppContentWrapper,
@@ -13,7 +13,6 @@ import {
   Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
-// $FlowFixMe
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
@@ -29,6 +28,8 @@ import TranslationKeys from './constants/TranslationKeys';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
+import * as LanguageCodes from '../../utils/constants/LanguageCodes';
+
 import { usePrevious } from './hooks';
 import {
   createFormSchema,
@@ -43,13 +44,10 @@ import SubmissionSuccessful from '../shared/SubmissionSuccessful';
 const {
   ACTIVITY_END_TIME,
   DAY_END_TIME,
-  DAY_OF_WEEK,
   DAY_START_TIME
 } = PROPERTY_CONSTS;
 
 const { DAY_SPAN_PAGE, SURVEY_INTRO_PAGE } = PAGE_NUMBERS;
-
-const { getPageSectionKey } = DataProcessingUtils;
 
 const TimeUseDiaryContainer = () => {
   const location = useLocation();
@@ -100,7 +98,7 @@ const TimeUseDiaryContainer = () => {
 
   // select default language
   useEffect(() => {
-    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === 'en');
+    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === LanguageCodes.ENGLISH);
     if (defaultLng) {
       setSelectedLanguage({
         label: defaultLng.language,
@@ -115,20 +113,6 @@ const TimeUseDiaryContainer = () => {
     setFormSchema(newSchema);
   }, [page, selectedLanguage?.value, t]);
   /* eslint-enable */
-
-  useEffect(() => {
-    if (page === PAGE_NUMBERS.PRE_SURVEY_PAGE) {
-      const dayOfWeekInput = document.getElementById(
-        `root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`
-      );
-      const label = dayOfWeekInput?.previousSibling;
-      if (label) {
-        // TODO: italics format
-        // $FlowFixMe
-        label.innerHTML = t(TranslationKeys.DAY_OF_WEEK);
-      }
-    }
-  }, [page, formSchema, t]);
 
   const refreshProgress = (currFormData) => {
     const dayStart = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, currFormData);
@@ -161,7 +145,7 @@ const TimeUseDiaryContainer = () => {
     setFormData(currFormData);
   };
 
-  const changeLanguage = (lng :Object) => {
+  const changeLanguage = (lng :SelectLanguageOption) => {
     if (lng !== null) {
       i18n.changeLanguage(lng.value);
       setSelectedLanguage(lng);
@@ -176,7 +160,7 @@ const TimeUseDiaryContainer = () => {
     }
   };
 
-  const onChangeLanguage = (lng :Object) => {
+  const onChangeLanguage = (lng :SelectLanguageOption) => {
     if (lng.value === i18n.language) return;
 
     if (page === SURVEY_INTRO_PAGE) {

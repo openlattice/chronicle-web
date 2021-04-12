@@ -6,7 +6,6 @@ import i18n from 'i18next';
 import { mount } from 'enzyme';
 import { Select } from 'lattice-ui-kit';
 import { act } from 'react-dom/test-utils';
-// $FlowFixMe
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { Provider } from 'react-redux';
 import {
@@ -61,8 +60,6 @@ const App = (
   </Suspense>
 );
 
-const testIfMultipleLanguages = (languages) => (languages.length > 1 ? test : test.skip);
-
 const defaultLookup = Translations.en;
 
 describe('TimeUseDiaryContainer', () => {
@@ -90,44 +87,42 @@ describe('TimeUseDiaryContainer', () => {
 
   });
 
-  testIfMultipleLanguages(SupportedLanguages)(
-    'switching languages in the middle of survey should display modal', () => {
-      const wrapper = mount(App);
+  test('switching languages in the middle of survey should display modal', () => {
+    const wrapper = mount(App);
 
-      expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeFalsy();
+    expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeFalsy();
 
-      // go to next page
-      wrapper
-        .findWhere((n) => n.type() === 'button' && n.text() === defaultLookup[TranslationKeys.BTN_NEXT])
-        .simulate('click');
+    // go to next page
+    wrapper
+      .findWhere((n) => n.type() === 'button' && n.text() === defaultLookup[TranslationKeys.BTN_NEXT])
+      .simulate('click');
 
-      // should be on page 1
-      expect(wrapper.find(QuestionnaireForm).prop('pagedProps').page).toEqual(1);
+    // should be on page 1
+    expect(wrapper.find(QuestionnaireForm).prop('pagedProps').page).toEqual(1);
 
-      // TODO: switch to a language defined in SupportedLanguages
-      const newLng = { label: 'Swedish', value: 'sv' };
-      expect(SupportedLanguages)
-        .toContainEqual(expect.objectContaining({ language: newLng.label, code: newLng.value }));
+    // TODO: switch to a language defined in SupportedLanguages
+    const newLng = { label: 'Swedish', value: 'sv' };
+    expect(SupportedLanguages)
+      .toContainEqual(expect.objectContaining({ language: newLng.label, code: newLng.value }));
 
-      // switch language when in page 1
-      act(() => {
-        wrapper.find(Select).first().prop('onChange')(newLng);
-      });
-      wrapper.update();
-      expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeTruthy();
+    // switch language when in page 1
+    act(() => {
+      wrapper.find(Select).first().prop('onChange')(newLng);
+    });
+    wrapper.update();
+    expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeTruthy();
 
-      // click on confirm
-      wrapper
-        .findWhere((n) => n.type() === 'button' && n.text() === defaultLookup[TranslationKeys.CHANGE_LANGUAGE])
-        .simulate('click');
+    // click on confirm
+    wrapper
+      .findWhere((n) => n.type() === 'button' && n.text() === defaultLookup[TranslationKeys.CHANGE_LANGUAGE])
+      .simulate('click');
 
-      expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeFalsy();
-      expect(wrapper.find(QuestionnaireForm).prop('pagedProps').page).toEqual(0);
+    expect(wrapper.find(ConfirmChangeLanguage).prop('isVisible')).toBeFalsy();
+    expect(wrapper.find(QuestionnaireForm).prop('pagedProps').page).toEqual(0);
 
-      const initialFormData = { page0section0: { clockFormat: 12 }, page1section0: {} };
-      expect(wrapper.find(QuestionnaireForm).prop('initialFormData')).toStrictEqual(initialFormData);
-    }
-  );
+    const initialFormData = { page0section0: { clockFormat: 12 }, page1section0: {} };
+    expect(wrapper.find(QuestionnaireForm).prop('initialFormData')).toStrictEqual(initialFormData);
+  });
 
   test('switching to currently selected language should not show modal', () => {
     const wrapper = mount(App);

@@ -8,7 +8,7 @@ import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 const { getPageSectionKey } = DataProcessingUtils;
 const { CLOCK_FORMAT } = PROPERTY_CONSTS;
 
-const createSchema = (trans :(string, ?Object) => string) => ({
+const createSchema = (trans :TranslationFunction) => ({
   type: 'object',
   title: '',
   properties: {
