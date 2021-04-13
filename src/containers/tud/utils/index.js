@@ -13,7 +13,11 @@ import { Models } from 'lattice';
 import { DataProcessingUtils } from 'lattice-fabricate';
 import { DateTime } from 'luxon';
 
+import createEnglishTranslationLookup from './createEnglishTranslationLookup';
+import translateToEnglish from './translateToEnglish';
+
 import DataTypes from '../constants/DataTypes';
+import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
 import * as NightTimeActivitySchema from '../schemas/NightTimeActivitySchema';
@@ -54,6 +58,7 @@ const {
   HAS_FOLLOWUP_QUESTIONS,
   NON_TYPICAL_DAY_REASON,
   NON_TYPICAL_SLEEP_PATTERN,
+  OTHER_ACTIVITY,
   PRIMARY_BOOK_TITLE,
   PRIMARY_BOOK_TYPE,
   PRIMARY_MEDIA_ACTIVITY,
@@ -117,8 +122,8 @@ const getIsSummaryPage = (formData :Object, page :number) => {
 /*
  * Return true if the schema is the night activity schema
  */
-const getIsNightActivityPage = (schema :Object, page :number) => {
-  const nightSchema = NightTimeActivitySchema.createSchema(page);
+const getIsNightActivityPage = (schema :Object, page :number, trans :TranslationFunction) => {
+  const nightSchema = NightTimeActivitySchema.createSchema(page, trans);
 
   return isEqual(schema, nightSchema);
 };
@@ -144,7 +149,7 @@ const getSecondaryMediaSelected = (formData :Object, page :number) => getIn(
   formData, [getPageSectionKey(page, 0), SECONDARY_ACTIVITY], []
 ).includes(MEDIA_USE);
 
-const createFormSchema = (formData :Object, pageNum :number) => {
+const createFormSchema = (formData :Object, pageNum :number, trans :TranslationFunction) => {
 
   const is12hourFormat = getIs12HourFormatSelected(formData);
 
@@ -153,14 +158,14 @@ const createFormSchema = (formData :Object, pageNum :number) => {
 
   if (pageNum === SURVEY_INTRO_PAGE) {
     return {
-      schema: SurveyIntroSchema.schema,
+      schema: SurveyIntroSchema.createSchema(trans),
       uiSchema: SurveyIntroSchema.uiSchema
     };
   }
   // case 1:
   if (pageNum === PRE_SURVEY_PAGE) {
     return {
-      schema: PreSurveySchema.schema,
+      schema: PreSurveySchema.createSchema(trans),
       uiSchema: PreSurveySchema.uiSchema
     };
   }
@@ -168,7 +173,7 @@ const createFormSchema = (formData :Object, pageNum :number) => {
   // case 2:
   if (pageNum === DAY_SPAN_PAGE) {
     return {
-      schema: DaySpanSchema.createSchema(is12hourFormat),
+      schema: DaySpanSchema.createSchema(is12hourFormat, trans),
       uiSchema: DaySpanSchema.createUiSchema(is12hourFormat)
     };
   }
@@ -192,17 +197,19 @@ const createFormSchema = (formData :Object, pageNum :number) => {
   const isDaytimeCompleted = getIsDayTimeCompleted(formData, pageNum);
 
   if (isDaytimeCompleted) {
-    schema = NightTimeActivitySchema.createSchema(pageNum);
-    uiSchema = NightTimeActivitySchema.createUiSchema(pageNum);
+    schema = NightTimeActivitySchema.createSchema(pageNum, trans);
+    uiSchema = NightTimeActivitySchema.createUiSchema(pageNum, trans);
   }
   else if (shouldDisplayFollowup) {
     schema = ContextualSchema.createSchema(
-      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected
+      pageNum, prevActivity, prevStartTime, prevEndTime, isSecondaryReadingSelected, isSecondaryMediaSelected, trans
     );
-    uiSchema = ContextualSchema.createUiSchema(pageNum);
+    uiSchema = ContextualSchema.createUiSchema(pageNum, trans);
   }
   else {
-    schema = PrimaryActivitySchema.createSchema(pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat);
+    schema = PrimaryActivitySchema.createSchema(
+      pageNum, prevActivity, currentActivity, prevEndTime, is12hourFormat, trans
+    );
     uiSchema = PrimaryActivitySchema.createUiSchema(pageNum, is12hourFormat);
   }
 
@@ -212,7 +219,7 @@ const createFormSchema = (formData :Object, pageNum :number) => {
   };
 };
 
-const createTimeUseSummary = (formData :Object) => {
+const createTimeUseSummary = (formData :Object, trans :TranslationFunction) => {
 
   const summary = [];
 
@@ -233,7 +240,7 @@ const createTimeUseSummary = (formData :Object) => {
   // add day start time
   summary.push({
     time: formattedDayStartTime,
-    description: 'Child woke up',
+    description: trans(TranslationKeys.CHILD_WOKE_UP),
     pageNum: DAY_SPAN_PAGE
   });
 
@@ -250,7 +257,7 @@ const createTimeUseSummary = (formData :Object) => {
       if (index === lastPage) {
         summary.push({
           time: `${formattedDayEndTime} - ${formattedDayStartTime}`,
-          description: 'Sleeping',
+          description: trans(TranslationKeys.SLEEPING),
           pageNum: Object.keys(formData).length - 1
         });
       }
@@ -281,7 +288,14 @@ const createTimeUseSummary = (formData :Object) => {
   return summary;
 };
 
-const applyCustomValidation = (formData :Object, errors :Object, pageNum :number) => {
+const formatTime = (time :DateTime) => time.toLocaleString(DateTime.TIME_SIMPLE);
+
+const applyCustomValidation = (
+  formData :Object,
+  errors :Object,
+  pageNum :number,
+  trans :TranslationFunction
+) => {
   const psk = getPageSectionKey(pageNum, 0);
 
   // For each activity, end date should greater than start date
@@ -293,20 +307,16 @@ const applyCustomValidation = (formData :Object, errors :Object, pageNum :number
   const dayEndTime = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_END_TIME, formData);
 
   const errorMsg = pageNum === DAY_SPAN_PAGE
-    ? `Bed time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`
-    : `End time should be after ${currentStartTime.toLocaleString(DateTime.TIME_SIMPLE)}`;
+    ? trans(TranslationKeys.ERROR_INVALID_BED_TIME, { time: formatTime(currentStartTime) })
+    : trans(TranslationKeys.ERROR_INVALID_END_TIME, { time: formatTime(currentStartTime) });
 
   if (currentStartTime.isValid && currentEndTime.isValid) {
-    // $FlowFixMe invalid-compare
-    if (currentEndTime <= currentStartTime) {
+    if (currentEndTime.valueOf() <= currentStartTime.valueOf()) {
       errors[psk][endTimeKey].addError(errorMsg);
     }
     // the last activity of the day should end at the time the child went to bed
-    // $FlowFixMe invalid-compare
-    if (currentEndTime > dayEndTime) {
-      errors[psk][endTimeKey].addError(`The last activity of the
-          day should end at ${dayEndTime.toLocaleString(DateTime.TIME_SIMPLE)}
-          since you indicated the child went to bed then.`);
+    if (currentEndTime.valueOf() > dayEndTime.valueOf()) {
+      errors[psk][endTimeKey].addError(trans(TranslationKeys.ERROR_END_PAST_BEDTIME, { time: formatTime(dayEndTime) }));
     }
   }
 
@@ -324,11 +334,20 @@ const stringifyValue = (value :any) => {
 };
 
 // TODO: omit first page (clock format select) from form
-const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?string) => {
+const createSubmitRequestBody = (
+  formData :Object,
+  familyId :?string,
+  waveId :?string,
+  language :string,
+  translationData :Object
+) => {
   let result = [];
 
+  // create english translation lookup
+  const englishTranslationLookup = createEnglishTranslationLookup(translationData, language);
+
   const dateYesterday :DateTime = DateTime.local().minus({ days: 1 });
-  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS];
+  const entriesToOmit = [ACTIVITY_START_TIME, ACTIVITY_END_TIME, HAS_FOLLOWUP_QUESTIONS, OTHER_ACTIVITY, CLOCK_FORMAT];
 
   Object.entries(formData).forEach(([psk :string, pageData :Object]) => {
 
@@ -355,7 +374,7 @@ const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?s
         .map(([key, value]) => {
           const stringVal = stringifyValue(value);
           const entity = {
-            [VALUES_FQN.toString()]: Array.isArray(stringVal) ? stringVal : [stringVal],
+            [VALUES_FQN.toString()]: translateToEnglish(key, stringVal, language, englishTranslationLookup),
             [ID_FQN.toString()]: [key],
             [TITLE_FQN.toString()]: [get(QUESTION_TITLE_LOOKUP, key, key)],
             ...(startTime && endTime) && {
@@ -385,6 +404,7 @@ const createSubmitRequestBody = (formData :Object, familyId :?string, waveId :?s
       [TITLE_FQN.toString()]: ['Family Id']
     });
   }
+
   return result;
 };
 
@@ -516,12 +536,13 @@ export {
   createFormSchema,
   createSubmitRequestBody,
   createTimeUseSummary,
+  formatTime,
   getIs12HourFormatSelected,
-  getIsSummaryPage,
   getIsNightActivityPage,
+  getIsSummaryPage,
+  getOutputFileName,
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
   writeToCsvFile,
-  getOutputFileName,
 };

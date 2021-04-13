@@ -897,7 +897,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, NOTIFICATION_ENABLED)]
     );
 
-    const associations = [];
+    const associations :Array<Object> = [];
 
     const associationEntityData = processAssociationEntityData(
       associations,
