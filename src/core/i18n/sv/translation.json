@@ -38,8 +38,7 @@
   "button_close": "Stäng",
   "weekday": "weekday",
   "day_start_time": "Vilken tid vaknade barnet i går morse? Skriv den tiden då barnet vaknade för att gå upp, det vill säga inte om hen vaknade mitt i natten och sedan somnade om.",
-  "day_end_time": "Vilken tid somnade ditt barn i går kväll? Skriv den tiden då barnet somnade för natten. Senare i dagboken kommer vi fråga hur ofta ditt barn vaknade under natten."
-"
+  "day_end_time": "Vilken tid somnade ditt barn i går kväll? Skriv den tiden då barnet somnade för natten. Senare i dagboken kommer vi fråga hur ofta ditt barn vaknade under natten.",
   "today_wakeup_time": "Vilken tid vaknade barnet i går morse?",
   "default_time": "Fyll i tider genom att skriva tiden i rutan (tex 07:00) eller klicka på klockan för att välja rätt tid.",
   "primary_activities": {
