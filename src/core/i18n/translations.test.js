@@ -2,6 +2,7 @@
 
 import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isPlainObject';
+import matchAll from 'match-all';
 import set from 'lodash/set';
 
 import Translations from './translations';
@@ -25,11 +26,8 @@ const getInterpolationValues = (obj :Object) => {
 
   Object.entries(obj).forEach(([key :string, value :string | Array | Object]) => {
     if (typeof value === 'string') {
-      const array = [...value.matchAll(regexp)];
-      const matches = array.map((arr) => arr[0]);
-      if (matches.length) {
-        lookup[key] = matches;
-      }
+      const matches = matchAll(value, regexp).toArray();
+      lookup[key] = matches;
     }
   });
 
@@ -94,6 +92,7 @@ describe('Translation files structure', () => {
     const { en, ...others } = Translations;
 
     const englishInterpolation = getInterpolationValues(en);
+
     Object.values(others).forEach((lng :Object) => {
       expect(getInterpolationValues(lng)).toStrictEqual(englishInterpolation);
     });
