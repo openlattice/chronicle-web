@@ -882,7 +882,9 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       throw response.error;
     }
 
-    let studies = fromJS(response.data).filter((study) => study.getIn([STUDY_ID, 0]));
+    let studies = fromJS(response.data)
+      .filter((study) => study.getIn([STUDY_ID, 0]))
+      .filter((study) => !study.getIn([DELETE_FQN, 0], false));
 
     // get notification status for studies
     if (!studies.isEmpty()) {
