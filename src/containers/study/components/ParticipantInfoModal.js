@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import { faCopy } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  // $FlowFixMe
   Box,
   IconButton,
   Modal,
+  // $FlowFixMe
   Tooltip,
   Typography
 } from 'lattice-ui-kit';
@@ -16,10 +18,6 @@ import {
 import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
-
-const DetailWrapper = styled.div`
-  margin-bottom: 20px;
-`;
 
 const Grid = styled.div`
   align-items: center;

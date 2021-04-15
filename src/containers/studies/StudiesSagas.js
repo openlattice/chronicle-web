@@ -38,6 +38,7 @@ import {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
   CREATE_STUDY,
+  DELETE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
@@ -45,6 +46,7 @@ import {
   addStudyParticipant,
   changeEnrollmentStatus,
   createStudy,
+  deleteStudy,
   deleteStudyParticipant,
   getNotificationsEntity,
   getParticipantsMetadata,
@@ -52,7 +54,7 @@ import {
   getStudyNotificationStatus,
   getStudyParticipants,
   getTimeUseDiaryStudies,
-  updateStudy
+  updateStudy,
 } from './StudiesActions';
 import { constructEntityFromFormData, getMinDateFromMetadata } from './utils';
 
@@ -98,15 +100,16 @@ const {
 
 const { UpdateTypes } = Types;
 const { isDefined } = LangUtils;
-const { getEntityKeyId } = DataUtils;
+const { getEntityKeyId, getPropertyValue } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
-  DATE_ENROLLED,
-  DATETIME_START_FQN,
-  DATE_LOGGED,
   DATETIME_END_FQN,
+  DATETIME_START_FQN,
+  DATE_ENROLLED,
+  DATE_LOGGED,
+  DELETE_FQN,
   DESCRIPTION_FQN,
   EVENT_COUNT,
   ID_FQN,
@@ -131,6 +134,54 @@ const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 const TIME_USE_DIARY = 'Time Use Diary';
+
+function* deleteStudyWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(deleteStudy.request(action.id));
+
+    const study = action.value;
+
+    const orgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
+    const studyId = getPropertyValue(study, [STUDY_ID, 0]);
+    const studyEKID = getEntityKeyId(study);
+
+    yield call(ChronicleApi.deleteStudy, orgId, studyId);
+
+    // mark the study entity as deleted
+
+    const chronicleEntitySetIds = yield select(selectEntitySetsByModule(AppModules.CHRONICLE_CORE));
+    const studyESID = chronicleEntitySetIds.get(STUDIES);
+
+    const deletePTID = yield select(selectPropertyTypeId(DELETE_FQN));
+
+    const updateResponse = yield call(updateEntityDataWorker, updateEntityData({
+      entities: {
+        // $FlowFixMe
+        [studyEKID]: {
+          [deletePTID]: [true],
+        }
+      },
+      entitySetId: studyESID,
+      updateType: UpdateTypes.PartialReplace
+    }));
+
+    if (updateResponse.error) throw updateResponse.error;
+
+    yield put(deleteStudy.success(action.id));
+
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteStudy.failure(action.id));
+  }
+  finally {
+    yield put(deleteStudy.finally(action.id));
+  }
+}
+
+function* deleteStudyWatcher() :Saga<*> {
+  yield takeEvery(DELETE_STUDY, deleteStudyWorker);
+}
 
 function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
   const workerResponse = {};
@@ -960,11 +1011,12 @@ export {
   changeEnrollmentStatusWatcher,
   createStudyWatcher,
   deleteStudyParticipantWatcher,
+  deleteStudyWatcher,
+  getNotificationsEntityWorker,
   getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
-  getNotificationsEntityWorker
 };
