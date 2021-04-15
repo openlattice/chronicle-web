@@ -19,6 +19,23 @@ const getArrayValueSizes = (obj :Object) => {
   return sizes;
 };
 
+const getInterpolationValues = (obj :Object) => {
+  const lookup = {};
+  const regexp = /\{\{(.*?)\}\}/g;
+
+  Object.entries(obj).forEach(([key :string, value :string | Array | Object]) => {
+    if (typeof value === 'string') {
+      const array = [...value.matchAll(regexp)];
+      const matches = array.map((arr) => arr[0]);
+      if (matches.length) {
+        lookup[key] = matches;
+      }
+    }
+  });
+
+  return lookup;
+};
+
 describe('Translation files structure', () => {
   test('translation files should include all supported languages', () => {
     const languages = Object.keys(Translations);
@@ -70,6 +87,15 @@ describe('Translation files structure', () => {
       Object.keys(lng).forEach((key) => {
         expect(translationKeys).toContain(key);
       });
+    });
+  });
+
+  test('should not modify interpolation values', () => {
+    const { en, ...others } = Translations;
+
+    const englishInterpolation = getInterpolationValues(en);
+    Object.values(others).forEach((lng :Object) => {
+      expect(getInterpolationValues(lng)).toStrictEqual(englishInterpolation);
     });
   });
 });
