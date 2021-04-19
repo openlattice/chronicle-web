@@ -150,7 +150,17 @@ const getSubmitTudDataUrl = (studyId :UUID, participantId :string) => {
   return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
 };
 
+const getDeleteStudyUrl = (studyId :UUID) => {
+  if (!isValidUUID(studyId)) {
+    LOG.error('invalid studyId: ', studyId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${CHRONICLE}/${STUDY}/${AUTHENTICATED}/${studyId}`;
+};
+
 export {
+  getDeleteStudyUrl,
   getBaseUrl,
   getDeleteParticipantPath,
   getParticipantDataUrl,

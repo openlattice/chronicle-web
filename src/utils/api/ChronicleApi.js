@@ -5,6 +5,7 @@ import { Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 
 import {
+  getDeleteStudyUrl,
   getDeleteParticipantPath,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
@@ -164,7 +165,26 @@ function submitTudData(studyId :UUID, participantId :string, requestBody :Object
   });
 }
 
+function deleteStudy(studyId :UUID) {
+  return new Promise<*>((resolve, reject) => {
+
+    const url = getDeleteStudyUrl(studyId);
+    if (!url) return reject(new Error('Invalid url'));
+
+    const authToken = AuthUtils.getAuthToken() || '';
+
+    return axios({
+      headers: { Authorization: `Bearer ${authToken}` },
+      method: 'delete',
+      params: { type: DeleteTypes.HARD },
+      url,
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
+
 export {
+  deleteStudy,
   deleteStudyParticipant,
   getParticipantAppsUsageData,
   getQuestionnaire,
