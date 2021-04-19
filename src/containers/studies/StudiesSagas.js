@@ -40,6 +40,7 @@ import {
   CHANGE_ENROLLMENT_STATUS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  DELETE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
@@ -48,6 +49,7 @@ import {
   changeEnrollmentStatus,
   createParticipantsEntitySet,
   createStudy,
+  deleteStudy,
   deleteStudyParticipant,
   getGlobalNotificationsEKID,
   getParticipantsMetadata,
@@ -118,6 +120,7 @@ const {
   DATETIME_START_FQN,
   DATE_LOGGED,
   DATETIME_END_FQN,
+  DELETE_FQN,
   EVENT_COUNT,
   ID_FQN,
   NOTIFICATION_ENABLED,
@@ -141,6 +144,50 @@ const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 const LOG = new Logger('StudiesSagas');
 const CAFE_ORGANIZATION_ID = '7349c446-2acc-4d14-b2a9-a13be39cff93';
 const TIME_USE_DIARY = 'Time Use Diary';
+
+function* deleteStudyWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(deleteStudy.request(action.id));
+
+    const study = action.value;
+
+    const studyId = study.getIn([STUDY_ID, 0]);
+    const studyEKID = getEntityKeyId(study);
+
+    yield call(ChronicleApi.deleteStudy, studyId);
+
+    // mark the study entity as deleted
+    const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
+    const deletePTID = yield select(selectPropertyTypeId(DELETE_FQN));
+
+    const updateResponse = yield call(updateEntityDataWorker, updateEntityData({
+      entities: {
+        // $FlowFixMe
+        [studyEKID]: {
+          [deletePTID]: [true],
+        }
+      },
+      entitySetId: studyESID,
+      updateType: UpdateTypes.PartialReplace
+    }));
+
+    if (updateResponse.error) throw updateResponse.error;
+
+    yield put(deleteStudy.success(action.id));
+
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteStudy.failure(action.id));
+  }
+  finally {
+    yield put(deleteStudy.finally(action.id));
+  }
+}
+
+function* deleteStudyWatcher() :Saga<*> {
+  yield takeEvery(DELETE_STUDY, deleteStudyWorker);
+}
 
 function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
   const workerResponse = {};
@@ -1023,11 +1070,12 @@ export {
   createParticipantsEntitySetWorker,
   createStudyWatcher,
   deleteStudyParticipantWatcher,
+  deleteStudyWatcher,
+  getGlobalNotificationsEKIDWorker,
   getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
-  getGlobalNotificationsEKIDWorker
 };
