@@ -243,7 +243,7 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
             Edit Details
           </Button>
           <Button
-              color="secondary"
+              color="error"
               onClick={showDeleteModal}>
             Delete Study
           </Button>
