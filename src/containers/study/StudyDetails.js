@@ -2,7 +2,7 @@
  * @flow
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
 import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
@@ -14,13 +14,16 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
-import { LangUtils } from 'lattice-utils';
+import { LangUtils, useBoolean, useRequestState } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+
+import DeleteStudyModal from './components/DeleteStudyModal';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { UPDATE_STUDY } from '../studies/StudiesActions';
+import { DELETE_STUDY, UPDATE_STUDY, removeStudyOnDelete } from '../studies/StudiesActions';
 
 const { isNonEmptyString } = LangUtils;
 
@@ -149,6 +152,9 @@ type Props = {
 const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isDeleteModalVisible, showDeleteModal, hideDeleteModal] = useBoolean(false);
+
+  const deleteStudyRS = useRequestState(['studies', DELETE_STUDY]);
 
   const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
   const studyUUID = study.getIn([STUDY_ID, 0]);
@@ -156,10 +162,25 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
+  // After deleting study, redirect to root
+  useEffect(() => {
+    if (deleteStudyRS === RequestStates.SUCCESS) {
+      setTimeout(() => {
+        dispatch(removeStudyOnDelete(studyUUID));
+        dispatch(resetRequestState(DELETE_STUDY));
+      }, 2000);
+    }
+  }, [deleteStudyRS, dispatch, studyUUID]);
+
   const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
+  };
+
+  const onCloseDeleteModal = () => {
+    hideDeleteModal();
+    dispatch(resetRequestState(DELETE_STUDY));
   };
 
   const openEditModal = () => {
@@ -226,7 +247,9 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
         </MainInfoContainer>
 
         <DeleteButtonWrapper>
-          <Button color="error">
+          <Button
+              color="secondary"
+              onClick={showDeleteModal}>
             Delete Study
           </Button>
         </DeleteButtonWrapper>
@@ -234,6 +257,11 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
             handleOnCloseModal={closeEditModal}
             notificationsEnabled={notificationsEnabled}
             isVisible={editModalVisible}
+            study={study} />
+        <DeleteStudyModal
+            isVisible={isDeleteModalVisible}
+            onClose={onCloseDeleteModal}
+            requestState={deleteStudyRS || RequestStates.STANDBY}
             study={study} />
       </CardSegment>
     </Card>
