@@ -175,21 +175,24 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
                   value={studyGroup} />
             </Grid>
 
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Box mr="20px">
-                  <Button
-                      color="secondary"
-                      onClick={openEditModal}>
-                    Edit Details
-                  </Button>
-                </Box>
+            <Grid container item xs={12} spacing={3}>
+              <Grid item xs={6}>
                 <Button
                     color="secondary"
+                    fullWidth
+                    onClick={openEditModal}>
+                  Edit Details
+                </Button>
+              </Grid>
+
+              <Grid item xs={6}>
+                <Button
+                    color="secondary"
+                    fullWidth
                     onClick={showDeleteModal}>
                   Delete Study
                 </Button>
-              </Box>
+              </Grid>
             </Grid>
           </Grid>
           <StudyDetailsModal
