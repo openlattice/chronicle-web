@@ -3,3 +3,10 @@
  */
 
 declare type UUID = string;
+
+declare type SelectLanguageOption = {|
+  label: string;
+  value: string;
+|}
+
+declare type TranslationFunction = (string, ?Object) => Object;

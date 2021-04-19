@@ -1,11 +1,10 @@
 // @flow
 
 import { DataProcessingUtils } from 'lattice-fabricate';
-import { Info } from 'luxon';
 
-import SCHEMA_FIELDS_TITLES from '../constants/SchemaFieldsTitles';
+import TranslationKeys from '../constants/TranslationKeys';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
-import { NON_TYPICAL_DAY_REASONS, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 
 const { getPageSectionKey } = DataProcessingUtils;
 
@@ -17,7 +16,7 @@ const {
   TYPICAL_DAY_FLAG
 } = PROPERTY_CONSTS;
 
-const schema = {
+const createSchema = (trans :(string, ?Object) => string) => ({
   type: 'object',
   title: '',
   properties: {
@@ -26,16 +25,16 @@ const schema = {
       title: '',
       properties: {
         [DAY_OF_WEEK]: {
-          title: SCHEMA_FIELDS_TITLES[DAY_OF_WEEK],
+          title: trans(TranslationKeys.DAY_OF_WEEK),
           // $FlowFixMe
-          enum: Info.weekdays(),
+          enum: trans(TranslationKeys.WEEKDAY_OPTIONS, { returnObjects: true }),
           type: 'string'
         },
         [TYPICAL_DAY_FLAG]: {
-          title: SCHEMA_FIELDS_TITLES[TYPICAL_DAY_FLAG],
+          title: trans(TranslationKeys.TYPICAL_DAY, { day: trans(TranslationKeys.WEEKDAY) }),
           type: 'string',
-          enum: ['Yes', 'No'],
-          enumNames: ['Yes, yesterday was typical.', 'No, yesterday was non-typical.']
+          enum: [trans(TranslationKeys.YES), trans(TranslationKeys.NO)],
+          enumNames: trans(TranslationKeys.TYPICAL_DAY_CHOICES, { returnObjects: true })
         }
       },
       dependencies: {
@@ -44,23 +43,23 @@ const schema = {
             {
               properties: {
                 [TYPICAL_DAY_FLAG]: {
-                  enum: ['Yes']
+                  enum: [trans(TranslationKeys.YES)]
                 }
               }
             },
             {
               properties: {
                 [TYPICAL_DAY_FLAG]: {
-                  enum: ['No']
+                  enum: [trans(TranslationKeys.NO)]
                 },
                 [NON_TYPICAL_DAY_REASON]: {
-                  title: SCHEMA_FIELDS_TITLES[NON_TYPICAL_DAY_REASON],
+                  title: trans(TranslationKeys.NON_TYPICAL_DAY),
                   type: 'array',
                   items: {
                     type: 'string',
-                    enum: NON_TYPICAL_DAY_REASONS
+                    enum: trans(TranslationKeys.NON_TYPICAL_DAY_REASONS, { returnObjects: true })
                   },
-                  description: 'Please choose all that apply.',
+                  description: trans(TranslationKeys.CHOOSE_APPLICABLE, { returnObjects: true }),
                   uniqueItems: true,
                   minItems: 1
                 }
@@ -73,7 +72,7 @@ const schema = {
       required: [DAY_OF_WEEK, TYPICAL_DAY_FLAG]
     }
   }
-};
+});
 
 const uiSchema = {
   [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
@@ -94,6 +93,6 @@ const uiSchema = {
 };
 
 export {
-  schema,
+  createSchema,
   uiSchema
 };

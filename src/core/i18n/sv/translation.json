@@ -1,0 +1,152 @@
+{
+  "intro_text": "Thank you for taking the time to complete this survey! First, we will ask you to describe everything your child did yesterday, starting when your child woke up yesterday morning and ending when they went to bed last night. Then, we will ask how your child slept last night. Please answer the questions to the best of your ability. At the end of the survey, you will be able to make changes if you want.",
+  "choose_format": "To get started, please select your preferred clock format.",
+  "clock_formats": [
+    "12-hour clock format",
+    "24-hour clock format"
+  ],
+  "day_of_week": "We would like you to think about your child's day and complete the time use diary for yesterday. What day of the week was yesterday?",
+  "weekday_options": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ],
+  "typical_day": "An important part of this project is to find out how children spend their time during the week. Was yesterday a typical {{day}} for you and your child? A non-typical day would include a school closing, being on vacation, or being home sick.",
+  "typical_day_choices": [
+    "Yes, yesterday was typical.",
+    "No, yesterday was non-typical."
+  ],
+  "yes": "Yes",
+  "no": "No",
+  "non_typical_day": "What made yesterday a non-typical day?",
+  "choose_applicable": "Please choose all that apply",
+  "non_typical_day_reasons": [
+    "My child was sick.",
+    "School/childcare was closed.",
+    "The weather was bad and we could not go outside.",
+    "We were traveling.",
+    "We had visitors."
+  ],
+  "button_back": "Back",
+  "button_next": "Next",
+  "button_submit": "Submit",
+  "button_cancel": "Cancel",
+  "button_close": "Close",
+  "weekday": "weekday",
+  "day_start_time": "What time did your child wake up yesterday morning? Please think about when your child woke up for the day, rather than waking up in the middle of the night and going back to sleep.",
+  "day_end_time": "What time did your child fall asleep last night? Please think about when your child first fell asleep for the night. Later in the survey, we will ask about how often your child woke up in the middle of the night.",
+  "today_wakeup_time": "What time did your child wake up this morning?",
+  "default_time": "Please enter time by typing in the box below (e.g., 07:00) or clicking on the clock button.",
+  "primary_activities": {
+    "childcare": "Attending school/childcare",
+    "napping": "Napping/sleeping",
+    "eating": "Eating/Drinking",
+    "media_use": "Using screen media (videos, apps, chat, etc.)",
+    "reading": "Reading or listening to a story (paper book, eBook, audiobook, etc.)",
+    "indoor": "Playing indoors",
+    "outdoor": "Playing outdoors",
+    "grooming": "Bathroom/grooming",
+    "other": "Doing other activities at home (cooking, chores, etc.)",
+    "outdoors": "Doing other activities out of the house (errands, traveling, etc.)"
+  },
+  "primary_activity": "What did your child start doing at {{time}}?",
+  "next_activity": "What did your child start doing at {{time}} after they finished {{activity}}?",
+  "default_end_time": "When did the selected activity end?",
+  "activity_end_time": "When did your child stop {{activity}}?",
+  "contextual_text": "Now, let's talk about what your child did while {{activity}} at {{time}}.",
+  "caregiver": "Who was with your child when he/she was {{activity}}?",
+  "caregiver_options": [
+    "A parent or parental figure",
+    "A grandparent",
+    "Another adult",
+    "A sibling",
+    "Another child"
+  ],
+  "bg_tv_day": "Was there TV in the background while your child was {{activity}}? For example, maybe a parent was watching TV while your child did something else in the room.",
+  "bg_audio_day": "Was there audio in the background (e.g., music, podcast) while your child was {{activity}}? For example, maybe a parent was listening to music while your child did something else in the room.",
+  "adult_media": "Was an adult using a mobile device (phone, tablet, laptop) while your child was {{activity}}? For example, maybe a parent was sending text messages while your child did something else in the room.",
+  "bg_media_options": [
+    "No",
+    "Yes, some of the time",
+    "Yes, half of the time",
+    "Yes, most of the time",
+    "Yes, the entire time",
+    "Don't know"
+  ],
+  "other_activity": "Did your child do anything else while {{activity}}?",
+  "dont_know": "Don't know",
+  "secondary_activity": "Ok, what else did your child do while {{activity}}?",
+  "book_type": "Specifically, what type(s) of book did your child read?",
+  "book_title": "What was the name of the book? If you don't know the exact name, you can give a general description (e.g., a book about unicorns).",
+  "media_activity": "Specifically, what did your child do while using screen media?",
+  "media_age": "Would you describe the program (e.g., TV show, app) as for your child’s age, for older children, for younger children, or for adults?",
+  "media_name": "What was the name of the media program (e.g., name of the show or app)? If you don’t know the exact name, you can give a general description (e.g., a drawing app, a movie about unicorns).",
+  "media_age_options": [
+    "Child's age",
+    "Older children",
+    "Younger children",
+    "Adults",
+    "Don't know"
+  ],
+  "media_activity_options": [
+    "Watched video content (TV, movie, YouTube, etc.)",
+    "Played games (app, console game, etc.)",
+    "Video chat (Facetime, Zoom, etc.)",
+    "Communicated with others in another way (talked on phone, helped to write a text message, etc.)",
+    "Created content (recorded video, took photographs, etc.)",
+    "Looked up information on the internet"
+  ],
+  "book_type_options": [
+    "Printed book (paper, cardboard, etc.)",
+    "Electronic book (eBook)",
+    "Audiobook"
+  ],
+  "no_one": "No one",
+  "bg_tv_night": "Was there a TV playing in the room while your child slept at night?",
+  "bg_audio_night": "Was there music or other audio playing in the room while your child slept at night?",
+  "sleep_pattern": "Last night, was your child's sleep pattern typical?",
+  "sleep_arrangement": "Last night, what was your child's sleeping arrangement?",
+  "sleep_arrangement_options": [
+    "Crib/cot/bed in their own, separate room (not shared with others)",
+    "Crib/cot/bed in a parent's room",
+    "Crib/cot/bed in a shared room with a sibling",
+    "Co-sleeping in a parent's bed",
+    "Co-sleeping in a sibling's bed"
+  ],
+  "wake_up_count": "Last night, how many times did your child wake up in the middle of the night?",
+  "wake_up_count_options": [
+    "Didn't wake up",
+    "1 time",
+    "2 times",
+    "3 times",
+    "4 times",
+    "5 or more times",
+    "Don't know"
+  ],
+  "non_typical_sleep_pattern": "What made your child's sleeping pattern non-typical?",
+  "non_typical_sleep_options": [
+    "My child was sick",
+    "We were traveling",
+    "We had visitors"
+  ],
+  "other": "Other",
+  "error_required": "Response is required",
+  "error_min_items": "Please select at least one item",
+  "error_invalid_end": "End time should be after {{time}}",
+  "error_invalid_bedtime": "Bed time should be after {{time}}",
+  "error_end_past_bedtime": "The last activity of the day should end at {{time}} since you indicated the child went to bed then",
+  "summary_title": "Here is a summary of how your child spent their day. Please make sure this information is correct before submitting survey.",
+  "button_edit": "Edit",
+  "child_woke_up": "Child woke up",
+  "sleeping": "Sleeping",
+  "change_language_warning": "Are you sure you want to change language? This will undo all the changes you have made so far.",
+  "change_language": "Change Language",
+  "error_submit": "An error occurred while trying to submit survey. Please try again later.",
+  "submission_error_title": "Submission Error",
+  "submission_success": "Thank you for completing the Time Use Diary survey. Your responses have been recorded.",
+  "submission_success_title": "Submission successful!"
+}
