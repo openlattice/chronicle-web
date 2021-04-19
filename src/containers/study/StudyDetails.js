@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
@@ -21,8 +21,10 @@ import { RequestStates } from 'redux-reqseq';
 import DeleteStudyModal from './components/DeleteStudyModal';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
+import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
+import { goToRoute } from '../../core/router/RoutingActions';
 import { DELETE_STUDY, UPDATE_STUDY, removeStudyOnDelete } from '../studies/StudiesActions';
 
 const { isNonEmptyString } = LangUtils;
@@ -84,15 +86,8 @@ const ContactWrapper = styled.div`
   flex: 0 0 33.3%;
 `;
 
-const DetailsHeaderWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 5px;
-  align-items: center;
-`;
-
 const NotificationIconWrapper = styled.div`
-  margin-left: 30px;
+  margin-bottom: 5px;
   display: flex;
   align-items: center;
   padding: 0 3px;
@@ -104,7 +99,11 @@ const NotificationIconWrapper = styled.div`
   }
 `;
 
-const DeleteButtonWrapper = styled.div`
+const ButtonGrid = styled.div`
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: auto auto;
+  margin-top: 20px;
   text-align: center;
 `;
 
@@ -162,11 +161,11 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
-  // After deleting study, redirect to root
   useEffect(() => {
     if (deleteStudyRS === RequestStates.SUCCESS) {
       setTimeout(() => {
         dispatch(removeStudyOnDelete(studyUUID));
+        dispatch(goToRoute(Routes.ROOT));
         dispatch(resetRequestState(DELETE_STUDY));
       }, 2000);
     }
@@ -222,19 +221,10 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   );
 
   const renderEditButton = () => (
-    <DetailsHeaderWrapper>
-      <Button
-          color="primary"
-          onClick={openEditModal}
-          startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
-        Edit Details
-      </Button>
-
-      <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
-        <h3> Daily Notifications </h3>
-      </NotificationIconWrapper>
-    </DetailsHeaderWrapper>
+    <NotificationIconWrapper>
+      <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
+      <h3> Daily Notifications </h3>
+    </NotificationIconWrapper>
   );
 
   return (
@@ -246,13 +236,18 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
           {renderContactInfo()}
         </MainInfoContainer>
 
-        <DeleteButtonWrapper>
+        <ButtonGrid>
+          <Button
+              color="secondary"
+              onClick={openEditModal}>
+            Edit Details
+          </Button>
           <Button
               color="secondary"
               onClick={showDeleteModal}>
             Delete Study
           </Button>
-        </DeleteButtonWrapper>
+        </ButtonGrid>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
             notificationsEnabled={notificationsEnabled}

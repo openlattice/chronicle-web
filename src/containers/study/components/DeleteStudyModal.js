@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react';
 
+import styled from 'styled-components';
 import { Map } from 'immutable';
 import {
-  // $FlowFixMe
-  Box,
   Input,
   Label,
   Modal,
@@ -23,6 +22,14 @@ import { deleteStudy } from '../../studies/StudiesActions';
 const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
 const { getPropertyValue } = DataUtils;
+
+const ModalBodyWrapper = styled.div`
+  max-width: 500px;
+`;
+
+const CenterText = styled.div`
+  text-align: center;
+`;
 
 const DeleteStudyModal = ({
   isVisible,
@@ -79,12 +86,12 @@ const DeleteStudyModal = ({
       </Typography>
     ),
     [RequestStates.PENDING]: (
-      <Box textAlign="center">
+      <CenterText>
         <Spinner size="2x" />
         <Typography>
           Deleting study. Please wait.
         </Typography>
-      </Box>
+      </CenterText>
     ),
     [RequestStates.SUCCESS]: (
       <Typography>
@@ -105,9 +112,9 @@ const DeleteStudyModal = ({
         textPrimary={textPrimary}
         textSecondary="Close"
         textTitle="Delete Study">
-      <Box maxWidth="500px">
+      <ModalBodyWrapper>
         { requestStateComponents[requestState] }
-      </Box>
+      </ModalBodyWrapper>
     </Modal>
   );
 };
