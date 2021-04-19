@@ -187,7 +187,7 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
 
               <Grid item xs={6}>
                 <Button
-                    color="secondary"
+                    color="error"
                     fullWidth
                     onClick={showDeleteModal}>
                   Delete Study
