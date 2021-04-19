@@ -12,7 +12,6 @@ const ModalBodyWrapper = styled.div`
 `;
 
 type Props = {
-  deleteTimeout :boolean;
   handleOnClose :() => void;
   handleOnDeleteParticipant :() => void;
   isVisible :boolean;
@@ -20,7 +19,6 @@ type Props = {
   requestState :?RequestState;
 }
 const DeleteParticipantModal = ({
-  deleteTimeout,
   handleOnClose,
   handleOnDeleteParticipant,
   isVisible,
@@ -48,11 +46,7 @@ const DeleteParticipantModal = ({
     ),
     [RequestStates.SUCCESS]: (
       <span>
-        {
-          deleteTimeout
-            ? "We are still processing your request to delete participant's data. You may close this window."
-            : "Successfully deleted participant's data."
-        }
+        Your request to delete participant&apos;s data has been successfully submitted.
       </span>
     )
   };
@@ -62,7 +56,6 @@ const DeleteParticipantModal = ({
       return (
         <ModalFooter
             isPendingPrimary
-            isDisabledSecondary={!deleteTimeout}
             onClickSecondary={handleOnClose}
             textPrimary={textPrimary}
             textSecondary={textSecondary}
