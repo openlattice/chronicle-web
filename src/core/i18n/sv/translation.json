@@ -68,7 +68,7 @@
   ],
   "bg_tv_day": "Var TV:n på i bakgrunden när barnet skulle {{activity}}? Till exempel så kanske en förälder tittade på TV under tiden barnet gjorde något annat i rummet.",
   "bg_audio_day": "Var det ljud i bakgrunden (tex musik eller podcast) när ditt barn skulle {{activity}}? Till exempel, så kanske en förälder lyssnade på musik medan barnet gjorde något annat i samma rum.",
-  "adult_media": "Använde den vuxne en bärbar digital apparat (mobil, surfplatta, laptop) medan ditt barn skulle /aktivitet från Q6a/b/? Till exempel kanske en vuxen skickade ett sms mean barnet gjorde något annat i samma rum?",
+  "adult_media": "Använde den vuxne en bärbar digital apparat (mobil, surfplatta, laptop) medan ditt barn skulle {{activity}}? Till exempel kanske en vuxen skickade ett sms mean barnet gjorde något annat i samma rum?",
   "bg_media_options": [
     "Nej.",
     "Ja, del av tiden.",
