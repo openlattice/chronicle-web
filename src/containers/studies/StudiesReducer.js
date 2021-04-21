@@ -23,7 +23,6 @@ import {
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   GET_TIME_USE_DIARY_STUDIES,
-  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -89,10 +88,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
-    }
-
-    case RESET_DELETE_PARTICIPANT_TIMEOUT: {
-      return state.setIn([DELETE_STUDY_PARTICIPANT, TIMEOUT], false);
     }
 
     case getStudies.case(action.type): {
