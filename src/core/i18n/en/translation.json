@@ -148,5 +148,5 @@
   "error_submit": "An error occurred while trying to submit survey. Please try again later.",
   "submission_error_title": "Submission Error",
   "submission_success": "Thank you for completing the Time Use Diary survey. Your responses have been recorded.",
-  "submission_success_title": "Submission successful!"
+  "submission_sucess_title": "Submission successful!"
 }
