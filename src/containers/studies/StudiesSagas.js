@@ -4,9 +4,7 @@
 
 import {
   call,
-  delay,
   put,
-  race,
   select,
   takeEvery,
 } from '@redux-saga/core/effects';
@@ -29,7 +27,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { DataUtils, LangUtils, Logger } from 'lattice-utils';
+import { DataUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
 import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
@@ -99,7 +97,6 @@ const {
 } = DataProcessingUtils;
 
 const { UpdateTypes } = Types;
-const { isDefined } = LangUtils;
 const { getEntityKeyId, getPropertyValue } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
@@ -130,7 +127,7 @@ const {
   SELECTED_ORG_ID
 } = APP_REDUX_CONSTANTS;
 
-const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
+const { DELETE, ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 const TIME_USE_DIARY = 'Time Use Diary';
@@ -317,16 +314,31 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
     const { studyId, participantEntityKeyId, participantId } = action.value;
     const selectedOrgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
-    const { response, timeout } = yield race({
-      response: call(ChronicleApi.deleteStudyParticipant, selectedOrgId, participantId, studyId),
-      timeout: delay(1000 * 10) // 10 seconds
-    });
-    if (response && response.error) throw response.error;
+    yield call(ChronicleApi.deleteStudyParticipant, selectedOrgId, participantId, studyId);
+
+    // update association with status = 'DELETE'
+    const participatedInESID = yield select(selectESIDByCollection(PARTICIPATED_IN, AppModules.CHRONICLE_CORE));
+    const statusPTID = yield select(selectPropertyTypeId(STATUS));
+
+    const participatedInEKID = yield select(
+      (state) => state.getIn(['studies', 'participants', studyId, participantEntityKeyId, PARTICIPATED_IN_EKID, 0])
+    );
+
+    const response = yield call(updateEntityDataWorker, updateEntityData({
+      entities: {
+        [participatedInEKID]: {
+          [statusPTID]: [DELETE],
+        }
+      },
+      entitySetId: participatedInESID,
+      updateType: UpdateTypes.PartialReplace
+    }));
+
+    if (response.error) throw response.error;
 
     yield put(deleteStudyParticipant.success(action.id, {
       participantEntityKeyId,
       studyId,
-      timeout: isDefined(timeout)
     }));
   }
   catch (error) {
@@ -474,7 +486,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     }, {});
 
     yield put(getStudyParticipants.success(action.id, {
-      participants: fromJS(participants),
+      participants: fromJS(participants).filter((participant) => participant.getIn([STATUS, 0]) !== DELETE),
       studyId,
     }));
   }

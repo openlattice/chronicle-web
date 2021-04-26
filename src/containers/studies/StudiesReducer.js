@@ -25,7 +25,6 @@ import {
   GET_STUDY_PARTICIPANTS,
   GET_TIME_USE_DIARY_STUDIES,
   REMOVE_STUDY_ON_DELETE,
-  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -98,10 +97,6 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
     case REMOVE_STUDY_ON_DELETE: {
       const { studyId } = action;
       return state.deleteIn([STUDIES, studyId]);
-    }
-
-    case RESET_DELETE_PARTICIPANT_TIMEOUT: {
-      return state.setIn([DELETE_STUDY_PARTICIPANT, TIMEOUT], false);
     }
 
     case getStudies.case(action.type): {
