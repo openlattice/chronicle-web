@@ -16,20 +16,18 @@ import ContextualQuestionsIntro from './ContextualQuestionsIntro';
 import SurveyIntro from './SurveyIntro';
 import TimeUseSummary from './TimeUseSummary';
 
+import TranslationKeys from '../constants/TranslationKeys';
 import * as SecondaryFollowUpSchema from '../schemas/SecondaryFollowUpSchema';
 import { submitTudData } from '../TimeUseDiaryActions';
 import { PAGE_NUMBERS } from '../constants/GeneralConstants';
-import { PRIMARY_ACTIVITIES, PROPERTY_CONSTS } from '../constants/SchemaConstants';
+import { PROPERTY_CONSTS } from '../constants/SchemaConstants';
 import {
   applyCustomValidation,
-  getIs12HourFormatSelected,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey
 } from '../utils';
 
 const { getPageSectionKey, parsePageSectionKey } = DataProcessingUtils;
-
-const { READING, MEDIA_USE } = PRIMARY_ACTIVITIES;
 
 const {
   ACTIVITY_END_TIME,
@@ -82,7 +80,7 @@ const removeExtraData = (formRef :Object, pagedData, page :number) => {
 
     const pages = Object.keys(formData)
       .map((key) => {
-        const parsed = parsePageSectionKey(key);
+        const parsed :Object = parsePageSectionKey(key);
         return Number(parsed.page);
       });
 
@@ -143,7 +141,7 @@ const forceFormDataStateUpdate = (formRef :Object, pagedData :Object = {}, page 
   }
 };
 
-const updateTypicalDayLabel = (formData :Object, page :number) => {
+const updateTypicalDayLabel = (formData :Object, page :number, trans :(string, ?Object) => string) => {
   const psk = getPageSectionKey(page, 0);
   const dayOfWeek = getIn(formData, [psk, DAY_OF_WEEK]);
   if (dayOfWeek) {
@@ -151,14 +149,12 @@ const updateTypicalDayLabel = (formData :Object, page :number) => {
     const label = typicalDayInput?.previousSibling;
     if (label) {
       // $FlowFixMe
-      label.innerHTML = 'An important part of this project is to find out how children spend'
-        + ` their time during the week. Was yesterday a typical ${dayOfWeek} for you`
-        + ' and your child? A non-typical day would include a school closing, being on vacation, or being home sick.';
+      label.innerHTML = trans(TranslationKeys.TYPICAL_DAY, { day: dayOfWeek });
     }
   }
 };
 
-const updatePrimaryActivityQuestion = (formData :Object, page :number) => {
+const updatePrimaryActivityQuestion = (formData :Object, page :number, trans :(string, ?Object) => string) => {
   const currentActivity = selectPrimaryActivityByPage(page, formData);
   if (currentActivity) {
     const endTimeInput = document.getElementById(`root_${getPageSectionKey(page, 0)}_endTime`);
@@ -166,7 +162,7 @@ const updatePrimaryActivityQuestion = (formData :Object, page :number) => {
     const label = endTimeInput?.parentNode?.parentNode?.parentNode?.firstChild;
     if (label) {
       // $FlowFixMe
-      label.innerHTML = `When did your child stop ${currentActivity}?`;
+      label.innerHTML = trans(TranslationKeys.ACTIVITY_END_TIME, { activity: currentActivity });
     }
   }
 };
@@ -178,19 +174,37 @@ const schemaHasFollowupQuestions = (schema :Object = {}, page :number) => {
   return Object.keys(properties).includes(HAS_FOLLOWUP_QUESTIONS);
 };
 
+type TudActivities = {|
+  childcare :'string';
+  napping :'string';
+  eating :'string';
+  media_use :'string';
+  reading :'string';
+  indoor :'string';
+  outdoor :'string';
+  grooming :'string';
+  other :'string';
+  outdoors :'string';
+|};
+
 type Props = {
   familyId :?string;
   formSchema :Object;
   initialFormData :Object;
   isSummaryPage :boolean;
+  language :string;
+  organizationId :UUID;
   pagedProps :Object;
   participantId :string;
+  resetSurvey :(Function) => void;
+  shouldReset :boolean;
   studyId :UUID;
   submitRequestState :?RequestState;
+  trans :(string, ?Object) => Object;
+  translationData :Object;
   updateFormState :(newSchema :Object, uiSchema :Object, formData :Object) => void;
   updateSurveyProgress :(formData :Object) => void;
   waveId :?string;
-  organizationId :UUID;
 };
 
 const QuestionnaireForm = ({
@@ -198,11 +212,16 @@ const QuestionnaireForm = ({
   formSchema,
   initialFormData,
   isSummaryPage,
+  language,
   organizationId,
   pagedProps,
   participantId,
+  resetSurvey,
+  shouldReset,
   studyId,
   submitRequestState,
+  trans,
+  translationData,
   updateFormState,
   updateSurveyProgress,
   waveId,
@@ -218,12 +237,16 @@ const QuestionnaireForm = ({
     validateAndSubmit
   } = pagedProps;
 
+  if (shouldReset) resetSurvey(setPage);
+
   const dispatch = useDispatch();
 
   const { schema, uiSchema } = formSchema;
 
-  const readingSchema = SecondaryFollowUpSchema.createSchema(READING);
-  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(MEDIA_USE);
+  const activities :TudActivities = trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true });
+
+  const readingSchema = SecondaryFollowUpSchema.createSchema(activities.reading, trans);
+  const mediaUseSchema = SecondaryFollowUpSchema.createSchema(activities.media_use, trans);
 
   const handleNext = () => {
     if (isSummaryPage) {
@@ -234,6 +257,8 @@ const QuestionnaireForm = ({
         participantId,
         studyId,
         waveId,
+        language,
+        translationData
       }));
       return;
     }
@@ -252,7 +277,7 @@ const QuestionnaireForm = ({
     let newProperties = getIn(currentSchema, ['properties', psk, 'properties'], {});
     let newRequired = getIn(currentSchema, ['properties', psk, 'required'], []);
 
-    if (secondaryActivities.includes(MEDIA_USE)) {
+    if (secondaryActivities.includes(activities.media_use)) {
       newProperties = merge(newProperties, mediaProperties);
       newRequired = merge(newRequired, mediaRequired);
     }
@@ -262,7 +287,7 @@ const QuestionnaireForm = ({
       newRequired = newRequired.filter((property) => !mediaRequired.includes(property));
     }
 
-    if (secondaryActivities.includes(READING)) {
+    if (secondaryActivities.includes(activities.reading)) {
       newProperties = merge(newProperties, readingProperties);
       newRequired = merge(newRequired, readingRequired);
     }
@@ -279,10 +304,10 @@ const QuestionnaireForm = ({
   };
 
   const onChange = ({ formData, schema: currentSchema, uiSchema: currentUiSchema }) => {
-    updatePrimaryActivityQuestion(formData, page);
+    updatePrimaryActivityQuestion(formData, page, trans);
 
     if (page === PRE_SURVEY_PAGE) {
-      updateTypicalDayLabel(formData, page);
+      updateTypicalDayLabel(formData, page, trans);
     }
 
     if (schemaHasFollowupQuestions(currentSchema, page)) {
@@ -293,17 +318,27 @@ const QuestionnaireForm = ({
   };
 
   const validate = (formData, errors) => (
-    applyCustomValidation(formData, errors, page)
+    applyCustomValidation(formData, errors, page, trans)
   );
+
+  /* eslint-disable no-param-reassign */
+  const transformErrors = (errors) => errors.map((error) => {
+    if (error.name === 'required') {
+      error.message = trans(TranslationKeys.ERROR_RESPONSE_REQUIRED);
+    }
+    if (error.name === 'minItems') {
+      error.message = trans(TranslationKeys.ERROR_MIN_ITEMS);
+    }
+    if (error.name === 'enum' || error.name === 'oneOf') {
+      error.message = '';
+    }
+    return error;
+  });
+  /* eslint-enable */
 
   const schemaHasFollowup = schemaHasFollowupQuestions(schema, page);
   const prevActivity = selectPrimaryActivityByPage(page - 1, pagedData);
   const prevEndTime = selectTimeByPageAndKey(page - 1, ACTIVITY_START_TIME, pagedData);
-
-  const is12hourFormat = getIs12HourFormatSelected(pagedData);
-  const formattedPrevEndTime = is12hourFormat
-    ? prevEndTime.toLocaleString(DateTime.TIME_SIMPLE)
-    : prevEndTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 
   return (
     <>
@@ -318,7 +353,8 @@ const QuestionnaireForm = ({
               schemaHasFollowup && (
                 <ContextualQuestionsIntro
                     selectedActivity={prevActivity}
-                    time={formattedPrevEndTime} />
+                    time={prevEndTime}
+                    trans={trans} />
               )
             }
             {
@@ -332,6 +368,7 @@ const QuestionnaireForm = ({
                 onSubmit={onNext}
                 ref={formRef}
                 schema={schema}
+                transformErrors={transformErrors}
                 uiSchema={uiSchema}
                 validate={validate} />
 
@@ -343,14 +380,14 @@ const QuestionnaireForm = ({
         <Button
             disabled={page === 0 || submitRequestState === RequestStates.PENDING}
             onClick={onBack}>
-          Back
+          {trans(TranslationKeys.BTN_BACK)}
         </Button>
         <Button
             color="primary"
             isLoading={submitRequestState === RequestStates.PENDING}
             onClick={handleNext}>
           {
-            isSummaryPage ? 'Submit' : 'Next'
+            isSummaryPage ? trans(TranslationKeys.BTN_SUBMIT) : trans(TranslationKeys.BTN_NEXT)
           }
         </Button>
       </ButtonRow>

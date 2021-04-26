@@ -2,10 +2,10 @@
  * @flow
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
@@ -19,13 +19,16 @@ import {
   Grid,
   Typography
 } from 'lattice-ui-kit';
-import { LangUtils } from 'lattice-utils';
+import { LangUtils, useBoolean, useRequestState } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+
+import DeleteStudyModal from './components/DeleteStudyModal';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { UPDATE_STUDY } from '../studies/StudiesActions';
+import { DELETE_STUDY, UPDATE_STUDY, removeStudyOnDelete } from '../studies/StudiesActions';
 
 const { isNonEmptyString } = LangUtils;
 
@@ -93,6 +96,9 @@ type Props = {
 const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isDeleteModalVisible, showDeleteModal, hideDeleteModal] = useBoolean(false);
+
+  const deleteStudyRS = useRequestState(['studies', DELETE_STUDY]);
 
   const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
   const studyUUID = study.getIn([STUDY_ID, 0]);
@@ -102,8 +108,23 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
 
   const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
+  // After deleting study, redirect to root
+  useEffect(() => {
+    if (deleteStudyRS === RequestStates.SUCCESS) {
+      setTimeout(() => {
+        dispatch(removeStudyOnDelete(studyUUID));
+        dispatch(resetRequestState(DELETE_STUDY));
+      }, 2000);
+    }
+  }, [deleteStudyRS, dispatch, studyUUID]);
+
   const closeEditModal = () => {
     setEditModalVisible(false);
+  };
+
+  const onCloseDeleteModal = () => {
+    hideDeleteModal();
+    dispatch(resetRequestState(DELETE_STUDY));
   };
 
   const openEditModal = () => {
@@ -114,20 +135,10 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   };
 
   const DetailsHeader = () => (
-    <Box display="flex" flexWrap="wrap">
-      <Box mr={4}>
-        <Button
-            color="primary"
-            onClick={openEditModal}
-            startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
-          Edit Details
-        </Button>
-      </Box>
-      <Box display="flex" alignItems="center">
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
-        <Box ml={1}>
-          <Typography color="textSecondary" variant="button"> Daily Notifications </Typography>
-        </Box>
+    <Box display="flex" alignItems="center">
+      <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
+      <Box ml={1}>
+        <Typography color="textSecondary" variant="button"> Daily Notifications </Typography>
       </Box>
     </Box>
   );
@@ -163,11 +174,36 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
                   placeholder="No group"
                   value={studyGroup} />
             </Grid>
+
+            <Grid container item xs={12} spacing={3}>
+              <Grid item xs={6}>
+                <Button
+                    color="secondary"
+                    fullWidth
+                    onClick={openEditModal}>
+                  Edit Details
+                </Button>
+              </Grid>
+
+              <Grid item xs={6}>
+                <Button
+                    color="error"
+                    fullWidth
+                    onClick={showDeleteModal}>
+                  Delete Study
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
           <StudyDetailsModal
               handleOnCloseModal={closeEditModal}
               notificationsEnabled={notificationsEnabled}
               isVisible={editModalVisible}
+              study={study} />
+          <DeleteStudyModal
+              isVisible={isDeleteModalVisible}
+              onClose={onCloseDeleteModal}
+              requestState={deleteStudyRS || RequestStates.STANDBY}
               study={study} />
         </Box>
       </CardSegment>

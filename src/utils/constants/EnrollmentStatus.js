@@ -2,13 +2,15 @@
 
 // study enrollment status
 type EnrollmentStatusEnum = {|
-  ENROLLED:'ENROLLED';
-  NOT_ENROLLED:'NOT_ENROLLED';
+  DELETE :'DELETE';
+  ENROLLED :'ENROLLED';
+  NOT_ENROLLED :'NOT_ENROLLED';
 |};
 
 type EnrollmentStatus = $Values<EnrollmentStatusEnum>;
 
 const EnrollmentStatuses :{|...EnrollmentStatusEnum |} = Object.freeze({
+  DELETE: 'DELETE',
   ENROLLED: 'ENROLLED',
   NOT_ENROLLED: 'NOT_ENROLLED'
 });
