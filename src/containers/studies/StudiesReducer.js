@@ -17,25 +17,28 @@ import {
   CREATE_NOTIFICATIONS_ENTITY_SETS,
   CREATE_PARTICIPANTS_ENTITY_SET,
   CREATE_STUDY,
+  DELETE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_NOTIFICATIONS_EKID,
   GET_STUDIES,
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   GET_TIME_USE_DIARY_STUDIES,
+  REMOVE_STUDY_ON_DELETE,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
   createNotificationsEntitySets,
   createParticipantsEntitySet,
   createStudy,
+  deleteStudy,
   deleteStudyParticipant,
   getNotificationsEntity,
   getStudies,
   getStudyNotificationStatus,
   getStudyParticipants,
   getTimeUseDiaryStudies,
-  updateStudy
+  updateStudy,
 } from './StudiesActions';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -59,6 +62,7 @@ const INITIAL_STATE :Map<*, *> = fromJS({
   [CREATE_NOTIFICATIONS_ENTITY_SETS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [CREATE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [CREATE_PARTICIPANTS_ENTITY_SET]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [DELETE_STUDY]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [DELETE_STUDY_PARTICIPANT]: {
     [REQUEST_STATE]: RequestStates.STANDBY,
     [TIMEOUT]: false
@@ -88,6 +92,11 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
         return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
+    }
+
+    case REMOVE_STUDY_ON_DELETE: {
+      const { studyId } = action;
+      return state.deleteIn([STUDIES, studyId]);
     }
 
     case getStudies.case(action.type): {
@@ -300,6 +309,14 @@ export default function studiesReducer(state :Map<*, *> = INITIAL_STATE, action 
           .setIn([GET_TIME_USE_DIARY_STUDIES, REQUEST_STATE], RequestStates.SUCCESS)
           .set(TIME_USE_DIARY_STUDIES, action.value),
         FINALLY: () => state.deleteIn([GET_TIME_USE_DIARY_STUDIES, action.id])
+      });
+    }
+
+    case deleteStudy.case(action.type): {
+      return deleteStudy.reducer(state, action, {
+        REQUEST: () => state.setIn([DELETE_STUDY, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([DELETE_STUDY, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([DELETE_STUDY, REQUEST_STATE], RequestStates.SUCCESS)
       });
     }
 

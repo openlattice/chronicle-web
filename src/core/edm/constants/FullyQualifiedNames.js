@@ -8,6 +8,7 @@ const { FQN } = Models;
 
 const PROPERTY_TYPE_FQNS = {
   // study
+  DELETE_FQN: FQN.of('ol.delete'),
   FULL_NAME_FQN: FQN.of('general.fullname'),
   STUDY_DESCRIPTION: FQN.of('diagnosis.Description'),
   STUDY_EMAIL: FQN.of('contact.Email'),

@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import { faCopy } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  // $FlowFixMe
+  Box,
   IconButton,
   Modal,
   // $FlowFixMe
@@ -16,10 +18,6 @@ import {
 import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
-
-const DetailWrapper = styled.div`
-  margin-bottom: 20px;
-`;
 
 const Grid = styled.div`
   align-items: center;
@@ -66,7 +64,7 @@ const ParticipantInfoModal = ({
       <div>
         {
           participantDetails.map((detail) => (
-            <DetailWrapper key={detail.name}>
+            <Box mb="20px" maxWidth="600px">
               <Typography variant="body2">
                 {detail.name}
               </Typography>
@@ -85,7 +83,7 @@ const ParticipantInfoModal = ({
                   </IconButton>
                 </Tooltip>
               </Grid>
-            </DetailWrapper>
+            </Box>
           ))
         }
       </div>

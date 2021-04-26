@@ -218,9 +218,23 @@ const getSubmitTudDataUrl = (orgId :UUID, studyId :UUID, participantId :string) 
   return `${getBaseUrl()}/${BASE}/${orgId}/${studyId}/${participantId}/${TIME_USE_DIARY}`;
 };
 
+const getDeleteStudyUrl = (orgId :UUID, studyId :UUID) => {
+  if (!isValidUUID(orgId)) {
+    LOG.error('invalid orgId: ', orgId);
+    return null;
+  }
+  if (!isValidUUID(studyId)) {
+    LOG.error('invalid studyId: ', studyId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${BASE}/${AUTHENTICATED}/${orgId}/${studyId}`;
+};
+
 export {
   getBaseUrl,
   getDeleteParticipantPath,
+  getDeleteStudyUrl,
   getParticipantDataUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
