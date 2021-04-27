@@ -154,7 +154,8 @@ function* deleteStudyWorker(action :SequenceAction) :Saga<*> {
     const studyId = study.getIn([STUDY_ID, 0]);
     const studyEKID = getEntityKeyId(study);
 
-    yield call(ChronicleApi.deleteStudy, studyId);
+    const deleteResponse = yield call(ChronicleApi.deleteStudy, studyId);
+    if (deleteResponse?.error) throw deleteResponse.error;
 
     // mark the study entity as deleted
     const studyESID = yield select(selectEntitySetId(CHRONICLE_STUDIES));
