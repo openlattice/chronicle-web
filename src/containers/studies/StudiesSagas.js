@@ -268,11 +268,6 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
 
     yield call(ChronicleApi.deleteStudyParticipant, participantId, studyId);
 
-    yield put(deleteStudyParticipant.success(action.id, {
-      participantEntityKeyId,
-      studyId,
-    }));
-
     // update association with status = 'DELETE'
     const participatedInESID = yield select(selectEntitySetId(PARTICIPATED_IN));
     const statusPTID = yield select(selectPropertyTypeId(STATUS));
@@ -292,6 +287,10 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
     }));
     if (response.error) throw response.error;
 
+    yield put(deleteStudyParticipant.success(action.id, {
+      participantEntityKeyId,
+      studyId,
+    }));
   }
   catch (error) {
     LOG.error(action.type, error);
