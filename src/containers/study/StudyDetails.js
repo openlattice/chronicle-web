@@ -2,10 +2,10 @@
  * @flow
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
-import { faBell, faBellSlash, faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faBell, faBellSlash } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
 import {
@@ -14,13 +14,18 @@ import {
   CardSegment,
   Colors
 } from 'lattice-ui-kit';
-import { LangUtils } from 'lattice-utils';
+import { LangUtils, useBoolean, useRequestState } from 'lattice-utils';
 import { useDispatch } from 'react-redux';
+import { RequestStates } from 'redux-reqseq';
+
+import DeleteStudyModal from './components/DeleteStudyModal';
 
 import StudyDetailsModal from '../studies/components/StudyDetailsModal';
+import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { UPDATE_STUDY } from '../studies/StudiesActions';
+import { goToRoute } from '../../core/router/RoutingActions';
+import { DELETE_STUDY, UPDATE_STUDY, removeStudyOnDelete } from '../studies/StudiesActions';
 
 const { isNonEmptyString } = LangUtils;
 
@@ -81,15 +86,8 @@ const ContactWrapper = styled.div`
   flex: 0 0 33.3%;
 `;
 
-const DetailsHeaderWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 5px;
-  align-items: center;
-`;
-
 const NotificationIconWrapper = styled.div`
-  margin-left: 30px;
+  margin-bottom: 5px;
   display: flex;
   align-items: center;
   padding: 0 3px;
@@ -99,6 +97,14 @@ const NotificationIconWrapper = styled.div`
     font-weight: 400;
     font-size: 15px;
   }
+`;
+
+const ButtonGrid = styled.div`
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: auto auto;
+  margin-top: 20px;
+  text-align: center;
 `;
 
 const StyledFontAwesome = styled(FontAwesomeIcon)`
@@ -145,6 +151,9 @@ type Props = {
 const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isDeleteModalVisible, showDeleteModal, hideDeleteModal] = useBoolean(false);
+
+  const deleteStudyRS = useRequestState(['studies', DELETE_STUDY]);
 
   const studyDescription = study.getIn([STUDY_DESCRIPTION, 0]);
   const studyUUID = study.getIn([STUDY_ID, 0]);
@@ -152,10 +161,25 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   const studyEmail = study.getIn([STUDY_EMAIL, 0]);
   const studyGroup = study.getIn([STUDY_GROUP, 0]);
 
+  useEffect(() => {
+    if (deleteStudyRS === RequestStates.SUCCESS) {
+      setTimeout(() => {
+        dispatch(removeStudyOnDelete(studyUUID));
+        dispatch(goToRoute(Routes.ROOT));
+        dispatch(resetRequestState(DELETE_STUDY));
+      }, 2000);
+    }
+  }, [deleteStudyRS, dispatch, studyUUID]);
+
   const notificationIcon = notificationsEnabled ? faBell : faBellSlash;
 
   const closeEditModal = () => {
     setEditModalVisible(false);
+  };
+
+  const onCloseDeleteModal = () => {
+    hideDeleteModal();
+    dispatch(resetRequestState(DELETE_STUDY));
   };
 
   const openEditModal = () => {
@@ -197,19 +221,10 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
   );
 
   const renderEditButton = () => (
-    <DetailsHeaderWrapper>
-      <Button
-          color="primary"
-          onClick={openEditModal}
-          startIcon={<FontAwesomeIcon icon={faPencilAlt} />}>
-        Edit Details
-      </Button>
-
-      <NotificationIconWrapper>
-        <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
-        <h3> Daily Notifications </h3>
-      </NotificationIconWrapper>
-    </DetailsHeaderWrapper>
+    <NotificationIconWrapper>
+      <StyledFontAwesome icon={notificationIcon} color={notificationsEnabled ? GREEN.G300 : NEUTRAL.N300} />
+      <h3> Daily Notifications </h3>
+    </NotificationIconWrapper>
   );
 
   return (
@@ -220,10 +235,28 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
           {renderAbout()}
           {renderContactInfo()}
         </MainInfoContainer>
+
+        <ButtonGrid>
+          <Button
+              color="secondary"
+              onClick={openEditModal}>
+            Edit Details
+          </Button>
+          <Button
+              color="error"
+              onClick={showDeleteModal}>
+            Delete Study
+          </Button>
+        </ButtonGrid>
         <StudyDetailsModal
             handleOnCloseModal={closeEditModal}
             notificationsEnabled={notificationsEnabled}
             isVisible={editModalVisible}
+            study={study} />
+        <DeleteStudyModal
+            isVisible={isDeleteModalVisible}
+            onClose={onCloseDeleteModal}
+            requestState={deleteStudyRS || RequestStates.STANDBY}
             study={study} />
       </CardSegment>
     </Card>

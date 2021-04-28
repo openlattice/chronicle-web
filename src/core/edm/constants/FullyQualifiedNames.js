@@ -27,6 +27,7 @@ const PROPERTY_TYPE_FQNS = {
   STUDY_GROUP: FQN.of('sharing.name'),
   STUDY_ID: FQN.of('general.stringid'),
   STUDY_VERSION: FQN.of('ol.version'),
+  DELETE_FQN: FQN.of('ol.delete'),
 
   // study participants:
   PERSON_ID: FQN.of('nc.SubjectIdentification'),
