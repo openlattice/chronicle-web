@@ -7,7 +7,7 @@ import { Map } from 'immutable';
 import { Constants } from 'lattice';
 import { Table } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { RequestState } from 'redux-reqseq';
 
@@ -21,18 +21,14 @@ import TABLE_HEADERS from './utils/tableHeaders';
 import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 import {
   CHANGE_ENROLLMENT_STATUS,
   DELETE_STUDY_PARTICIPANT,
   changeEnrollmentStatus,
   deleteStudyParticipant,
-  resetDeleteParticipantTimeout
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
-
-const { TIMEOUT } = STUDIES_REDUX_CONSTANTS;
 
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
@@ -66,10 +62,6 @@ const ParticipantsTable = (props :Props) => {
   const deleteParticipantRS :?RequestState = useRequestState(['studies', DELETE_STUDY_PARTICIPANT]);
   const changeEnrollmentStatusRS :?RequestState = useRequestState(['studies', CHANGE_ENROLLMENT_STATUS]);
 
-  const deleteTimeout :boolean = useSelector(
-    (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)
-  );
-
   const studyId = study.getIn([STUDY_ID, 0]);
 
   const handleOnDeleteParticipant = () => {
@@ -100,7 +92,6 @@ const ParticipantsTable = (props :Props) => {
 
   const onCloseDeleteParticipantModal = () => {
     setDeleteModalOpen(false);
-    dispatch(resetDeleteParticipantTimeout());
   };
 
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
@@ -149,7 +140,6 @@ const ParticipantsTable = (props :Props) => {
           studyId={studyId} />
 
       <DeleteParticipantModal
-          deleteTimeout={deleteTimeout}
           handleOnClose={onCloseDeleteParticipantModal}
           handleOnDeleteParticipant={handleOnDeleteParticipant}
           isVisible={deleteModalOpen}

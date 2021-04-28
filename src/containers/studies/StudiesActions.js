@@ -41,11 +41,6 @@ const getStudyNotificationStatus :RequestSequence = newRequestSequence(GET_STUDY
 const GET_TIME_USE_DIARY_STUDIES :'GET_TIME_USE_DIARY_STUDIES' = 'GET_TIME_USE_DIARY_STUDIES';
 const getTimeUseDiaryStudies :RequestSequence = newRequestSequence(GET_TIME_USE_DIARY_STUDIES);
 
-const RESET_DELETE_PARTICIPANT_TIMEOUT :'RESET_DELETE_PARTICIPANT_TIMEOUT' = 'RESET_DELETE_PARTICIPANT_TIMEOUT';
-const resetDeleteParticipantTimeout = () => ({
-  type: RESET_DELETE_PARTICIPANT_TIMEOUT
-});
-
 const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
 const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 
@@ -62,7 +57,6 @@ export {
   GET_STUDY_NOTIFICATION_STATUS,
   GET_STUDY_PARTICIPANTS,
   GET_TIME_USE_DIARY_STUDIES,
-  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -76,6 +70,5 @@ export {
   getStudyNotificationStatus,
   getStudyParticipants,
   getTimeUseDiaryStudies,
-  resetDeleteParticipantTimeout,
   updateStudy
 };

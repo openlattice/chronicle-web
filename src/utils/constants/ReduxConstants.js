@@ -6,7 +6,6 @@ const STUDIES_REDUX_CONSTANTS = {
   PARTICIPATED_IN_EKID: 'participatedInEKID',
   PART_OF_ASSOCIATION_EKID_MAP: 'partOfAssociationEKIDMap',
   STUDIES: 'studies',
-  TIMEOUT: 'timeout',
   TIME_USE_DIARY_STUDIES: 'timeUseDiaryStudies',
 };
 
