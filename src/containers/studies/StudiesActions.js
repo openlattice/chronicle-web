@@ -50,11 +50,6 @@ const removeStudyOnDelete = (studyId :UUID) => ({
   studyId
 });
 
-const RESET_DELETE_PARTICIPANT_TIMEOUT :'RESET_DELETE_PARTICIPANT_TIMEOUT' = 'RESET_DELETE_PARTICIPANT_TIMEOUT';
-const resetDeleteParticipantTimeout = () => ({
-  type: RESET_DELETE_PARTICIPANT_TIMEOUT
-});
-
 const UPDATE_STUDY :'UPDATE_STUDY' = 'UPDATE_STUDY';
 const updateStudy :RequestSequence = newRequestSequence(UPDATE_STUDY);
 
@@ -73,7 +68,6 @@ export {
   GET_STUDY_PARTICIPANTS,
   GET_TIME_USE_DIARY_STUDIES,
   REMOVE_STUDY_ON_DELETE,
-  RESET_DELETE_PARTICIPANT_TIMEOUT,
   UPDATE_STUDY,
   addStudyParticipant,
   changeEnrollmentStatus,
@@ -89,6 +83,5 @@ export {
   getStudyParticipants,
   getTimeUseDiaryStudies,
   removeStudyOnDelete,
-  resetDeleteParticipantTimeout,
   updateStudy
 };
