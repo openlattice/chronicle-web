@@ -55,8 +55,8 @@
   },
   "primary_activity": "Vad började ditt barn göra klockan {{time}}?",
   "next_activity": "Vad började ditt barn göra klockan {{time}} efter de hade slutat med att {{activity}}?",
-  "default_end_time": "When did the selected activity end?",
-  "activity_end_time": "When did your child stop {{activity}}?",
+  "default_end_time": "När avslutades den valda aktiviteten?",
+  "activity_end_time": "När slutatade ditt barn att {{activity}}?",
   "contextual_text": "Nu handlar frågan om vad ditt barn gjorde under tiden hen skulle {{activity}} klockan {{time}}.",
   "caregiver": "Vem var med ditt barn när hen skulle {{activity}}?",
   "caregiver_options": [
