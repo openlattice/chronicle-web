@@ -1,7 +1,7 @@
 {
   "intro_text": "¡Gracias por tormarse el tiempo de completar el cuestionario! En primer lugar, le vamos a pedir que describa todo lo que hizo su hijo ayer, comenzando por cuando su hijo se despertó ayer por la mañana y terminando por cuando se acostó por la noche. Luego, le preguntaremos por cómo durmió su hijo anoche. Responda a las preguntas lo mejor que pueda. Al final de la encuesta, podrá realizar cambios si lo desea.",
   "choose_format": "Para comenzar, seleccione por favor el formato de reloj que prefiera.",
-  "clock_formats": [
+  "clock_formats": 
     "Formato de reloj de 12 horas",
     "Formato de reloj de 24 horas"
   ],
@@ -15,7 +15,7 @@
     "Sábado",
     "Domingo"
   ],
-  "typical_day": "Una parte importante de este proyecto es comprender cómo los niños emplean su tiempo durante la semana. ¿Fue ayer un típico {{insertar día de Q2}} para usted y su hijo? Un día que no sea típico incluiría que no fuera al colegio, estuviera de vacaciones, o en casa enfermo.",
+  "typical_day": "Una parte importante de este proyecto es comprender cómo los niños emplean su tiempo durante la semana. ¿Fue ayer un típico {{insert day from Q2}} para usted y su hijo? Un día que no sea típico incluiría que no fuera al colegio, estuviera de vacaciones, o en casa enfermo.",
   "typical_day_choices": [
     "Sí, ayer fue un día típico.",
     "No, ayer no fue un día típicol."
@@ -53,12 +53,12 @@
     "other": "Hacer otras actividades en casa (cocinar, otras tareas, etc.)",
     "outdoors": "Hacer actividades fuera de la casa (recados, viajes, etc.)"
   },
-  "primary_activity": "¿Qué comenzó a hacer su hijo a las {{hora señalada en Q4a}}??",
-  "next_activity": "¿Qué comenzó a hacer su hijo a las [hora señalada en Q7) después de haber terminado {{actividad señalada en Q6a/b}}?",
-  "default_end_time": "¿Cuando terminó de {{Actividad selecionada}}?",
-  "activity_end_time": "Cuándo paró su hijo de {{actividad señalada en Q6a/b}}?",
-  "contextual_text": "Ahora, hablemos de lo que hizo su hijo mientras {{actividad señalada en Q6a / b] a las [hora señalada en Q4a / Q7}}",
-  "caregiver": "¿Con quién estaba su hijo cuando él o ella estaban {{actividad señalada en Q6a / b}}?",
+  "primary_activity": "¿Qué comenzó a hacer su hijo a las {{time piped in from Q4a}}??",
+  "next_activity": "¿Qué comenzó a hacer su hijo a las {{time piped in from Q7}} después de haber terminado {{activity piped in from Q6a/b}}?",
+  "default_end_time": "¿Cuando terminó de {{the selected activity}}?",
+  "activity_end_time": "Cuándo paró su hijo de {{activity piped in from Q6a/b}}?",
+  "contextual_text": "Ahora, hablemos de lo que hizo su hijo mientras {{activity piped in from Q6a/b] a las {{time piped in from Q4a/Q7}}",
+  "caregiver": "¿Con quién estaba su hijo cuando él o ella estaban {{activity piped in from Q6a/b}}?",
   "caregiver_options": [
     "Padre/madre o figura parental",
     "Un abuelo/a",
@@ -66,9 +66,9 @@
     "Hermano",
     "Otro niño"
   ],
-  "bg_tv_day": "¿Había televisión de fondo mientras su hijo estaba {{inserte la actividad de la Q6a / b}}? Por ejemplo, tal vez uno de los padres estaba viendo la televisión mientras su hijo hacía otra cosa en la habitación.",
-  "bg_audio_day": "¿Había audio de fondo (p. ej., música, podcast) mientras su hijo estaba {{insertar actividad de Q6a / b}}? Por ejemplo, tal vez uno de los padres estaba escuchando música mientras su hijo hacía otra cosa en la habitación.",
-  "adult_media": "¿Estaba algún adulto usando un dispositivo móvil (teléfono, tableta, computadora portátil) mientras su hijo estaba {{insertar actividad de Q6a / b}}? Por ejemplo, tal vez un padre estaba enviando mensajes de texto con el móvil mientras su hijo hacía otra cosa en la habitación.": [
+  "bg_tv_day": "¿Había televisión de fondo mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez uno de los padres estaba viendo la televisión mientras su hijo hacía otra cosa en la habitación.",
+  "bg_audio_day": "¿Había audio de fondo (p. ej., música, podcast) mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez uno de los padres estaba escuchando música mientras su hijo hacía otra cosa en la habitación.",
+  "adult_media": "¿Estaba algún adulto usando un dispositivo móvil (teléfono, tableta, computadora portátil) mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez un padre estaba enviando mensajes de texto con el móvil mientras su hijo hacía otra cosa en la habitación.": [
     "No",
     "Sí, parte del tiempo",
     "Sí, la mitad del tiempo",
@@ -76,9 +76,9 @@
     "Sí, todo el tiempo",
     "No lo sé"
   ],
-  "other_activity": "¿Su hijo hacía alguna otra cosa mientras {{actividad señalada en Q6a / b}}",
-  "dont_know": "Don't know",
-  "secondary_activity": "De acuerdo, ¿qué más hizo su hijo mientras {{actividad señalada en Q6a / b}}?  Elija todas las que correspondan.",
+  "other_activity": "¿Su hijo hacía alguna otra cosa mientras {{activity piped in from Q6a/b}}",
+  "dont_know": "No lo sé",
+  "secondary_activity": "De acuerdo, ¿qué más hizo su hijo mientras {{activity piped in from Q6a/b}}?  Elija todas las que correspondan.",
   "book_type": "Específicamente, ¿qué tipo(s) de libro leyó su hijo?",
   "book_title": "¿Cuál era el nombre del libro?  Si no se acuerda exactamente del nombre, puede darnos una descripción general (ej., era un libro de unicornios.).",
   "media_activity": "Específicamente, ¿qué hizo su hijo mientras usaba las pantallas? Elija todas las que correspondan.",
@@ -133,9 +133,9 @@
     "Tuvimos visita en casa."
   ],
   "other": "Otros:",
-  "error_required": "Es una pregunta obligatoria [frase que aparece al participante si no responde a una pregunta obligatoria]",
+  "error_required": "Es una pregunta obligatoria",
   "error_min_items": "Por favor selecione al menos una respuesta",
-  "error_invalid_end": "La finalización de la actividad debería ser después [señalar hora] {{La frase aparece a los participantes}}",
+  "error_invalid_end": "La finalización de la actividad debería ser después {{time}}",
   "error_invalid_bedtime": "Bed time should be after {{time}}",
   "error_end_past_bedtime": "La última actividad del día debe terminar a las {{time}} ya que indicaste que el niño se fue a la cama en ese momento",
   "summary_title": "Aquí hay un resumen de cómo su hijo pasó el día. Asegúrese de que esta información sea correcta antes de enviar la encuesta.",
