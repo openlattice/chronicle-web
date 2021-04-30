@@ -1,7 +1,7 @@
 {
   "intro_text": "¡Gracias por tormarse el tiempo de completar el cuestionario! En primer lugar, le vamos a pedir que describa todo lo que hizo su hijo ayer, comenzando por cuando su hijo se despertó ayer por la mañana y terminando por cuando se acostó por la noche. Luego, le preguntaremos por cómo durmió su hijo anoche. Responda a las preguntas lo mejor que pueda. Al final de la encuesta, podrá realizar cambios si lo desea.",
   "choose_format": "Para comenzar, seleccione por favor el formato de reloj que prefiera.",
-  "clock_formats": 
+  "clock_formats": [
     "Formato de reloj de 12 horas",
     "Formato de reloj de 24 horas"
   ],
