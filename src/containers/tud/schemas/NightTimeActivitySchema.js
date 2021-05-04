@@ -17,7 +17,7 @@ const {
 
 const createSchema = (pageNum :number, trans :(string, ?Object) => Object) => ({
   type: 'object',
-  title: 'Nighttime Activity',
+  title: trans(TranslationKeys.NIGHTTIME_ACTIVITY_TITLE),
   properties: {
     [getPageSectionKey(pageNum, 0)]: {
       type: 'object',
