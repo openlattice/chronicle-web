@@ -34,9 +34,9 @@
   "button_back": "Tillbaka",
   "button_next": "Nästa",
   "button_submit": "Skicka in",
-  "button_cancel": "Ändra",
+  "button_cancel": "Ångra",
   "button_close": "Stäng",
-  "weekday": "weekday",
+  "weekday": "dag",
   "day_start_time": "Vilken tid vaknade barnet i går morse? Skriv den tiden då barnet vaknade för att gå upp, det vill säga inte om hen vaknade mitt i natten och sedan somnade om.",
   "day_end_time": "Vilken tid somnade ditt barn i går kväll? Skriv den tiden då barnet somnade för natten. Senare i dagboken kommer vi fråga hur ofta ditt barn vaknade under natten.",
   "today_wakeup_time": "Vilken tid vaknade barnet i går morse?",
@@ -115,7 +115,7 @@
     "Vagga/spjälsäng, vanlig säng i föräldernas rum",
     "Vagga/spjälsäng, vanlig säng i sitt eget rum som de delar med ett syskon",
     "Samsov i förälders säng",
-    "Samsov i med ett syskon"
+    "Samsov med ett syskon"
   ],
   "wake_up_count": "Igår natt, hur många gånger vakande barnet mitt i natten?",
   "wake_up_count_options": [
@@ -138,16 +138,16 @@
   "error_min_items": "Välj åtminstone ett svar",
   "error_invalid_end": "Sluttiden måste vara efter {{time}}",
   "error_invalid_bedtime": "Läggning måste vara efter klockan {{time}}",
-  "error_end_past_bedtime": "Dagen sista aktivitet bör sluta klockan {{time}} eftersom du skrev att barnet gick och la sig då",
+  "error_end_past_bedtime": "Dagens sista aktivitet bör sluta klockan {{time}} eftersom du skrev att barnet gick och la sig då",
   "summary_title": "Här är en sammanfattning av vad ditt barn gjorde idag. Kolla igenom allt stämmer innan du trycker på skicka in! Tack!",
   "button_edit": "Ändra",
-  "child_woke_up": "Barnet vakande",
+  "child_woke_up": "Barnet vaknade",
   "sleeping": "Sover",
-  "change_language_warning": "Är du säker på att du vill ändra språk? Detta kommer att radera alla alla ändringar du gjort.",
+  "change_language_warning": "Är du säker på att du vill ändra språk? Detta kommer att radera alla ändringar du gjort.",
   "change_language": "Ändra språk",
   "error_submit": "Det blev fel när du skulle skicka in dagboken. Var snäll och försök igen senare.",
   "submission_error_title": "Det gick inte att skicka in",
   "submission_success": "Tack för att du har fyllt i dagboken! Ditt svar har registrerats",
   "submission_success_title": "Dagboken är inskickad!",
-  "nighttime_activity_title": "Nighttime Activity"
+  "nighttime_activity_title": "Nattetid"
 }
