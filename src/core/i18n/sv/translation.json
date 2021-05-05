@@ -148,5 +148,6 @@
   "error_submit": "Det blev fel när du skulle skicka in dagboken. Var snäll och försök igen senare.",
   "submission_error_title": "Det gick inte att skicka in",
   "submission_success": "Tack för att du har fyllt i dagboken! Ditt svar har registrerats",
-  "submission_success_title": "Dagboken är inskickad!"
+  "submission_success_title": "Dagboken är inskickad!",
+  "nighttime_activity_title": "Nighttime Activity"
 }
