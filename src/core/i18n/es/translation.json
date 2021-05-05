@@ -15,7 +15,7 @@
     "Sábado",
     "Domingo"
   ],
-  "typical_day": "Una parte importante de este proyecto es comprender cómo los niños emplean su tiempo durante la semana. ¿Fue ayer un típico {{insert day from Q2}} para usted y su hijo? Un día que no sea típico incluiría que no fuera al colegio, estuviera de vacaciones, o en casa enfermo.",
+  "typical_day": "Una parte importante de este proyecto es comprender cómo los niños emplean su tiempo durante la semana. ¿Fue ayer un típico {{day}} para usted y su hijo? Un día que no sea típico incluiría que no fuera al colegio, estuviera de vacaciones, o en casa enfermo.",
   "typical_day_choices": [
     "Sí, ayer fue un día típico.",
     "No, ayer no fue un día típicol."
@@ -53,12 +53,12 @@
     "other": "Hacer otras actividades en casa (cocinar, otras tareas, etc.)",
     "outdoors": "Hacer actividades fuera de la casa (recados, viajes, etc.)"
   },
-  "primary_activity": "¿Qué comenzó a hacer su hijo a las {{time piped in from Q4a}}??",
-  "next_activity": "¿Qué comenzó a hacer su hijo a las {{time piped in from Q7}} después de haber terminado {{activity piped in from Q6a/b}}?",
-  "default_end_time": "¿Cuando terminó de {{the selected activity}}?",
-  "activity_end_time": "Cuándo paró su hijo de {{activity piped in from Q6a/b}}?",
-  "contextual_text": "Ahora, hablemos de lo que hizo su hijo mientras {{activity piped in from Q6a/b] a las {{time piped in from Q4a/Q7}}",
-  "caregiver": "¿Con quién estaba su hijo cuando él o ella estaban {{activity piped in from Q6a/b}}?",
+  "primary_activity": "¿Qué comenzó a hacer su hijo a las {{time}}??",
+  "next_activity": "¿Qué comenzó a hacer su hijo a las {{time}} después de haber terminado {{activity}}?",
+  "default_end_time": "¿Cuando terminó de {{activity}}?",
+  "activity_end_time": "Cuándo paró su hijo de {{activity}}?",
+  "contextual_text": "Ahora, hablemos de lo que hizo su hijo mientras {{activity}} a las {{time}}",
+  "caregiver": "¿Con quién estaba su hijo cuando él o ella estaban {{activity}}?",
   "caregiver_options": [
     "Padre/madre o figura parental",
     "Un abuelo/a",
@@ -66,9 +66,9 @@
     "Hermano",
     "Otro niño"
   ],
-  "bg_tv_day": "¿Había televisión de fondo mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez uno de los padres estaba viendo la televisión mientras su hijo hacía otra cosa en la habitación.",
-  "bg_audio_day": "¿Había audio de fondo (p. ej., música, podcast) mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez uno de los padres estaba escuchando música mientras su hijo hacía otra cosa en la habitación.",
-  "adult_media": "¿Estaba algún adulto usando un dispositivo móvil (teléfono, tableta, computadora portátil) mientras su hijo estaba {{insert activity from Q6a/b}}? Por ejemplo, tal vez un padre estaba enviando mensajes de texto con el móvil mientras su hijo hacía otra cosa en la habitación.": [
+  "bg_tv_day": "¿Había televisión de fondo mientras su hijo estaba {{activity}}? Por ejemplo, tal vez uno de los padres estaba viendo la televisión mientras su hijo hacía otra cosa en la habitación.",
+  "bg_audio_day": "¿Había audio de fondo (p. ej., música, podcast) mientras su hijo estaba {{activity}}? Por ejemplo, tal vez uno de los padres estaba escuchando música mientras su hijo hacía otra cosa en la habitación.",
+  "adult_media": "¿Estaba algún adulto usando un dispositivo móvil (teléfono, tableta, computadora portátil) mientras su hijo estaba {{activity}}? Por ejemplo, tal vez un padre estaba enviando mensajes de texto con el móvil mientras su hijo hacía otra cosa en la habitación.": [
     "No",
     "Sí, parte del tiempo",
     "Sí, la mitad del tiempo",
@@ -76,9 +76,9 @@
     "Sí, todo el tiempo",
     "No lo sé"
   ],
-  "other_activity": "¿Su hijo hacía alguna otra cosa mientras {{activity piped in from Q6a/b}}",
+  "other_activity": "¿Su hijo hacía alguna otra cosa mientras {{activity}}",
   "dont_know": "No lo sé",
-  "secondary_activity": "De acuerdo, ¿qué más hizo su hijo mientras {{activity piped in from Q6a/b}}?  Elija todas las que correspondan.",
+  "secondary_activity": "De acuerdo, ¿qué más hizo su hijo mientras {{activity}}?  Elija todas las que correspondan.",
   "book_type": "Específicamente, ¿qué tipo(s) de libro leyó su hijo?",
   "book_title": "¿Cuál era el nombre del libro?  Si no se acuerda exactamente del nombre, puede darnos una descripción general (ej., era un libro de unicornios.).",
   "media_activity": "Específicamente, ¿qué hizo su hijo mientras usaba las pantallas? Elija todas las que correspondan.",
