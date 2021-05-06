@@ -84,7 +84,6 @@ module.exports = (env) => {
   return {
     bail: true,
     entry: [
-      '@babel/polyfill',
       APP_PATHS.ABS.APP,
     ],
     mode: env.production ? ENV_PROD : ENV_DEV,
@@ -108,9 +107,6 @@ module.exports = (env) => {
         }
       ],
     },
-    node: {
-      net: 'empty',
-    },
     optimization: {
       minimize: !!env.production,
     },
@@ -132,6 +128,12 @@ module.exports = (env) => {
         APP_PATHS.ABS.SOURCE,
         APP_PATHS.ABS.NODE,
       ],
+      fallback: {
+        http: false,
+        zlib: false,
+        https: false,
+        stream: false
+      }
     },
   };
 };

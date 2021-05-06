@@ -10,8 +10,8 @@ module.exports = (env) => {
   const baseConfig = baseWebpackConfig(env);
 
   const output = Object.assign({}, baseConfig.output, {
-    filename: `${APP_PATHS.REL.STATIC_JS}/app.[hash:8].js`,
-    chunkFilename: `${APP_PATHS.REL.STATIC_JS}/app.chunk.[id].[chunkhash:8].js`,
+    filename: `${APP_PATHS.REL.STATIC_JS}/app.[contenthash].js`,
+    chunkFilename: `${APP_PATHS.REL.STATIC_JS}/app.chunk.[id].[chunkhash].js`,
   });
 
   const plugins = [
