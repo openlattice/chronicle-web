@@ -20,7 +20,7 @@
     "Yes, yesterday was typical.",
     "No, yesterday was non-typical."
   ],
-  "yes": "Yes",
+  "yes": "Making temporary changes just to demo.",
   "no": "No",
   "non_typical_day": "What made yesterday a non-typical day?",
   "choose_applicable": "Please choose all that apply",
@@ -35,7 +35,7 @@
   "button_next": "Next",
   "button_submit": "Submit",
   "button_cancel": "Cancel",
-  "button_close": "Close",
+  "button_close": "Other changes here",
   "weekday": "weekday",
   "day_start_time": "What time did your child wake up yesterday morning? Please think about when your child woke up for the day, rather than waking up in the middle of the night and going back to sleep.",
   "day_end_time": "What time did your child fall asleep last night? Please think about when your child first fell asleep for the night. Later in the survey, we will ask about how often your child woke up in the middle of the night.",
