@@ -20,7 +20,7 @@
     "Yes, yesterday was typical.",
     "No, yesterday was non-typical."
   ],
-  "yes": "Yes",
+  "yes": "Here is another change that I wanna make! ",
   "no": "No",
   "non_typical_day": "What made yesterday a non-typical day?",
   "choose_applicable": "Please choose all that apply",
@@ -32,7 +32,7 @@
     "We had visitors."
   ],
   "button_back": "Back",
-  "button_next": "Next",
+  "button_next": "And another change",
   "button_submit": "Submit",
   "button_cancel": "Cancel",
   "button_close": "Close",
