@@ -5,7 +5,7 @@
     "12-hour clock format",
     "24-hour clock format"
   ],
-  "day_of_week": "We would like you to think about your child's day and complete the time use diary for yesterday. What day of the week was yesterday?",
+  "day_of_week": "More changes on this line. This is just for demo. about your child's day and complete the time use diary for yesterday. What day of the week was yesterday?",
   "weekday_options": [
     "Monday",
     "Tuesday",
@@ -149,5 +149,5 @@
   "submission_error_title": "Submission Error",
   "submission_success": "Thank you for completing the Time Use Diary survey. Your responses have been recorded.",
   "submission_success_title": "Submission successful!",
-  "nighttime_activity_title": "Nighttime Activity"
+  "nighttime_activity_title": "Other changes."
 }
