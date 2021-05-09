@@ -64,7 +64,7 @@
     "redux-reqseq": "0.5.0",
     "reselect": "~4.0.0",
     "rrule": "~2.6.0",
-    "styled-components": "~5.2.1",
+    "styled-components": "~5.3.0",
     "uuid": "~8.3.2"
   },
   "devDependencies": {
