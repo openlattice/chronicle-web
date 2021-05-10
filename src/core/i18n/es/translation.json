@@ -148,6 +148,6 @@
   "error_submit": "Ha ocurrido un error mietras intentaba enviar el encuesta. Por favor, inténtelo más tarde.",
   "submission_error_title": "Error en el envío",
   "submission_success": "Gracias por completar la encuesta del Diario de Uso del Tiempo. Sus respuestas han sido registradas.",
-  "submission_success_title": "Su encuesta se ha enviado correctamente!"
+  "submission_success_title": "Su encuesta se ha enviado correctamente!",
   "nighttime_activity_title": "Actividad Nocturna"
 }
