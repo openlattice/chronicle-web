@@ -18,10 +18,6 @@ const {
   RAW,
 } = ParticipantDataTypes;
 
-const ModalWrapper = styled.div`
-  min-width: 400px;
-`;
-
 const ButtonGrid = styled.div`
   display: grid;
   align-items: center;
@@ -92,7 +88,7 @@ const DownloadParticipantDataModal = (props :Props) => {
   };
 
   const renderModalBody = () => (
-    <ModalWrapper>
+    <div>
       <p>
         What kind of data do you want to download?
       </p>
@@ -113,7 +109,7 @@ const DownloadParticipantDataModal = (props :Props) => {
           Questionnaire Responses
         </Button>
       </ButtonGrid>
-    </ModalWrapper>
+    </div>
   );
 
   if (questionnaireModalOpen) {

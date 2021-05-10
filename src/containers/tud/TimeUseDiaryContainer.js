@@ -4,22 +4,26 @@ import React, { useEffect, useState } from 'react';
 
 import isEqual from 'lodash/isEqual';
 import qs from 'qs';
-import { DataProcessingUtils, Paged } from 'lattice-fabricate';
+import { Paged } from 'lattice-fabricate';
 import {
   AppContainerWrapper,
   AppContentWrapper,
-  AppHeaderWrapper,
   Card,
   CardSegment,
-  Typography
 } from 'lattice-ui-kit';
 import { useRequestState } from 'lattice-utils';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
+import ConfirmChangeLanguage from './components/ConfirmChangeLanguage';
+import HeaderComponent from './components/HeaderComponent';
 import ProgressBar from './components/ProgressBar';
 import QuestionnaireForm from './components/QuestionnaireForm';
+import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
+import SubmissionErrorModal from './components/SubmissionErrorModal';
+import SubmissionSuccessful from './components/SubmissionSuccessful';
 import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
@@ -32,20 +36,15 @@ import {
   selectTimeByPageAndKey
 } from './utils';
 
-import BasicModal from '../shared/BasicModal';
-import OpenLatticeIcon from '../../assets/images/ol_icon.png';
-import SubmissionSuccessful from '../shared/SubmissionSuccessful';
+import * as LanguageCodes from '../../utils/constants/LanguageCodes';
 
 const {
   ACTIVITY_END_TIME,
   DAY_END_TIME,
-  DAY_OF_WEEK,
   DAY_START_TIME
 } = PROPERTY_CONSTS;
 
-const { DAY_SPAN_PAGE } = PAGE_NUMBERS;
-
-const { getPageSectionKey } = DataProcessingUtils;
+const { DAY_SPAN_PAGE, SURVEY_INTRO_PAGE } = PAGE_NUMBERS;
 
 const TimeUseDiaryContainer = () => {
   const location = useLocation();
@@ -66,10 +65,12 @@ const TimeUseDiaryContainer = () => {
     // $FlowFixMe
   } = queryParams;
 
-  const initFormSchema = createFormSchema({}, 0);
+  const { i18n, t } = useTranslation();
+
+  const initFormSchema = createFormSchema({}, 0, t);
 
   const [formSchema, setFormSchema] = useState(initFormSchema); // {schema, uiSchema}
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
   const [page, setPage] = useState(0);
   const [formData, setFormData] = useState({});
 
@@ -78,36 +79,37 @@ const TimeUseDiaryContainer = () => {
   const [dayStartTime, setDayStartTime] = useState();
   const [isSummaryPage, setIsSummaryPage] = useState(false);
   const [isNightActivityPage, setIsNightActivityPage] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [languageToChangeTo, setLanguageToChangeTo] = useState(null);
+  const [isChangeLanguageModalVisible, setChangeLanguageModalVisible] = useState(false);
+  const [shouldReset, setShouldReset] = useState(false);
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
 
   useEffect(() => {
     if (submitRequestState === RequestStates.FAILURE) {
-      setIsModalVisible(true);
+      setIsErrorModalVisible(true);
     }
   }, [submitRequestState]);
 
+  // select default language
+  useEffect(() => {
+    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === LanguageCodes.ENGLISH);
+    if (defaultLng) {
+      setSelectedLanguage({
+        label: defaultLng.language,
+        value: defaultLng.code
+      });
+    }
+  }, []);
+
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    const newSchema = createFormSchema(formData, page);
+    const newSchema = createFormSchema(formData, page, t);
     setFormSchema(newSchema);
-  }, [page]);
+  }, [page, selectedLanguage?.value, t]);
   /* eslint-enable */
-
-  useEffect(() => {
-    if (page === PAGE_NUMBERS.PRE_SURVEY_PAGE) {
-      const dayOfWeekInput = document.getElementById(
-        `root_${getPageSectionKey(page, 0)}_${DAY_OF_WEEK}`
-      );
-      const label = dayOfWeekInput?.previousSibling;
-      if (label) {
-        // $FlowFixMe
-        label.innerHTML = 'We would like you to think about your child\'s day and complete the time use diary'
-          + ' for <i>yesterday</i>. What day of the week was <i>yesterday</i>?';
-      }
-    }
-  }, [page, formSchema]);
 
   const refreshProgress = (currFormData) => {
     const dayStart = selectTimeByPageAndKey(DAY_SPAN_PAGE, DAY_START_TIME, currFormData);
@@ -130,7 +132,7 @@ const TimeUseDiaryContainer = () => {
   const prevSchema = usePrevious(formSchema.schema);
   useEffect(() => {
     if (!isEqual(prevSchema, formSchema.schema)) {
-      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page));
+      setIsNightActivityPage(getIsNightActivityPage(formSchema.schema, page, t));
     }
   }, [page, formSchema]);
   /* eslint-enable */
@@ -138,6 +140,32 @@ const TimeUseDiaryContainer = () => {
   const onPageChange = (currPage, currFormData) => {
     setPage(currPage);
     setFormData(currFormData);
+  };
+
+  const changeLanguage = (lng :SelectLanguageOption) => {
+    if (lng !== null) {
+      i18n.changeLanguage(lng.value);
+      setSelectedLanguage(lng);
+    }
+  };
+
+  const onConfirmChangeLanguage = () => {
+    if (languageToChangeTo !== null) {
+      setChangeLanguageModalVisible(false);
+      setShouldReset(true);
+      changeLanguage(languageToChangeTo);
+    }
+  };
+
+  const onChangeLanguage = (lng :SelectLanguageOption) => {
+    if (lng.value === i18n.language) return;
+
+    if (page === SURVEY_INTRO_PAGE) {
+      changeLanguage(lng);
+      return;
+    }
+    setLanguageToChangeTo(lng);
+    setChangeLanguageModalVisible(true);
   };
 
   const updateFormState = (schema, uiSchema, currFormData) => {
@@ -153,6 +181,12 @@ const TimeUseDiaryContainer = () => {
     setFormData(currFormData);
   };
 
+  const resetSurvey = (goToPage) => {
+    goToPage(SURVEY_INTRO_PAGE);
+    setFormData({});
+    setShouldReset(false);
+  };
+
   const is12hourFormat = getIs12HourFormatSelected(formData);
   const isDayActivityPage = page >= PAGE_NUMBERS.FIRST_ACTIVITY_PAGE
     && !isSummaryPage
@@ -160,22 +194,22 @@ const TimeUseDiaryContainer = () => {
 
   return (
     <AppContainerWrapper>
-      <AppHeaderWrapper appIcon={OpenLatticeIcon} appTitle="Chronicle" />
+      <HeaderComponent onChangeLanguage={onChangeLanguage} selectedLanguage={selectedLanguage} />
       <AppContentWrapper>
-        <BasicModal
-            handleOnClose={() => setIsModalVisible(false)}
-            isVisible={isModalVisible}
-            title="Submission Error">
-          <p> An error occurred while trying to submit survey. Please try again later. </p>
-        </BasicModal>
+        <ConfirmChangeLanguage
+            handleOnClose={() => setChangeLanguageModalVisible(false)}
+            handleOnConfirmChange={onConfirmChangeLanguage}
+            isVisible={isChangeLanguageModalVisible}
+            language={i18n.language}
+            trans={t} />
+        <SubmissionErrorModal
+            handleOnClose={() => setIsErrorModalVisible(false)}
+            isVisible={isErrorModalVisible}
+            trans={t} />
         {
           submitRequestState === RequestStates.SUCCESS
             ? (
-              <SubmissionSuccessful>
-                <Typography variant="body2">
-                  Thank you for completing the Time Use Diary survey. Your responses have been recorded.
-                </Typography>
-              </SubmissionSuccessful>
+              <SubmissionSuccessful trans={t} />
             )
             : (
               <Card>
@@ -196,11 +230,16 @@ const TimeUseDiaryContainer = () => {
                             formSchema={formSchema}
                             initialFormData={formData}
                             isSummaryPage={isSummaryPage}
+                            language={i18n.language}
                             organizationId={organizationId}
                             pagedProps={pagedProps}
                             participantId={participantId}
+                            resetSurvey={resetSurvey}
+                            shouldReset={shouldReset}
                             studyId={studyId}
                             submitRequestState={submitRequestState}
+                            trans={t}
+                            translationData={i18n.store.data}
                             updateFormState={updateFormState}
                             updateSurveyProgress={updateSurveyProgress}
                             waveId={waveId} />

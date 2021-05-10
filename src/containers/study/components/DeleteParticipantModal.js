@@ -2,17 +2,18 @@
 
 import React from 'react';
 
-import styled from 'styled-components';
-import { Modal, ModalFooter, Spinner } from 'lattice-ui-kit';
+import {
+  // $FlowFixMe
+  Box,
+  Modal,
+  ModalFooter,
+  Spinner,
+  Typography
+} from 'lattice-ui-kit';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
 
-const ModalBodyWrapper = styled.div`
-  width: 500px;
-`;
-
 type Props = {
-  deleteTimeout :boolean;
   handleOnClose :() => void;
   handleOnDeleteParticipant :() => void;
   isVisible :boolean;
@@ -20,7 +21,6 @@ type Props = {
   requestState :?RequestState;
 }
 const DeleteParticipantModal = ({
-  deleteTimeout,
   handleOnClose,
   handleOnDeleteParticipant,
   isVisible,
@@ -33,27 +33,25 @@ const DeleteParticipantModal = ({
 
   const requestStateComponents = {
     [RequestStates.STANDBY]: (
-      <span>
+      <Typography>
         {`Are you sure you want to delete ${participantId}'s data? This action is permanent and cannot be undone.`}
-      </span>
+      </Typography>
     ),
     [RequestStates.PENDING]: (
-      <div style={{ textAlign: 'center' }}>
+      <Box textAlign="center">
         <Spinner size="2x" />
-        <p>Deleting participant&apos;s data. Please wait.</p>
-      </div>
+        <Typography>Deleting participant&apos;s data. Please wait.</Typography>
+      </Box>
     ),
     [RequestStates.FAILURE]: (
-      <span>Failed to delete participant. Please try again or contact support@openlattice.com.</span>
+      <Typography>
+        Failed to delete participant. Please try again or contact support@openlattice.com.
+      </Typography>
     ),
     [RequestStates.SUCCESS]: (
-      <span>
-        {
-          deleteTimeout
-            ? "We are still processing your request to delete participant's data. You may close this window."
-            : "Successfully deleted participant's data."
-        }
-      </span>
+      <Typography>
+        Your request to delete participant&apos;s data has been successfully submitted.
+      </Typography>
     )
   };
 
@@ -62,7 +60,6 @@ const DeleteParticipantModal = ({
       return (
         <ModalFooter
             isPendingPrimary
-            isDisabledSecondary={!deleteTimeout}
             onClickSecondary={handleOnClose}
             textPrimary={textPrimary}
             textSecondary={textSecondary}
@@ -97,11 +94,11 @@ const DeleteParticipantModal = ({
         textSecondary={textSecondary}
         textTitle="Delete Participant's Data"
         withFooter={renderFooter}>
-      <ModalBodyWrapper>
+      <Box maxWidth="500px">
         {
           requestStateComponents[requestState || RequestStates.STANDBY]
         }
-      </ModalBodyWrapper>
+      </Box>
     </Modal>
   );
 };

@@ -4,9 +4,7 @@
 
 import {
   call,
-  delay,
   put,
-  race,
   select,
   takeEvery,
 } from '@redux-saga/core/effects';
@@ -29,7 +27,7 @@ import {
   SearchApiActions,
   SearchApiSagas,
 } from 'lattice-sagas';
-import { DataUtils, LangUtils, Logger } from 'lattice-utils';
+import { DataUtils, Logger } from 'lattice-utils';
 import type { Saga } from '@redux-saga/core';
 import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
@@ -38,6 +36,7 @@ import {
   ADD_PARTICIPANT,
   CHANGE_ENROLLMENT_STATUS,
   CREATE_STUDY,
+  DELETE_STUDY,
   DELETE_STUDY_PARTICIPANT,
   GET_STUDIES,
   GET_STUDY_PARTICIPANTS,
@@ -45,6 +44,7 @@ import {
   addStudyParticipant,
   changeEnrollmentStatus,
   createStudy,
+  deleteStudy,
   deleteStudyParticipant,
   getNotificationsEntity,
   getParticipantsMetadata,
@@ -52,7 +52,7 @@ import {
   getStudyNotificationStatus,
   getStudyParticipants,
   getTimeUseDiaryStudies,
-  updateStudy
+  updateStudy,
 } from './StudiesActions';
 import { constructEntityFromFormData, getMinDateFromMetadata } from './utils';
 
@@ -97,16 +97,16 @@ const {
 } = DataProcessingUtils;
 
 const { UpdateTypes } = Types;
-const { isDefined } = LangUtils;
-const { getEntityKeyId } = DataUtils;
+const { getEntityKeyId, getPropertyValue } = DataUtils;
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
 const {
-  DATE_ENROLLED,
-  DATETIME_START_FQN,
-  DATE_LOGGED,
   DATETIME_END_FQN,
+  DATETIME_START_FQN,
+  DATE_ENROLLED,
+  DATE_LOGGED,
+  DELETE_FQN,
   DESCRIPTION_FQN,
   EVENT_COUNT,
   ID_FQN,
@@ -127,10 +127,58 @@ const {
   SELECTED_ORG_ID
 } = APP_REDUX_CONSTANTS;
 
-const { ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
+const { DELETE, ENROLLED, NOT_ENROLLED } = EnrollmentStatuses;
 
 const LOG = new Logger('StudiesSagas');
 const TIME_USE_DIARY = 'Time Use Diary';
+
+function* deleteStudyWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(deleteStudy.request(action.id));
+
+    const study = action.value;
+
+    const orgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
+    const studyId = getPropertyValue(study, [STUDY_ID, 0]);
+    const studyEKID = getEntityKeyId(study);
+
+    yield call(ChronicleApi.deleteStudy, orgId, studyId);
+
+    // mark the study entity as deleted
+
+    const chronicleEntitySetIds = yield select(selectEntitySetsByModule(AppModules.CHRONICLE_CORE));
+    const studyESID = chronicleEntitySetIds.get(STUDIES);
+
+    const deletePTID = yield select(selectPropertyTypeId(DELETE_FQN));
+
+    const updateResponse = yield call(updateEntityDataWorker, updateEntityData({
+      entities: {
+        // $FlowFixMe
+        [studyEKID]: {
+          [deletePTID]: [true],
+        }
+      },
+      entitySetId: studyESID,
+      updateType: UpdateTypes.PartialReplace
+    }));
+
+    if (updateResponse.error) throw updateResponse.error;
+
+    yield put(deleteStudy.success(action.id));
+
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(deleteStudy.failure(action.id));
+  }
+  finally {
+    yield put(deleteStudy.finally(action.id));
+  }
+}
+
+function* deleteStudyWatcher() :Saga<*> {
+  yield takeEvery(DELETE_STUDY, deleteStudyWorker);
+}
 
 function* getTimeUseDiaryStudiesWorker(action :SequenceAction) :Saga<*> {
   const workerResponse = {};
@@ -266,16 +314,31 @@ function* deleteStudyParticipantWorker(action :SequenceAction) :Generator<*, *, 
     const { studyId, participantEntityKeyId, participantId } = action.value;
     const selectedOrgId :UUID = yield select((state) => state.getIn(['app', SELECTED_ORG_ID]));
 
-    const { response, timeout } = yield race({
-      response: call(ChronicleApi.deleteStudyParticipant, selectedOrgId, participantId, studyId),
-      timeout: delay(1000 * 10) // 10 seconds
-    });
-    if (response && response.error) throw response.error;
+    yield call(ChronicleApi.deleteStudyParticipant, selectedOrgId, participantId, studyId);
+
+    // update association with status = 'DELETE'
+    const participatedInESID = yield select(selectESIDByCollection(PARTICIPATED_IN, AppModules.CHRONICLE_CORE));
+    const statusPTID = yield select(selectPropertyTypeId(STATUS));
+
+    const participatedInEKID = yield select(
+      (state) => state.getIn(['studies', 'participants', studyId, participantEntityKeyId, PARTICIPATED_IN_EKID, 0])
+    );
+
+    const response = yield call(updateEntityDataWorker, updateEntityData({
+      entities: {
+        [participatedInEKID]: {
+          [statusPTID]: [DELETE],
+        }
+      },
+      entitySetId: participatedInESID,
+      updateType: UpdateTypes.PartialReplace
+    }));
+
+    if (response.error) throw response.error;
 
     yield put(deleteStudyParticipant.success(action.id, {
       participantEntityKeyId,
       studyId,
-      timeout: isDefined(timeout)
     }));
   }
   catch (error) {
@@ -423,7 +486,7 @@ function* getStudyParticipantsWorker(action :SequenceAction) :Generator<*, *, *>
     }, {});
 
     yield put(getStudyParticipants.success(action.id, {
-      participants: fromJS(participants),
+      participants: fromJS(participants).filter((participant) => participant.getIn([STATUS, 0]) !== DELETE),
       studyId,
     }));
   }
@@ -831,7 +894,9 @@ function* getStudiesWorker(action :SequenceAction) :Generator<*, *, *> {
       throw response.error;
     }
 
-    let studies = fromJS(response.data).filter((study) => study.getIn([STUDY_ID, 0]));
+    let studies = fromJS(response.data)
+      .filter((study) => study.getIn([STUDY_ID, 0]))
+      .filter((study) => !study.getIn([DELETE_FQN, 0], false));
 
     // get notification status for studies
     if (!studies.isEmpty()) {
@@ -897,7 +962,7 @@ function* createStudyWorker(action :SequenceAction) :Generator<*, *, *> {
       [getPageSectionKey(1, 1), getEntityAddressKey(0, STUDIES, NOTIFICATION_ENABLED)]
     );
 
-    const associations = [];
+    const associations :Array<Object> = [];
 
     const associationEntityData = processAssociationEntityData(
       associations,
@@ -960,11 +1025,12 @@ export {
   changeEnrollmentStatusWatcher,
   createStudyWatcher,
   deleteStudyParticipantWatcher,
+  deleteStudyWatcher,
+  getNotificationsEntityWorker,
   getParticipantsMetadataWorker,
   getStudiesWatcher,
   getStudiesWorker,
   getStudyParticipantsWatcher,
   updateStudyWatcher,
   updateStudyWorker,
-  getNotificationsEntityWorker
 };

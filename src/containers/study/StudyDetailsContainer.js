@@ -6,7 +6,12 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
-import { Colors } from 'lattice-ui-kit';
+import {
+  // $FlowFixMe
+  Box,
+  Colors,
+  StyleUtils,
+} from 'lattice-ui-kit';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
@@ -42,23 +47,11 @@ const { NEUTRAL, PURPLE } = Colors;
 
 const { getEntityKeyId } = DataUtils;
 
-const StudyNameWrapper = styled.h2`
-  align-items: flex-start;
-  display: flex;
-  font-size: 28px;
-  font-weight: normal;
-  margin-bottom: 0;
-  padding: 0;
-`;
+const { media } = StyleUtils;
 
 type Props = {
   match :Match;
 };
-
-const Tabs = styled.div`
-  display: flex;
-  margin: 30px 0 50px 0;
-`;
 
 const TabLink = styled(NavLink)`
   border-bottom: 2px solid transparent;
@@ -79,10 +72,19 @@ const TabLink = styled(NavLink)`
     cursor: pointer;
   }
 
+  &.last-child {
+    margin-right: 0;
+  }
+
   &.active {
     border-bottom: 2px solid ${PURPLE.P300};
     color: ${PURPLE.P300};
   }
+
+  ${media.phone`
+    line-height: 2;
+    font-size:  16px;
+  `}
 `;
 
 const StudyDetailsContainer = (props :Props) => {
@@ -116,10 +118,10 @@ const StudyDetailsContainer = (props :Props) => {
 
   return (
     <>
-      <StudyNameWrapper>
+      <Box fontSize={28} fontWeight="fontWeightNormal">
         { study.getIn([FULL_NAME_FQN, 0]) }
-      </StudyNameWrapper>
-      <Tabs>
+      </Box>
+      <Box display="flex" mt="30px" mb="50px" overflow="scroll">
         <TabLink exact to={Routes.STUDY.replace(Routes.ID_PARAM, studyId)}>
           Study Details
         </TabLink>
@@ -140,7 +142,7 @@ const StudyDetailsContainer = (props :Props) => {
             </TabLink>
           )
         }
-      </Tabs>
+      </Box>
       <Switch>
         <Route
             exact

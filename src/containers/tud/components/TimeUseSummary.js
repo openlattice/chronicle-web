@@ -6,7 +6,9 @@ import styled from 'styled-components';
 import { faPencilAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Colors } from 'lattice-ui-kit';
+import { useTranslation } from 'react-i18next';
 
+import TranslationKeys from '../constants/TranslationKeys';
 import { createTimeUseSummary } from '../utils';
 
 const { NEUTRAL } = Colors;
@@ -52,13 +54,14 @@ type Props = {
 };
 
 const TimeUseSummary = ({ formData, goToPage } :Props) => {
-  const summary = createTimeUseSummary(formData);
+  const { t } = useTranslation();
+
+  const summary = createTimeUseSummary(formData, t);
 
   return (
     <div>
       <Heading>
-        Here is a summary of how your child spent their day.
-        Please make sure this information is correct before submitting survey.
+        {t(TranslationKeys.SUMMARY_TITLE)}
       </Heading>
       {
         summary.map((item) => (
@@ -75,7 +78,7 @@ const TimeUseSummary = ({ formData, goToPage } :Props) => {
             <StyledButton
                 onClick={() => goToPage(item.pageNum)}
                 startIcon={EditIcon}>
-              Edit
+              {t(TranslationKeys.BTN_EDIT)}
             </StyledButton>
           </Wrapper>
         ))

@@ -22,18 +22,15 @@ import ParticipantActionTypes from '../../utils/constants/ParticipantActionTypes
 import { getSelectedOrgId } from '../../core/edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
 import {
   CHANGE_ENROLLMENT_STATUS,
   DELETE_STUDY_PARTICIPANT,
   changeEnrollmentStatus,
   deleteStudyParticipant,
-  resetDeleteParticipantTimeout
 } from '../studies/StudiesActions';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 
-const { TIMEOUT } = STUDIES_REDUX_CONSTANTS;
 const { PERSON_ID, STATUS, STUDY_ID } = PROPERTY_TYPE_FQNS;
 
 const {
@@ -44,7 +41,11 @@ const {
 } = ParticipantActionTypes;
 
 const TableWrapper = styled.div`
-  margin-top: 20px;
+  overflow-x: scroll;
+
+  table {
+    min-width: 960px;
+  }
 `;
 
 type Props = {
@@ -65,10 +66,6 @@ const ParticipantsTable = (props :Props) => {
 
   const deleteParticipantRS :?RequestState = useRequestState(['studies', DELETE_STUDY_PARTICIPANT]);
   const changeEnrollmentStatusRS :?RequestState = useRequestState(['studies', CHANGE_ENROLLMENT_STATUS]);
-
-  const deleteTimeout :boolean = useSelector(
-    (state) => state.getIn(['studies', DELETE_STUDY_PARTICIPANT, TIMEOUT], false)
-  );
 
   const selectedOrgId :UUID = useSelector(getSelectedOrgId());
 
@@ -102,7 +99,6 @@ const ParticipantsTable = (props :Props) => {
 
   const onCloseDeleteParticipantModal = () => {
     setDeleteModalOpen(false);
-    dispatch(resetDeleteParticipantTimeout());
   };
 
   const onClickIcon = (event :SyntheticEvent<HTMLElement>) => {
@@ -152,7 +148,6 @@ const ParticipantsTable = (props :Props) => {
           studyId={studyId} />
 
       <DeleteParticipantModal
-          deleteTimeout={deleteTimeout}
           handleOnClose={onCloseDeleteParticipantModal}
           handleOnDeleteParticipant={handleOnDeleteParticipant}
           isVisible={deleteModalOpen}

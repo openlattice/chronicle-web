@@ -87,9 +87,11 @@ function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
       participantId,
       studyId,
       waveId,
+      language,
+      translationData
     } = action.value;
 
-    const requestBody = createSubmitRequestBody(formData, familyId, waveId);
+    const requestBody = createSubmitRequestBody(formData, familyId, waveId, language, translationData);
 
     const response = yield call(ChronicleApi.submitTudData, organizationId, studyId, participantId, requestBody);
     if (response.error) throw response.error;

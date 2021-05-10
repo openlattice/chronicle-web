@@ -6,8 +6,11 @@ import styled from 'styled-components';
 import { faCopy } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  // $FlowFixMe
+  Box,
   IconButton,
   Modal,
+  // $FlowFixMe
   Tooltip,
   Typography
 } from 'lattice-ui-kit';
@@ -15,14 +18,6 @@ import {
 import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
 import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
-
-const ModalWrapper = styled.div`
-  max-width: 500px;
-`;
-
-const DetailWrapper = styled.div`
-  margin-bottom: 20px;
-`;
 
 const Grid = styled.div`
   align-items: center;
@@ -66,10 +61,10 @@ const ParticipantInfoModal = ({
     }
 
     return (
-      <ModalWrapper>
+      <div>
         {
           participantDetails.map((detail) => (
-            <DetailWrapper key={detail.name}>
+            <Box mb="20px" maxWidth="600px">
               <Typography variant="body2">
                 {detail.name}
               </Typography>
@@ -88,10 +83,10 @@ const ParticipantInfoModal = ({
                   </IconButton>
                 </Tooltip>
               </Grid>
-            </DetailWrapper>
+            </Box>
           ))
         }
-      </ModalWrapper>
+      </div>
     );
   };
 
