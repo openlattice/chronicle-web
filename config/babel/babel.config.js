@@ -33,8 +33,13 @@ module.exports = {
     }]
   ],
   presets: [
-    '@babel/preset-env',
+    ['@babel/preset-env', {
+      corejs: '3.10',
+      useBuiltIns: 'entry',
+    }],
+    ['@babel/preset-react', {
+      runtime: 'automatic',
+    }],
     '@babel/preset-flow',
-    '@babel/preset-react',
   ],
 };
