@@ -23,7 +23,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@babel/polyfill": "~7.12.1",
     "@babel/runtime": "~7.14.0",
     "@fortawesome/fontawesome-svg-core": "~1.2.0",
     "@fortawesome/free-solid-svg-icons": "~5.13.0",
@@ -64,7 +63,7 @@
     "redux-reqseq": "~0.6.0",
     "reselect": "~4.0.0",
     "rrule": "~2.6.0",
-    "styled-components": "~5.2.3",
+    "styled-components": "~5.3.0",
     "uuid": "~8.3.2"
   },
   "devDependencies": {
@@ -76,7 +75,6 @@
     "@babel/preset-env": "~7.14.0",
     "@babel/preset-flow": "~7.13.13",
     "@babel/preset-react": "~7.13.13",
-    "@babel/register": "~7.13.16",
     "babel-eslint": "~10.1.0",
     "babel-jest": "~26.6.3",
     "babel-loader": "~8.2.1",
@@ -87,7 +85,6 @@
     "eslint": "~7.25.0",
     "eslint-config-airbnb": "~18.2.1",
     "eslint-import-resolver-webpack": "~0.13.0",
-    "eslint-loader": "~4.0.0",
     "eslint-plugin-flowtype": "~5.7.2",
     "eslint-plugin-import": "~2.22.0",
     "eslint-plugin-jest": "~24.3.6",
