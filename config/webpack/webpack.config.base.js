@@ -41,18 +41,6 @@ module.exports = (env) => {
     },
   };
 
-  const FILE_LOADER_ASSETS_IMAGES = {
-    test: /\.(gif|ico|jpg|jpeg|png|svg|webp)(\?.*)?$/,
-    exclude: /node_modules/,
-    use: [{
-      loader: 'file-loader',
-      options: {
-        name: '[name].[hash:8].[ext]',
-        outputPath: `${APP_PATHS.REL.STATIC_ASSETS_IMAGES}/`,
-      }
-    }]
-  };
-
   /*
    * plugins
    */
@@ -90,7 +78,6 @@ module.exports = (env) => {
     module: {
       rules: [
         BABEL_LOADER,
-        FILE_LOADER_ASSETS_IMAGES,
         {
           test: /translation\.json$/,
           type: 'javascript/auto',
@@ -104,7 +91,18 @@ module.exports = (env) => {
               },
             },
           }],
-        }
+        },
+        {
+          generator: {
+            filename: (
+              env.production
+                ? `${APP_PATHS.REL.STATIC_ASSETS}/[name].[contenthash].[ext]`
+                : `${APP_PATHS.REL.STATIC_ASSETS}/[name].[ext]`
+            )
+          },
+          test: /\.(gif|ico|jpg|jpeg|png|svg|webp)(\?.*)?$/,
+          type: 'asset/resource',
+        },
       ],
     },
     optimization: {
