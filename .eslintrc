@@ -1,9 +1,13 @@
 {
-  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "jest": true
+  },
   "extends": [
     "airbnb",
     "plugin:flowtype/recommended"
   ],
+  "parser": "babel-eslint",
   "plugins": [
     "flowtype",
     "import",
@@ -11,10 +15,6 @@
     "react",
     "react-hooks"
   ],
-  "env": {
-    "browser": true,
-    "jest": true
-  },
   "settings": {
     "flowtype": {
       "onlyFilesWithFlowAnnotation": true
@@ -71,6 +71,7 @@
           "OrderedList",
           "Map",
           "OrderedMap",
+          "Seq",
           "Set",
           "OrderedSet",
           "SortableContainer",
@@ -80,7 +81,14 @@
     ],
     "padded-blocks": "off",
     "prefer-destructuring": "warn",
-    "space-before-function-paren": ["error", "never"],
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "never",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
 
     "flowtype/define-flow-type": "error",
     "flowtype/space-after-type-colon": ["error", "never"],
@@ -113,6 +121,9 @@
 
     "jsx-a11y/href-no-hash": "off",
 
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
+
     "react/default-props-match-prop-types": [
       "error",
       {
@@ -137,16 +148,15 @@
     "react/jsx-one-expression-per-line": "warn",
     "react/no-did-update-set-state": "warn",
     "react/prefer-stateless-function": "warn",
+    "react/prop-types": "warn",
     "react/require-default-props": [
       "error",
       {
-        "forbidDefaultForRequired": false,
+        "forbidDefaultForRequired": false
       }
     ],
     "react/sort-comp": "off",
     "react/state-in-constructor": ["warn", "always"],
-    "react/static-property-placement": ["error", "static public field"],
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react/static-property-placement": ["error", "static public field"]
   }
 }
