@@ -39,11 +39,11 @@
   "weekday": "dag",
   "day_start_time": "Vilken tid vaknade barnet i går morse? Skriv den tiden då barnet vaknade för att gå upp, det vill säga inte om hen vaknade mitt i natten och sedan somnade om.",
   "day_end_time": "Vilken tid somnade ditt barn i går kväll? Skriv den tiden då barnet somnade för natten. Senare i dagboken kommer vi fråga hur ofta ditt barn vaknade under natten.",
-  "today_wakeup_time": "Vilken tid vaknade barnet i går morse?",
+  "today_wakeup_time": "Vilken tid vaknade barnet i morse?",
   "default_time": "Fyll i tider genom att skriva tiden i rutan (tex 07:00) eller klicka på klockan för att välja rätt tid.",
   "primary_activities": {
     "childcare": "vara på skolan/förskolan",
-    "napping": "sova middag/Sova",
+    "napping": "sova middag/sova",
     "eating": "äta/dricka",
     "media_use": "använda en skärm (tex TV-program, spel, videosamtal, appar)",
     "reading": "läsa eller lyssna på en saga (vanlig bok, e-bok, ljudbok etc.)",
@@ -67,8 +67,8 @@
     "Ett annat barn"
   ],
   "bg_tv_day": "Var TV:n på i bakgrunden när barnet skulle {{activity}}? Till exempel så kanske en förälder tittade på TV under tiden barnet gjorde något annat i rummet.",
-  "bg_audio_day": "Var det ljud i bakgrunden (tex musik eller podcast) när ditt barn skulle {{activity}}? Till exempel, så kanske en förälder lyssnade på musik medan barnet gjorde något annat i samma rum.",
-  "adult_media": "Använde den vuxne en bärbar digital apparat (mobil, surfplatta, laptop) medan ditt barn skulle {{activity}}? Till exempel kanske en vuxen skickade ett sms mean barnet gjorde något annat i samma rum?",
+  "bg_audio_day": "Var det ljud i bakgrunden (tex musik eller podcast) när ditt barn skulle {{activity}}? Till exempel så kanske en förälder lyssnade på musik medan barnet gjorde något annat i samma rum.",
+  "adult_media": "Använde den vuxne en bärbar digital apparat (mobil, surfplatta, laptop) medan ditt barn skulle {{activity}}? Till exempel kanske en vuxen skickade ett sms medan barnet gjorde något annat i samma rum?",
   "bg_media_options": [
     "Nej.",
     "Ja, del av tiden.",
@@ -81,10 +81,10 @@
   "dont_know": "Jag vet inte",
   "secondary_activity": "Ok, vad gjorde ditt barn mer under tiden hen skulle {{activity}}?",
   "book_type": "Vilken typ av bok läste ditt barn?",
-  "book_title": "Vad hette boken? Om du inte vet namnet kan du beskriva md ord (tex en bok om enhörningar).",
+  "book_title": "Vad hette boken? Om du inte vet namnet kan du beskriva med ord (tex en bok om enhörningar).",
   "media_activity": "Vad gjorde ditt barn när hen använde skärmen?",
   "media_age": "Skulle du beskriva att medieinnehållet (TV-programmet, appen, eller spelet) var riktat till ditt barns ålder, eller till äldre/yngre barn eller vuxna?",
-  "media_name": "Vad hette mediaprogrammet (namnet på TV-programmet, appen eller spelet)? Om du inte vet exakt vad det heter kan du beskriva med ord ( tex en app som de färglägger bilder i eller en film om en enhörning).",
+  "media_name": "Vad hette mediaprogrammet (namnet på TV-programmet, appen eller spelet)? Om du inte vet exakt vad det heter kan du beskriva med ord (tex en app där bilder färgläggs eller en film om en enhörning).",
   "media_age_options": [
     "Ditt barns ålder",
     "Äldre barn",
@@ -108,8 +108,8 @@
   "no_one": "ingen",
   "bg_tv_night": "Var TV:n på i samma rum som barnet sover i på kvällen/natten?",
   "bg_audio_night": "Var det musik eller annat ljud på i samma rum som barnet sover i för kvällen/natten?",
-  "sleep_pattern": "I går natt, sov ditt barn som vanligt?",
-  "sleep_arrangement": "I går natt, var sov ditt barn?",
+  "sleep_pattern": "Sov ditt barn som vanligt under natten?",
+  "sleep_arrangement": "Var sov ditt barn under natten?",
   "sleep_arrangement_options": [
     "Vagga/spjälsäng, vanlig säng i sitt eget rum (som det inte delar med någon)",
     "Vagga/spjälsäng, vanlig säng i föräldernas rum",
@@ -117,7 +117,7 @@
     "Samsov i förälders säng",
     "Samsov med ett syskon"
   ],
-  "wake_up_count": "Igår natt, hur många gånger vakande barnet mitt i natten?",
+  "wake_up_count": "Hur många gånger vaknade barnet mitt i natten?",
   "wake_up_count_options": [
     "Hen vakande inte alls",
     "1 gång",
@@ -139,7 +139,7 @@
   "error_invalid_end": "Sluttiden måste vara efter {{time}}",
   "error_invalid_bedtime": "Läggning måste vara efter klockan {{time}}",
   "error_end_past_bedtime": "Dagens sista aktivitet bör sluta klockan {{time}} eftersom du skrev att barnet gick och la sig då",
-  "summary_title": "Här är en sammanfattning av vad ditt barn gjorde idag. Kolla igenom allt stämmer innan du trycker på skicka in! Tack!",
+  "summary_title": "Här är en sammanfattning av vad ditt barn gjorde igår. Kolla igenom att allt stämmer innan du trycker på skicka in! Tack!",
   "button_edit": "Ändra",
   "child_woke_up": "Barnet vaknade",
   "sleeping": "Sover",
