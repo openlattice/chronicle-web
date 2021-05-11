@@ -21,7 +21,9 @@ module.exports = {
   },
   moduleNameMapper: {
     '\\.(png)$': '<rootDir>/config/jest/__mocks__/fileMock.js',
-    '\\.(css|less)$': '<rootDir>/config/jest/__mocks__/styleMock.js'
+    '\\.(css|less)$': '<rootDir>/config/jest/__mocks__/styleMock.js',
+    'core-js/library/fn/array/fill': '<rootDir>/node_modules/core-js-pure/features/array/fill',
+    'core-js/library/fn/array/includes': '<rootDir>/node_modules/core-js-pure/features/array/includes',
   },
   modulePathIgnorePatterns: [
     '<rootDir>/build/',
