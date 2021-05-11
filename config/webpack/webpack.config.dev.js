@@ -1,7 +1,6 @@
 /* eslint-disable import/extensions */
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const Webpack = require('webpack');
 
 const APP_PATHS = require('../app/paths.config.js');
 const baseWebpackConfig = require('./webpack.config.base.js');
@@ -20,7 +19,6 @@ module.exports = (env) => {
       favicon: `${APP_PATHS.ABS.SOURCE_ASSETS_IMAGES}/ol_favicon.png`,
       template: `${APP_PATHS.ABS.SOURCE}/index.html`,
     }),
-    new Webpack.HotModuleReplacementPlugin(),
     ...baseConfig.plugins
   ];
 
