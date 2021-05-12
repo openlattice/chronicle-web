@@ -10,4 +10,8 @@ export default [
     language: 'Swedish',
     code: LanguageCodes.SWEDISH
   },
+  {
+    language: 'Spanish',
+    code: LanguageCodes.SPANISH
+  },
 ];
