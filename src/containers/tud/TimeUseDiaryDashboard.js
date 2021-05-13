@@ -42,11 +42,10 @@ const {
 } = ReduxUtils;
 
 type Props = {
-  studyEKID :?UUID;
-  studyId :UUID;
+  participants :Map;
 };
 
-const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
+const TimeUseDiaryDashboard = ({ participants } :Props) => {
   const dispatch = useDispatch();
 
   const [dates, setDates] = useState({
@@ -78,9 +77,8 @@ const TimeUseDiaryDashboard = ({ studyEKID, studyId } :Props) => {
     if (startDate && endDate) {
       dispatch(getSubmissionsByDate({
         endDate,
+        participants,
         startDate,
-        studyEKID,
-        studyId
       }));
     }
   };
