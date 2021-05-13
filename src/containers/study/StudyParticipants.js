@@ -8,32 +8,26 @@ import styled from 'styled-components';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Map } from 'immutable';
-import { Constants } from 'lattice';
 import {
   // $FlowFixMe
   Box,
   Button,
-  // $FlowFixMe
-  Grid,
   Card,
   CardSegment,
+  // $FlowFixMe
+  Grid,
   SearchInput,
-  Spinner,
 } from 'lattice-ui-kit';
-import { useRequestState } from 'lattice-utils';
-import { useDispatch, useSelector } from 'react-redux';
-import { RequestStates } from 'redux-reqseq';
-import type { RequestState } from 'redux-reqseq';
+import { useDispatch } from 'react-redux';
 
 import AddParticipantModal from './components/AddParticipantModal';
 import ParticipantsTable from './ParticipantsTable';
 
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { resetRequestState } from '../../core/redux/ReduxActions';
-import { ADD_PARTICIPANT, GET_STUDY_PARTICIPANTS, getStudyParticipants } from '../studies/StudiesActions';
+import { ADD_PARTICIPANT } from '../studies/StudiesActions';
 
-const { PERSON_ID, STUDY_ID } = PROPERTY_TYPE_FQNS;
-const { OPENLATTICE_ID_FQN } = Constants;
+const { PERSON_ID } = PROPERTY_TYPE_FQNS;
 
 const AddParticipantsButton = styled(Button)`
   align-self: flex-start;
@@ -41,30 +35,15 @@ const AddParticipantsButton = styled(Button)`
 `;
 
 type Props = {
-  study :Map,
+  participants :Map;
+  study :Map;
 };
 
-const StudyParticipants = ({ study } :Props) => {
+const StudyParticipants = ({ participants, study } :Props) => {
   const dispatch = useDispatch();
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [filteredParticipants, setFilteredParticipants] = useState(Map());
-
-  const studyId :UUID = study.getIn([STUDY_ID, 0]);
-  const participants :Map = useSelector((state) => state.getIn(['studies', 'participants', studyId], Map()));
-
-  const getParticipantsRS :?RequestState = useRequestState(['studies', GET_STUDY_PARTICIPANTS]);
-
-  useEffect(() => {
-    // This is useful for avoiding a network request if
-    // a cached value is already available.
-    if (participants.isEmpty()) {
-      dispatch(getStudyParticipants({
-        studyEKID: study.getIn([OPENLATTICE_ID_FQN, 0]),
-        studyId: study.getIn([STUDY_ID, 0])
-      }));
-    }
-  }, [dispatch, participants, study]);
 
   useEffect(() => {
     setFilteredParticipants(participants);
@@ -83,12 +62,6 @@ const StudyParticipants = ({ study } :Props) => {
       .filter((participant) => participant.getIn([PERSON_ID, 0]).toLowerCase().includes(value.toLowerCase()));
     setFilteredParticipants(matchingResults);
   };
-
-  if (getParticipantsRS === RequestStates.PENDING) {
-    return (
-      <Spinner size="2x" />
-    );
-  }
 
   return (
     <Card>
