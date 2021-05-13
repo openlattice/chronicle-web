@@ -10,16 +10,10 @@ import {
   List,
   Map,
   fromJS,
-  get,
   getIn
 } from 'immutable';
 import { Constants } from 'lattice';
-import {
-  DataApiActions,
-  DataApiSagas,
-  SearchApiActions,
-  SearchApiSagas
-} from 'lattice-sagas';
+import { SearchApiActions, SearchApiSagas } from 'lattice-sagas';
 import { DataUtils, Logger } from 'lattice-utils';
 import { DateTime } from 'luxon';
 import type { Saga } from '@redux-saga/core';
@@ -43,7 +37,6 @@ import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import {
   selectESIDByCollection,
   selectEntitySetsByModule,
-  selectPropertyTypeId
 } from '../../core/edm/EDMUtils';
 import {
   ADDRESSES,
@@ -59,8 +52,6 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 
 const LOG = new Logger('TimeUseDiarySagas');
 
-const { getEntitySetDataWorker } = DataApiSagas;
-const { getEntitySetData } = DataApiActions;
 const { searchEntityNeighborsWithFilterWorker } = SearchApiSagas;
 const { searchEntityNeighborsWithFilter } = SearchApiActions;
 
@@ -116,26 +107,14 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
     yield put(getSubmissionsByDate.request(action.id));
 
     const {
+      participants,
       endDate,
       startDate,
     } = action.value;
 
     const participantsESID = yield select(selectESIDByCollection(PARTICIPANTS, AppModules.CHRONICLE_CORE));
 
-    const personPTID = yield select(selectPropertyTypeId(PERSON_ID));
-    const participantsRes = yield call(getEntitySetDataWorker, getEntitySetData(
-      {
-        entitySetId: participantsESID,
-        propertyTypeIds: [personPTID]
-      }
-    ));
-    if (participantsRes.error) throw participantsRes.error;
-    const participants :Object = participantsRes.data.reduce((result, entity) => ({
-      [getIn(entity, [OPENLATTICE_ID_FQN, 0])]: getIn(entity, [PERSON_ID, 0]),
-      ...result
-    }), {});
-
-    const participantEKIDs :UUID[] = participantsRes.data.map(getEntityKeyId);
+    const participantEKIDs :UUID[] = participants.keySeq().toJS();
 
     const submissionESID = yield select(selectESIDByCollection(SUBMISSION, AppModules.QUESTIONNAIRES));
     const respondsWithESID = yield select(selectESIDByCollection(RESPONDS_WITH, AppModules.QUESTIONNAIRES));
@@ -177,7 +156,7 @@ function* getSubmissionsByDateWorker(action :SequenceAction) :Saga<*> {
             const neighborDetails = neighbor.get('neighborDetails');
             const entity = fromJS({
               [OPENLATTICE_ID_FQN]: getPropertyValue(neighborDetails, OPENLATTICE_ID_FQN),
-              [PERSON_ID.toString()]: [get(participants, participantEKID)],
+              [PERSON_ID.toString()]: [getIn(participants, [participantEKID, PERSON_ID, 0])],
               [ID_FQN.toString()]: [participantEKID],
               [DATE_TIME_FQN.toString()]: getPropertyValue(neighborDetails, DATE_TIME_FQN)
             });
