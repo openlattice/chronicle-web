@@ -3,6 +3,7 @@
 const STUDIES_REDUX_CONSTANTS = {
   NOTIFICATIONS_EKID: 'notificationsEKID',
   NOTIFICATIONS_ENABLED_STUDIES: 'notificationsEnabledStudies',
+  PARTICIPANTS: 'participants',
   PARTICIPATED_IN_EKID: 'participatedInEKID',
   PART_OF_ASSOCIATION_EKID_MAP: 'partOfAssociationEKIDMap',
   STUDIES: 'studies',

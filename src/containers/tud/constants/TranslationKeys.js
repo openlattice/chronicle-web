@@ -45,6 +45,7 @@ export default {
   MEDIA_AGE_OPTIONS: 'media_age_options',
   MEDIA_NAME: 'media_name',
   NEXT_ACTIVITY: 'next_activity',
+  NIGHTTIME_ACTIVITY_TITLE: 'nighttime_activity_title',
   NO: 'no',
   NON_TYPICAL_DAY: 'non_typical_day',
   NON_TYPICAL_DAY_REASONS: 'non_typical_day_reasons',
