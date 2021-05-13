@@ -21,7 +21,9 @@ module.exports = {
   },
   moduleNameMapper: {
     '\\.(png)$': '<rootDir>/config/jest/__mocks__/fileMock.js',
-    '\\.(css|less)$': '<rootDir>/config/jest/__mocks__/styleMock.js'
+    '\\.(css|less)$': '<rootDir>/config/jest/__mocks__/styleMock.js',
+    'core-js/library/fn/array/fill': '<rootDir>/node_modules/core-js-pure/features/array/fill',
+    'core-js/library/fn/array/includes': '<rootDir>/node_modules/core-js-pure/features/array/includes',
   },
   modulePathIgnorePatterns: [
     '<rootDir>/build/',
@@ -30,9 +32,6 @@ module.exports = {
   rootDir: '../..',
   setupFiles: [
     '<rootDir>/config/jest/enzyme.config.js',
-  ],
-  setupFilesAfterEnv: [
-    '<rootDir>/config/jest/test.config.js',
   ],
   testEnvironment: '<rootDir>/config/jest/jsdom.config.js',
   testURL: 'http://localhost',

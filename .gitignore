@@ -1,7 +1,5 @@
 coverage/
-
-# npm
-npm-debug.log
 node_modules/
-# macOS
+npm-debug.log
 *.DS_Store
+*.LICENSE.txt
