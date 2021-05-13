@@ -12,6 +12,10 @@
     {
       "name": "Hristo Oskov",
       "email": "hristo@openlattice.com"
+    },
+    {
+      "name": "Alfonce Nzioka",
+      "email": "alfonce@openlattice.com"
     }
   ],
   "repository": {
@@ -105,8 +109,8 @@
     "stylelint-config-standard": "~22.0.0",
     "stylelint-config-styled-components": "~0.1.1",
     "stylelint-processor-styled-components": "~1.10.0",
-    "webpack": "~5.36.2",
-    "webpack-cli": "~4.6.0",
+    "webpack": "~5.37.0",
+    "webpack-cli": "~4.7.0",
     "webpack-dev-server": "~3.11.2",
     "webpack-hot-middleware": "~2.25.0"
   },
