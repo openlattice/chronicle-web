@@ -18,6 +18,7 @@ import {
   DATA,
   FILE_TYPE,
   QUESTIONNAIRE,
+  STATUS,
   TIME_USE_DIARY
 } from './constants/UrlConstants';
 import type { ParticipantDataType } from './constants/ParticipantDataTypes';
@@ -231,10 +232,24 @@ const getDeleteStudyUrl = (orgId :UUID, studyId :UUID) => {
   return `${getBaseUrl()}/${BASE}/${AUTHENTICATED}/${orgId}/${studyId}`;
 };
 
+const getEnrollmentStatusUrl = (organizationId :UUID, studyId :UUID, participantId :string) => {
+  if (!isValidUUID(organizationId)) {
+    LOG.error('invalid orgId: ', organizationId);
+    return null;
+  }
+  if (!isValidUUID(studyId)) {
+    LOG.error('invalid studyId: ', studyId);
+    return null;
+  }
+
+  return `${getBaseUrl()}/${BASE}/${organizationId}/${studyId}/${participantId}/${STATUS}`;
+};
+
 export {
   getBaseUrl,
   getDeleteParticipantPath,
   getDeleteStudyUrl,
+  getEnrollmentStatusUrl,
   getParticipantDataUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,

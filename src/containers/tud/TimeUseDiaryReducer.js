@@ -9,10 +9,12 @@ import {
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  VERIFY_TUD_LINK,
   downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
+  verifyTudLink,
 } from './TimeUseDiaryActions';
 
 import { RESET_REQUEST_STATE } from '../../core/redux/ReduxActions';
@@ -26,7 +28,7 @@ const INITIAL_STATE = fromJS({
   [DOWNLOAD_ALL_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_SUBMISSIONS_BY_DATE]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [SUBMIT_TUD_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
-  [SUBMISSIONS_BY_DATE]: Map()
+  [SUBMISSIONS_BY_DATE]: Map(),
 });
 
 export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :Object) {
@@ -38,6 +40,14 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
         return state.setIn([actionType, REQUEST_STATE], RequestStates.STANDBY);
       }
       return state;
+    }
+
+    case verifyTudLink.case(action.type): {
+      return verifyTudLink.reducer(state, action, {
+        REQUEST: () => state.setIn([VERIFY_TUD_LINK, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state.setIn([VERIFY_TUD_LINK, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state.setIn([VERIFY_TUD_LINK, REQUEST_STATE], RequestStates.SUCCESS)
+      });
     }
 
     case submitTudData.case(action.type): {

@@ -70,5 +70,6 @@ export default function* sagas() :Generator<*, *, *> {
     fork(TimeUseDiarySagas.downloadTudResponsesWatcher),
     fork(TimeUseDiarySagas.getSubmissionsByDateWatcher),
     fork(TimeUseDiarySagas.submitTudDataWatcher),
+    fork(TimeUseDiarySagas.verifyTudLinkWatcher),
   ]);
 }
