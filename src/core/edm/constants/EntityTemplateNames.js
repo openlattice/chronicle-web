@@ -13,5 +13,6 @@ export const REGISTERED_FOR = 'registeredfor';
 export const RESPONDS_WITH = 'respondswith';
 export const STUDIES = 'studies';
 export const SUBMISSION = 'submission';
+export const SUMMARY_SET = 'summaryset';
 export const SURVEY = 'survey';
 export const TIME_RANGE = 'timerange';

@@ -18,13 +18,19 @@ const { isPending } = ReduxUtils;
 const Wrapper = styled.div`
   align-items: center;
   display: grid;
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr auto;
   grid-column-gap: 20px;
   margin-bottom: 20px;
 
   :last-of-type {
     margin-bottom: 0;
   }
+`;
+
+const ButtonGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: 20px;
 `;
 
 const ButtonWrapper = styled(Button)`
@@ -56,23 +62,34 @@ const SummaryListComponent = (
       { entities.size }
     </Typography>
     <div />
-    <ButtonWrapper
-        isLoading={isPending(downloadRS.get(DataTypes.DAYTIME))}
-        onClick={() => onDownloadData(entities, date, DataTypes.DAYTIME)}
-        size="small"
-        startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
-        variant="outlined">
-      Daytime
-    </ButtonWrapper>
 
-    <ButtonWrapper
-        isLoading={isPending(downloadRS.get(DataTypes.NIGHTTIME))}
-        onClick={() => onDownloadData(entities, date, DataTypes.NIGHTTIME)}
-        size="small"
-        startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
-        variant="outlined">
-      Nighttime
-    </ButtonWrapper>
+    <ButtonGrid>
+      <ButtonWrapper
+          isLoading={isPending(downloadRS.get(DataTypes.SUMMARIZED))}
+          onClick={() => onDownloadData(entities, date, DataTypes.SUMMARIZED)}
+          size="small"
+          startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+          variant="outlined">
+        Summarized
+      </ButtonWrapper>
+      <ButtonWrapper
+          isLoading={isPending(downloadRS.get(DataTypes.DAYTIME))}
+          onClick={() => onDownloadData(entities, date, DataTypes.DAYTIME)}
+          size="small"
+          startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+          variant="outlined">
+        Daytime
+      </ButtonWrapper>
+
+      <ButtonWrapper
+          isLoading={isPending(downloadRS.get(DataTypes.NIGHTTIME))}
+          onClick={() => onDownloadData(entities, date, DataTypes.NIGHTTIME)}
+          size="small"
+          startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+          variant="outlined">
+        Nighttime
+      </ButtonWrapper>
+    </ButtonGrid>
   </Wrapper>
 );
 

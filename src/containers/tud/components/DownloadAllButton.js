@@ -75,6 +75,13 @@ const DownloadAllButton = ({ downloadAllDataRS, onDownloadData } :Props) => {
             onClick={handleClick}>
           Nighttime
         </MenuItem>
+
+        <MenuItem
+            data-action-id={DOWNLOAD_DATA}
+            data-type-id={DataTypes.SUMMARIZED}
+            onClick={handleClick}>
+          Summarized
+        </MenuItem>
       </Menu>
     </div>
   );

@@ -9,19 +9,29 @@ const submitTudData :RequestSequence = newRequestSequence(SUBMIT_TUD_DATA);
 const GET_SUBMISSIONS_BY_DATE :'GET_SUBMISSIONS_BY_DATE' = 'GET_SUBMISSIONS_BY_DATE';
 const getSubmissionsByDate :RequestSequence = newRequestSequence(GET_SUBMISSIONS_BY_DATE);
 
-const DOWNLOAD_TUD_RESPONSES :'DOWNLOAD_TUD_RESPONSES' = 'DOWNLOAD_TUD_RESPONSES';
-const downloadTudResponses :RequestSequence = newRequestSequence(DOWNLOAD_TUD_RESPONSES);
+const DOWNLOAD_TUD_DATA :'DOWNLOAD_TUD_DATA' = 'DOWNLOAD_TUD_DATA';
+const downloadTudData :RequestSequence = newRequestSequence(DOWNLOAD_TUD_DATA);
 
-const DOWNLOAD_ALL_DATA :'DOWNOAD_ALL_DATA' = 'DOWNOAD_ALL_DATA';
+const DOWNLOAD_ALL_DATA :'DOWNLOAD_ALL_DATA' = 'DOWNLOAD_ALL_DATA';
 const downloadAllData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_DATA);
+
+const DOWNLOAD_SUMMARIZED_DATA :'DOWNLOAD_SUMMARIZED_DATA' = 'DOWNLOAD_SUMMARIZED_DATA';
+const downloadSummarizedData :RequestSequence = newRequestSequence(DOWNLOAD_SUMMARIZED_DATA);
+
+const DOWNLOAD_RAW_DATA :'DOWNLOAD_RAW_DATA' = 'DOWNLOAD_RAW_DATA';
+const downloadRawData :RequestSequence = newRequestSequence(DOWNLOAD_RAW_DATA);
 
 export {
   DOWNLOAD_ALL_DATA,
-  DOWNLOAD_TUD_RESPONSES,
+  DOWNLOAD_RAW_DATA,
+  DOWNLOAD_SUMMARIZED_DATA,
+  DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   downloadAllData,
-  downloadTudResponses,
+  downloadRawData,
+  downloadSummarizedData,
+  downloadTudData,
   getSubmissionsByDate,
   submitTudData,
 };

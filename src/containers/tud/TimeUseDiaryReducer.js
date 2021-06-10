@@ -6,11 +6,10 @@ import { RequestStates } from 'redux-reqseq';
 
 import {
   DOWNLOAD_ALL_DATA,
-  DOWNLOAD_TUD_RESPONSES,
+  DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
-  downloadAllData,
-  downloadTudResponses,
+  downloadTudData,
   getSubmissionsByDate,
   submitTudData,
 } from './TimeUseDiaryActions';
@@ -61,32 +60,26 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
       });
     }
 
-    case downloadTudResponses.case(action.type): {
+    case downloadTudData.case(action.type): {
       const { date, dataType } = action.value;
-      return downloadTudResponses.reducer(state, action, {
-        REQUEST: () => state
-          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.PENDING)
-          .setIn([DOWNLOAD_TUD_RESPONSES, action.id], action),
+      return downloadTudData.reducer(state, action, {
+        REQUEST: () => {
+          if (!date) {
+            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.PENDING);
+          }
+          return state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE);
+        },
         FAILURE: () => state
-          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
-        SUCCESS: () => state
-          .setIn([DOWNLOAD_TUD_RESPONSES, REQUEST_STATE, date, dataType], RequestStates.SUCCESS),
+          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
+        SUCCESS: () => {
+          if (!date) {
+            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.SUCCESS);
+          }
+          return state
+            .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS);
+        },
         FINALLY: () => state
-          .deleteIn([DOWNLOAD_TUD_RESPONSES, action.id])
-      });
-    }
-
-    case downloadAllData.case(action.type): {
-      return downloadAllData.reducer(state, action, {
-        REQUEST: () => state
-          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.PENDING)
-          .setIn([DOWNLOAD_ALL_DATA, action.id], action),
-        FAILURE: () => state
-          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.FAILURE),
-        SUCCESS: () => state
-          .setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.SUCCESS),
-        FINALLY: () => state
-          .deleteIn([DOWNLOAD_ALL_DATA, action.id])
+          .deleteIn([DOWNLOAD_TUD_DATA, action.id])
       });
     }
 

@@ -17,6 +17,7 @@ import createEnglishTranslationLookup from './createEnglishTranslationLookup';
 import translateToEnglish from './translateToEnglish';
 
 import DataTypes from '../constants/DataTypes';
+import SUMMARIZED_DATA_VARIABLES from '../constants/SummarizedDataVariables';
 import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -421,7 +422,7 @@ function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
   return DateTime.fromISO(dateVal);
 }
 
-function writeToCsvFile(
+function exportRawDataToCsvFile(
   dataType :DataType,
   outputFileName :string,
   submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
@@ -518,6 +519,37 @@ function writeToCsvFile(
   FS.saveAs(blob, outputFileName);
 }
 
+function exportSummarizedDataToCsvFile(
+  summaryData :Map,
+  submissionMetadata :Map,
+  fileName :string
+) {
+
+  const csvData :Object[] = [];
+
+  summaryData.forEach((submissionSummary :Map, submissionId :UUID) => {
+    const rowData :Object = {};
+    rowData.participantId = submissionMetadata.getIn([submissionId, PERSON_ID, 0]);
+    rowData.Timestamp = DateTime
+      .fromISO((submissionMetadata.getIn([DATE_TIME_FQN, 0])))
+      .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+    SUMMARIZED_DATA_VARIABLES.forEach((variable :string) => {
+      if (submissionSummary.has(variable)) {
+        rowData[variable] = submissionSummary[variable];
+      }
+    });
+    csvData.push(rowData);
+
+  });
+
+  const csv = Papa.unparse(csvData);
+  const blob = new Blob([csv], {
+    type: 'text/csv'
+  });
+
+  FS.saveAs(blob, fileName);
+}
+
 const getOutputFileName = (date :?string, startDate :?string, endDate :?string, dataType :DataType) => {
   const prefix = 'TimeUseDiary';
 
@@ -544,5 +576,6 @@ export {
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
-  writeToCsvFile,
+  exportRawDataToCsvFile,
+  exportSummarizedDataToCsvFile,
 };

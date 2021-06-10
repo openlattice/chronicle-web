@@ -44,6 +44,7 @@ const PROPERTY_TYPE_FQNS = {
   RRULE_FQN: FQN.of('ol.rrule'),
   TITLE_FQN: FQN.of('ol.title'),
   VALUES_FQN: FQN.of('ol.values'),
+  VARIABLE_FQN: FQN.of('ol.variable'),
 };
 
 /* eslint-disable import/prefer-default-export */
