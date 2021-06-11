@@ -2,33 +2,44 @@
  * @flow
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import styled from 'styled-components';
 import { List, Map, Set } from 'immutable';
+import { Constants } from 'lattice';
 import {
   // $FlowFixMe
   Box,
   Colors,
+  Spinner,
   StyleUtils,
 } from 'lattice-ui-kit';
+import { DataUtils, ReduxUtils, useRequestState } from 'lattice-utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import type { Match } from 'react-router';
-import { DataUtils } from 'lattice-utils';
+import type { RequestState } from 'redux-reqseq';
 
 import StudyDetails from './StudyDetails';
 import StudyParticipants from './StudyParticipants';
 
 import QuestionnairesContainer from '../questionnaires/QuestionnairesContainer';
-import * as AppModules from '../../utils/constants/AppModules';
 import TimeUseDiaryDashboard from '../tud/TimeUseDiaryDashboard';
+import * as AppModules from '../../utils/constants/AppModules';
 import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
 import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import {
+  GET_STUDY_PARTICIPANTS,
+  getStudyParticipants,
+} from '../studies/StudiesActions';
+
+const { isPending } = ReduxUtils;
+
+const { OPENLATTICE_ID_FQN } = Constants;
 
 const { FULL_NAME_FQN } = PROPERTY_TYPE_FQNS;
 
@@ -39,8 +50,9 @@ const {
 
 const {
   NOTIFICATIONS_ENABLED_STUDIES,
+  PARTICIPANTS,
   STUDIES,
-  TIME_USE_DIARY_STUDIES
+  TIME_USE_DIARY_STUDIES,
 } = STUDIES_REDUX_CONSTANTS;
 
 const { NEUTRAL, PURPLE } = Colors;
@@ -112,8 +124,29 @@ const StudyDetailsContainer = (props :Props) => {
   const studyEKID = getEntityKeyId(study);
   const hasTimeUseDiary = timeUseDiaryStudies.has(studyEKID);
 
+  const participants :Map = useSelector((state) => state.getIn([STUDIES, PARTICIPANTS, studyId], Map()));
+
+  const getParticipantsRS :?RequestState = useRequestState([STUDIES, GET_STUDY_PARTICIPANTS]);
+
+  useEffect(() => {
+    // This is useful for avoiding a network request if
+    // a cached value is already available.
+    if (participants.isEmpty()) {
+      dispatch(getStudyParticipants({
+        studyEKID: study.getIn([OPENLATTICE_ID_FQN, 0]),
+        studyId
+      }));
+    }
+  }, [dispatch, participants, study, studyId]);
+
   if (study.isEmpty()) {
     dispatch(goToRoot());
+  }
+
+  if (isPending(getParticipantsRS)) {
+    return (
+      <Spinner size="2x" />
+    );
   }
 
   return (
@@ -147,13 +180,18 @@ const StudyDetailsContainer = (props :Props) => {
         <Route
             exact
             path={Routes.PARTICIPANTS}
-            render={() => <StudyParticipants study={study} />} />
+            render={() => <StudyParticipants participants={participants} study={study} />} />
         <Route
             path={Routes.QUESTIONNAIRES}
             render={() => <QuestionnairesContainer study={study} />} />
         <Route
             path={Routes.TUD_DASHBOARD}
-            render={() => <TimeUseDiaryDashboard studyEKID={studyEKID} studyId={studyId} />} />
+            render={() => (
+              <TimeUseDiaryDashboard
+                  participants={participants}
+                  studyEKID={studyEKID}
+                  studyId={studyId} />
+            )} />
         <Route
             path={Routes.STUDY}
             render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />

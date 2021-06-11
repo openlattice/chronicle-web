@@ -64,7 +64,7 @@ const ParticipantInfoModal = ({
       <div>
         {
           participantDetails.map((detail) => (
-            <Box mb="20px" maxWidth="600px">
+            <Box mb="20px" maxWidth="600px" key={detail.name}>
               <Typography variant="body2">
                 {detail.name}
               </Typography>
