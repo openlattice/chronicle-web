@@ -531,11 +531,11 @@ function exportSummarizedDataToCsvFile(
     const rowData :Object = {};
     rowData.participantId = submissionMetadata.getIn([submissionId, PERSON_ID, 0]);
     rowData.Timestamp = DateTime
-      .fromISO((submissionMetadata.getIn([DATE_TIME_FQN, 0])))
+      .fromISO((submissionMetadata.getIn([submissionId, DATE_TIME_FQN, 0])))
       .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
     SUMMARIZED_DATA_VARIABLES.forEach((variable :string) => {
       if (submissionSummary.has(variable)) {
-        rowData[variable] = submissionSummary[variable];
+        rowData[variable] = submissionSummary.get(variable);
       }
     });
     csvData.push(rowData);

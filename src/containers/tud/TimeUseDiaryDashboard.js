@@ -140,7 +140,9 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
                       </Typography>
                     ) : (
                       <>
-                        <SummaryHeader onDownloadData={handleDownload} downloadAllDataRS={downloadAllDataRS} />
+                        <SummaryHeader
+                            onDownloadData={handleDownload}
+                            downloadAllDataRS={downloadAllDataRS} />
                         <div>
                           {
                             submissionsByDate.entrySeq().sort().map(([key, entities]) => (

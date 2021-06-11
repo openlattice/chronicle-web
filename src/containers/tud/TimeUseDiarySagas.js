@@ -22,12 +22,9 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import DataTypes from './constants/DataTypes';
 import {
-  DOWNLOAD_SUMMARIZED_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
-  downloadRawData,
-  downloadSummarizedData,
   downloadTudData,
   getSubmissionsByDate,
   submitTudData,
@@ -191,17 +188,9 @@ function* getSubmissionsByDateWatcher() :Saga<*> {
   yield takeEvery(GET_SUBMISSIONS_BY_DATE, getSubmissionsByDateWorker);
 }
 
-function* downloadSummarizedDataWorker(action :SequenceAction) :Saga<WorkerResponse> {
+function* downloadSummarizedData(entities, outputFilename) :Saga<WorkerResponse> {
   let workerResponse = {};
   try {
-    yield put(downloadSummarizedData.request(action.id));
-
-    const {
-      date,
-      endDate,
-      entities,
-      startDate,
-    } = action.value;
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -217,7 +206,7 @@ function* downloadSummarizedDataWorker(action :SequenceAction) :Saga<WorkerRespo
     const filter = {
       destinationEntitySetIds: [submissionESID],
       edgeEntitySetIds: [registeredForESID],
-      entityKeyIds: submissionIds,
+      entityKeyIds: submissionIds.toJS(),
       sourceEntitySetIds: [summarysetESID]
     };
 
@@ -242,39 +231,21 @@ function* downloadSummarizedDataWorker(action :SequenceAction) :Saga<WorkerRespo
       });
     });
 
-    const outputFilename = getOutputFileName(date, startDate, endDate, DataTypes.SUMMARIZED);
     exportSummarizedDataToCsvFile(summaryData, submissionMetadata, outputFilename);
 
     workerResponse = { data: null };
-    yield put(downloadSummarizedData.success(action.id));
   }
   catch (error) {
     workerResponse = { error };
-    LOG.error(action.type, error);
-    yield put(downloadSummarizedData.failure(action.id));
-  }
-  finally {
-    yield put(downloadSummarizedData.finally(action.id));
   }
 
   return workerResponse;
 }
 
-function* downloadSummarizedDataWatcher() :Saga<*> {
-  yield takeEvery(DOWNLOAD_SUMMARIZED_DATA, downloadSummarizedDataWorker);
-}
-
-function* downloadRawDataWorker(action :SequenceAction) :Saga<WorkerResponse> {
+function* downloadRawData(dataType, entities, outputFilename) :Saga<WorkerResponse> {
   let workerResponse = {};
-  const {
-    dataType,
-    date,
-    endDate,
-    entities,
-    startDate,
-  } = action.value;
+
   try {
-    yield put(downloadRawData.request(action.id));
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -393,11 +364,9 @@ function* downloadRawDataWorker(action :SequenceAction) :Saga<WorkerResponse> {
       }
     });
 
-    const outputFileName = getOutputFileName(date, startDate, endDate, dataType);
-
     exportRawDataToCsvFile(
       dataType,
-      outputFileName,
+      outputFilename,
       submissionMetadata,
       answersMap,
       nonTimeRangeQuestionAnswerMap,
@@ -405,15 +374,9 @@ function* downloadRawDataWorker(action :SequenceAction) :Saga<WorkerResponse> {
       timeRangeValues
     );
     workerResponse = { data: null };
-    yield put(downloadRawData.success(action.id));
   }
   catch (error) {
     workerResponse = { error };
-    LOG.error(action.type, error);
-    yield put(downloadRawData.failure(action.id));
-  }
-  finally {
-    yield put(downloadRawData.finally(action.id));
   }
 
   return workerResponse;
@@ -431,27 +394,27 @@ function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
 
     yield put(downloadTudData.request(action.id, { date, dataType }));
 
+    const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
+
     let response;
     if (dataType === DataTypes.SUMMARIZED) {
-      response = yield call(downloadSummarizedDataWorker, downloadSummarizedData({
-        date,
-        endDate,
+      response = yield call(
+        downloadSummarizedData,
         entities,
-        startDate,
-      }));
+        outputFilename
+      );
     }
     else {
-      response = yield call(downloadRawDataWorker, downloadRawData({
+      response = yield call(
+        downloadRawData,
         dataType,
-        date,
-        endDate,
         entities,
-        startDate,
-      }));
-      if (response.error) throw response.error;
-
-      yield put(downloadTudData.success(action.id, { date, dataType }));
+        outputFilename
+      );
     }
+
+    if (response.error) throw response.error;
+    yield put(downloadTudData.success(action.id, { date, dataType }));
   }
   catch (error) {
     LOG.error(action.type, error);
@@ -468,7 +431,6 @@ function* downloadTudDataWatcher() :Saga<*> {
 }
 
 export {
-  downloadSummarizedDataWatcher,
   downloadTudDataWatcher,
   getSubmissionsByDateWatcher,
   submitTudDataWatcher,

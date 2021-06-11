@@ -15,22 +15,12 @@ const downloadTudData :RequestSequence = newRequestSequence(DOWNLOAD_TUD_DATA);
 const DOWNLOAD_ALL_DATA :'DOWNLOAD_ALL_DATA' = 'DOWNLOAD_ALL_DATA';
 const downloadAllData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_DATA);
 
-const DOWNLOAD_SUMMARIZED_DATA :'DOWNLOAD_SUMMARIZED_DATA' = 'DOWNLOAD_SUMMARIZED_DATA';
-const downloadSummarizedData :RequestSequence = newRequestSequence(DOWNLOAD_SUMMARIZED_DATA);
-
-const DOWNLOAD_RAW_DATA :'DOWNLOAD_RAW_DATA' = 'DOWNLOAD_RAW_DATA';
-const downloadRawData :RequestSequence = newRequestSequence(DOWNLOAD_RAW_DATA);
-
 export {
   DOWNLOAD_ALL_DATA,
-  DOWNLOAD_RAW_DATA,
-  DOWNLOAD_SUMMARIZED_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   downloadAllData,
-  downloadRawData,
-  downloadSummarizedData,
   downloadTudData,
   getSubmissionsByDate,
   submitTudData,
