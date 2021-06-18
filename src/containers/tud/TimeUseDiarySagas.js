@@ -25,10 +25,12 @@ import {
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  VERIFY_TUD_LINK,
   downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
+  verifyTudLink,
 } from './TimeUseDiaryActions';
 import { createSubmitRequestBody, getOutputFileName, writeToCsvFile } from './utils';
 
@@ -67,6 +69,35 @@ const {
   PERSON_ID,
   VALUES_FQN,
 } = PROPERTY_TYPE_FQNS;
+
+function* verifyTudLinkWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(verifyTudLink.request(action.id));
+
+    const { organizationId, participantId, studyId } = action.value;
+
+    const response = yield call(ChronicleApi.verifyTudLink, organizationId, studyId, participantId);
+    const isValidLink = response.data === 'ENROLLED' || response.data === 'NOT_ENROLLED';
+
+    if (isValidLink) {
+      yield put(verifyTudLink.success(action.id));
+    }
+    else {
+      throw new Error('Invalid TUD link');
+    }
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(verifyTudLink.failure(action.id));
+  }
+  finally {
+    yield put(verifyTudLink.finally(action.id));
+  }
+}
+
+function* verifyTudLinkWatcher() :Saga<*> {
+  yield takeEvery(VERIFY_TUD_LINK, verifyTudLinkWorker);
+}
 
 function* submitTudDataWorker(action :SequenceAction) :Saga<*> {
   try {
@@ -377,6 +408,7 @@ function* downloadAllDataWatcher() :Saga<*> {
 }
 
 export {
+  verifyTudLinkWatcher,
   downloadAllDataWatcher,
   downloadTudResponsesWatcher,
   getSubmissionsByDateWatcher,

@@ -36,6 +36,7 @@ export default {
   ERROR_INVALID_BED_TIME: 'error_invalid_bedtime',
   ERROR_INVALID_END_TIME: 'error_invalid_end',
   ERROR_MIN_ITEMS: 'error_min_items',
+  ERROR_INVALID_URL: 'error_invalid_url',
   ERROR_RESPONSE_REQUIRED: 'error_required',
   ERROR_SUBMIT: 'error_submit',
   INTRO_TEXT: 'intro_text',

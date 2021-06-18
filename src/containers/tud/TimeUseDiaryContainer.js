@@ -8,11 +8,16 @@ import { Paged } from 'lattice-fabricate';
 import {
   AppContainerWrapper,
   AppContentWrapper,
+  // $FlowFixMe
+  Box,
   Card,
   CardSegment,
+  Spinner,
+  Typography,
 } from 'lattice-ui-kit';
-import { useRequestState } from 'lattice-utils';
+import { ReduxUtils, useRequestState } from 'lattice-utils';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router';
 import { RequestStates } from 'redux-reqseq';
 import type { RequestState } from 'redux-reqseq';
@@ -24,7 +29,8 @@ import QuestionnaireForm from './components/QuestionnaireForm';
 import SUPPORTED_LANGUAGES from './constants/SupportedLanguages';
 import SubmissionErrorModal from './components/SubmissionErrorModal';
 import SubmissionSuccessful from './components/SubmissionSuccessful';
-import { SUBMIT_TUD_DATA } from './TimeUseDiaryActions';
+import TranslationKeys from './constants/TranslationKeys';
+import { SUBMIT_TUD_DATA, VERIFY_TUD_LINK, verifyTudLink } from './TimeUseDiaryActions';
 import { PAGE_NUMBERS } from './constants/GeneralConstants';
 import { PROPERTY_CONSTS } from './constants/SchemaConstants';
 import { usePrevious } from './hooks';
@@ -37,6 +43,8 @@ import {
 } from './utils';
 
 import * as LanguageCodes from '../../utils/constants/LanguageCodes';
+
+const { isPending, isFailure } = ReduxUtils;
 
 const {
   ACTIVITY_END_TIME,
@@ -65,6 +73,8 @@ const TimeUseDiaryContainer = () => {
     // $FlowFixMe
   } = queryParams;
 
+  const dispatch = useDispatch();
+
   const { i18n, t } = useTranslation();
 
   const initFormSchema = createFormSchema({}, 0, t);
@@ -86,6 +96,15 @@ const TimeUseDiaryContainer = () => {
 
   // selectors
   const submitRequestState :?RequestState = useRequestState(['tud', SUBMIT_TUD_DATA]);
+  const verifyTudLinkRS :?RequestState = useRequestState(['tud', VERIFY_TUD_LINK]);
+
+  useEffect(() => {
+    dispatch(verifyTudLink({
+      organizationId,
+      studyId,
+      participantId
+    }));
+  }, [dispatch, organizationId, studyId, participantId]);
 
   useEffect(() => {
     if (submitRequestState === RequestStates.FAILURE) {
@@ -191,6 +210,30 @@ const TimeUseDiaryContainer = () => {
   const isDayActivityPage = page >= PAGE_NUMBERS.FIRST_ACTIVITY_PAGE
     && !isSummaryPage
     && !isNightActivityPage;
+
+  if (isPending(verifyTudLinkRS)) {
+    return (
+      <AppContainerWrapper>
+        <HeaderComponent onChangeLanguage={onChangeLanguage} selectedLanguage={selectedLanguage} />
+        <Box textAlign="center" mt="30px">
+          <Spinner size="2x" />
+        </Box>
+      </AppContainerWrapper>
+    );
+  }
+
+  if (isFailure(verifyTudLinkRS)) {
+    return (
+      <AppContainerWrapper>
+        <HeaderComponent onChangeLanguage={onChangeLanguage} selectedLanguage={selectedLanguage} />
+        <Box textAlign="center" mt="30px">
+          <Typography>
+            {t(TranslationKeys.ERROR_INVALID_URL)}
+          </Typography>
+        </Box>
+      </AppContainerWrapper>
+    );
+  }
 
   return (
     <AppContainerWrapper>

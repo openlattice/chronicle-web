@@ -15,13 +15,18 @@ const downloadTudResponses :RequestSequence = newRequestSequence(DOWNLOAD_TUD_RE
 const DOWNLOAD_ALL_DATA :'DOWNOAD_ALL_DATA' = 'DOWNOAD_ALL_DATA';
 const downloadAllData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_DATA);
 
+const VERIFY_TUD_LINK :'VERIFY_TUD_LINK' = 'VERIFY_TUD_LINK';
+const verifyTudLink :RequestSequence = newRequestSequence(VERIFY_TUD_LINK);
+
 export {
   DOWNLOAD_ALL_DATA,
   DOWNLOAD_TUD_RESPONSES,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
+  VERIFY_TUD_LINK,
   downloadAllData,
   downloadTudResponses,
   getSubmissionsByDate,
   submitTudData,
+  verifyTudLink,
 };
