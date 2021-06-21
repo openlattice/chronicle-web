@@ -6,6 +6,7 @@ import isEqual from 'lodash/isEqual';
 import {
   List,
   Map,
+  OrderedSet,
   get,
   getIn
 } from 'immutable';
@@ -17,7 +18,6 @@ import createEnglishTranslationLookup from './createEnglishTranslationLookup';
 import translateToEnglish from './translateToEnglish';
 
 import DataTypes from '../constants/DataTypes';
-import SUMMARIZED_DATA_VARIABLES from '../constants/SummarizedDataVariables';
 import TranslationKeys from '../constants/TranslationKeys';
 import * as ContextualSchema from '../schemas/ContextualSchema';
 import * as DaySpanSchema from '../schemas/DaySpanSchema';
@@ -522,6 +522,7 @@ function exportRawDataToCsvFile(
 function exportSummarizedDataToCsvFile(
   summaryData :Map,
   submissionMetadata :Map,
+  csvHeaders :OrderedSet,
   fileName :string
 ) {
 
@@ -533,9 +534,9 @@ function exportSummarizedDataToCsvFile(
     rowData.Timestamp = DateTime
       .fromISO((submissionMetadata.getIn([submissionId, DATE_TIME_FQN, 0])))
       .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
-    SUMMARIZED_DATA_VARIABLES.forEach((variable :string) => {
-      if (submissionSummary.has(variable)) {
-        rowData[variable] = submissionSummary.get(variable);
+    csvHeaders.forEach((header :string) => {
+      if (submissionSummary.has(header)) {
+        rowData[header] = submissionSummary.get(header);
       }
     });
     csvData.push(rowData);

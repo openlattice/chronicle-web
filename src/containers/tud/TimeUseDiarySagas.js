@@ -9,6 +9,7 @@ import {
 import {
   List,
   Map,
+  OrderedSet,
   fromJS,
   getIn
 } from 'immutable';
@@ -219,6 +220,8 @@ function* downloadSummarizedData(entities, outputFilename) :Saga<WorkerResponse>
     );
     if (response.error) throw response.error;
 
+    const csvHeaders = OrderedSet().asMutable();
+
     // create submissionEKID -> ol.variable -> ol.value map
     const summaryData = Map().withMutations((mutator) => {
       fromJS(response.data).forEach((neighbors, submissionId) => {
@@ -227,11 +230,12 @@ function* downloadSummarizedData(entities, outputFilename) :Saga<WorkerResponse>
           const variable = getPropertyValue(neighborDetails, [VARIABLE_FQN, 0]);
           const value = getPropertyValue(neighborDetails, [VALUES_FQN, 0]);
           mutator.setIn([submissionId, variable], value);
+          csvHeaders.add(variable);
         });
       });
     });
 
-    exportSummarizedDataToCsvFile(summaryData, submissionMetadata, outputFilename);
+    exportSummarizedDataToCsvFile(summaryData, submissionMetadata, csvHeaders.asImmutable(), outputFilename);
 
     workerResponse = { data: null };
   }
