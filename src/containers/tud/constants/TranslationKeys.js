@@ -57,6 +57,7 @@ export default {
   OTHER_ACTIVITY: 'other_activity',
   PRIMARY_ACTIVITIES: 'primary_activities',
   PRIMARY_ACTIVITY: 'primary_activity',
+  SCROLL_ACTIVITIES: 'scroll_activities',
   SECONDARY_ACTIVITY: 'secondary_activity',
   SLEEPING: 'sleeping',
   SLEEP_ARRANGEMENT: 'sleep_arrangement',
