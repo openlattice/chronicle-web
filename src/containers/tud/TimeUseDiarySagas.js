@@ -418,15 +418,14 @@ function* downloadRawData(dataType, entities, outputFilename) :Saga<WorkerRespon
 }
 
 function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
+  const {
+    dataType,
+    date,
+    endDate,
+    entities,
+    startDate
+  } = action.value;
   try {
-    const {
-      dataType,
-      date,
-      endDate,
-      entities,
-      startDate
-    } = action.value;
-
     yield put(downloadTudData.request(action.id, { date, dataType }));
 
     const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
@@ -453,11 +452,11 @@ function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(downloadTudData.failure(action.id));
+    yield put(downloadTudData.failure(action.id, { date, dataType }));
   }
 
   finally {
-    yield put(downloadTudData.finally(action.id));
+    yield put(downloadTudData.finally(action.id, { date, dataType }));
   }
 }
 

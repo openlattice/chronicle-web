@@ -77,10 +77,15 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
           if (!date) {
             return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.PENDING);
           }
-          return state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE);
+          return state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.PENDING);
         },
-        FAILURE: () => state
-          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
+        FAILURE: () => {
+          if (!date) {
+            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.FAILURE);
+          }
+          return state
+            .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE);
+        },
         SUCCESS: () => {
           if (!date) {
             return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.SUCCESS);
@@ -88,8 +93,9 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
           return state
             .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS);
         },
-        FINALLY: () => state
-          .deleteIn([DOWNLOAD_TUD_DATA, action.id])
+        FINALLY: () => {
+          return state.deleteIn([DOWNLOAD_ALL_DATA, action.id]);
+        }
       });
     }
 
