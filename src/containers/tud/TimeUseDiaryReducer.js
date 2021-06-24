@@ -94,7 +94,10 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
             .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS);
         },
         FINALLY: () => {
-          return state.deleteIn([DOWNLOAD_ALL_DATA, action.id]);
+          if (!date) {
+            return state.deleteIn([DOWNLOAD_ALL_DATA, action.id]);
+          }
+          return state.deleteIn([DOWNLOAD_TUD_DATA, action.id]);
         }
       });
     }

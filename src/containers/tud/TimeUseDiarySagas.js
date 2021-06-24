@@ -268,7 +268,7 @@ function* downloadSummarizedData(entities, outputFilename) :Saga<WorkerResponse>
 
     exportSummarizedDataToCsvFile(summaryData, submissionMetadata, csvHeaders.asImmutable(), outputFilename);
 
-    workerResponse = { data: null };
+    workerResponse = { data: {} };
   }
   catch (error) {
     workerResponse = { error };
@@ -456,7 +456,7 @@ function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
   }
 
   finally {
-    yield put(downloadTudData.finally(action.id, { date, dataType }));
+    yield put(downloadTudData.finally(action.id, { date }));
   }
 }
 
