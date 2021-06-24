@@ -150,5 +150,6 @@
   "submission_success": "Gracias por completar la encuesta del Diario de Uso del Tiempo. Sus respuestas han sido registradas.",
   "submission_success_title": "Su encuesta se ha enviado correctamente!",
   "nighttime_activity_title": "Actividad Nocturna",
-  "error_invalid_url": "An error occurred while loading the Time Use Diary. Please try again later."
+  "error_invalid_url": "An error occurred while loading the Time Use Diary. Please try again later.",
+  "scroll_activities": "Please scroll to view more options."
 }
