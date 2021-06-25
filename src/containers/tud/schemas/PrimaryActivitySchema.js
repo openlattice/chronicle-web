@@ -40,7 +40,8 @@ const createSchema = (
               activity: prevActivity,
               interpolation: { escapeValue: false }
             })),
-          enum: Object.values(trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true }))
+          enum: Object.values(trans(TranslationKeys.PRIMARY_ACTIVITIES, { returnObjects: true })),
+          description: trans(TranslationKeys.SCROLL_ACTIVITIES)
         },
         [ACTIVITY_START_TIME]: {
           type: 'string',

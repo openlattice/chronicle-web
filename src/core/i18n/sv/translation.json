@@ -150,5 +150,6 @@
   "submission_success": "Tack för att du har fyllt i dagboken! Ditt svar har registrerats",
   "submission_success_title": "Dagboken är inskickad!",
   "nighttime_activity_title": "Nattetid",
-  "error_invalid_url": "An error occurred while loading the Time Use Diary. Please try again later."
+  "error_invalid_url": "An error occurred while loading the Time Use Diary. Please try again later.",
+  "scroll_activities": "Please scroll to view more options."
 }
