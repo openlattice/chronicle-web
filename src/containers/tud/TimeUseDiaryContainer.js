@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import Cookies from 'js-cookie';
 import isEqual from 'lodash/isEqual';
 import qs from 'qs';
 import { Paged } from 'lattice-fabricate';
@@ -43,6 +44,7 @@ import {
 } from './utils';
 
 import * as LanguageCodes from '../../utils/constants/LanguageCodes';
+import { DEFAULT_LANGUAGE_COOKIE } from '../../utils/constants/StorageConstants';
 
 const { isPending, isFailure } = ReduxUtils;
 
@@ -114,7 +116,9 @@ const TimeUseDiaryContainer = () => {
 
   // select default language
   useEffect(() => {
-    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === LanguageCodes.ENGLISH);
+    const defaultLngCode = Cookies.get(DEFAULT_LANGUAGE_COOKIE) || LanguageCodes.ENGLISH;
+
+    const defaultLng = SUPPORTED_LANGUAGES.find((lng) => lng.code === defaultLngCode);
     if (defaultLng) {
       setSelectedLanguage({
         label: defaultLng.language,
@@ -164,6 +168,7 @@ const TimeUseDiaryContainer = () => {
   const changeLanguage = (lng :SelectLanguageOption) => {
     if (lng !== null) {
       i18n.changeLanguage(lng.value);
+      Cookies.set(DEFAULT_LANGUAGE_COOKIE, lng.value, {});
       setSelectedLanguage(lng);
     }
   };
