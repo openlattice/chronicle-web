@@ -5,12 +5,13 @@ import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 
 import {
-  DOWNLOAD_ALL_DATA,
+  DOWNLOAD_ALL_TUD_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
-  downloadTudData,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate,
   submitTudData,
   verifyTudLink,
@@ -24,7 +25,7 @@ const { SUBMISSIONS_BY_DATE } = TUD_REDUX_CONSTANTS;
 const { REQUEST_STATE } = ReduxConstants;
 
 const INITIAL_STATE = fromJS({
-  [DOWNLOAD_ALL_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [DOWNLOAD_ALL_TUD_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_SUBMISSIONS_BY_DATE]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [SUBMIT_TUD_DATA]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [SUBMISSIONS_BY_DATE]: Map(),
@@ -70,35 +71,29 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
       });
     }
 
-    case downloadTudData.case(action.type): {
+    case downloadDailyTudData.case(action.type): {
       const { date, dataType } = action.value;
-      return downloadTudData.reducer(state, action, {
-        REQUEST: () => {
-          if (!date) {
-            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.PENDING);
-          }
-          return state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.PENDING);
-        },
-        FAILURE: () => {
-          if (!date) {
-            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.FAILURE);
-          }
-          return state
-            .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE);
-        },
-        SUCCESS: () => {
-          if (!date) {
-            return state.setIn([DOWNLOAD_ALL_DATA, REQUEST_STATE], RequestStates.SUCCESS);
-          }
-          return state
-            .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS);
-        },
-        FINALLY: () => {
-          if (!date) {
-            return state.deleteIn([DOWNLOAD_ALL_DATA, action.id]);
-          }
-          return state.deleteIn([DOWNLOAD_TUD_DATA, action.id]);
-        }
+      return downloadDailyTudData.reducer(state, action, {
+        REQUEST: () => state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.PENDING),
+        FAILURE: () => state
+          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS),
+        FINALLY: () => state.deleteIn([DOWNLOAD_TUD_DATA, action.id])
+      });
+    }
+
+    case downloadAllTudData.case(action.type): {
+      return downloadAllTudData.reducer(state, action, {
+        REQUEST: () => state
+          .setIn([DOWNLOAD_ALL_TUD_DATA, REQUEST_STATE], RequestStates.PENDING)
+          .setIn([DOWNLOAD_ALL_TUD_DATA, action.id], action),
+        FAILURE: () => state
+          .setIn([DOWNLOAD_ALL_TUD_DATA, REQUEST_STATE], RequestStates.FAILURE),
+        SUCCESS: () => state
+          .setIn([DOWNLOAD_ALL_TUD_DATA, REQUEST_STATE], RequestStates.SUCCESS),
+        FINALLY: () => state
+          .deleteIn([DOWNLOAD_ALL_TUD_DATA, action.id])
       });
     }
 

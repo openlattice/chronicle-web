@@ -10,22 +10,22 @@ const GET_SUBMISSIONS_BY_DATE :'GET_SUBMISSIONS_BY_DATE' = 'GET_SUBMISSIONS_BY_D
 const getSubmissionsByDate :RequestSequence = newRequestSequence(GET_SUBMISSIONS_BY_DATE);
 
 const DOWNLOAD_TUD_DATA :'DOWNLOAD_TUD_DATA' = 'DOWNLOAD_TUD_DATA';
-const downloadTudData :RequestSequence = newRequestSequence(DOWNLOAD_TUD_DATA);
+const downloadDailyTudData :RequestSequence = newRequestSequence(DOWNLOAD_TUD_DATA);
 
-const DOWNLOAD_ALL_DATA :'DOWNLOAD_ALL_DATA' = 'DOWNLOAD_ALL_DATA';
-const downloadAllData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_DATA);
+const DOWNLOAD_ALL_TUD_DATA :'DOWNLOAD_ALL_TUD_DATA' = 'DOWNLOAD_ALL_TUD_DATA';
+const downloadAllTudData :RequestSequence = newRequestSequence(DOWNLOAD_ALL_TUD_DATA);
 
 const VERIFY_TUD_LINK :'VERIFY_TUD_LINK' = 'VERIFY_TUD_LINK';
 const verifyTudLink :RequestSequence = newRequestSequence(VERIFY_TUD_LINK);
 
 export {
-  DOWNLOAD_ALL_DATA,
+  DOWNLOAD_ALL_TUD_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
-  downloadAllData,
-  downloadTudData,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate,
   submitTudData,
   verifyTudLink,

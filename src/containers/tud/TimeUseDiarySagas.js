@@ -23,11 +23,13 @@ import type { SequenceAction } from 'redux-reqseq';
 
 import DataTypes from './constants/DataTypes';
 import {
+  DOWNLOAD_ALL_TUD_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
-  downloadTudData,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate,
   submitTudData,
   verifyTudLink,
@@ -417,7 +419,7 @@ function* downloadRawData(dataType, entities, outputFilename) :Saga<WorkerRespon
   return workerResponse;
 }
 
-function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
+function* downloadDailyTudDataWorker(action :SequenceAction) :Saga<*> {
   const {
     dataType,
     date,
@@ -426,7 +428,7 @@ function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
     startDate
   } = action.value;
   try {
-    yield put(downloadTudData.request(action.id, { date, dataType }));
+    yield put(downloadDailyTudData.request(action.id, { date, dataType }));
 
     const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
 
@@ -448,25 +450,74 @@ function* downloadTudDataWorker(action :SequenceAction) :Saga<*> {
     }
 
     if (response.error) throw response.error;
-    yield put(downloadTudData.success(action.id, { date, dataType }));
+    yield put(downloadDailyTudData.success(action.id, { date, dataType }));
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(downloadTudData.failure(action.id, { date, dataType }));
+    yield put(downloadDailyTudData.failure(action.id, { date, dataType }));
   }
 
   finally {
-    yield put(downloadTudData.finally(action.id, { date }));
+    yield put(downloadDailyTudData.finally(action.id));
   }
 }
 
-function* downloadTudDataWatcher() :Saga<*> {
-  yield takeEvery(DOWNLOAD_TUD_DATA, downloadTudDataWorker);
+function* downloadDailyTudDataWatcher() :Saga<*> {
+  yield takeEvery(DOWNLOAD_TUD_DATA, downloadDailyTudDataWorker);
+}
+
+function* downloadAllTudDataWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(downloadAllTudData.request(action.id));
+
+    const {
+      dataType,
+      date,
+      endDate,
+      entities,
+      startDate
+    } = action.value;
+
+    const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
+
+    let response;
+    if (dataType === DataTypes.SUMMARIZED) {
+      response = yield call(
+        downloadSummarizedData,
+        entities,
+        outputFilename
+      );
+    }
+    else {
+      response = yield call(
+        downloadRawData,
+        dataType,
+        entities,
+        outputFilename
+      );
+    }
+
+    if (response.error) throw response.error;
+    yield put(downloadAllTudData.success(action.id));
+  }
+
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(downloadAllTudData.failure(action.id));
+  }
+  finally {
+    yield put(downloadAllTudData.finally(action.id));
+  }
+}
+
+function* downloadAllTudDataWatcher() :Saga<*> {
+  yield takeEvery(DOWNLOAD_ALL_TUD_DATA, downloadAllTudDataWorker);
 }
 
 export {
-  verifyTudLinkWatcher,
-  downloadTudDataWatcher,
+  downloadAllTudDataWatcher,
+  downloadDailyTudDataWatcher,
   getSubmissionsByDateWatcher,
   submitTudDataWatcher,
+  verifyTudLinkWatcher,
 };

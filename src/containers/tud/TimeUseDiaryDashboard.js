@@ -17,10 +17,11 @@ import SearchPanel from './components/SearchPanel';
 import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
 import {
-  DOWNLOAD_ALL_DATA,
+  DOWNLOAD_ALL_TUD_DATA,
   DOWNLOAD_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
-  downloadTudData,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate
 } from './TimeUseDiaryActions';
 import type { DataType } from './constants/DataTypes';
@@ -53,7 +54,7 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
   });
 
   // selectors
-  const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_DATA]);
+  const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_TUD_DATA]);
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
   const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_DATA, REQUEST_STATE], Map()));
@@ -85,18 +86,24 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
   const handleDownload = (entities :?List, date :?string, dataType :DataType) => {
     const { endDate, startDate } = dates;
 
-    let data = entities;
     if (!date) {
-      data = submissionsByDate.toList().flatten(true);
+      // download all
+      dispatch(downloadAllTudData({
+        entities: submissionsByDate.toList().flatten(true),
+        dataType,
+        endDate,
+        startDate
+      }));
     }
-
-    dispatch(downloadTudData({
-      dataType,
-      date,
-      endDate,
-      entities: data,
-      startDate,
-    }));
+    else {
+      dispatch(downloadDailyTudData({
+        dataType,
+        date,
+        endDate,
+        entities,
+        startDate,
+      }));
+    }
   };
 
   const errorMsg = 'An error occurred while loading time use diary data.'
