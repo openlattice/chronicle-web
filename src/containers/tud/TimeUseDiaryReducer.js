@@ -6,7 +6,7 @@ import { RequestStates } from 'redux-reqseq';
 
 import {
   DOWNLOAD_ALL_TUD_DATA,
-  DOWNLOAD_TUD_DATA,
+  DOWNLOAD_DAILY_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
@@ -74,12 +74,12 @@ export default function timeUseDiaryReducer(state :Map = INITIAL_STATE, action :
     case downloadDailyTudData.case(action.type): {
       const { date, dataType } = action.value;
       return downloadDailyTudData.reducer(state, action, {
-        REQUEST: () => state.setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.PENDING),
+        REQUEST: () => state.setIn([DOWNLOAD_DAILY_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.PENDING),
         FAILURE: () => state
-          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
+          .setIn([DOWNLOAD_DAILY_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.FAILURE),
         SUCCESS: () => state
-          .setIn([DOWNLOAD_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS),
-        FINALLY: () => state.deleteIn([DOWNLOAD_TUD_DATA, action.id])
+          .setIn([DOWNLOAD_DAILY_TUD_DATA, REQUEST_STATE, date, dataType], RequestStates.SUCCESS),
+        FINALLY: () => state.deleteIn([DOWNLOAD_DAILY_TUD_DATA, action.id])
       });
     }
 

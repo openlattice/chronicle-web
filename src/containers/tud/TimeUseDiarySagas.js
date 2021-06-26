@@ -24,7 +24,7 @@ import type { SequenceAction } from 'redux-reqseq';
 import DataTypes from './constants/DataTypes';
 import {
   DOWNLOAD_ALL_TUD_DATA,
-  DOWNLOAD_TUD_DATA,
+  DOWNLOAD_DAILY_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
@@ -463,7 +463,7 @@ function* downloadDailyTudDataWorker(action :SequenceAction) :Saga<*> {
 }
 
 function* downloadDailyTudDataWatcher() :Saga<*> {
-  yield takeEvery(DOWNLOAD_TUD_DATA, downloadDailyTudDataWorker);
+  yield takeEvery(DOWNLOAD_DAILY_TUD_DATA, downloadDailyTudDataWorker);
 }
 
 function* downloadAllTudDataWorker(action :SequenceAction) :Saga<*> {

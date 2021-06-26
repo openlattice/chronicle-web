@@ -18,7 +18,7 @@ import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
 import {
   DOWNLOAD_ALL_TUD_DATA,
-  DOWNLOAD_TUD_DATA,
+  DOWNLOAD_DAILY_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   downloadAllTudData,
   downloadDailyTudData,
@@ -57,7 +57,7 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
   const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_TUD_DATA]);
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
-  const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_DATA, REQUEST_STATE], Map()));
+  const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_DAILY_TUD_DATA, REQUEST_STATE], Map()));
 
   // reset state on dismount
   useEffect(() => () => {
