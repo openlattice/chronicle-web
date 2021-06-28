@@ -52,7 +52,7 @@ export default function permissionsReducer(state :Map = INITIAL_STATE, action :O
           .setIn([studyId, HAS_DELETE_PERMISSION], false),
         SUCCESS: () => state
           .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.SUCCESS)
-          .setIn([HAS_DELETE_PERMISSION, HAS_DELETE_PERMISSION], true),
+          .setIn([studyId, HAS_DELETE_PERMISSION], true),
         FINALLY: () => state.deleteIn([GET_DELETE_PERMISSION, action.id]),
       });
     }
