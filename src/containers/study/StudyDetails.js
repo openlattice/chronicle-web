@@ -144,11 +144,12 @@ DetailWrapper.defaultProps = {
 };
 
 type Props = {
+  hasDeletePermission :Boolean;
   notificationsEnabled :boolean;
   study :Map;
 }
 
-const StudyDetails = ({ study, notificationsEnabled } :Props) => {
+const StudyDetails = ({ hasDeletePermission, study, notificationsEnabled } :Props) => {
   const dispatch = useDispatch();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [isDeleteModalVisible, showDeleteModal, hideDeleteModal] = useBoolean(false);
@@ -243,6 +244,7 @@ const StudyDetails = ({ study, notificationsEnabled } :Props) => {
             Edit Details
           </Button>
           <Button
+              disabled={!hasDeletePermission}
               color="error"
               onClick={showDeleteModal}>
             Delete Study

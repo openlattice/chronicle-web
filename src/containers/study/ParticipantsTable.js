@@ -44,12 +44,13 @@ const TableWrapper = styled.div`
 `;
 
 type Props = {
+  hasDeletePermission :Boolean;
   participants :Map<UUID, Map>;
   study :Map;
 };
 
 const ParticipantsTable = (props :Props) => {
-  const { participants, study } = props;
+  const { hasDeletePermission, participants, study } = props;
 
   const dispatch = useDispatch();
 
@@ -118,7 +119,7 @@ const ParticipantsTable = (props :Props) => {
 
   const components = {
     Row: ({ data: rowData } :any) => (
-      <ParticipantRow data={rowData} onClickIcon={onClickIcon} />
+      <ParticipantRow data={rowData} hasDeletePermission={hasDeletePermission} onClickIcon={onClickIcon} />
     )
   };
 
