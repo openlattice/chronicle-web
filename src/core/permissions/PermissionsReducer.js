@@ -47,7 +47,7 @@ export default function permissionsReducer(state :Map = INITIAL_STATE, action :O
       return getDeletePermission.reducer(state, action, {
         REQUEST: () => state.setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.PENDING),
         FAILURE: () => state
-          .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.PENDING)
+          .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.FAILURE)
           .set(HAS_DELETE_PERMISSION, false),
         SUCCESS: () => state
           .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.SUCCESS)
