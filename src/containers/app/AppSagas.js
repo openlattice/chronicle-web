@@ -28,6 +28,8 @@ import * as AppModules from '../../utils/constants/AppModules';
 import * as Routes from '../../core/router/Routes';
 import { getEntityDataModelTypes } from '../../core/edm/EDMActions';
 import { getEntityDataModelTypesWorker } from '../../core/edm/EDMSagas';
+import { getDeletePermission } from '../../core/permissions/PermissionsActions';
+import { getDeletePermissionWorker } from '../../core/permissions/PermissionsSagas';
 import { processAppConfigs } from '../../utils/AppUtils';
 import { ERR_MISSING_CORE_MODULE } from '../../utils/Errors';
 import { getNotificationsEntity, getStudies } from '../studies/StudiesActions';
@@ -124,6 +126,8 @@ function* initializeApplicationWorker(action :SequenceAction) :Generator<*, *, *
     // get studies
     const studiesRes = yield call(getStudiesWorker, getStudies());
     if (studiesRes.error) throw studiesRes.error;
+
+    yield call(getDeletePermissionWorker, getDeletePermission());
 
     yield put(initializeApplication.success(action.id));
   }
