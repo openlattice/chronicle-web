@@ -166,7 +166,7 @@ const createFormSchema = (formData :Object, pageNum :number, trans :TranslationF
   if (pageNum === PRE_SURVEY_PAGE) {
     return {
       schema: PreSurveySchema.createSchema(trans),
-      uiSchema: PreSurveySchema.uiSchema
+      uiSchema: PreSurveySchema.createUiSchema(trans)
     };
   }
 
