@@ -5,17 +5,24 @@ import { ReduxConstants } from 'lattice-utils';
 import { RequestStates } from 'redux-reqseq';
 
 import {
+  GET_DELETE_PERMISSION,
   GET_STUDY_AUTHORIZATIONS,
   UPDATE_ES_PERMISSIONS,
+  getDeletePermission,
   getStudyAuthorizations,
   updateEntitySetPermissions
 } from './PermissionsActions';
 
+import { PERMISSIONS_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+
 const { REQUEST_STATE } = ReduxConstants;
+
+const { HAS_DELETE_PERMISSION } = PERMISSIONS_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map = fromJS({
   [GET_STUDY_AUTHORIZATIONS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [UPDATE_ES_PERMISSIONS]: { [REQUEST_STATE]: RequestStates.STANDBY },
+  [HAS_DELETE_PERMISSION]: Map()
 });
 
 export default function permissionsReducer(state :Map = INITIAL_STATE, action :Object) {
@@ -33,6 +40,20 @@ export default function permissionsReducer(state :Map = INITIAL_STATE, action :O
         REQUEST: () => state.setIn([GET_STUDY_AUTHORIZATIONS, REQUEST_STATE], RequestStates.PENDING),
         FAILURE: () => state.setIn([GET_STUDY_AUTHORIZATIONS, REQUEST_STATE], RequestStates.FAILURE),
         SUCCESS: () => state.setIn([GET_STUDY_AUTHORIZATIONS, REQUEST_STATE], RequestStates.SUCCESS)
+      });
+    }
+
+    case getDeletePermission.case(action.type): {
+      const studyId = action.value;
+      return getDeletePermission.reducer(state, action, {
+        REQUEST: () => state.setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.PENDING),
+        FAILURE: () => state
+          .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.FAILURE)
+          .setIn([studyId, HAS_DELETE_PERMISSION], false),
+        SUCCESS: () => state
+          .setIn([GET_DELETE_PERMISSION, REQUEST_STATE], RequestStates.SUCCESS)
+          .setIn([studyId, HAS_DELETE_PERMISSION], true),
+        FINALLY: () => state.deleteIn([GET_DELETE_PERMISSION, action.id]),
       });
     }
 

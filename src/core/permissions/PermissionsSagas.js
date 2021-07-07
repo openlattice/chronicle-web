@@ -23,14 +23,17 @@ import {
   PermissionsApiSagas,
 } from 'lattice-sagas';
 import { Logger } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  GET_DELETE_PERMISSION,
   GET_STUDY_AUTHORIZATIONS,
   UPDATE_ES_PERMISSIONS,
+  getDeletePermission,
   getStudyAuthorizations,
-  updateEntitySetPermissions
+  updateEntitySetPermissions,
 } from './PermissionsActions';
 
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
@@ -49,8 +52,8 @@ const { getAuthorizations } = AuthorizationsApiActions;
 const { getAuthorizationsWorker } = AuthorizationsApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
-const { updateAcls } = PermissionsApiActions;
-const { updateAclsWorker } = PermissionsApiSagas;
+const { getAcl, updateAcls } = PermissionsApiActions;
+const { getAclWorker, updateAclsWorker } = PermissionsApiSagas;
 
 const {
   AccessCheck,
@@ -215,9 +218,43 @@ function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
 }
 
+function* getDeletePermissionWorker(action :SequenceAction) :Saga<*> {
+  const studyId = action.value;
+
+  try {
+    yield put(getDeletePermission.request(action.id));
+    // to delete legacy study/participant data, current user should have OWNER on participant esid
+
+    // get participants esid
+    const entitySetName = getParticipantsEntitySetName(studyId);
+    const entitySetResponse = yield call(getEntitySetIdWorker, getEntitySetId(entitySetName));
+
+    if (entitySetResponse.error) throw entitySetResponse.error;
+    const entitySetId = entitySetResponse.data;
+
+    const response = yield call(getAclWorker, getAcl([entitySetId]));
+    if (response.error) throw response.error;
+
+    yield put(getDeletePermission.success(action.id, studyId));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getDeletePermission.failure(action.id, studyId));
+  }
+  finally {
+    yield put(getDeletePermission.finally(action.id));
+  }
+}
+
+function* getDeletePermissionWatcher() :Saga<*> {
+  yield takeEvery(GET_DELETE_PERMISSION, getDeletePermissionWorker);
+}
+
 export {
+  getDeletePermissionWatcher,
+  getDeletePermissionWorker,
+  getStudyAuthorizationsWatcher,
+  getStudyAuthorizationsWorker,
   updateEntitySetPermissionsWatcher,
   updateEntitySetPermissionsWorker,
-  getStudyAuthorizationsWatcher,
-  getStudyAuthorizationsWorker
 };
