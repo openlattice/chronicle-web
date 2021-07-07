@@ -35,11 +35,12 @@ const AddParticipantsButton = styled(Button)`
 `;
 
 type Props = {
+  hasDeletePermission :Boolean;
   participants :Map;
   study :Map;
 };
 
-const StudyParticipants = ({ participants, study } :Props) => {
+const StudyParticipants = ({ hasDeletePermission, participants, study } :Props) => {
   const dispatch = useDispatch();
 
   const [isModalOpen, setModalOpen] = useState(false);
@@ -91,7 +92,12 @@ const StudyParticipants = ({ participants, study } :Props) => {
         }
         {
           !filteredParticipants.isEmpty()
-          && <ParticipantsTable participants={filteredParticipants} study={study} />
+          && (
+            <ParticipantsTable
+                hasDeletePermission={hasDeletePermission}
+                participants={filteredParticipants}
+                study={study} />
+          )
         }
       </CardSegment>
       <AddParticipantModal

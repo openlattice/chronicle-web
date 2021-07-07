@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getIn } from 'immutable';
-import { Colors } from 'lattice-ui-kit';
+import { Colors, IconButton } from 'lattice-ui-kit';
 import { DateTimeUtils } from 'lattice-utils';
 import { DateTime } from 'luxon';
 
@@ -75,6 +75,7 @@ const ActionIconsWrapper = styled.div`
 type IconProps = {
   action :string;
   enrollmentStatus :string;
+  hasDeletePermission :Boolean;
   icon :any;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
   participantEKId :UUID;
@@ -84,6 +85,7 @@ const ActionIcon = (props :IconProps) => {
   const {
     action,
     enrollmentStatus,
+    hasDeletePermission,
     icon,
     onClickIcon,
     participantEKId,
@@ -94,24 +96,31 @@ const ActionIcon = (props :IconProps) => {
     // eslint-disable-next-line prefer-destructuring
     iconColor = PURPLE.P300;
   }
+  if (icon === faTrashAlt && !hasDeletePermission) {
+    iconColor = NEUTRAL.N300;
+  }
 
   return (
-    <StyledFontAwesomeIcon
+    <IconButton
         data-action-id={action}
         data-key-id={participantEKId}
-        onClick={onClickIcon}
-        color={iconColor}
-        icon={icon} />
+        disabled={action === DELETE && !hasDeletePermission}
+        onClick={onClickIcon}>
+      <StyledFontAwesomeIcon
+          color={iconColor}
+          icon={icon} />
+    </IconButton>
   );
 };
 
 type Props = {
   data :Object;
+  hasDeletePermission :Boolean;
   onClickIcon :(SyntheticEvent<HTMLElement>) => void;
 };
 
 const ParticipantRow = (props :Props) => {
-  const { data, onClickIcon } = props;
+  const { data, hasDeletePermission, onClickIcon } = props;
 
   const participantEKId = getIn(data, ['id', 0]);
   const participantId = getIn(data, [PERSON_ID, 0]);
@@ -162,6 +171,7 @@ const ParticipantRow = (props :Props) => {
                 <ActionIcon
                     action={actionItem.action}
                     enrollmentStatus={enrollmentStatus}
+                    hasDeletePermission={hasDeletePermission}
                     icon={actionItem.icon}
                     key={actionItem.action}
                     onClickIcon={onClickIcon}

@@ -9,6 +9,7 @@ import * as DataSagas from './data/DataSagas';
 
 import * as AppSagas from '../../containers/app/AppSagas';
 import * as EDMSagas from '../edm/EDMSagas';
+import * as PermissionsSagas from '../permissions/PermissionsSagas';
 import * as QuestionnaireSagas from '../../containers/questionnaire/QuestionnaireSagas';
 import * as RoutingSagas from '../router/RoutingSagas';
 import * as StudiesSagas from '../../containers/studies/StudiesSagas';
@@ -64,6 +65,9 @@ export default function* sagas() :Generator<*, *, *> {
     fork(QuestionnaireSagas.getQuestionnaireWatcher),
     fork(QuestionnaireSagas.getStudyQuestionnairesWatcher),
     fork(QuestionnaireSagas.submitQuestionnaireWatcher),
+
+    // permissions
+    fork(PermissionsSagas.getDeletePermissionWatcher),
 
     // time use diary
     fork(TimeUseDiarySagas.downloadAllTudDataWatcher),
