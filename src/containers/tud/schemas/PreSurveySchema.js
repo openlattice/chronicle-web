@@ -74,7 +74,7 @@ const createSchema = (trans :(string, ?Object) => string) => ({
   }
 });
 
-const uiSchema = {
+const createUiSchema = (trans :TranslationFunction) => ({
   [getPageSectionKey(PRE_SURVEY_PAGE, 0)]: {
     classNames: 'column-span-12 grid-container',
     [DAY_OF_WEEK]: {
@@ -87,12 +87,16 @@ const uiSchema = {
     },
     [NON_TYPICAL_DAY_REASON]: {
       classNames: 'column-span-12',
-      'ui:widget': 'checkboxes'
+      'ui:widget': 'checkboxes',
+      'ui:options': {
+        withOther: true,
+        otherText: trans(TranslationKeys.OTHER)
+      }
     }
   }
-};
+});
 
 export {
   createSchema,
-  uiSchema
+  createUiSchema,
 };
