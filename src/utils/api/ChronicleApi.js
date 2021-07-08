@@ -7,10 +7,11 @@ import { AuthUtils } from 'lattice-auth';
 import {
   getDeleteParticipantPath,
   getDeleteStudyUrl,
+  getEnrollmentStatusUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
   getSubmitQuestionnaireUrl,
-  getSubmitTudDataUrl
+  getSubmitTudDataUrl,
 } from '../AppUtils';
 
 const { DeleteTypes } = Types;
@@ -189,6 +190,20 @@ function deleteStudy(orgId :UUID, studyId :UUID) {
   });
 }
 
+function verifyTudLink(organizationId :UUID, studyId :UUID, participantId :string) {
+  return new Promise<*>((resolve, reject) => {
+    const url = getEnrollmentStatusUrl(organizationId, studyId, participantId);
+
+    if (!url) return reject(new Error('Invalid url'));
+
+    return axios({
+      method: 'get',
+      url
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
+
 export {
   deleteStudy,
   deleteStudyParticipant,
@@ -197,4 +212,5 @@ export {
   submitQuestionnaire,
   submitTudData,
   updateAppsUsageAssociationData,
+  verifyTudLink,
 };

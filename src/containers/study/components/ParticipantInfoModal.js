@@ -17,7 +17,7 @@ import {
 
 import copyToClipboard from '../../../utils/copyToClipboard';
 import { useHasQuestionnairesModule } from '../../shared/hooks';
-import { getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
+import { getAppUsageLink, getParticipantLoginLink, getTimeUseDiaryLink } from '../utils';
 
 const Grid = styled.div`
   align-items: center;
@@ -47,11 +47,13 @@ const ParticipantInfoModal = ({
   const renderParticipantInfo = () => {
     const participantLoginLink = getParticipantLoginLink(orgId, studyId, participantId);
     const timeUseDiaryLink = getTimeUseDiaryLink(orgId, studyId, participantId);
+    const appUsageLink = getAppUsageLink(orgId, studyId, participantId);
 
     const participantDetails = [
       { name: 'Participant ID', value: participantId },
       { name: 'Study ID', value: studyId },
-      { name: 'Enrollment Link', value: participantLoginLink }
+      { name: 'Enrollment Link', value: participantLoginLink },
+      { name: 'App Usage Link', value: appUsageLink }
     ];
     if (hasQuestionnaireModule) {
       participantDetails.push({
@@ -64,7 +66,7 @@ const ParticipantInfoModal = ({
       <div>
         {
           participantDetails.map((detail) => (
-            <Box mb="20px" maxWidth="600px">
+            <Box mb="20px" maxWidth="600px" key={detail.name}>
               <Typography variant="body2">
                 {detail.name}
               </Typography>

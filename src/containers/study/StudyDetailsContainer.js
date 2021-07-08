@@ -31,7 +31,11 @@ import * as Routes from '../../core/router/Routes';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 import { getIdFromMatch } from '../../core/router/RouterUtils';
 import { goToRoot } from '../../core/router/RoutingActions';
-import { APP_REDUX_CONSTANTS, STUDIES_REDUX_CONSTANTS } from '../../utils/constants/ReduxConstants';
+import {
+  APP_REDUX_CONSTANTS,
+  PERMISSIONS_REDUX_CONSTANTS,
+  STUDIES_REDUX_CONSTANTS
+} from '../../utils/constants/ReduxConstants';
 import {
   GET_STUDY_PARTICIPANTS,
   getStudyParticipants,
@@ -54,6 +58,8 @@ const {
   STUDIES,
   TIME_USE_DIARY_STUDIES,
 } = STUDIES_REDUX_CONSTANTS;
+
+const { HAS_DELETE_PERMISSION } = PERMISSIONS_REDUX_CONSTANTS;
 
 const { NEUTRAL, PURPLE } = Colors;
 
@@ -119,6 +125,8 @@ const StudyDetailsContainer = (props :Props) => {
 
   const notificationsEnabled :boolean = notificationsEnabledStudies.has(studyId);
 
+  const hasDeletePermission :Boolean = useSelector((state) => state.getIn(['permissions', HAS_DELETE_PERMISSION]));
+
   const timeUseDiaryStudies = useSelector((state) => state.getIn([STUDIES, TIME_USE_DIARY_STUDIES], Set()));
 
   const studyEKID = getEntityKeyId(study);
@@ -180,7 +188,12 @@ const StudyDetailsContainer = (props :Props) => {
         <Route
             exact
             path={Routes.PARTICIPANTS}
-            render={() => <StudyParticipants participants={participants} study={study} />} />
+            render={() => (
+              <StudyParticipants
+                  hasDeletePermission={hasDeletePermission}
+                  participants={participants}
+                  study={study} />
+            )} />
         <Route
             path={Routes.QUESTIONNAIRES}
             render={() => <QuestionnairesContainer study={study} />} />
@@ -194,7 +207,12 @@ const StudyDetailsContainer = (props :Props) => {
             )} />
         <Route
             path={Routes.STUDY}
-            render={() => <StudyDetails study={study} notificationsEnabled={notificationsEnabled} />} />
+            render={() => (
+              <StudyDetails
+                  hasDeletePermission={hasDeletePermission}
+                  study={study}
+                  notificationsEnabled={notificationsEnabled} />
+            )} />
         {
           questionnaireModuleOrgs.includes(selectedOrgId) && (
             <Route

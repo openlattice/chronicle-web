@@ -23,18 +23,22 @@ import {
   PermissionsApiSagas,
 } from 'lattice-sagas';
 import { Logger } from 'lattice-utils';
+import type { Saga } from '@redux-saga/core';
 import type { FQN } from 'lattice';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  GET_DELETE_PERMISSION,
   GET_STUDY_AUTHORIZATIONS,
   UPDATE_ES_PERMISSIONS,
+  getDeletePermission,
   getStudyAuthorizations,
-  updateEntitySetPermissions
+  updateEntitySetPermissions,
 } from './PermissionsActions';
 
+import * as AppModules from '../../utils/constants/AppModules';
 import { getParticipantsEntitySetName } from '../../utils/ParticipantUtils';
-import { selectEntityType } from '../edm/EDMUtils';
+import { selectEntitySetsByModule, selectEntityType } from '../edm/EDMUtils';
 import { PROPERTY_TYPE_FQNS } from '../edm/constants/FullyQualifiedNames';
 
 const { STUDY_ID } = PROPERTY_TYPE_FQNS;
@@ -49,8 +53,8 @@ const { getAuthorizations } = AuthorizationsApiActions;
 const { getAuthorizationsWorker } = AuthorizationsApiSagas;
 const { getEntitySetId } = EntitySetsApiActions;
 const { getEntitySetIdWorker } = EntitySetsApiSagas;
-const { updateAcls } = PermissionsApiActions;
-const { updateAclsWorker } = PermissionsApiSagas;
+const { getAcls, updateAcls } = PermissionsApiActions;
+const { getAclsWorker, updateAclsWorker } = PermissionsApiSagas;
 
 const {
   AccessCheck,
@@ -215,9 +219,46 @@ function* getStudyAuthorizationsWatcher() :Generator<*, *, *> {
   yield takeEvery(GET_STUDY_AUTHORIZATIONS, getStudyAuthorizations);
 }
 
+function* getDeletePermissionWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(getDeletePermission.request(action.id));
+
+    // to delete study/participant data, current user should have OWNER on all the entity set ids
+    const coreEntitySetIds = yield select(selectEntitySetsByModule(AppModules.CHRONICLE_CORE));
+    const dataCollectionEntitySetids = yield select(selectEntitySetsByModule(AppModules.DATA_COLLECTION));
+    const surveyEntitySetIds :Map = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const allEntityKeyIds = coreEntitySetIds
+      .merge(dataCollectionEntitySetids)
+      .merge(surveyEntitySetIds)
+      .valueSeq()
+      .toJS();
+
+    const acls = allEntityKeyIds.map((ekid) => [ekid]);
+
+    const response = yield call(getAclsWorker, getAcls(acls));
+    if (response.error) throw response.error;
+
+    yield put(getDeletePermission.success(action.id));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getDeletePermission.failure(action.id));
+  }
+  finally {
+    yield put(getDeletePermission.finally(action.id));
+  }
+}
+
+function* getDeletePermissionWatcher() :Saga<*> {
+  yield takeEvery(GET_DELETE_PERMISSION, getDeletePermissionWorker);
+}
+
 export {
+  getDeletePermissionWatcher,
+  getDeletePermissionWorker,
+  getStudyAuthorizationsWatcher,
+  getStudyAuthorizationsWorker,
   updateEntitySetPermissionsWatcher,
   updateEntitySetPermissionsWorker,
-  getStudyAuthorizationsWatcher,
-  getStudyAuthorizationsWorker
 };
