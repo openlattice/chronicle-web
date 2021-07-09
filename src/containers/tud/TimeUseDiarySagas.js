@@ -9,6 +9,7 @@ import {
 import {
   List,
   Map,
+  OrderedSet,
   fromJS,
   getIn
 } from 'immutable';
@@ -20,19 +21,25 @@ import type { Saga } from '@redux-saga/core';
 import type { WorkerResponse } from 'lattice-sagas';
 import type { SequenceAction } from 'redux-reqseq';
 
+import DataTypes from './constants/DataTypes';
 import {
-  DOWNLOAD_ALL_DATA,
-  DOWNLOAD_TUD_RESPONSES,
+  DOWNLOAD_ALL_TUD_DATA,
+  DOWNLOAD_DAILY_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
   SUBMIT_TUD_DATA,
   VERIFY_TUD_LINK,
-  downloadAllData,
-  downloadTudResponses,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate,
   submitTudData,
   verifyTudLink,
 } from './TimeUseDiaryActions';
-import { createSubmitRequestBody, getOutputFileName, writeToCsvFile } from './utils';
+import {
+  createSubmitRequestBody,
+  exportRawDataToCsvFile,
+  exportSummarizedDataToCsvFile,
+  getOutputFileName
+} from './utils';
 
 import * as AppModules from '../../utils/constants/AppModules';
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
@@ -48,7 +55,8 @@ import {
   REGISTERED_FOR,
   RESPONDS_WITH,
   SUBMISSION,
-  TIME_RANGE,
+  SUMMARY_SET,
+  TIME_RANGE
 } from '../../core/edm/constants/EntityTemplateNames';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
@@ -68,6 +76,7 @@ const {
   ID_FQN,
   PERSON_ID,
   VALUES_FQN,
+  VARIABLE_FQN,
 } = PROPERTY_TYPE_FQNS;
 
 function* verifyTudLinkWorker(action :SequenceAction) :Saga<*> {
@@ -213,17 +222,67 @@ function* getSubmissionsByDateWatcher() :Saga<*> {
   yield takeEvery(GET_SUBMISSIONS_BY_DATE, getSubmissionsByDateWorker);
 }
 
-function* downloadTudResponsesWorker(action :SequenceAction) :Saga<WorkerResponse> {
+function* downloadSummarizedData(entities, outputFilename) :Saga<WorkerResponse> {
   let workerResponse = {};
-  const {
-    dataType,
-    date,
-    endDate,
-    entities,
-    startDate,
-  } = action.value;
   try {
-    yield put(downloadTudResponses.request(action.id, { date, dataType }));
+
+    const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
+    const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
+
+    // entity set ids
+    const surveyEntitySets :Map = yield select(selectEntitySetsByModule(AppModules.QUESTIONNAIRES));
+
+    const submissionESID = surveyEntitySets.get(SUBMISSION);
+    const registeredForESID = surveyEntitySets.get(REGISTERED_FOR);
+    const summarysetESID = surveyEntitySets.get(SUMMARY_SET);
+
+    // filtered search on submissions
+    const filter = {
+      destinationEntitySetIds: [submissionESID],
+      edgeEntitySetIds: [registeredForESID],
+      entityKeyIds: submissionIds.toJS(),
+      sourceEntitySetIds: [summarysetESID]
+    };
+
+    const response = yield call(
+      searchEntityNeighborsWithFilterWorker,
+      searchEntityNeighborsWithFilter({
+        entitySetId: submissionESID,
+        filter,
+      })
+    );
+    if (response.error) throw response.error;
+
+    const csvHeaders = OrderedSet().asMutable();
+
+    // create submissionEKID -> ol.variable -> ol.value map
+    const summaryData = Map().withMutations((mutator) => {
+      fromJS(response.data).forEach((neighbors, submissionId) => {
+        neighbors.forEach((neighbor) => {
+          const neighborDetails = neighbor.get('neighborDetails');
+          const variable = getPropertyValue(neighborDetails, [VARIABLE_FQN, 0]);
+          const value = getPropertyValue(neighborDetails, [VALUES_FQN, 0]);
+          mutator.setIn([submissionId, variable], value);
+          csvHeaders.add(variable);
+        });
+      });
+    });
+
+    exportSummarizedDataToCsvFile(summaryData, submissionMetadata, csvHeaders.asImmutable(), outputFilename);
+
+    workerResponse = { data: {} };
+  }
+  catch (error) {
+    workerResponse = { error };
+  }
+
+  return workerResponse;
+}
+
+function* downloadRawData(dataType, entities, outputFilename) :Saga<WorkerResponse> {
+  let workerResponse = {};
+
+  try {
 
     const submissionIds = entities.map((entity) => entity.get(OPENLATTICE_ID_FQN)).flatten();
     const submissionMetadata = Map(entities.map((entity) => [entity.getIn([OPENLATTICE_ID_FQN, 0]), entity]));
@@ -342,11 +401,9 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<WorkerRespons
       }
     });
 
-    const outputFileName = getOutputFileName(date, startDate, endDate, dataType);
-
-    writeToCsvFile(
+    exportRawDataToCsvFile(
       dataType,
-      outputFileName,
+      outputFilename,
       submissionMetadata,
       answersMap,
       nonTimeRangeQuestionAnswerMap,
@@ -354,63 +411,113 @@ function* downloadTudResponsesWorker(action :SequenceAction) :Saga<WorkerRespons
       timeRangeValues
     );
     workerResponse = { data: null };
-    yield put(downloadTudResponses.success(action.id, { date, dataType }));
   }
   catch (error) {
     workerResponse = { error };
-    LOG.error(action.type, error);
-    yield put(downloadTudResponses.failure(action.id, { date, dataType }));
-  }
-  finally {
-    yield put(downloadTudResponses.finally(action.id));
   }
 
   return workerResponse;
 }
 
-function* downloadTudResponsesWatcher() :Saga<*> {
-  yield takeEvery(DOWNLOAD_TUD_RESPONSES, downloadTudResponsesWorker);
-}
-
-function* downloadAllDataWorker(action :SequenceAction) :Saga<*> {
+function* downloadDailyTudDataWorker(action :SequenceAction) :Saga<*> {
+  const {
+    dataType,
+    date,
+    endDate,
+    entities,
+    startDate
+  } = action.value;
   try {
-    yield put(downloadAllData.request(action.id));
+    yield put(downloadDailyTudData.request(action.id, { date, dataType }));
 
-    const {
-      entities,
-      startDate,
-      endDate,
-      dataType
-    } = action.value;
+    const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
 
-    const response = yield call(downloadTudResponsesWorker, downloadTudResponses({
-      entities,
-      startDate,
-      endDate,
-      dataType
-    }));
+    let response;
+    if (dataType === DataTypes.SUMMARIZED) {
+      response = yield call(
+        downloadSummarizedData,
+        entities,
+        outputFilename
+      );
+    }
+    else {
+      response = yield call(
+        downloadRawData,
+        dataType,
+        entities,
+        outputFilename
+      );
+    }
+
     if (response.error) throw response.error;
-
-    yield put(downloadAllData.success(action.id));
+    yield put(downloadDailyTudData.success(action.id, { date, dataType }));
   }
   catch (error) {
     LOG.error(action.type, error);
-    yield put(downloadAllData.failure(action.id));
+    yield put(downloadDailyTudData.failure(action.id, { date, dataType }));
   }
+
   finally {
-    yield put(downloadAllData.finally(action.id));
+    yield put(downloadDailyTudData.finally(action.id));
   }
 }
 
-function* downloadAllDataWatcher() :Saga<*> {
+function* downloadDailyTudDataWatcher() :Saga<*> {
+  yield takeEvery(DOWNLOAD_DAILY_TUD_DATA, downloadDailyTudDataWorker);
+}
 
-  yield takeEvery(DOWNLOAD_ALL_DATA, downloadAllDataWorker);
+function* downloadAllTudDataWorker(action :SequenceAction) :Saga<*> {
+  try {
+    yield put(downloadAllTudData.request(action.id));
+
+    const {
+      dataType,
+      date,
+      endDate,
+      entities,
+      startDate
+    } = action.value;
+
+    const outputFilename = getOutputFileName(date, startDate, endDate, dataType);
+
+    let response;
+    if (dataType === DataTypes.SUMMARIZED) {
+      response = yield call(
+        downloadSummarizedData,
+        entities,
+        outputFilename
+      );
+    }
+    else {
+      response = yield call(
+        downloadRawData,
+        dataType,
+        entities,
+        outputFilename
+      );
+    }
+
+    if (response.error) throw response.error;
+    yield put(downloadAllTudData.success(action.id));
+  }
+
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(downloadAllTudData.failure(action.id));
+  }
+  finally {
+    yield put(downloadAllTudData.finally(action.id));
+  }
+}
+
+function* downloadAllTudDataWatcher() :Saga<*> {
+  yield takeEvery(DOWNLOAD_ALL_TUD_DATA, downloadAllTudDataWorker);
 }
 
 export {
-  verifyTudLinkWatcher,
-  downloadAllDataWatcher,
-  downloadTudResponsesWatcher,
+  downloadAllTudDataWatcher,
+  downloadDailyTudDataWatcher,
   getSubmissionsByDateWatcher,
   submitTudDataWatcher,
+  verifyTudLinkWatcher,
 };

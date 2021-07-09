@@ -70,8 +70,8 @@ export default function* sagas() :Generator<*, *, *> {
     fork(PermissionsSagas.getDeletePermissionWatcher),
 
     // time use diary
-    fork(TimeUseDiarySagas.downloadAllDataWatcher),
-    fork(TimeUseDiarySagas.downloadTudResponsesWatcher),
+    fork(TimeUseDiarySagas.downloadAllTudDataWatcher),
+    fork(TimeUseDiarySagas.downloadDailyTudDataWatcher),
     fork(TimeUseDiarySagas.getSubmissionsByDateWatcher),
     fork(TimeUseDiarySagas.submitTudDataWatcher),
     fork(TimeUseDiarySagas.verifyTudLinkWatcher),

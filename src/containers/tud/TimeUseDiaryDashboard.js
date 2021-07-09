@@ -17,11 +17,11 @@ import SearchPanel from './components/SearchPanel';
 import SummaryHeader from './components/SummaryHeader';
 import SummaryListComponent from './components/SummaryListComponent';
 import {
-  DOWNLOAD_ALL_DATA,
-  DOWNLOAD_TUD_RESPONSES,
+  DOWNLOAD_ALL_TUD_DATA,
+  DOWNLOAD_DAILY_TUD_DATA,
   GET_SUBMISSIONS_BY_DATE,
-  downloadAllData,
-  downloadTudResponses,
+  downloadAllTudData,
+  downloadDailyTudData,
   getSubmissionsByDate
 } from './TimeUseDiaryActions';
 import type { DataType } from './constants/DataTypes';
@@ -54,10 +54,10 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
   });
 
   // selectors
-  const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_DATA]);
+  const downloadAllDataRS :?RequestState = useRequestState(['tud', DOWNLOAD_ALL_TUD_DATA]);
   const getSubmissionsByDateRS :?RequestState = useRequestState(['tud', GET_SUBMISSIONS_BY_DATE]);
   const submissionsByDate = useSelector((state) => state.getIn(['tud', SUBMISSIONS_BY_DATE], Map()));
-  const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_TUD_RESPONSES, REQUEST_STATE], Map()));
+  const downloadStates = useSelector((state) => state.getIn(['tud', DOWNLOAD_DAILY_TUD_DATA, REQUEST_STATE], Map()));
 
   // reset state on dismount
   useEffect(() => () => {
@@ -85,9 +85,10 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
 
   const handleDownload = (entities :?List, date :?string, dataType :DataType) => {
     const { endDate, startDate } = dates;
+
     if (!date) {
       // download all
-      dispatch(downloadAllData({
+      dispatch(downloadAllTudData({
         entities: submissionsByDate.toList().flatten(true),
         dataType,
         endDate,
@@ -95,11 +96,12 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
       }));
     }
     else {
-      // download for specified date
-      dispatch(downloadTudResponses({
+      dispatch(downloadDailyTudData({
         dataType,
         date,
+        endDate,
         entities,
+        startDate,
       }));
     }
   };
@@ -145,7 +147,9 @@ const TimeUseDiaryDashboard = ({ participants } :Props) => {
                       </Typography>
                     ) : (
                       <>
-                        <SummaryHeader onDownloadData={handleDownload} downloadAllDataRS={downloadAllDataRS} />
+                        <SummaryHeader
+                            onDownloadData={handleDownload}
+                            downloadAllDataRS={downloadAllDataRS} />
                         <div>
                           {
                             submissionsByDate.entrySeq().sort().map(([key, entities]) => (

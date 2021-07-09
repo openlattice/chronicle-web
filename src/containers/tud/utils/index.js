@@ -6,6 +6,7 @@ import isEqual from 'lodash/isEqual';
 import {
   List,
   Map,
+  OrderedSet,
   get,
   getIn
 } from 'immutable';
@@ -421,7 +422,7 @@ function getTimeRangeValue(values :Map, timeRangeId :UUID, key :FQN) {
   return DateTime.fromISO(dateVal);
 }
 
-function writeToCsvFile(
+function exportRawDataToCsvFile(
   dataType :DataType,
   outputFileName :string,
   submissionMetadata :Map, // { submissionId: {participantId: _, date: }}
@@ -518,6 +519,38 @@ function writeToCsvFile(
   FS.saveAs(blob, outputFileName);
 }
 
+function exportSummarizedDataToCsvFile(
+  summaryData :Map,
+  submissionMetadata :Map,
+  csvHeaders :OrderedSet,
+  fileName :string
+) {
+
+  const csvData :Object[] = [];
+
+  summaryData.forEach((submissionSummary :Map, submissionId :UUID) => {
+    const rowData :Object = {};
+    rowData.participantId = submissionMetadata.getIn([submissionId, PERSON_ID, 0]);
+    rowData.Timestamp = DateTime
+      .fromISO((submissionMetadata.getIn([submissionId, DATE_TIME_FQN, 0])))
+      .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+    csvHeaders.forEach((header :string) => {
+      if (submissionSummary.has(header)) {
+        rowData[header] = submissionSummary.get(header);
+      }
+    });
+    csvData.push(rowData);
+
+  });
+
+  const csv = Papa.unparse(csvData);
+  const blob = new Blob([csv], {
+    type: 'text/csv'
+  });
+
+  FS.saveAs(blob, fileName);
+}
+
 const getOutputFileName = (date :?string, startDate :?string, endDate :?string, dataType :DataType) => {
   const prefix = 'TimeUseDiary';
 
@@ -544,5 +577,6 @@ export {
   pageHasFollowupQuestions,
   selectPrimaryActivityByPage,
   selectTimeByPageAndKey,
-  writeToCsvFile,
+  exportRawDataToCsvFile,
+  exportSummarizedDataToCsvFile,
 };

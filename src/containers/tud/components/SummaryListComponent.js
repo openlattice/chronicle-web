@@ -6,7 +6,8 @@ import styled from 'styled-components';
 import { faCloudDownload } from '@fortawesome/pro-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { List } from 'immutable';
-import { Button, Typography } from 'lattice-ui-kit';
+// $FlowFixMe
+import { Button, Grid, Typography } from 'lattice-ui-kit';
 import { ReduxUtils } from 'lattice-utils';
 import type { RequestState } from 'redux-reqseq';
 
@@ -18,7 +19,7 @@ const { isPending } = ReduxUtils;
 const Wrapper = styled.div`
   align-items: center;
   display: grid;
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr 400px;
   grid-column-gap: 20px;
   margin-bottom: 20px;
 
@@ -56,23 +57,42 @@ const SummaryListComponent = (
       { entities.size }
     </Typography>
     <div />
-    <ButtonWrapper
-        isLoading={isPending(downloadRS.get(DataTypes.DAYTIME))}
-        onClick={() => onDownloadData(entities, date, DataTypes.DAYTIME)}
-        size="small"
-        startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
-        variant="outlined">
-      Daytime
-    </ButtonWrapper>
 
-    <ButtonWrapper
-        isLoading={isPending(downloadRS.get(DataTypes.NIGHTTIME))}
-        onClick={() => onDownloadData(entities, date, DataTypes.NIGHTTIME)}
-        size="small"
-        startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
-        variant="outlined">
-      Nighttime
-    </ButtonWrapper>
+    <Grid container spacing={2}>
+      <Grid item xs={4}>
+        <ButtonWrapper
+            fullWidth
+            isLoading={isPending(downloadRS.get(DataTypes.SUMMARIZED))}
+            onClick={() => onDownloadData(entities, date, DataTypes.SUMMARIZED)}
+            size="small"
+            startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+            variant="outlined">
+          Summarized
+        </ButtonWrapper>
+      </Grid>
+      <Grid item xs={4}>
+        <ButtonWrapper
+            fullWidth
+            isLoading={isPending(downloadRS.get(DataTypes.DAYTIME))}
+            onClick={() => onDownloadData(entities, date, DataTypes.DAYTIME)}
+            size="small"
+            startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+            variant="outlined">
+          Daytime
+        </ButtonWrapper>
+      </Grid>
+      <Grid item xs={4}>
+        <ButtonWrapper
+            fullWidth
+            isLoading={isPending(downloadRS.get(DataTypes.NIGHTTIME))}
+            onClick={() => onDownloadData(entities, date, DataTypes.NIGHTTIME)}
+            size="small"
+            startIcon={<FontAwesomeIcon icon={faCloudDownload} />}
+            variant="outlined">
+          Nighttime
+        </ButtonWrapper>
+      </Grid>
+    </Grid>
   </Wrapper>
 );
 
