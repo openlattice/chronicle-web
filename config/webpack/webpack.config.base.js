@@ -61,6 +61,10 @@ module.exports = (env) => {
     entryOnly: true,
   });
 
+  const PROVIDE_PLUGIN = new webpack.ProvidePlugin({
+    process: 'process/browser'
+  });
+
   const DEFINE_PLUGIN = new webpack.DefinePlugin({
     __AUTH0_CLIENT_ID__: JSON.stringify(env.production ? AUTH0_CLIENT_ID_PROD : AUTH0_CLIENT_ID_DEV),
     __AUTH0_DOMAIN__: JSON.stringify(AUTH0_DOMAIN),
@@ -110,6 +114,7 @@ module.exports = (env) => {
     plugins: [
       DEFINE_PLUGIN,
       BANNER_PLUGIN,
+      PROVIDE_PLUGIN,
     ],
     resolve: {
       alias: {
