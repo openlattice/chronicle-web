@@ -45,7 +45,7 @@ function getParticipantAppsUsageData(date :string, participantId :string, studyI
     return axios({
       method: 'get',
       params: { date },
-      url,
+      url: encodeURI(url),
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
   });
@@ -81,7 +81,7 @@ function updateAppsUsageAssociationData(
     return axios({
       method: 'post',
       data: requestBody,
-      url,
+      url: encodeURI(url),
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
   });
@@ -98,7 +98,7 @@ function deleteStudyParticipant(orgId :UUID = CAFE_ORG_ID, participantId :string
 
     return axios({
       method: 'delete',
-      url,
+      url: encodeURI(url),
       headers: { Authorization: `Bearer ${authToken}` },
       params: { type: DeleteTypes.HARD }
     }).then((result) => resolve(result))
@@ -146,7 +146,7 @@ function submitQuestionnaire(
 
     return axios({
       method: 'post',
-      url,
+      url: encodeURI(url),
       data: questionAnswerMapping
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
@@ -166,7 +166,7 @@ function submitTudData(organizationId :UUID, studyId :UUID, participantId :strin
     return axios({
       data: requestBody,
       method: 'post',
-      url,
+      url: encodeURI(url),
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
   });
@@ -198,7 +198,7 @@ function verifyTudLink(organizationId :UUID, studyId :UUID, participantId :strin
 
     return axios({
       method: 'get',
-      url
+      url: encodeURI(url)
     }).then((result) => resolve(result))
       .catch((error) => reject(error));
   });
