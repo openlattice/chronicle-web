@@ -16,15 +16,18 @@ import type { Saga } from '@redux-saga/core';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
+  GET_APP_SETTINGS,
   GET_CONFIGS,
   INITIALIZE_APPLICATION,
   SWITCH_ORGANIZATION,
+  getAppSettings,
   getConfigs,
   initializeApplication,
   switchOrganization
 } from './AppActions';
 
 import * as AppModules from '../../utils/constants/AppModules';
+import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import * as Routes from '../../core/router/Routes';
 import { getEntityDataModelTypes } from '../../core/edm/EDMActions';
 import { getEntityDataModelTypesWorker } from '../../core/edm/EDMSagas';
@@ -165,7 +168,31 @@ function* switchOrganizationWatcher() :Saga<*> {
   yield takeEvery(SWITCH_ORGANIZATION, switchOrganizationWorker);
 }
 
+function* getAppSettingsWorker(action :SequenceAction) :Generator<*, *, *> {
+  try {
+    yield put(getAppSettings.request(action.id));
+
+    const { organizationId, appName } = action.value;
+
+    const response = yield call(ChronicleApi.getAppSettings, organizationId, appName);
+
+    yield put(getAppSettings.success(action.id, { organizationId, appName, settings: response.data }));
+  }
+  catch (error) {
+    LOG.error(action.type, error);
+    yield put(getAppSettings.failure(action.id));
+  }
+  finally {
+    yield put(getAppSettings.finally(action.id));
+  }
+}
+
+function* getAppSettingsWatcher() :Generator<*, *, *> {
+  yield takeEvery(GET_APP_SETTINGS, getAppSettingsWorker);
+}
+
 export {
+  getAppSettingsWatcher,
   getConfigsWatcher,
   initializeApplicationWatcher,
   initializeApplicationWorker,
