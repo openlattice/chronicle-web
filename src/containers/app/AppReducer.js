@@ -30,16 +30,16 @@ const {
 } = APP_REDUX_CONSTANTS;
 
 const INITIAL_STATE :Map<*, *> = fromJS({
+  [GET_APP_SETTINGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [GET_CONFIGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
   [INITIALIZE_APPLICATION]: { [REQUEST_STATE]: RequestStates.STANDBY },
-  [GET_APP_SETTINGS]: { [REQUEST_STATE]: RequestStates.STANDBY },
 
   // state
-  [SETTINGS]: Map(),
   [APP_MODULES_ORG_LIST_MAP]: Map(),
   [ENTITY_SET_IDS_BY_ORG_ID]: Map(),
   [ORGS]: Map(),
   [SELECTED_ORG_ID]: '',
+  [SETTINGS]: Map()
 });
 
 export default function appReducer(state :Map<*, *> = INITIAL_STATE, action :Object) {
