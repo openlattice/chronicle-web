@@ -24,6 +24,7 @@ import { resetRequestState } from '../../../core/redux/ReduxActions';
 import { SUBMIT_SURVEY, submitSurvey } from '../SurveyActions';
 import { SURVEY_INSTRUCTION_TEXT } from '../constants';
 import { createInitialFormData, createSurveyFormSchema } from '../utils';
+import type { AppUsageFreqType } from '../../../utils/constants/AppUsageFreqTypes';
 
 const { media } = StyleUtils;
 const { NEUTRAL } = Colors;
@@ -53,6 +54,7 @@ const InstructionText = styled.span`
 `;
 
 type Props = {
+  appUsageFreqType :AppUsageFreqType;
   organizationId ?:UUID;
   participantId :string;
   studyId :UUID;
@@ -61,6 +63,7 @@ type Props = {
 };
 
 const SurveyForm = ({
+  appUsageFreqType,
   organizationId,
   participantId,
   studyId,
@@ -72,8 +75,11 @@ const SurveyForm = ({
 
   const [errorModalVisible, setErrorModalVisible] = useState(false);
 
-  const { uiSchema, schema } = createSurveyFormSchema(userAppsData);
+  const { uiSchema, schema } = createSurveyFormSchema(userAppsData, appUsageFreqType);
   const initialFormData = createInitialFormData(userAppsData);
+
+  // console.log(initialFormData);
+  // console.log(userAppsData);
 
   useEffect(() => {
     setErrorModalVisible(submitSurveyRS === RequestStates.FAILURE);

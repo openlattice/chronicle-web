@@ -4,6 +4,7 @@ import { call, put, takeEvery } from '@redux-saga/core/effects';
 import { fromJS } from 'immutable';
 import { Constants } from 'lattice';
 import { Logger } from 'lattice-utils';
+import { DateTime } from 'luxon';
 import type { SequenceAction } from 'redux-reqseq';
 
 import {
@@ -15,9 +16,12 @@ import {
 import { createSubmissionData, getAppNameFromUserAppsEntity } from './utils';
 
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
+import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const LOG = new Logger('SurveySagas');
+
+const { DATE_TIME_FQN } = PROPERTY_TYPE_FQNS;
 
 /*
  *
@@ -34,10 +38,9 @@ function* submitSurveyWorker(action :SequenceAction) :Generator<*, *, *> {
       organizationId,
       participantId,
       studyId,
-      userAppsData,
     } = value;
 
-    const submissionData = createSubmissionData(formData, userAppsData);
+    const submissionData = createSubmissionData(formData);
 
     const response = yield call(
       ChronicleApi.updateAppsUsageAssociationData, organizationId, studyId, participantId, submissionData
@@ -84,7 +87,8 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
       .toMap()
       .mapKeys((index, entity) => entity.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]))
       .map((entity, id) => entity.set('id', id))
-      .map((entity) => entity.setIn(['entityDetails', 'ol.title', 0], getAppNameFromUserAppsEntity(entity)));
+      .map((entity) => entity.setIn(['entityDetails', 'ol.title', 0], getAppNameFromUserAppsEntity(entity)))
+      .sortBy((entity) => DateTime.fromISO(entity.getIn(['associationDetails', DATE_TIME_FQN, 0])));
 
     yield put(getChronicleAppsData.success(action.id, appsData));
   }
