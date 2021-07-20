@@ -5,8 +5,11 @@ import {
   get,
 } from 'immutable';
 import { Constants } from 'lattice';
+import { DateTime } from 'luxon';
 
+import AppUsageFreqTypes from '../../../utils/constants/AppUsageFreqTypes';
 import { PROPERTY_TYPE_FQNS } from '../../../core/edm/constants/FullyQualifiedNames';
+import type { AppUsageFreqType } from '../../../utils/constants/AppUsageFreqTypes';
 
 const { OPENLATTICE_ID_FQN } = Constants;
 const { DATE_TIME_FQN, TITLE_FQN, USER_FQN } = PROPERTY_TYPE_FQNS;
@@ -20,10 +23,15 @@ const getAppNameFromUserAppsEntity = (entity :Map) => {
   return titleFQNValues.first();
 };
 
-const createSurveyFormSchema = (userApps :Map) => {
+const getAppUsageDate = (appData :Map) => {
+  const date = appData.getIn(['associationDetails', DATE_TIME_FQN, 0]);
+  return DateTime.fromISO(date).toLocaleString(DateTime.TIME_SIMPLE);
+};
+
+const createSurveyFormSchema = (userApps :Map, appUsageFreqType :AppUsageFreqType) => {
   const schemaProperties :Object = userApps.map((app) => ({
     title: app.getIn(['entityDetails', TITLE_FQN, 0]),
-    description: 'Select all that apply',
+    description: appUsageFreqType === AppUsageFreqTypes.HOURLY ? getAppUsageDate(app) : 'Select all that apply',
     type: 'array',
     uniqueItems: true,
     minItems: 1,
@@ -72,10 +80,9 @@ const createInitialFormData = (userApps :Map) => userApps
   .map((app) => app.getIn(['associationDetails', USER_FQN], List()))
   .toJS();
 
-const createSubmissionData = (formData :Object, userApps :Map) => {
+const createSubmissionData = (formData :Object) => {
   const entities = Object.entries(formData).map(([entityKeyId, selectedUsers]) => ({
     [OPENLATTICE_ID_FQN]: entityKeyId,
-    [DATE_TIME_FQN.toString()]: [userApps.getIn([entityKeyId, 'associationDetails', DATE_TIME_FQN, 0])],
     [USER_FQN.toString()]: selectedUsers
   }));
 
@@ -89,7 +96,11 @@ const createSubmissionData = (formData :Object, userApps :Map) => {
   /* eslint-enable */
 };
 
+const getMinimumDate = (dates :List) => dates
+  .map((date) => DateTime.fromISO(date)).filter((date) => date.isValid).min();
+
 export {
+  getMinimumDate,
   createInitialFormData,
   createSubmissionData,
   createSurveyFormSchema,

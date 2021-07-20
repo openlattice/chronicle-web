@@ -5,14 +5,16 @@ import { Types } from 'lattice';
 import { AuthUtils } from 'lattice-auth';
 
 import {
+  getAppSettingsUrl,
   getDeleteParticipantPath,
   getDeleteStudyUrl,
   getEnrollmentStatusUrl,
   getParticipantUserAppsUrl,
   getQuestionnaireUrl,
   getSubmitQuestionnaireUrl,
-  getSubmitTudDataUrl,
+  getSubmitTudDataUrl
 } from '../AppUtils';
+import { CHRONICLE_CORE, DATA_COLLECTION, QUESTIONNAIRES } from '../constants/AppModules';
 
 const { DeleteTypes } = Types;
 
@@ -204,9 +206,28 @@ function verifyTudLink(organizationId :UUID, studyId :UUID, participantId :strin
   });
 }
 
+function getAppSettings(organizationId :UUID, appName :string) {
+  return new Promise<*>((resolve, reject) => {
+    const chronicleApps = new Set([CHRONICLE_CORE, DATA_COLLECTION, QUESTIONNAIRES]);
+    if (!chronicleApps.has(appName)) {
+      return reject(new Error(`${appName} is not a valid chronicle app`));
+    }
+    const url = getAppSettingsUrl(organizationId);
+    if (!url) return reject(new Error('invalid url'));
+
+    return axios({
+      method: 'get',
+      url,
+      params: { appName }
+    }).then((result) => resolve(result))
+      .catch((error) => reject(error));
+  });
+}
+
 export {
   deleteStudy,
   deleteStudyParticipant,
+  getAppSettings,
   getParticipantAppsUsageData,
   getQuestionnaire,
   submitQuestionnaire,

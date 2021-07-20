@@ -25,6 +25,7 @@ const APP_REDUX_CONSTANTS = {
   ENTITY_SET_IDS_BY_ORG_ID: 'entitySetIdsByOrgId',
   ORGS: 'orgs',
   SELECTED_ORG_ID: 'selectedOrgId',
+  SETTINGS: 'settings',
 };
 
 const TUD_REDUX_CONSTANTS = {
@@ -35,10 +36,16 @@ const PERMISSIONS_REDUX_CONSTANTS = {
   HAS_DELETE_PERMISSION: 'hasDeletePermission'
 };
 
+const REDUCERS = {
+  APPS_DATA: 'appsData',
+  APP: 'app'
+};
+
 export {
   APP_REDUX_CONSTANTS,
   PERMISSIONS_REDUX_CONSTANTS,
   QUESTIONNAIRE_REDUX_CONSTANTS,
+  REDUCERS,
   STUDIES_REDUX_CONSTANTS,
   TUD_REDUX_CONSTANTS
 };
