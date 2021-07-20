@@ -13,7 +13,7 @@ import {
   getChronicleAppsData,
   submitSurvey,
 } from './SurveyActions';
-import { createSubmissionData, getAppNameFromUserAppsEntity } from './utils';
+import { createSubmissionData, getAppNameFromUserAppsEntity, getMinimumDate } from './utils';
 
 import * as ChronicleApi from '../../utils/api/ChronicleApi';
 import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames';
@@ -21,7 +21,7 @@ import { PROPERTY_TYPE_FQNS } from '../../core/edm/constants/FullyQualifiedNames
 const { OPENLATTICE_ID_FQN } = Constants;
 const LOG = new Logger('SurveySagas');
 
-const { DATE_TIME_FQN } = PROPERTY_TYPE_FQNS;
+const { DATE_TIME_FQN, TITLE_FQN } = PROPERTY_TYPE_FQNS;
 
 /*
  *
@@ -87,7 +87,9 @@ function* getChronicleUserAppsWorker(action :SequenceAction) :Generator<*, *, *>
       .toMap()
       .mapKeys((index, entity) => entity.getIn(['associationDetails', OPENLATTICE_ID_FQN, 0]))
       .map((entity, id) => entity.set('id', id))
-      .map((entity) => entity.setIn(['entityDetails', 'ol.title', 0], getAppNameFromUserAppsEntity(entity)))
+      .map((entity) => entity.setIn(['entityDetails', TITLE_FQN, 0], getAppNameFromUserAppsEntity(entity)))
+      .map((entity) => entity.setIn(['associationDetails', DATE_TIME_FQN],
+        [getMinimumDate(entity.getIn(['associationDetails', DATE_TIME_FQN]))]))
       .sortBy((entity) => DateTime.fromISO(entity.getIn(['associationDetails', DATE_TIME_FQN, 0])));
 
     yield put(getChronicleAppsData.success(action.id, appsData));

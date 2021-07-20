@@ -96,7 +96,11 @@ const createSubmissionData = (formData :Object) => {
   /* eslint-enable */
 };
 
+const getMinimumDate = (dates :List) => dates
+  .map((date) => DateTime.fromISO(date)).filter((date) => date.isValid).min();
+
 export {
+  getMinimumDate,
   createInitialFormData,
   createSubmissionData,
   createSurveyFormSchema,
